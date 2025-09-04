@@ -42,7 +42,7 @@ const Header = () => {
     { href: "/tv", label: "Phim Bộ" },
     { href: "/people", label: "Diễn viên" },
     { href: "/favorites", label: "Yêu thích" },
-    { href: "/schedule", label: "Lịch Chiếu" },
+    { href: "/demo", label: "🎬 Demo" },
   ];
 
   return (

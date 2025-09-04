@@ -60,6 +60,59 @@ class ApiService {
     return this.fetchWithErrorHandling<MovieResponse>(url);
   }
 
+  // New category-specific movie endpoints
+  async getNowPlayingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/movies/now-playing${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
+  async getPopularMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/movies/popular${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
+  async getTopRatedMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/movies/top-rated${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
+  async getUpcomingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/movies/upcoming${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
   async getMovieById(id: number): Promise<{
     success: boolean;
     message: string;
@@ -72,7 +125,7 @@ class ApiService {
 
   async getMovieCredits(
     id: number,
-    language: string = "vi-VN"
+    language: string = "en-US"
   ): Promise<{
     success: boolean;
     message: string;
@@ -95,7 +148,7 @@ class ApiService {
 
   async getTVCredits(
     id: number,
-    language: string = "vi-VN"
+    language: string = "en-US"
   ): Promise<{
     success: boolean;
     message: string;
@@ -113,6 +166,54 @@ class ApiService {
     error?: string;
   }> {
     const url = `${API_BASE_URL}/tv/${id}/credits?language=${language}`;
+    return this.fetchWithErrorHandling(url);
+  }
+
+  async getMovieVideos(id: number): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      id: number;
+      results: Array<{
+        id: string;
+        iso_639_1: string;
+        iso_3166_1: string;
+        key: string;
+        name: string;
+        site: string;
+        size: number;
+        type: string;
+        official: boolean;
+        published_at: string;
+      }>;
+    };
+    error?: string;
+  }> {
+    const url = `${API_BASE_URL}/movies/${id}/videos`;
+    return this.fetchWithErrorHandling(url);
+  }
+
+  async getTVVideos(id: number): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      id: number;
+      results: Array<{
+        id: string;
+        iso_639_1: string;
+        iso_3166_1: string;
+        key: string;
+        name: string;
+        site: string;
+        size: number;
+        type: string;
+        official: boolean;
+        published_at: string;
+      }>;
+    };
+    error?: string;
+  }> {
+    const url = `${API_BASE_URL}/tv/${id}/videos`;
     return this.fetchWithErrorHandling(url);
   }
 
@@ -381,6 +482,69 @@ class ApiService {
       return {
         success: false,
         message: `Failed to lookup TMDB ID ${tmdbId}: ${error}`,
+      };
+    }
+  }
+
+  // Movie Upload APIs
+  async getUploadedMovies(): Promise<{
+    success: boolean;
+    message: string;
+    data: Array<{
+      id: string;
+      title: string;
+      description: string;
+      year: number;
+      genre: string;
+      duration: string;
+      s3Key: string;
+      streamUrl: string;
+      posterUrl?: string;
+      uploadDate: string;
+      fileSize: number;
+      originalName: string;
+    }>;
+  }> {
+    try {
+      const url = `${API_BASE_URL}/movie-upload/movies`;
+      return await this.fetchWithErrorHandling(url);
+    } catch (error) {
+      console.error("Failed to get uploaded movies:", error);
+      return {
+        success: false,
+        message: `Failed to get uploaded movies: ${error}`,
+        data: [],
+      };
+    }
+  }
+
+  async getUploadedMovie(id: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      id: string;
+      title: string;
+      description: string;
+      year: number;
+      genre: string;
+      duration: string;
+      s3Key: string;
+      streamUrl: string;
+      posterUrl?: string;
+      uploadDate: string;
+      fileSize: number;
+      originalName: string;
+    } | null;
+  }> {
+    try {
+      const url = `${API_BASE_URL}/movie-upload/movie/${id}`;
+      return await this.fetchWithErrorHandling(url);
+    } catch (error) {
+      console.error("Failed to get uploaded movie:", error);
+      return {
+        success: false,
+        message: `Failed to get uploaded movie: ${error}`,
+        data: null,
       };
     }
   }

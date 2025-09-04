@@ -202,7 +202,7 @@ const TVDetailPageContent = () => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("vi-VN");
+    return new Date(dateString).toLocaleDateString("en-US");
   };
 
   const formatRuntime = (runtimes: number[]) => {
@@ -246,9 +246,9 @@ const TVDetailPageContent = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-gray-900 pt-16">
         {/* Hero Section */}
-        <div className="relative h-[70vh] flex items-center pt-16">
+        <div className="relative h-[70vh] flex items-center">
           <div className="absolute inset-0">
             <Image
               src={getBackdropUrl(tvData.backdropPath)}

@@ -117,12 +117,10 @@ export default function FavoriteButton({
     <button
       onClick={handleToggle}
       disabled={isLoading}
-      className={`${
-        sizeClasses[size]
-      } rounded-full flex items-center justify-center transition-all duration-200 ${
+      className={` ${
         isFavorited
           ? "bg-red-500 text-white hover:bg-red-600 shadow-lg"
-          : "bg-gray-600/80 text-white"
+          : "bg-gray-600/80 text-white hover:bg-gray-500/80"
       } ${isLoading ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
       title={isFavorited ? "Bỏ lưu phim" : "Lưu phim"}
       data-item-id={item.id}

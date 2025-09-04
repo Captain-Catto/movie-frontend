@@ -56,6 +56,7 @@ const PersonDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"cast" | "crew">("cast");
+  const [showFullBio, setShowFullBio] = useState(false);
 
   useEffect(() => {
     const fetchPersonData = async () => {
@@ -114,7 +115,30 @@ const PersonDetailPage = () => {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString("vi-VN");
+    return new Date(dateString).toLocaleDateString("en-US");
+  };
+
+  const truncateBiography = (bio: string, maxLength: number = 300) => {
+    if (!bio) return "";
+    if (bio.length <= maxLength) return bio;
+
+    // Find the last complete sentence within the limit
+    const truncated = bio.substring(0, maxLength);
+    const lastSentenceEnd = Math.max(
+      truncated.lastIndexOf("."),
+      truncated.lastIndexOf("!"),
+      truncated.lastIndexOf("?")
+    );
+
+    if (lastSentenceEnd > 0) {
+      return truncated.substring(0, lastSentenceEnd + 1);
+    }
+
+    // If no sentence end found, find last space
+    const lastSpace = truncated.lastIndexOf(" ");
+    return lastSpace > 0
+      ? truncated.substring(0, lastSpace) + "..."
+      : truncated + "...";
   };
 
   const convertToMovieCardData = (
@@ -122,6 +146,7 @@ const PersonDetailPage = () => {
   ): MovieCardData => {
     return {
       id: item.id.toString(),
+      tmdbId: item.id,
       title: item.title || item.name || "",
       aliasTitle: item.character || item.job || "",
       poster: item.poster_path
@@ -169,7 +194,7 @@ const PersonDetailPage = () => {
     <Layout>
       <div className="min-h-screen bg-gray-900">
         {/* Hero Section */}
-        <div className="relative">
+        <div className="relative pt-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Profile Image */}
@@ -237,7 +262,17 @@ const PersonDetailPage = () => {
                       Tiểu sử
                     </h3>
                     <div className="text-gray-300 leading-relaxed whitespace-pre-line">
-                      {personData.biography}
+                      {showFullBio
+                        ? personData.biography
+                        : truncateBiography(personData.biography)}
+                      {personData.biography.length > 300 && (
+                        <button
+                          onClick={() => setShowFullBio(!showFullBio)}
+                          className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
+                        >
+                          {showFullBio ? "Ẩn bớt" : "Xem thêm"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}

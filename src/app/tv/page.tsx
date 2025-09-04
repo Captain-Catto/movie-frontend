@@ -39,7 +39,7 @@ export default function TVShowsPage() {
         const response = await apiService.getTVSeries({
           page: 1,
           limit: 20,
-          language: "vi-VN",
+          language: "en-US",
         });
 
         if (response.success && response.data) {

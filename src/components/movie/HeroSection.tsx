@@ -1,9 +1,19 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import FavoriteButton from '@/components/ui/FavoriteButton';
-import HeroSkeleton from '@/components/ui/HeroSkeleton';
-import { useLoading } from '@/hooks/useLoading';
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay, EffectFade } from "swiper/modules";
+import type { Swiper as SwiperType } from "swiper";
+import FavoriteButton from "@/components/ui/FavoriteButton";
+import HeroSkeleton from "@/components/ui/HeroSkeleton";
+import { useLoading } from "@/hooks/useLoading";
+
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/effect-fade";
 
 interface HeroSectionProps {
   movies: Array<{
@@ -25,110 +35,212 @@ interface HeroSectionProps {
 
 const HeroSection = ({ movies }: HeroSectionProps) => {
   const { isLoading } = useLoading({ delay: 1200 });
-  
-  // Use first movie for now (can be extended for carousel later)
-  const movie = movies[0];
-  
-  if (!movie || isLoading) return <HeroSkeleton />;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const swiperRef = useRef<SwiperType | null>(null);
+
+  console.log("HeroSection movies:", movies);
+
+  if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
+
+  const handleThumbnailClick = (index: number) => {
+    if (swiperRef.current) {
+      swiperRef.current.slideToLoop(index);
+    }
+  };
 
   return (
     <div className="relative min-h-screen">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url("${movie.backgroundImage}")` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/95 to-transparent" />
-      </div>
+      <Swiper
+        modules={[Pagination, Autoplay, EffectFade]}
+        spaceBetween={0}
+        slidesPerView={1}
+        pagination={{
+          clickable: true,
+          el: ".swiper-pagination-custom",
+        }}
+        autoplay={{
+          delay: 5000,
+          disableOnInteraction: false,
+        }}
+        effect="fade"
+        fadeEffect={{
+          crossFade: true,
+        }}
+        loop={movies.length > 1}
+        className="h-screen"
+        onSwiper={(swiper) => (swiperRef.current = swiper)}
+        onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+      >
+        {movies.map((movie, index) => (
+          <SwiperSlide key={movie.id} className="relative">
+            <div className="slide-elements relative h-full">
+              <Link
+                href={`/movie/${movie.id}`}
+                className="slide-url absolute inset-0 z-10"
+              />
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-        <div className="max-w-2xl space-y-8">
-          {/* Title and Info */}
-          <div>
-            <h1 className="text-5xl font-bold mb-4">{movie.title}</h1>
-            <div className="flex items-center space-x-4 text-sm">
-              {/* Rating */}
-              <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-yellow-500 fill-current">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                </svg>
-                <span className="ml-1">{movie.rating}</span>
+              {/* Background Fade */}
+              <div
+                className="background-fade absolute inset-0"
+                style={{ backgroundImage: `url("${movie.backgroundImage}")` }}
+              />
+
+              {/* Cover Fade */}
+              <div className="cover-fade absolute inset-0">
+                <div className="cover-image w-full h-full">
+                  <img
+                    className="fade-in visible w-full h-full object-cover"
+                    title={movie.title}
+                    loading="lazy"
+                    src={movie.backgroundImage}
+                    alt={movie.title}
+                  />
+                </div>
               </div>
-              
-              {/* Year */}
-              <span>{movie.year}</span>
-              
-              {/* Duration */}
-              <div className="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-gray-400">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <polyline points="12 6 12 12 16 14"></polyline>
-                </svg>
-                <span className="ml-1">{movie.duration}</span>
+
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+
+              {/* Safe Area Content */}
+              <div className="safe-area relative z-20 h-full flex items-center">
+                <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                  <div className="media-item max-w-2xl space-y-6">
+                    {/* Main Title */}
+                    <h1 className="text-5xl font-bold text-white">
+                      <Link title={movie.title} href={`/movie/${movie.id}`}>
+                        {movie.title}
+                      </Link>
+                    </h1>
+
+                    {/* Alias Title */}
+                    <h3 className="media-alias-title">
+                      <Link
+                        title={movie.aliasTitle || movie.title}
+                        href={`/movie/${movie.id}`}
+                        className="text-gray-300 text-xl"
+                      >
+                        {movie.aliasTitle || movie.title}
+                      </Link>
+                    </h3>
+
+                    {/* Tags */}
+                    <div className="hl-tags flex flex-wrap gap-2">
+                      <div className="tag-quality">
+                        <span className="bg-yellow-500 text-black px-2 py-1 rounded text-sm font-bold">
+                          4K
+                        </span>
+                      </div>
+                      <div className="tag-model">
+                        <span className="last bg-white text-black px-2 py-1 rounded text-sm font-bold">
+                          <strong>T16</strong>
+                        </span>
+                      </div>
+                      <div className="tag-classic">
+                        <span className="bg-gray-700 text-white px-2 py-1 rounded text-sm">
+                          {movie.year}
+                        </span>
+                      </div>
+                      <div className="tag-classic">
+                        <span className="bg-gray-700 text-white px-2 py-1 rounded text-sm">
+                          {movie.duration}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Genre Tags */}
+                    <div className="hl-tags mb-4 flex flex-wrap gap-2">
+                      {movie.genres?.map((genre, genreIndex) => (
+                        <Link
+                          key={genreIndex}
+                          href={`/genre/${genre}`}
+                          className="tag-topic"
+                        >
+                          <span className="bg-gray-800/70 hover:bg-gray-700/70 text-white px-3 py-1 rounded-full text-sm transition-colors">
+                            {genre}
+                          </span>
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Description */}
+                    <div className="description lim-3 text-gray-300 text-base leading-relaxed line-clamp-3">
+                      {movie.description}
+                    </div>
+
+                    {/* Touch/Action Buttons */}
+                    <div className="touch flex items-center space-x-4">
+                      <Link href={`/movie/${movie.id}`} className="button-play">
+                        <button className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors">
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                          </svg>
+                        </button>
+                      </Link>
+
+                      <div className="touch-group flex items-center space-x-2">
+                        <FavoriteButton
+                          item={{ id: movie.id, title: movie.title }}
+                          size="lg"
+                          className="p-3 rounded-lg bg-gray-800/70 hover:bg-gray-700/70 transition-colors"
+                        />
+                        <Link href={`/movie/${movie.id}`} className="item">
+                          <button className="p-3 rounded-lg bg-gray-800/70 hover:bg-gray-700/70 text-white transition-colors">
+                            <svg
+                              className="w-5 h-5"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              {/* Season */}
-              <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded-md">{movie.season}</span>
-              
-              {/* Episode */}
-              <span className="px-2 py-1 bg-blue-500/20 text-blue-500 rounded-md">{movie.episode}</span>
             </div>
-          </div>
+          </SwiperSlide>
+        ))}
 
-          {/* Genres */}
-          <div className="flex flex-wrap gap-2">
-            {movie.genres.map((genre, index) => (
-              <Link key={index} href={`/genre/${genre}`}>
-                <span className="px-3 py-1 bg-gray-800/50 backdrop-blur-sm rounded-full text-sm hover:bg-gray-700/50 transition-colors cursor-pointer">
-                  {genre}
-                </span>
-              </Link>
-            ))}
-          </div>
+        {/* Custom Pagination */}
+        <div className="swiper-pagination-custom absolute bottom-8 left-1/2 -translate-x-1/2 z-30"></div>
+      </Swiper>
 
-          {/* Description */}
-          <p className="text-gray-300 text-lg leading-relaxed">
-            {movie.description}
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-4">
-            <Link href={`/movie/${movie.id}`}>
-              <button className="px-8 py-4 bg-red-500 hover:bg-red-600 rounded-xl font-semibold flex items-center space-x-2 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <span>Xem Phim</span>
-              </button>
-            </Link>
-            <FavoriteButton 
-              item={{ id: movie.id, title: movie.title }}
-              size="lg"
-              className="px-8 py-4 rounded-xl font-semibold"
-            />
-            <button className="px-8 py-4 bg-gray-800/50 hover:bg-gray-700/50 backdrop-blur-sm rounded-xl font-semibold transition-colors">
-              Chi Tiết
-            </button>
-          </div>
+      {/* Thumbnail Navigation */}
+      {movies.length > 1 && (
+        <div className="absolute bottom-8 right-8 z-30 flex space-x-2">
+          {movies.map((movie, index) => (
+            <div
+              key={movie.id}
+              onClick={() => handleThumbnailClick(index)}
+              className={`
+                cursor-pointer transition-all duration-300 rounded-md overflow-hidden
+                ${
+                  activeIndex === index
+                    ? "ring-2 ring-white scale-110 opacity-100"
+                    : "opacity-70 hover:opacity-90 hover:scale-105"
+                }
+              `}
+            >
+              <img
+                src={movie.backgroundImage || movie.posterImage}
+                alt={movie.title}
+                className="w-20 h-12 object-cover"
+                loading="lazy"
+              />
+            </div>
+          ))}
         </div>
-
-        {/* Scene Thumbnails - Bottom Right */}
-        <div className="absolute bottom-8 right-8">
-          <div className="flex space-x-2">
-            {movie.scenes.slice(0, 6).map((scene, index) => (
-              <div key={index} className="w-24 h-16 rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105">
-                <img 
-                  src={scene} 
-                  alt={`Scene ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

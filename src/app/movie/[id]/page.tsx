@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
@@ -82,9 +83,13 @@ const MovieDetailPageContent = () => {
         setError(null);
 
         // Backend now uses TMDB ID by default, so use unified content detection
-        console.log(`Fetching content for ID ${movieId} (now treated as TMDB ID by backend)`);
-        const contentResult = await apiService.getContentById(parseInt(movieId));
-        
+        console.log(
+          `Fetching content for ID ${movieId} (now treated as TMDB ID by backend)`
+        );
+        const contentResult = await apiService.getContentById(
+          parseInt(movieId)
+        );
+
         if (!contentResult.success || !contentResult.content) {
           console.error("Content not found:", contentResult.message);
           setError(
@@ -94,7 +99,7 @@ const MovieDetailPageContent = () => {
         }
 
         const content = contentResult.content;
-        const isMovie = contentResult.contentType === 'movie';
+        const isMovie = contentResult.contentType === "movie";
         setContentType(contentResult.contentType);
 
         if (content) {
@@ -188,7 +193,9 @@ const MovieDetailPageContent = () => {
             // fetchTVCredits(content.tmdbId || content.id);
           }
         } else {
-          throw new Error(response.message || "Failed to fetch content data");
+          throw new Error(
+            contentResult.message || "Failed to fetch content data"
+          );
         }
       } catch (err) {
         console.error("Error fetching movie:", err);
@@ -271,7 +278,7 @@ const MovieDetailPageContent = () => {
         )}
 
         {/* Hero Section */}
-        <div className="relative h-[70vh]">
+        <div className="relative h-[70vh] lg:pt-16 md:pt-36 pt-32">
           {/* Background Image */}
           <div className="absolute inset-0">
             <Image
@@ -339,7 +346,7 @@ const MovieDetailPageContent = () => {
 
                 {/* Genres */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                  {movieData.genres.map((genre, index) => (
+                  {movieData.genres?.map((genre: string, index: number) => (
                     <span
                       key={index}
                       className="px-3 py-1 bg-gray-800/60 text-white text-sm rounded-full"
@@ -367,14 +374,24 @@ const MovieDetailPageContent = () => {
                   </button>
 
                   <FavoriteButton
-                    item={{ id: movieData.id, title: movieData.title }}
+                    item={{
+                      id: movieData.id?.toString() || movieId,
+                      title: movieData.title || "Unknown Title",
+                      type: contentType === "tv" ? "tv-show" : "movie",
+                      year: movieData.year,
+                      rating: movieData.rating,
+                      image: movieData.posterImage,
+                    }}
                     size="lg"
                     className="px-8 py-4 !rounded-lg font-semibold"
                   />
 
-                  <button className="px-8 py-4 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors">
-                    Trailer
-                  </button>
+                  <TrailerButton
+                    movieId={movieData.tmdbId || parseInt(movieId)}
+                    movieTitle={movieData.title}
+                    contentType={contentType || "movie"}
+                    className="px-8 py-4 !rounded-lg font-semibold"
+                  />
                 </div>
               </div>
             </div>
@@ -407,8 +424,8 @@ const MovieDetailPageContent = () => {
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                       {movieData.cast.map((actor: any, index: number) => (
-                        <Link 
-                          key={index} 
+                        <Link
+                          key={index}
                           href={`/people/${actor.id}`}
                           className="text-center group block"
                         >
@@ -534,7 +551,7 @@ const MovieDetailPageContent = () => {
                           </span>
                           <span className="ml-2">
                             {new Date(movieData.lastAirDate).toLocaleDateString(
-                              "vi-VN"
+                              "en-US"
                             )}
                           </span>
                         </div>
