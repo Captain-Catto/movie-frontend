@@ -10,7 +10,38 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
-import { TMDB_MOVIE_GENRE_MAP, TMDB_TV_GENRE_MAP } from "@/utils/genresFetch";
+
+// TMDB Genre mapping to English names
+const TMDB_ENGLISH_GENRE_MAP: Record<number, string> = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
+  // TV genres
+  10759: "Action & Adventure",
+  10762: "Kids",
+  10763: "News",
+  10764: "Reality",
+  10765: "Sci-Fi & Fantasy",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics",
+};
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -38,9 +69,15 @@ const MovieDetailPageContent = () => {
         const credits = creditsResponse.data;
 
         // Find director from crew
-        const director =
-          credits.crew?.find((person: any) => person.job === "Director")
-            ?.name || "Unknown";
+        const directorPerson = credits.crew?.find(
+          (person: any) => person.job === "Director"
+        );
+        const director = directorPerson
+          ? {
+              id: directorPerson.id,
+              name: directorPerson.name,
+            }
+          : null;
 
         // Get country from production_countries
         const country = credits.production_countries?.[0]?.name || "Unknown";
@@ -107,7 +144,7 @@ const MovieDetailPageContent = () => {
             // Transform Backend Movie API data
             const genreNames =
               content.genreIds
-                ?.map((id: number) => TMDB_MOVIE_GENRE_MAP[id])
+                ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [];
 
             setMovieData({
@@ -118,16 +155,13 @@ const MovieDetailPageContent = () => {
               year: content.releaseDate
                 ? new Date(content.releaseDate).getFullYear()
                 : 2025,
-              duration: "N/A",
+              runtime: "N/A",
               genres: genreNames,
+              genreIds: content.genreIds || [],
               description: content.overview || "No description available",
-              backgroundImage:
-                content.backdropUrl ||
-                "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=1920&q=80",
-              posterImage:
-                content.posterUrl ||
-                "https://images.unsplash.com/photo-1489599858765-d6bf4d1c6f4b?auto=format&fit=crop&w=500&q=80",
-              director: "Loading...",
+              backgroundImage: content.backdropUrl || "/images/no-poster.svg",
+              posterImage: content.posterUrl || "/images/no-poster.svg",
+              director: null,
               cast: [],
               country: "Loading...",
               status: "Released",
@@ -149,7 +183,7 @@ const MovieDetailPageContent = () => {
             // Transform Backend TV Series API data
             const genreNames =
               content.genreIds
-                ?.map((id: number) => TMDB_TV_GENRE_MAP[id])
+                ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [];
 
             setMovieData({
@@ -160,16 +194,13 @@ const MovieDetailPageContent = () => {
               year: content.releaseDate
                 ? new Date(content.releaseDate).getFullYear()
                 : 2025,
-              duration: "N/A",
+              runtime: "N/A",
               genres: genreNames,
+              genreIds: content.genreIds || [],
               description: content.overview || "No description available",
-              backgroundImage:
-                content.backdropUrl ||
-                "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=1920&q=80",
-              posterImage:
-                content.posterUrl ||
-                "https://images.unsplash.com/photo-1489599858765-d6bf4d1c6f4b?auto=format&fit=crop&w=500&q=80",
-              director: "Loading...",
+              backgroundImage: content.backdropUrl || "/images/no-poster.svg",
+              posterImage: content.posterUrl || "/images/no-poster.svg",
+              director: null,
               cast: [],
               country: "Loading...",
               status: "Returning Series",
@@ -208,7 +239,7 @@ const MovieDetailPageContent = () => {
           aliasTitle: "I Know What You Did Last Summer",
           rating: 7.2,
           year: 2025,
-          duration: "1h 51m",
+          runtime: "1h 51m",
           season: "Phần 1",
           episode: "Tập 14",
           genres: ["Chiếu Rạp", "Gay Cấn", "Kinh Dị", "Bí Ẩn", "Tâm Lý"],
@@ -332,7 +363,7 @@ const MovieDetailPageContent = () => {
                   <span>•</span>
                   <span>{movieData.year}</span>
                   <span>•</span>
-                  <span>{movieData.duration}</span>
+                  <span>{movieData.runtime}</span>
                   <span>•</span>
                   <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded">
                     {movieData.quality}
@@ -346,19 +377,28 @@ const MovieDetailPageContent = () => {
 
                 {/* Genres */}
                 <div className="flex flex-wrap gap-2 mb-8">
-                  {movieData.genres?.map((genre: string, index: number) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-gray-800/60 text-white text-sm rounded-full"
-                    >
-                      {genre}
-                    </span>
-                  ))}
+                  {movieData.genres?.map((genre: string, index: number) => {
+                    const genreId = movieData.genreIds?.[index];
+                    return (
+                      <Link
+                        key={index}
+                        href={`/browse?type=movie&genres=${
+                          genreId || encodeURIComponent(genre)
+                        }`}
+                        className="px-3 py-1 bg-gray-800/60 text-white text-sm rounded-full hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+                      >
+                        {genre}
+                      </Link>
+                    );
+                  })}
                 </div>
 
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-4">
-                  <button className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors">
+                  <Link
+                    href={`/watch/movie-${movieData.tmdbId || movieId}`}
+                    className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
+                  >
                     <svg
                       className="w-5 h-5"
                       fill="currentColor"
@@ -371,7 +411,7 @@ const MovieDetailPageContent = () => {
                       />
                     </svg>
                     Xem Phim
-                  </button>
+                  </Link>
 
                   <FavoriteButton
                     item={{
@@ -434,7 +474,7 @@ const MovieDetailPageContent = () => {
                               src={
                                 actor.profile_path
                                   ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
-                                  : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80"
+                                  : "/images/no-avatar.svg"
                               }
                               alt={actor.name}
                               fill
@@ -443,8 +483,7 @@ const MovieDetailPageContent = () => {
                               sizes="(max-width: 768px) 50vw, 25vw"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src =
-                                  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80";
+                                target.src = "/images/no-avatar.svg";
                               }}
                             />
                           </div>
@@ -476,8 +515,15 @@ const MovieDetailPageContent = () => {
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
                           Loading...
                         </span>
+                      ) : movieData.director ? (
+                        <Link
+                          href={`/people/${movieData.director.id}`}
+                          className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded transition-colors cursor-pointer"
+                        >
+                          {movieData.director.name}
+                        </Link>
                       ) : (
-                        movieData.director
+                        "Unknown"
                       )}
                     </span>
                   </div>
@@ -514,7 +560,9 @@ const MovieDetailPageContent = () => {
                           Loading...
                         </span>
                       ) : (
-                        movieData.country
+                        movieData.country ||
+                        movieData.origin_country[0] ||
+                        "Unknown"
                       )}
                     </span>
                   </div>

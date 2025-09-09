@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
@@ -9,9 +9,15 @@ import { apiService } from "@/services/api";
 
 export default function TVShowsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [tvShows, setTVShows] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const pageParam = searchParams.get("page");
+    return pageParam ? parseInt(pageParam, 10) : 1;
+  });
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleFilterChange = (filters: FilterOptions) => {
     // Chuyển sang trang browse với filters
@@ -30,6 +36,16 @@ export default function TVShowsPage() {
     router.push(`/browse?${params.toString()}`);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setLoading(true);
+
+    // Update URL with new page parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.replace(`/tv?${params.toString()}`, { scroll: false });
+  };
+
   useEffect(() => {
     const fetchTVShows = async () => {
       try {
@@ -37,8 +53,8 @@ export default function TVShowsPage() {
         setError(null);
 
         const response = await apiService.getTVSeries({
-          page: 1,
-          limit: 20,
+          page: currentPage,
+          limit: 24,
           language: "en-US",
         });
 
@@ -49,26 +65,28 @@ export default function TVShowsPage() {
             ? responseData
             : responseData.data || [];
 
-          // Convert API response to MovieCardData format directly (simple approach like original)
+          // Convert API response to MovieCardData format directly
           const tvShowsWithCardData: MovieCardData[] = tvSeriesArray.map(
             (series: any) => {
-              // Ensure we use tmdbId for routing
-              const routeId =
-                series.tmdbId && series.tmdbId !== series.id
-                  ? series.tmdbId
-                  : series.id;
+              // TMDB ID is required since all data comes from TMDB
+              const tmdbId = series.tmdbId || series.id;
+
+              if (!tmdbId) {
+                console.error("TV Series missing tmdbId:", series);
+                throw new Error("TV Series data is missing tmdbId");
+              }
 
               const tvShow = {
-                id: series.id?.toString() || "0",
-                tmdbId: series.tmdbId || series.id, // Ensure tmdbId is passed
+                id: series.id?.toString() || tmdbId.toString(),
+                tmdbId: tmdbId, // Guaranteed to exist
                 title: series.title || series.name || "Unknown",
                 aliasTitle:
                   series.originalName ||
                   series.title ||
                   series.name ||
                   "Unknown",
-                poster: series.posterUrl || "/images/no-poster.jpg",
-                href: `/tv/${routeId}`, // Use calculated routeId
+                poster: series.posterUrl || "/images/no-poster.svg",
+                href: `/tv/${tmdbId}`, // Use tmdbId directly
                 year: series.firstAirDate
                   ? new Date(series.firstAirDate).getFullYear()
                   : undefined,
@@ -86,7 +104,6 @@ export default function TVShowsPage() {
                 title: tvShow.title,
                 id: tvShow.id,
                 tmdbId: tvShow.tmdbId,
-                routeId: routeId,
                 href: tvShow.href,
                 originalSeriesId: series.id,
                 originalSeriesTmdbId: series.tmdbId,
@@ -97,6 +114,18 @@ export default function TVShowsPage() {
           );
 
           setTVShows(tvShowsWithCardData);
+
+          // Set pagination info from response
+          // Pagination is in response.data.pagination (nested structure)
+          const paginationData = (response.data as any)?.pagination;
+          if (paginationData) {
+            console.log("🔍 TV Pagination data:", paginationData);
+            setTotalPages(paginationData.totalPages);
+            console.log("📄 Set totalPages to:", paginationData.totalPages);
+          } else {
+            console.log("❌ No pagination data in TV response");
+            setTotalPages(1);
+          }
         } else {
           throw new Error(response.message || "Failed to fetch TV series");
         }
@@ -112,12 +141,12 @@ export default function TVShowsPage() {
     };
 
     fetchTVShows();
-  }, []);
+  }, [currentPage]);
 
   if (loading) {
     return (
       <Layout>
-        <div className="pt-16">
+        <div>
           <div className="container mx-auto px-4">
             <h1 className="text-3xl font-bold text-white mb-8">
               📺 Phim Bộ / TV Series
@@ -130,8 +159,8 @@ export default function TVShowsPage() {
             </div>
 
             {/* TV series grid skeleton */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {Array.from({ length: 18 }).map((_, index) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+              {Array.from({ length: 16 }).map((_, index) => (
                 <div key={index} className="sw-item group relative">
                   <div className="v-thumbnail block">
                     <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
@@ -160,24 +189,31 @@ export default function TVShowsPage() {
 
   return (
     <Layout>
-      <div className="pt-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-white mb-8">
-            📺 Phim Bộ / TV Series
-          </h1>
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold text-white mb-8">
+          📺 Phim Bộ / TV Series
+        </h1>
 
-          {/* Filter Component */}
-          <MovieFilters onFilterChange={handleFilterChange} className="mb-8" />
-
-          {error && (
-            <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-              Lỗi: {error}
-            </div>
-          )}
+        {/* Filter Component */}
+        <div className="mb-8">
+          <MovieFilters onFilterChange={handleFilterChange} />
         </div>
 
-        <MoviesGrid title="" movies={tvShows} className="py-8" />
+        {error && (
+          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
+            Lỗi: {error}
+          </div>
+        )}
       </div>
+
+      <MoviesGrid
+        title=""
+        movies={tvShows}
+        className="py-8"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </Layout>
   );
 }

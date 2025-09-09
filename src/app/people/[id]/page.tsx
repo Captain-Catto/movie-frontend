@@ -7,6 +7,7 @@ import Layout from "@/components/layout/Layout";
 import MovieCard from "@/components/movie/MovieCard";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
+import { Pagination } from "@/components/ui/Pagination";
 import { apiService } from "@/services/api";
 
 interface PersonDetail {
@@ -48,34 +49,158 @@ interface PersonCredits {
   }>;
 }
 
+interface PaginatedCastCredits {
+  cast: Array<{
+    id: number;
+    title?: string;
+    name?: string;
+    character?: string;
+    job?: string;
+    media_type: "movie" | "tv";
+    poster_path: string | null;
+    release_date?: string;
+    first_air_date?: string;
+    vote_average: number;
+  }>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+  metadata: {
+    fromCache: boolean;
+    totalCastItems: number;
+    cacheInfo?: any;
+  };
+}
+
+interface PaginatedCrewCredits {
+  crew: Array<{
+    id: number;
+    title?: string;
+    name?: string;
+    character?: string;
+    job?: string;
+    media_type: "movie" | "tv";
+    poster_path: string | null;
+    release_date?: string;
+    first_air_date?: string;
+    vote_average: number;
+  }>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    limit: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+  metadata: {
+    fromCache: boolean;
+    totalCrewItems: number;
+    cacheInfo?: any;
+  };
+}
+
 const PersonDetailPage = () => {
   const params = useParams();
   const personId = params.id as string;
   const [personData, setPersonData] = useState<PersonDetail | null>(null);
-  const [credits, setCredits] = useState<PersonCredits | null>(null);
+  const [castCredits, setCastCredits] = useState<PaginatedCastCredits | null>(null);
+  const [crewCredits, setCrewCredits] = useState<PaginatedCrewCredits | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"cast" | "crew">("cast");
   const [showFullBio, setShowFullBio] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+
+  // Group crew items by movie to combine multiple jobs
+  const groupCrewByMovie = (crewItems: any[]) => {
+    const grouped = crewItems.reduce((acc, item) => {
+      const key = `${item.id}-${item.media_type}`;
+      if (acc[key]) {
+        // Combine job titles
+        const existingJob = acc[key].job || '';
+        const newJob = item.job || '';
+        if (existingJob && newJob && existingJob !== newJob) {
+          acc[key].job = `${existingJob}, ${newJob}`;
+        } else if (newJob) {
+          acc[key].job = newJob;
+        }
+      } else {
+        acc[key] = { ...item };
+      }
+      return acc;
+    }, {} as Record<string, any>);
+    
+    return Object.values(grouped);
+  };
+
+  const fetchAllCredits = async () => {
+    try {
+      const response = await apiService.getPersonCredits(parseInt(personId));
+
+      if (response) {
+        // Split data into cast and crew for separate pagination
+        const castData: PaginatedCastCredits = {
+          cast: response.cast,
+          pagination: {
+            currentPage: 1,
+            totalPages: Math.ceil(response.cast.length / itemsPerPage),
+            totalItems: response.cast.length,
+            limit: itemsPerPage,
+            hasNextPage: 1 < Math.ceil(response.cast.length / itemsPerPage),
+            hasPreviousPage: false,
+          },
+          metadata: {
+            fromCache: true,
+            totalCastItems: response.cast.length,
+          }
+        };
+
+        const groupedCrew = groupCrewByMovie(response.crew);
+        const crewData: PaginatedCrewCredits = {
+          crew: response.crew, // Keep original for grouping
+          pagination: {
+            currentPage: 1,
+            totalPages: Math.ceil(groupedCrew.length / itemsPerPage),
+            totalItems: groupedCrew.length,
+            limit: itemsPerPage,
+            hasNextPage: 1 < Math.ceil(groupedCrew.length / itemsPerPage),
+            hasPreviousPage: false,
+          },
+          metadata: {
+            fromCache: true,
+            totalCrewItems: groupedCrew.length, // Use grouped count
+          }
+        };
+
+        setCastCredits(castData);
+        setCrewCredits(crewData);
+      }
+    } catch (err) {
+      console.error("Error fetching person credits:", err);
+      setError("Không thể tải danh sách phim");
+    }
+  };
 
   useEffect(() => {
     const fetchPersonData = async () => {
       try {
         setLoading(true);
 
-        // Fetch person details and credits
-        const [personResponse, creditsResponse] = await Promise.all([
-          apiService.getPersonDetails(parseInt(personId)),
-          apiService.getPersonCredits(parseInt(personId)),
-        ]);
+        const personResponse = await apiService.getPersonDetails(parseInt(personId));
 
         if (personResponse) {
           setPersonData(personResponse);
         }
 
-        if (creditsResponse) {
-          setCredits(creditsResponse);
-        }
+        // Fetch all credits data
+        await fetchAllCredits();
 
         setError(null);
       } catch (err) {
@@ -91,11 +216,31 @@ const PersonDetailPage = () => {
     }
   }, [personId]);
 
+  // Update pagination info when page or tab changes
+  useEffect(() => {
+    if (castCredits && crewCredits) {
+      // Update pagination info for current tab
+      const currentData = activeTab === "cast" ? castCredits : crewCredits;
+      const totalPages = currentData.pagination.totalPages;
+      
+      // Reset to page 1 if current page is beyond available pages
+      if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(1);
+      }
+    }
+  }, [activeTab, castCredits, crewCredits]);
+
+  // Reset page to 1 when switching tabs  
+  const handleTabChange = (tab: "cast" | "crew") => {
+    setActiveTab(tab);
+    setCurrentPage(1);
+  };
+
   const getProfileImage = () => {
     if (personData?.profile_path) {
       return `https://image.tmdb.org/t/p/w500${personData.profile_path}`;
     }
-    return "/images/no-avatar.jpg";
+    return "/images/no-avatar.svg";
   };
 
   const getKnownForText = () => {
@@ -151,7 +296,7 @@ const PersonDetailPage = () => {
       aliasTitle: item.character || item.job || "",
       poster: item.poster_path
         ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
-        : "/images/no-poster.jpg",
+        : "/images/no-poster.svg",
       href: `/movie/${item.id}`, // Direct TMDB ID - backend now handles TMDB ID by default
       year: item.release_date
         ? new Date(item.release_date).getFullYear()
@@ -187,8 +332,24 @@ const PersonDetailPage = () => {
     );
   }
 
-  const castItems = credits?.cast || [];
-  const crewItems = credits?.crew || [];
+  // Get paginated items for current tab
+  const getPaginatedItems = () => {
+    if (activeTab === "cast") {
+      const allCast = castCredits?.cast || [];
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      return allCast.slice(startIndex, endIndex);
+    } else {
+      const allCrew = crewCredits?.crew || [];
+      const groupedCrew = groupCrewByMovie(allCrew);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      return groupedCrew.slice(startIndex, endIndex);
+    }
+  };
+
+  const castItems = activeTab === "cast" ? getPaginatedItems() : [];
+  const crewItems = activeTab === "crew" ? getPaginatedItems() : [];
 
   return (
     <Layout>
@@ -256,26 +417,32 @@ const PersonDetailPage = () => {
                 </div>
 
                 {/* Biography */}
-                {personData.biography && (
-                  <div>
-                    <h3 className="text-xl font-semibold text-white mb-4">
-                      Tiểu sử
-                    </h3>
-                    <div className="text-gray-300 leading-relaxed whitespace-pre-line">
-                      {showFullBio
-                        ? personData.biography
-                        : truncateBiography(personData.biography)}
-                      {personData.biography.length > 300 && (
-                        <button
-                          onClick={() => setShowFullBio(!showFullBio)}
-                          className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
-                        >
-                          {showFullBio ? "Ẩn bớt" : "Xem thêm"}
-                        </button>
-                      )}
-                    </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-white mb-4">
+                    Tiểu sử
+                  </h3>
+                  <div className="text-gray-300 leading-relaxed whitespace-pre-line">
+                    {personData.biography ? (
+                      <>
+                        {showFullBio
+                          ? personData.biography
+                          : truncateBiography(personData.biography)}
+                        {personData.biography.length > 300 && (
+                          <button
+                            onClick={() => setShowFullBio(!showFullBio)}
+                            className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
+                          >
+                            {showFullBio ? "Ẩn bớt" : "Xem thêm"}
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-gray-400 italic">
+                        Tiểu sử hiện chưa có
+                      </p>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -289,24 +456,24 @@ const PersonDetailPage = () => {
             {/* Tabs */}
             <div className="flex space-x-4 mb-6">
               <button
-                onClick={() => setActiveTab("cast")}
+                onClick={() => handleTabChange("cast")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "cast"
                     ? "bg-red-500 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                Diễn xuất ({castItems.length})
+                Diễn xuất ({castCredits?.metadata.totalCastItems || 0})
               </button>
               <button
-                onClick={() => setActiveTab("crew")}
+                onClick={() => handleTabChange("crew")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "crew"
                     ? "bg-red-500 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                Thành viên đoàn phim ({crewItems.length})
+                Thành viên đoàn phim ({crewCredits?.metadata.totalCrewItems || 0})
               </button>
             </div>
 
@@ -328,6 +495,30 @@ const PersonDetailPage = () => {
                   />
                 ))}
             </div>
+
+            {/* Pagination for cast tab */}
+            {activeTab === "cast" && castCredits?.pagination && castCredits.pagination.totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={castCredits.pagination.totalPages}
+                  onPageChange={(page) => setCurrentPage(page)}
+                  className="mb-8"
+                />
+              </div>
+            )}
+
+            {/* Pagination for crew tab */}
+            {activeTab === "crew" && crewCredits?.pagination && crewCredits.pagination.totalPages > 1 && (
+              <div className="mt-8 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={crewCredits.pagination.totalPages}
+                  onPageChange={(page) => setCurrentPage(page)}
+                  className="mb-8"
+                />
+              </div>
+            )}
 
             {/* Empty state */}
             {((activeTab === "cast" && castItems.length === 0) ||

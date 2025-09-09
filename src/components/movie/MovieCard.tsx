@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import { Play, Info, Star } from "lucide-react";
 
 export interface MovieCardData {
   id: string;
@@ -27,10 +29,71 @@ interface MovieCardProps {
 }
 
 const MovieCard = ({ movie }: MovieCardProps) => {
+  const router = useRouter();
+  const cardRef = useRef<HTMLDivElement>(null);
+  const hoverCardRef = useRef<HTMLDivElement>(null);
+  const [hoverPosition, setHoverPosition] = useState<
+    "center" | "left" | "right"
+  >("center");
+
+  useEffect(() => {
+    const handleMouseEnter = () => {
+      if (!cardRef.current || !hoverCardRef.current) return;
+
+      const cardRect = cardRef.current.getBoundingClientRect();
+      const hoverCardWidth = 384; // w-96 = 384px
+      const viewportWidth = window.innerWidth;
+      const margin = 20; // Safe margin from edge
+
+      // Calculate where the center of hover card would be
+      const cardCenterX = cardRect.left + cardRect.width / 2;
+      const hoverCardLeft = cardCenterX - hoverCardWidth / 2;
+      const hoverCardRight = cardCenterX + hoverCardWidth / 2;
+
+      // Check if hover card would overflow
+      if (hoverCardLeft < margin) {
+        // Too close to left edge - align card to left
+        setHoverPosition("left");
+      } else if (hoverCardRight > viewportWidth - margin) {
+        // Too close to right edge - align card to right
+        setHoverPosition("right");
+      } else {
+        // Safe to center
+        setHoverPosition("center");
+      }
+    };
+
+    const cardElement = cardRef.current;
+    if (cardElement) {
+      cardElement.addEventListener("mouseenter", handleMouseEnter);
+      return () =>
+        cardElement.removeEventListener("mouseenter", handleMouseEnter);
+    }
+  }, []);
+
+  const handleWatchMovie = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Determine content type from href, fallback to movie as default
+    let contentType = "movie"; // Default to movie
+    if (movie.href?.includes("/tv/")) {
+      contentType = "tv";
+    }
+
+    // Create proper watch URL - tmdbId is guaranteed to exist since all data comes from TMDB
+    const watchUrl = `/watch/${contentType}-${movie.tmdbId}`;
+    console.log("Navigating to watch page:", watchUrl);
+    router.push(watchUrl);
+  };
+
   return (
-    <div className="sw-item group relative">
+    <div ref={cardRef} className="sw-item group relative">
       {/* Main Card */}
-      <Link href={movie.href} className="v-thumbnail block">
+      <Link
+        href={movie.href || `/movie/${movie.tmdbId}`}
+        className="v-thumbnail block"
+      >
         <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-transform duration-300 lg:group-hover:scale-110 lg:group-hover:z-20">
           {/* Favorite Button - Top Right Corner */}
           <FavoriteButton
@@ -56,27 +119,13 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             </div>
           )}
 
-          {/* Movie Special Badges */}
-          {movie.isComplete && !movie.episodeNumber && (
-            <div className="pin-new m-pin-new">
-              <div className="line-center line-pd absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
-                P.Đề
-              </div>
-            </div>
-          )}
-
-          {/* Language Badges */}
-          {movie.isDubbed && (
-            <div className="pin-new m-pin-new">
-              <div className="line-center line-lt absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded">
-                L.Tiếng
-              </div>
-            </div>
-          )}
-
           {/* Movie Poster */}
           <img
-            src={movie.poster}
+            src={
+              movie.poster ||
+              (movie as any).posterUrl ||
+              "/images/no-poster.svg"
+            }
             alt={`Xem Phim ${movie.title}`}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 lg:group-hover:scale-105"
@@ -85,7 +134,10 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           {/* Mobile/Tablet Hover Overlay - Simple */}
           <div className="lg:hidden absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="absolute bottom-0 left-0 right-0 p-4">
-              <button className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center space-x-2">
+              <button
+                onClick={handleWatchMovie}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center space-x-2"
+              >
                 <div className="w-4 h-4 relative">
                   <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-0.5"></div>
                 </div>
@@ -97,11 +149,24 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       </Link>
 
       {/* Desktop Hover Card - Large Overlay Style */}
-      <div className="hidden lg:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 bg-gray-900 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-30 transform scale-95 group-hover:scale-100 overflow-hidden">
+      <div
+        ref={hoverCardRef}
+        className={`hidden lg:block absolute top-1/2 -translate-y-1/2 w-96 bg-gray-900 rounded-xl shadow-2xl opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 z-30 transform scale-95 group-hover:scale-100 overflow-hidden ${
+          hoverPosition === "left"
+            ? "left-0 translate-x-0"
+            : hoverPosition === "right"
+            ? "right-0 translate-x-0"
+            : "left-1/2 -translate-x-1/2"
+        }`}
+      >
         {/* Movie Poster - Top Section */}
         <div className="relative h-64">
           <img
-            src={movie.poster}
+            src={
+              movie.poster ||
+              (movie as any).posterUrl ||
+              "/images/no-poster.svg"
+            }
             alt={movie.title}
             className="w-full h-full object-cover"
           />
@@ -122,10 +187,11 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
           {/* Action Buttons */}
           <div className="flex space-x-2">
-            <button className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black py-1.5 rounded font-semibold text-xs transition-colors flex items-center justify-center space-x-1">
-              <div className="w-3 h-3 relative">
-                <div className="w-0 h-0 border-l-[6px] border-l-black border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent ml-0.5"></div>
-              </div>
+            <button
+              onClick={handleWatchMovie}
+              className="flex-1 bg-red-400 hover:bg-red-500 text-white py-1.5 rounded font-semibold text-xs transition-colors flex items-center justify-center space-x-2"
+            >
+              <Play className="w-4 h-4 fill-white" />
               <span>Xem ngay</span>
             </button>
             <FavoriteButton
@@ -134,46 +200,43 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               className="!w-auto !h-auto px-3 py-1.5 !rounded font-semibold text-xs"
             />
             <Link
-              href={movie.href}
+              href={movie.href || `/movie/${movie.tmdbId}`}
               className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded font-semibold text-xs transition-colors flex items-center space-x-1"
             >
-              <span>ℹ</span>
+              <Info className="w-4 h-4" />
               <span>Chi tiết</span>
             </Link>
           </div>
 
           {/* Movie Info */}
           <div className="space-y-1">
-            {/* Year and Episode Info with Rating Badge */}
-            <div className="flex items-center space-x-2 text-white text-xs">
-              <div className="bg-white text-black px-2 py-1 rounded text-xs font-bold">
-                T13
-              </div>
+            {/* Rating, Year and Genres - All in one row */}
+            <div className="flex flex-wrap gap-1 items-center">
+              {movie.rating && (
+                <span className="bg-yellow-500 text-black px-2 py-1 rounded flex items-center space-x-1 font-bold text-xs">
+                  <Star className="w-3 h-3 fill-current" />
+                  <span>{movie.rating}</span>
+                </span>
+              )}
               {movie.year && (
-                <span className="bg-gray-700 px-2 py-1 rounded">
+                <span className="bg-gray-700 text-white px-2 py-1 rounded font-medium text-xs">
                   {movie.year}
                 </span>
               )}
-              {movie.episodeNumber && (
-                <>
-                  <span className="bg-gray-700 px-2 py-1 rounded">Phần 1</span>
-                  <span className="bg-gray-700 px-2 py-1 rounded">
-                    Tập {movie.episodeNumber}
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Genre Tags */}
-            <div className="flex flex-wrap items-center space-x-1 text-gray-400 text-xs">
               {movie.genres && movie.genres.length > 0
-                ? movie.genres.slice(0, 4).map((genre, index) => (
-                    <React.Fragment key={genre}>
-                      {index > 0 && <span>•</span>}
-                      <span>{genre}</span>
-                    </React.Fragment>
+                ? movie.genres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="bg-gray-700 text-white px-2 py-1 rounded text-xs font-medium"
+                    >
+                      {genre}
+                    </span>
                   ))
-                : movie.genre && <span>{movie.genre}</span>}
+                : movie.genre && (
+                    <span className="bg-gray-700 text-white px-2 py-1 rounded text-xs font-medium">
+                      {movie.genre}
+                    </span>
+                  )}
             </div>
           </div>
         </div>
@@ -183,7 +246,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       <div className="info mt-3 space-y-1">
         <h4 className="item-title text-white">
           <Link
-            href={movie.href}
+            href={movie.href || `/movie/${movie.tmdbId}`}
             title={movie.title}
             className="text-sm font-semibold hover:text-red-500 transition-colors line-clamp-2"
           >
@@ -192,7 +255,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         </h4>
         <h4 className="alias-title text-gray-400">
           <Link
-            href={movie.href}
+            href={movie.href || `/movie/${movie.tmdbId}`}
             title={movie.aliasTitle}
             className="text-xs hover:text-red-500 transition-colors line-clamp-1"
           >

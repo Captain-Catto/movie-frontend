@@ -14,6 +14,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
+import { Info } from "lucide-react";
 
 interface HeroSectionProps {
   movies: Array<{
@@ -30,6 +31,7 @@ interface HeroSectionProps {
     backgroundImage: string;
     posterImage: string;
     scenes: string[];
+    href: string;
   }>;
 }
 
@@ -75,16 +77,14 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
           <SwiperSlide key={movie.id} className="relative">
             <div className="slide-elements relative h-full">
               <Link
-                href={`/movie/${movie.id}`}
+                href={movie.href}
                 className="slide-url absolute inset-0 z-10"
               />
-
               {/* Background Fade */}
               <div
                 className="background-fade absolute inset-0"
                 style={{ backgroundImage: `url("${movie.backgroundImage}")` }}
               />
-
               {/* Cover Fade */}
               <div className="cover-fade absolute inset-0">
                 <div className="cover-image w-full h-full">
@@ -97,17 +97,17 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                   />
                 </div>
               </div>
-
               {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-
+              {/* <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" /> */}
+              {/* Overlay có 2 mép trái phải thì xám nhẹ còn chính giữa hơn 50% màu bình thường */}
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-800/90 via-gray-800/30 to-gray-800/90" />{" "}
               {/* Safe Area Content */}
               <div className="safe-area relative z-20 h-full flex items-center">
                 <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                   <div className="media-item max-w-2xl space-y-6">
                     {/* Main Title */}
                     <h1 className="text-5xl font-bold text-white">
-                      <Link title={movie.title} href={`/movie/${movie.id}`}>
+                      <Link title={movie.title} href={movie.href}>
                         {movie.title}
                       </Link>
                     </h1>
@@ -116,7 +116,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                     <h3 className="media-alias-title">
                       <Link
                         title={movie.aliasTitle || movie.title}
-                        href={`/movie/${movie.id}`}
+                        href={movie.href}
                         className="text-gray-300 text-xl"
                       >
                         {movie.aliasTitle || movie.title}
@@ -125,24 +125,31 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
 
                     {/* Tags */}
                     <div className="hl-tags flex flex-wrap gap-2">
-                      <div className="tag-quality">
-                        <span className="bg-yellow-500 text-black px-2 py-1 rounded text-sm font-bold">
-                          4K
+                      {/* Media Type */}
+                      <div className="tag-media-type">
+                        <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold">
+                          {movie.href.includes("/tv/") ? "TV Series" : "Movie"}
                         </span>
                       </div>
-                      <div className="tag-model">
-                        <span className="last bg-white text-black px-2 py-1 rounded text-sm font-bold">
-                          <strong>T16</strong>
+
+                      {/* Rating */}
+                      <div className="tag-rating">
+                        <span className="bg-yellow-500 text-black px-3 py-1 rounded text-sm font-bold flex items-center gap-1">
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          {movie.rating}
                         </span>
                       </div>
-                      <div className="tag-classic">
-                        <span className="bg-gray-700 text-white px-2 py-1 rounded text-sm">
+
+                      {/* Year */}
+                      <div className="tag-year">
+                        <span className="bg-gray-700 text-white px-3 py-1 rounded text-sm">
                           {movie.year}
-                        </span>
-                      </div>
-                      <div className="tag-classic">
-                        <span className="bg-gray-700 text-white px-2 py-1 rounded text-sm">
-                          {movie.duration}
                         </span>
                       </div>
                     </div>
@@ -155,9 +162,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                           href={`/genre/${genre}`}
                           className="tag-topic"
                         >
-                          <span className="bg-gray-800/70 hover:bg-gray-700/70 text-white px-3 py-1 rounded-full text-sm transition-colors">
-                            {genre}
-                          </span>
+                          {genre}
                         </Link>
                       ))}
                     </div>
@@ -169,7 +174,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
 
                     {/* Touch/Action Buttons */}
                     <div className="touch flex items-center space-x-4">
-                      <Link href={`/movie/${movie.id}`} className="button-play">
+                      <Link href={movie.href} className="button-play">
                         <button className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors">
                           <svg
                             className="w-5 h-5"
@@ -187,19 +192,9 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                           size="lg"
                           className="p-3 rounded-lg bg-gray-800/70 hover:bg-gray-700/70 transition-colors"
                         />
-                        <Link href={`/movie/${movie.id}`} className="item">
-                          <button className="p-3 rounded-lg bg-gray-800/70 hover:bg-gray-700/70 text-white transition-colors">
-                            <svg
-                              className="w-5 h-5"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
+                        <Link href={movie.href} className="item">
+                          <button className="p-3 rounded-lg transition-colors">
+                            <Info className="w-6 h-6 text-gray-400" />
                           </button>
                         </Link>
                       </div>

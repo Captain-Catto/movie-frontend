@@ -6,10 +6,30 @@ import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import FavoriteButton from "@/components/ui/FavoriteButton";
+import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
-import { TMDB_TV_GENRE_MAP } from "@/utils/genresFetch";
+
+// TMDB TV Genre mapping to English names
+const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
+  10759: "Action & Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  10762: "Kids",
+  9648: "Mystery",
+  10763: "News",
+  10764: "Reality",
+  10765: "Sci-Fi & Fantasy",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics",
+  37: "Western",
+};
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -29,6 +49,7 @@ const TVDetailPageContent = () => {
   const [loading, setLoading] = useState(true);
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   // Function to fetch credits after basic TV data is loaded
   const fetchCredits = async (tvId: number) => {
@@ -43,11 +64,15 @@ const TVDetailPageContent = () => {
           const credits = creditsResponse.data;
 
           // Find creator from crew
-          const creator =
-            credits.crew?.find((person: any) => person.job === "Creator")
-              ?.name ||
-            credits.created_by?.[0]?.name ||
-            "Unknown";
+          const creatorPerson =
+            credits.crew?.find((person: any) => person.job === "Creator") ||
+            credits.created_by?.[0];
+          const creator = creatorPerson
+            ? {
+                id: creatorPerson.id,
+                name: creatorPerson.name,
+              }
+            : null;
 
           // Get country from origin_country
           const country = credits.origin_country?.[0] || "Unknown";
@@ -65,7 +90,7 @@ const TVDetailPageContent = () => {
           // Set default values if API fails
           setTVData((prevData: any) => ({
             ...prevData,
-            creator: "Not available",
+            creator: null,
             country: "Not available",
             cast: [],
             crew: [],
@@ -79,7 +104,7 @@ const TVDetailPageContent = () => {
         // Set default values if endpoint doesn't exist
         setTVData((prevData: any) => ({
           ...prevData,
-          creator: "Not available",
+          creator: null,
           country: "Not available",
           cast: [],
           crew: [],
@@ -90,7 +115,7 @@ const TVDetailPageContent = () => {
       // Set default values on any error
       setTVData((prevData: any) => ({
         ...prevData,
-        creator: "Error loading",
+        creator: null,
         country: "Error loading",
         cast: [],
         crew: [],
@@ -121,32 +146,39 @@ const TVDetailPageContent = () => {
           const processedTVData = {
             id: tv.id,
             tmdbId: tv.tmdbId || tv.id,
-            title: tv.title,
-            originalTitle: tv.originalTitle || tv.title,
+            title: tv.title || tv.name,
+            originalTitle:
+              tv.originalTitle || tv.original_name || tv.title || tv.name,
             overview: tv.overview,
-            firstAirDate: tv.releaseDate || tv.firstAirDate,
-            lastAirDate: tv.lastAirDate,
-            voteAverage: tv.voteAverage,
-            voteCount: tv.voteCount,
+            firstAirDate:
+              tv.releaseDate || tv.firstAirDate || tv.first_air_date,
+            lastAirDate: tv.lastAirDate || tv.last_air_date,
+            voteAverage: tv.voteAverage || tv.vote_average,
+            voteCount: tv.voteCount || tv.vote_count,
             popularity: tv.popularity,
             // Fix: Use posterUrl/backdropUrl from API, fallback to posterPath/backdropPath
-            posterPath: tv.posterUrl || tv.posterPath,
-            backdropPath: tv.backdropUrl || tv.backdropPath,
+            posterPath: tv.posterUrl || tv.posterPath || tv.poster_path,
+            backdropPath: tv.backdropUrl || tv.backdropPath || tv.backdrop_path,
             genres:
-              tv.genreIds
-                ?.map((id: number) => TMDB_TV_GENRE_MAP[id])
+              (tv.genreIds || tv.genre_ids)
+                ?.map((id: number) => TMDB_TV_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [],
-            numberOfEpisodes: tv.numberOfEpisodes,
-            numberOfSeasons: tv.numberOfSeasons,
-            episodeRunTime: tv.episodeRunTime,
+            genreIds: tv.genreIds || tv.genre_ids || [],
+            numberOfEpisodes: tv.numberOfEpisodes || tv.number_of_episodes,
+            numberOfSeasons: tv.numberOfSeasons || tv.number_of_seasons,
+            episodeRunTime: tv.episodeRunTime || tv.episode_run_time,
             status: tv.status || "Unknown",
             type: tv.type,
             adult: tv.adult,
-            inProduction: tv.inProduction,
-            originCountry: tv.originCountry,
-            originalLanguage: tv.originalLanguage,
+            inProduction: tv.inProduction || tv.in_production,
+            originCountry: tv.originCountry || tv.origin_country,
+            originalLanguage: tv.originalLanguage || tv.original_language,
+            // Handle created_by from TMDB data directly
+            createdBy: tv.created_by || [],
+            // Handle production countries
+            productionCountries: tv.production_countries || [],
             // Default values that will be updated by credits
-            creator: "Loading...",
+            creator: null,
             country: "Loading...",
             cast: [],
             crew: [],
@@ -174,7 +206,7 @@ const TVDetailPageContent = () => {
   // Helper functions
   const getPosterUrl = (posterPath: string | null) => {
     console.log("Poster path:", posterPath);
-    if (!posterPath) return "/images/no-poster.jpg";
+    if (!posterPath) return "/images/no-poster.svg";
     // If it's already a full URL, return it as is
     if (posterPath.startsWith("http")) {
       console.log("Generated poster URL (full):", posterPath);
@@ -188,7 +220,7 @@ const TVDetailPageContent = () => {
 
   const getBackdropUrl = (backdropPath: string | null) => {
     console.log("Backdrop path:", backdropPath);
-    if (!backdropPath) return "/images/no-poster.jpg";
+    if (!backdropPath) return "/images/no-poster.svg";
     // If it's already a full URL, return it as is
     if (backdropPath.startsWith("http")) {
       console.log("Generated backdrop URL (full):", backdropPath);
@@ -246,9 +278,9 @@ const TVDetailPageContent = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-900 pt-16">
+      <div className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative h-[70vh] flex items-center">
+        <div className="relative h-[70vh] lg:pt-16 md:pt-36 pt-32">
           <div className="absolute inset-0">
             <Image
               src={getBackdropUrl(tvData.backdropPath)}
@@ -266,25 +298,16 @@ const TVDetailPageContent = () => {
           <div className="relative max-w-6xl mx-auto px-4 z-10">
             <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
               {/* Poster */}
-              <div className="flex-shrink-0 relative">
-                <div className="w-80 h-[450px] relative rounded-lg overflow-hidden shadow-2xl">
+              <div className="hidden md:block flex-shrink-0">
+                <div className="relative w-64 h-96">
                   <Image
                     src={getPosterUrl(tvData.posterPath)}
                     alt={tvData.title}
                     fill
-                    className="object-cover"
-                    priority
-                    placeholder="blur"
-                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLDHPKw8HFBcZLEEEEEEEgUCFQKBQQVBA"
+                    className="object-cover rounded-lg shadow-2xl"
+                    loading="lazy"
+                    sizes="256px"
                   />
-                  {/* Favorite Button */}
-                  <div className="absolute top-4 right-4">
-                    <FavoriteButton
-                      item={{ id: tvData.id.toString(), title: tvData.title }}
-                      size="lg"
-                      className="bg-black/50 hover:bg-black/70"
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -315,93 +338,161 @@ const TVDetailPageContent = () => {
                   <span className="text-gray-300">
                     {formatDate(tvData.firstAirDate)}
                   </span>
-                  <span className="text-gray-300">
-                    {formatRuntime(tvData.episodeRunTime)}
-                  </span>
+                  {tvData.episodeRunTime &&
+                    tvData.episodeRunTime.length > 0 && (
+                      <span className="text-gray-300">
+                        {formatRuntime(tvData.episodeRunTime)}
+                      </span>
+                    )}
                 </div>
 
                 {/* Genres */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-6">
-                  {tvData.genres.map((genre: string, index: number) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm"
-                    >
-                      {genre}
-                    </span>
-                  ))}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-8">
+                  {tvData.genres.map((genre: string, index: number) => {
+                    const genreId = tvData.genreIds?.[index];
+                    return (
+                      <Link
+                        key={index}
+                        href={`/browse?type=tv&genres=${
+                          genreId || encodeURIComponent(genre)
+                        }`}
+                        className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+                      >
+                        {genre}
+                      </Link>
+                    );
+                  })}
                 </div>
 
-                {/* Overview */}
-                <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-3xl">
-                  {tvData.overview || "Không có mô tả."}
-                </p>
-
                 {/* Action Buttons */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-4">
-                  <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-                    <span>▶️</span>
-                    Xem phim
-                  </button>
-                  <button className="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2">
-                    <span>🎬</span>
-                    Trailer
-                  </button>
+                <div className="flex flex-wrap gap-4">
+                  <Link
+                    href={`/watch/tv-${tvData.tmdbId || tvId}`}
+                    className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Xem Series
+                  </Link>
+
+                  <FavoriteButton
+                    item={{
+                      id: tvData.id?.toString() || tvId,
+                      title: tvData.title || "Unknown Title",
+                      type: "tv-show",
+                      year: tvData.firstAirDate
+                        ? new Date(tvData.firstAirDate).getFullYear()
+                        : 2025,
+                      rating: tvData.voteAverage,
+                      image: tvData.posterPath,
+                    }}
+                    size="lg"
+                    className="px-8 py-4 !rounded-lg font-semibold"
+                  />
+
+                  <TrailerButton
+                    movieId={tvData.tmdbId || parseInt(tvId)}
+                    movieTitle={tvData.title}
+                    contentType="tv"
+                    className="px-8 py-4 !rounded-lg font-semibold"
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Content Grid */}
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* TV Details Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="lg:col-span-2">
+              <h3 className="text-2xl font-bold text-white mb-6">
+                Nội dung phim
+              </h3>
+              <div className="bg-gray-800 rounded-lg p-6 mb-8">
+                <p className="text-gray-300 leading-relaxed">
+                  {tvData.overview ? (
+                    showFullDescription || tvData.overview.length <= 300 ? (
+                      tvData.overview
+                    ) : (
+                      <>
+                        {tvData.overview.substring(0, 300)}...
+                        <button
+                          onClick={() => setShowFullDescription(true)}
+                          className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors"
+                        >
+                          Xem thêm
+                        </button>
+                      </>
+                    )
+                  ) : (
+                    "Không có mô tả."
+                  )}
+                </p>
+                {showFullDescription &&
+                  tvData.overview &&
+                  tvData.overview.length > 300 && (
+                    <button
+                      onClick={() => setShowFullDescription(false)}
+                      className="mt-2 text-red-400 hover:text-red-300 font-medium transition-colors"
+                    >
+                      Thu gọn
+                    </button>
+                  )}
+              </div>
+
               {/* Cast Section */}
-              <section>
-                <h2 className="text-2xl font-bold text-white mb-6">
-                  Diễn viên
-                </h2>
-                {creditsLoading ? (
-                  <CastSkeleton />
-                ) : tvData.cast && tvData.cast.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {tvData.cast.slice(0, 10).map((actor: CastMember) => (
-                      <Link
-                        key={actor.id}
-                        href={`/people/${actor.id}`}
-                        className="group block"
-                      >
-                        <div className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors">
-                          <div className="aspect-[3/4] relative">
+              {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
+                <>
+                  <h3 className="text-2xl font-bold text-white mb-6">
+                    Diễn viên
+                  </h3>
+                  {creditsLoading ? (
+                    <CastSkeleton />
+                  ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                      {tvData.cast.slice(0, 10).map((actor: CastMember) => (
+                        <Link
+                          key={actor.id}
+                          href={`/people/${actor.id}`}
+                          className="text-center group block"
+                        >
+                          <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-700 relative">
                             <Image
                               src={
                                 actor.profile_path
-                                  ? `https://image.tmdb.org/t/p/w185${actor.profile_path}`
-                                  : "/images/no-poster.jpg"
+                                  ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
+                                  : "/images/no-avatar.svg"
                               }
                               alt={actor.name}
                               fill
-                              className="object-cover"
+                              className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
+                              loading="lazy"
+                              sizes="(max-width: 768px) 50vw, 25vw"
                             />
                           </div>
-                          <div className="p-3">
-                            <h3 className="font-semibold text-white text-sm group-hover:text-red-400 transition-colors line-clamp-2">
-                              {actor.name}
-                            </h3>
-                            <p className="text-gray-400 text-xs mt-1 line-clamp-1">
-                              {actor.character}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-400">Không có thông tin diễn viên.</p>
-                )}
-              </section>
+                          <h4 className="font-semibold text-white mb-1 group-hover:text-red-400 transition-colors">
+                            {actor.name}
+                          </h4>
+                          <p className="text-sm text-gray-400">
+                            {actor.character}
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : null}
             </div>
 
             {/* Sidebar */}
@@ -413,15 +504,32 @@ const TVDetailPageContent = () => {
                 <div className="space-y-3 text-gray-300">
                   <div>
                     <span className="text-gray-500">Sáng tạo bởi:</span>
-                    <span className="ml-2">
-                      {creditsLoading ? (
+                    <div className="mt-1">
+                      {tvData.createdBy && tvData.createdBy.length > 0 ? (
+                        tvData.createdBy.map((creator: any, index: number) => (
+                          <Link
+                            key={creator.id || index}
+                            href={`/people/${creator.id}`}
+                            className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded mr-2 mb-1 transition-colors cursor-pointer"
+                          >
+                            {creator.name}
+                          </Link>
+                        ))
+                      ) : creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
                           Đang tải...
                         </span>
+                      ) : tvData.creator ? (
+                        <Link
+                          href={`/people/${tvData.creator.id}`}
+                          className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded transition-colors cursor-pointer"
+                        >
+                          {tvData.creator.name}
+                        </Link>
                       ) : (
-                        tvData.creator
+                        "Unknown"
                       )}
-                    </span>
+                    </div>
                   </div>
                   {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                     <div>
@@ -449,15 +557,39 @@ const TVDetailPageContent = () => {
                   ) : null}
                   <div>
                     <span className="text-gray-500">Quốc gia:</span>
-                    <span className="ml-2">
-                      {creditsLoading ? (
+                    <div className="mt-1">
+                      {tvData.productionCountries &&
+                      tvData.productionCountries.length > 0 ? (
+                        tvData.productionCountries.map(
+                          (country: any, index: number) => (
+                            <span
+                              key={index}
+                              className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"
+                            >
+                              {country.name || country.iso_3166_1}
+                            </span>
+                          )
+                        )
+                      ) : tvData.originCountry &&
+                        tvData.originCountry.length > 0 ? (
+                        tvData.originCountry.map(
+                          (country: string, index: number) => (
+                            <span
+                              key={index}
+                              className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"
+                            >
+                              {country}
+                            </span>
+                          )
+                        )
+                      ) : creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
                           Đang tải...
                         </span>
                       ) : (
-                        tvData.country
+                        tvData.country || "Unknown"
                       )}
-                    </span>
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-500">Ngày phát sóng đầu:</span>
@@ -475,12 +607,7 @@ const TVDetailPageContent = () => {
                       </span>
                     </div>
                   )}
-                  <div>
-                    <span className="text-gray-500">Thời lượng/tập:</span>
-                    <span className="ml-2">
-                      {formatRuntime(tvData.episodeRunTime)}
-                    </span>
-                  </div>
+
                   <div>
                     <span className="text-gray-500">Số mùa:</span>
                     <span className="ml-2">
@@ -493,6 +620,15 @@ const TVDetailPageContent = () => {
                       {tvData.numberOfEpisodes || "N/A"}
                     </span>
                   </div>
+                  {tvData.episodeRunTime &&
+                    tvData.episodeRunTime.length > 0 && (
+                      <div>
+                        <span className="text-gray-500">Thời lượng/tập:</span>
+                        <span className="ml-2">
+                          {formatRuntime(tvData.episodeRunTime)}
+                        </span>
+                      </div>
+                    )}
                   <div>
                     <span className="text-gray-500">Ngôn ngữ:</span>
                     <span className="ml-2">
@@ -543,15 +679,6 @@ const TVDetailPageContent = () => {
             <RecommendationsSection tmdbId={tvData.tmdbId} contentType="tv" />
           </Suspense>
         )}
-
-        {/* TODO: Create TVRecommendationsSection for TV series */}
-        {/* 
-        <Suspense
-          fallback={<div className="h-96 bg-gray-800/50 animate-pulse" />}
-        >
-          <RecommendationsSection movieId={tvData.tmdbId} />
-        </Suspense>
-        */}
       </div>
     </Layout>
   );

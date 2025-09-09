@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
@@ -10,9 +10,15 @@ import { mapMoviesToFrontend } from "@/utils/movieMapper";
 
 export default function MoviesPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [movies, setMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const pageParam = searchParams.get("page");
+    return pageParam ? parseInt(pageParam, 10) : 1;
+  });
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleFilterChange = (filters: FilterOptions) => {
     // Chuyển sang trang browse với filters
@@ -33,6 +39,16 @@ export default function MoviesPage() {
     router.push(`/browse?${params.toString()}`);
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setLoading(true);
+
+    // Update URL with new page parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.replace(`/movies?${params.toString()}`, { scroll: false });
+  };
+
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -40,30 +56,20 @@ export default function MoviesPage() {
         setError(null);
 
         const response = await apiService.getMovies({
-          page: 1,
-          limit: 20,
+          page: currentPage,
+          limit: 24,
           language: "en-US",
         });
 
         if (response.success && response.data) {
           const frontendMovies = mapMoviesToFrontend(response.data);
-          const moviesWithCardData: MovieCardData[] = frontendMovies.map(
-            (movie) => ({
-              id: movie.id,
-              title: movie.title,
-              aliasTitle: movie.aliasTitle,
-              poster: movie.poster,
-              href: movie.href,
-              year: movie.year,
-              rating: movie.rating,
-              genre: movie.genre,
-              genres: movie.genres,
-              description: movie.description,
-              isComplete: true,
-            })
-          );
+          // Use frontend movies directly since they already match MovieCardData interface
+          setMovies(frontendMovies);
 
-          setMovies(moviesWithCardData);
+          // Set pagination info from response
+          if (response.pagination) {
+            setTotalPages(response.pagination.totalPages);
+          }
         } else {
           throw new Error(response.message || "Failed to fetch movies");
         }
@@ -75,10 +81,10 @@ export default function MoviesPage() {
         const fallbackMovies: MovieCardData[] = [
           {
             id: "movie1",
+            tmdbId: 0,
             title: "Loading...",
             aliasTitle: "Backend not available",
-            poster:
-              "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=500&q=80",
+            poster: "/images/no-poster.svg",
             href: "/movie/1",
             isComplete: false,
           },
@@ -90,12 +96,12 @@ export default function MoviesPage() {
     };
 
     fetchMovies();
-  }, []);
+  }, [currentPage]);
 
   if (loading) {
     return (
       <Layout>
-        <div className="pt-16">
+        <div>
           <div className="container mx-auto px-4">
             <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
 
@@ -106,8 +112,8 @@ export default function MoviesPage() {
             </div>
 
             {/* Movies grid skeleton */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {Array.from({ length: 18 }).map((_, index) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+              {Array.from({ length: 16 }).map((_, index) => (
                 <div key={index} className="sw-item group relative">
                   <div className="v-thumbnail block">
                     <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
@@ -132,22 +138,30 @@ export default function MoviesPage() {
 
   return (
     <Layout>
-      <div className="pt-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
+      {/* Movies Grid */}
+      <div className="container mx-auto px-4">
+        <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
 
-          {/* Filter Component */}
-          <MovieFilters onFilterChange={handleFilterChange} className="mb-8" />
-
-          {error && (
-            <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-              Lỗi: {error}
-            </div>
-          )}
+        {/* Filter Component */}
+        <div className="mb-8">
+          <MovieFilters onFilterChange={handleFilterChange} />
         </div>
 
-        <MoviesGrid title="" movies={movies} className="py-8" />
+        {error && (
+          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
+            Lỗi: {error}
+          </div>
+        )}
       </div>
+
+      <MoviesGrid
+        title=""
+        movies={movies}
+        className="py-8"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
     </Layout>
   );
 }

@@ -13,7 +13,7 @@ const PersonCard = ({ person }: PersonCardProps) => {
   const getProfileImage = () => {
     const imageUrl = person.profile_path
       ? `https://image.tmdb.org/t/p/w300${person.profile_path}`
-      : "/images/no-avatar.jpg";
+      : "/images/no-avatar.svg";
 
     console.log("Profile image URL for", person.name, ":", imageUrl);
     return imageUrl;
@@ -57,7 +57,7 @@ const PersonCard = ({ person }: PersonCardProps) => {
                 person.name,
                 getProfileImage()
               );
-              (e.target as HTMLImageElement).src = "/images/no-avatar.jpg";
+              (e.target as HTMLImageElement).src = "/images/no-avatar.svg";
             }}
             onLoad={() => {
               console.log("Successfully loaded image for:", person.name);

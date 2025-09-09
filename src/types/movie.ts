@@ -47,6 +47,8 @@ export interface MovieQuery {
   genre?: string;
   year?: number;
   language?: string;
+  sortBy?: string;
+  countries?: string;
 }
 
 export interface TrendingResponse {
@@ -59,21 +61,24 @@ export interface TrendingResponse {
 // Frontend movie interface (current structure)
 export interface FrontendMovie {
   id: string;
+  tmdbId: number; // Make tmdbId required instead of optional
   title: string;
   aliasTitle?: string;
   poster: string;
   href: string;
+  watchHref?: string;
   year: number;
-  genre: string;
   rating?: number;
   duration?: string;
   season?: string;
   episode?: string;
-  genres?: string[];
+  genre: string;
+  genres: string[];
   description?: string;
   backgroundImage?: string;
   posterImage?: string;
   scenes?: string[];
+  isComplete?: boolean;
 }
 
 // TV Series interfaces
@@ -130,19 +135,21 @@ export interface TVSeriesResponse {
 // Frontend TV series interface
 export interface FrontendTVSeries {
   id: string;
+  tmdbId?: number;
   title: string;
   aliasTitle?: string;
   poster: string;
   href: string;
+  watchHref?: string;
   year: number;
-  genre: string;
   rating?: number;
   duration?: string;
   episodeNumber?: number;
   totalEpisodes?: number;
   isComplete?: boolean;
   numberOfSeasons?: number;
-  genres?: string[];
+  genre: string;
+  genres: string[];
   description?: string;
   backgroundImage?: string;
   posterImage?: string;

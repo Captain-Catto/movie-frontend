@@ -7,7 +7,19 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll to change navbar background
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 0);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close search dropdown when clicking outside
   useEffect(() => {
@@ -46,7 +58,13 @@ const Header = () => {
   ];
 
   return (
-    <nav className="bg-gray-800/50 backdrop-blur-sm fixed w-full z-50">
+    <nav
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        isScrolled
+          ? "bg-gray-800/95 backdrop-blur-sm shadow-lg"
+          : "bg-transparent"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -108,40 +126,38 @@ const Header = () => {
               </button>
 
               {isSearchOpen && (
-                <div className="fixed inset-x-0 top-16 px-4 sm:px-6 lg:px-8 z-50">
-                  <div className="w-full bg-gray-800 rounded-lg shadow-lg">
-                    <form
-                      className="flex items-center p-4"
-                      onSubmit={handleSearchSubmit}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-gray-800 rounded-lg shadow-lg z-50">
+                  <form
+                    className="flex items-center p-4"
+                    onSubmit={handleSearchSubmit}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-5 h-5 text-gray-400"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="w-5 h-5 text-gray-400"
-                      >
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.3-4.3"></path>
-                      </svg>
-                      <input
-                        type="text"
-                        placeholder="Tìm kiếm phim, TV shows..."
-                        className="flex-1 ml-3 bg-transparent border-none focus:outline-none text-white placeholder-gray-400"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        autoFocus
-                      />
-                    </form>
-                    <div className="border-t border-gray-700 px-4 py-3">
-                      <div className="text-sm text-gray-400">
-                        Nhấn Enter để tìm kiếm
-                      </div>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm phim, TV shows..."
+                      className="flex-1 ml-3 bg-transparent border-none focus:outline-none text-white placeholder-gray-400"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      autoFocus
+                    />
+                  </form>
+                  <div className="border-t border-gray-700 px-4 py-3">
+                    <div className="text-sm text-gray-400">
+                      Nhấn Enter để tìm kiếm
                     </div>
                   </div>
                 </div>

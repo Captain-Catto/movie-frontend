@@ -53,6 +53,8 @@ class ApiService {
     if (query.genre) params.append("genre", query.genre);
     if (query.year) params.append("year", query.year.toString());
     if (query.language) params.append("language", query.language);
+    if (query.sortBy) params.append("sortBy", query.sortBy);
+    if (query.countries) params.append("countries", query.countries);
 
     const url = `${API_BASE_URL}/movies${
       params.toString() ? `?${params.toString()}` : ""
@@ -230,6 +232,8 @@ class ApiService {
     if (query.genre) params.append("genre", query.genre);
     if (query.year) params.append("year", query.year.toString());
     if (query.language) params.append("language", query.language);
+    if (query.sortBy) params.append("sortBy", query.sortBy);
+    if (query.countries) params.append("countries", query.countries);
 
     const url = `${API_BASE_URL}/tv${
       params.toString() ? `?${params.toString()}` : ""
@@ -350,31 +354,141 @@ class ApiService {
   async getPersonCreditsPaginated(
     id: number,
     page: number = 1,
-    limit: number = 20
+    limit: number = 20,
+    mediaType: "movie" | "tv" | "all" = "all",
+    sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
   ): Promise<{
-    id: number;
     cast: any[];
     crew: any[];
     pagination: {
-      current_page: number;
-      total_pages: number;
-      total_results: number;
-      page_size: number;
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      limit: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+    metadata: {
+      fromCache: boolean;
+      totalCastItems: number;
+      totalCrewItems: number;
+      cacheInfo?: any;
     };
   }> {
-    const url = `${API_BASE_URL}/people/${id}/credits/paginated?page=${page}&limit=${limit}`;
+    const url = `${API_BASE_URL}/people/${id}/credits/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
       data: {
-        id: number;
         cast: any[];
         crew: any[];
         pagination: {
-          current_page: number;
-          total_pages: number;
-          total_results: number;
-          page_size: number;
+          currentPage: number;
+          totalPages: number;
+          totalItems: number;
+          limit: number;
+          hasNextPage: boolean;
+          hasPreviousPage: boolean;
+        };
+        metadata: {
+          fromCache: boolean;
+          totalCastItems: number;
+          totalCrewItems: number;
+          cacheInfo?: any;
+        };
+      };
+    }>(url);
+
+    return response.data;
+  }
+
+  async getPersonCastPaginated(
+    id: number,
+    page: number = 1,
+    limit: number = 20,
+    mediaType: "movie" | "tv" | "all" = "all",
+    sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
+  ): Promise<{
+    cast: any[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      limit: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+    metadata: {
+      fromCache: boolean;
+      totalCastItems: number;
+      cacheInfo?: any;
+    };
+  }> {
+    const url = `${API_BASE_URL}/people/${id}/credits/cast/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
+    const response = await this.fetchWithErrorHandling<{
+      success: boolean;
+      message: string;
+      data: {
+        cast: any[];
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalItems: number;
+          limit: number;
+          hasNextPage: boolean;
+          hasPreviousPage: boolean;
+        };
+        metadata: {
+          fromCache: boolean;
+          totalCastItems: number;
+          cacheInfo?: any;
+        };
+      };
+    }>(url);
+
+    return response.data;
+  }
+
+  async getPersonCrewPaginated(
+    id: number,
+    page: number = 1,
+    limit: number = 20,
+    mediaType: "movie" | "tv" | "all" = "all",
+    sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
+  ): Promise<{
+    crew: any[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      limit: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+    metadata: {
+      fromCache: boolean;
+      totalCrewItems: number;
+      cacheInfo?: any;
+    };
+  }> {
+    const url = `${API_BASE_URL}/people/${id}/credits/crew/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
+    const response = await this.fetchWithErrorHandling<{
+      success: boolean;
+      message: string;
+      data: {
+        crew: any[];
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalItems: number;
+          limit: number;
+          hasNextPage: boolean;
+          hasPreviousPage: boolean;
+        };
+        metadata: {
+          fromCache: boolean;
+          totalCrewItems: number;
+          cacheInfo?: any;
         };
       };
     }>(url);
@@ -486,6 +600,81 @@ class ApiService {
     }
   }
 
+  // Specific content type fetching methods
+  async getMovieByTmdbId(tmdbId: number): Promise<{
+    content: any;
+    contentType: "movie";
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      const movieResponse = await this.fetchWithErrorHandling<{
+        success: boolean;
+        message: string;
+        data: any;
+      }>(`${API_BASE_URL}/movies/${tmdbId}`);
+
+      if (movieResponse.success && movieResponse.data) {
+        return {
+          content: movieResponse.data,
+          contentType: "movie",
+          success: true,
+        };
+      } else {
+        return {
+          content: null,
+          contentType: "movie",
+          success: false,
+          message: movieResponse.message || "Movie not found",
+        };
+      }
+    } catch (error) {
+      return {
+        content: null,
+        contentType: "movie",
+        success: false,
+        message: `Failed to fetch movie: ${error}`,
+      };
+    }
+  }
+
+  async getTVByTmdbId(tmdbId: number): Promise<{
+    content: any;
+    contentType: "tv";
+    success: boolean;
+    message?: string;
+  }> {
+    try {
+      const tvResponse = await this.fetchWithErrorHandling<{
+        success: boolean;
+        message: string;
+        data: any;
+      }>(`${API_BASE_URL}/tv/${tmdbId}`);
+
+      if (tvResponse.success && tvResponse.data) {
+        return {
+          content: tvResponse.data,
+          contentType: "tv",
+          success: true,
+        };
+      } else {
+        return {
+          content: null,
+          contentType: "tv",
+          success: false,
+          message: tvResponse.message || "TV series not found",
+        };
+      }
+    } catch (error) {
+      return {
+        content: null,
+        contentType: "tv",
+        success: false,
+        message: `Failed to fetch TV series: ${error}`,
+      };
+    }
+  }
+
   // Movie Upload APIs
   async getUploadedMovies(): Promise<{
     success: boolean;
@@ -547,6 +736,55 @@ class ApiService {
         data: null,
       };
     }
+  }
+
+  // TV Series Category Methods
+  async getAiringTodayTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/tv/airing-today${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
+  async getOnTheAirTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/tv/on-the-air${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
+  async getPopularTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/tv/popular-tv${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
+  }
+
+  async getTopRatedTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+    const params = new URLSearchParams();
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/tv/top-rated-tv${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    return this.fetchWithErrorHandling<MovieResponse>(url);
   }
 }
 

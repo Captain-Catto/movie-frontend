@@ -4,6 +4,8 @@ import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
 import CategoryGrid from "@/components/movie/CategoryGrid";
 import MovieGrid from "@/components/movie/MovieGrid";
+import SectionHeader from "@/components/ui/SectionHeader";
+import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
@@ -79,6 +81,7 @@ export default function Home() {
             trendingResponse.data.slice(0, 5)
           );
           setHeroMovies(heroTrendingMovies);
+          console.log("🎬 Hero Trending Movies:", heroTrendingMovies);
         }
       } catch (error) {
         console.error("Error fetching trending movies for hero:", error);
@@ -496,7 +499,7 @@ export default function Home() {
       {/* Now Playing Section */}
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Now Playing</h2>
+          <SectionHeader title="Now Playing" href="/movies/now-playing" />
           <MovieGrid
             movies={nowPlayingToDisplay}
             showFilters={false}
@@ -509,7 +512,7 @@ export default function Home() {
       {/* Popular Section */}
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Popular</h2>
+          <SectionHeader title="Popular" href="/movies/popular" />
           <MovieGrid
             movies={popularToDisplay}
             showFilters={false}
@@ -522,7 +525,7 @@ export default function Home() {
       {/* Top Rated Section */}
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Top Rated</h2>
+          <SectionHeader title="Top Rated" href="/movies/top-rated" />
           <MovieGrid
             movies={topRatedToDisplay}
             showFilters={false}
@@ -535,7 +538,7 @@ export default function Home() {
       {/* Upcoming Section */}
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Upcoming</h2>
+          <SectionHeader title="Upcoming" href="/movies/upcoming" />
           <MovieGrid
             movies={upcomingToDisplay}
             showFilters={false}
@@ -544,6 +547,9 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {/* TV Series Sections */}
+      <TVSeriesSections />
 
       {(loading || heroLoading) && (
         <div className="text-center text-white py-8">

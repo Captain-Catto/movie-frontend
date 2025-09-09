@@ -97,7 +97,7 @@ export default function RecommendationsSection({
             const title = item.title || item.name || "Untitled";
             const posterPath = item.poster_path
               ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              : "https://images.unsplash.com/photo-1489599858765-d6bf4d1c6f4b?auto=format&fit=crop&w=500&q=80";
+              : "/images/no-poster.svg";
             const year = item.release_date
               ? new Date(item.release_date).getFullYear()
               : item.first_air_date

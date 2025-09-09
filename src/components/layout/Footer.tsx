@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { TMDB_GENRE_MAP } from '@/utils/genresFetch';
+import Link from "next/link";
 
 const Footer = () => {
   return (
@@ -12,13 +11,18 @@ const Footer = () => {
               <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center mr-2">
                 <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
               </div>
-              <span className="ml-2 text-xl font-bold text-white">MovieStream</span>
+              <span className="ml-2 text-xl font-bold text-white">
+                MovieStream
+              </span>
             </div>
             <p className="text-gray-400">
               Trải nghiệm giải trí tuyệt vời với kho phim đặc sắc và đa dạng.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-red-500 transition-colors"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -34,7 +38,10 @@ const Footer = () => {
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                 </svg>
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-red-500 transition-colors"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -50,7 +57,10 @@ const Footer = () => {
                   <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
                 </svg>
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-red-500 transition-colors"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -68,7 +78,10 @@ const Footer = () => {
                   <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
                 </svg>
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+              <Link
+                href="#"
+                className="text-gray-400 hover:text-red-500 transition-colors"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -90,30 +103,47 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Liên Kết Nhanh</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">
+              Liên Kết Nhanh
+            </h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Trang Chủ
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Phim Mới
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Phim Lẻ
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Phim Bộ
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Phim Chiếu Rạp
                 </Link>
               </li>
@@ -125,27 +155,42 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-white">Thể Loại</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Hành Động
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Tình Cảm
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Hài Hước
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Hoạt Hình
                 </Link>
               </li>
               <li>
-                <Link href="#" className="text-gray-400 hover:text-red-500 transition-colors">
+                <Link
+                  href="#"
+                  className="text-gray-400 hover:text-red-500 transition-colors"
+                >
                   Kinh Dị
                 </Link>
               </li>
