@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
-import FavoriteButton from "@/components/ui/FavoriteButton";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
@@ -44,7 +44,8 @@ interface CastMember {
 
 const TVDetailPageContent = () => {
   const params = useParams();
-  const tvId = params.id as string;
+  const tvIdParam = params.id as string;
+  const numericTvId = Number(tvIdParam);
   const [tvData, setTVData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -131,12 +132,12 @@ const TVDetailPageContent = () => {
         setLoading(true);
         setError(null);
 
-        if (!tvId || tvId === "undefined") {
+        if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
           throw new Error("Invalid TV series ID");
         }
 
-        console.log("Fetching TV series details for ID:", tvId);
-        const response = await apiService.getTVSeriesById(parseInt(tvId));
+        console.log("Fetching TV series details for ID:", numericTvId);
+        const response = await apiService.getTVSeriesById(numericTvId);
 
         if (response.success && response.data) {
           const tv = response.data as any; // Cast to any to handle TV-specific fields
@@ -201,7 +202,7 @@ const TVDetailPageContent = () => {
     };
 
     fetchTVData();
-  }, [tvId]);
+  }, [numericTvId, tvIdParam]);
 
   // Helper functions
   const getPosterUrl = (posterPath: string | null) => {
@@ -324,14 +325,16 @@ const TVDetailPageContent = () => {
 
                 {/* Rating and Info */}
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
-                  <div className="flex items-center bg-yellow-500 text-black px-3 py-1 rounded-full">
-                    <span className="mr-1">⭐</span>
-                    <span className="font-bold">
-                      {typeof tvData.voteAverage === "number"
-                        ? tvData.voteAverage.toFixed(1)
-                        : parseFloat(tvData.voteAverage)?.toFixed(1) || "N/A"}
-                    </span>
-                  </div>
+                  {tvData.voteAverage && parseFloat(String(tvData.voteAverage)) > 0 && (
+                    <div className="flex items-center bg-yellow-500 text-black px-3 py-1 rounded-full">
+                      <span className="mr-1">⭐</span>
+                      <span className="font-bold">
+                        {typeof tvData.voteAverage === "number"
+                          ? tvData.voteAverage.toFixed(1)
+                          : parseFloat(tvData.voteAverage)?.toFixed(1) || "N/A"}
+                      </span>
+                    </div>
+                  )}
                   <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold">
                     TV Series
                   </span>

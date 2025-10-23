@@ -134,12 +134,12 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // Format rating
   const rating = voteAverage ? Math.round(voteAverage * 10) / 10 : 0;
 
-  const href = `/movie/${tmdbId}`;
-  const watchHref = `/watch/movie-${tmdbId}`;
+  const href = `/movie/${finalTmdbId}`;
+  const watchHref = `/watch/movie-${finalTmdbId}`;
 
   return {
-    id: movie.id.toString(),
-    tmdbId: tmdbId,
+    id: finalTmdbId.toString(),
+    tmdbId: finalTmdbId,
     title: title,
     aliasTitle: originalTitle !== title ? originalTitle : title,
     poster: posterUrl,

@@ -39,7 +39,7 @@ export default function BrowsePage() {
       if (filters.countries?.length) {
         queryParams.countries = filters.countries.join(",");
       }
-      if (filters.genres?.length) queryParams.genres = filters.genres.join(",");
+      if (filters.genres?.length) queryParams.genre = filters.genres.join(","); // ✅ Fix: use "genre" to match MovieQuery interface
       if (filters.years?.length) queryParams.year = parseInt(filters.years[0]);
       if (filters.sortBy) queryParams.sortBy = filters.sortBy;
 
@@ -47,7 +47,7 @@ export default function BrowsePage() {
       console.log("🌐 Fetching with queryParams:", queryParams);
       console.log("📋 QueryParams details:", {
         countries: queryParams.countries,
-        genre: queryParams.genre,
+        genre: queryParams.genre, // ✅ Fix: check "genre" to match what we actually set
         sortBy: queryParams.sortBy,
         year: queryParams.year,
       });
@@ -181,7 +181,7 @@ export default function BrowsePage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pt-16">
         <h1 className="text-3xl font-bold text-white mb-8">{pageTitle}</h1>
 
         {/* Filter Component */}

@@ -1,14 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
+import SearchModal from "@/components/search/SearchModal";
+import AuthModal from "@/components/auth/AuthModal";
+import UserMenu from "@/components/layout/UserMenu";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { useAuth } from "@/hooks/useAuth";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
+
+  const { user, isAuthenticated, logout } = useAuth();
 
   // Handle scroll to change navbar background
   useEffect(() => {
@@ -21,29 +27,24 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close search dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
-        setIsSearchOpen(false);
-      }
-    };
+  const handleSearchClick = () => {
+    setIsSearchModalOpen(true);
+  };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const handleSearchModalClose = () => {
+    setIsSearchModalOpen(false);
+  };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      console.log("Searching for:", searchQuery);
-      // Handle search logic here
-    }
+  const handleAuthModalOpen = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthModalClose = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const handleAuthSuccess = () => {
+    console.log("Authentication successful");
   };
 
   const navigationItems = [
@@ -59,7 +60,7 @@ const Header = () => {
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
+      className={`fixed w-full z-[100] transition-all duration-300 ${
         isScrolled
           ? "bg-gray-800/95 backdrop-blur-sm shadow-lg"
           : "bg-transparent"
@@ -93,76 +94,42 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            {/* Favorites Button */}
-            <Link href="/favorites">
-              <button
-                className="p-1 hover:text-red-500 transition-colors text-white"
-                title="Yêu thích"
+            <button
+              className="p-1 hover:text-red-500 transition-colors text-white"
+              onClick={handleSearchClick}
+              title="Tìm kiếm"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5"
               >
-                <span className="text-xl">♥</span>
-              </button>
-            </Link>
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </button>
 
-            <div className="relative" ref={searchRef}>
+            {/* Notification Bell - Only show when authenticated */}
+            {isAuthenticated && <NotificationDropdown />}
+
+            {/* Auth Section */}
+            {isAuthenticated ? (
+              <UserMenu user={user} onLogout={logout} />
+            ) : (
               <button
-                className="p-1 hover:text-red-500 transition-colors text-white"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                onClick={handleAuthModalOpen}
+                className="text-white hover:text-red-500 transition-colors text-sm px-3 py-2 rounded bg-red-600 hover:bg-red-700"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-5 h-5"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
+                Đăng nhập
               </button>
-
-              {isSearchOpen && (
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-96 max-w-[calc(100vw-2rem)] bg-gray-800 rounded-lg shadow-lg z-50">
-                  <form
-                    className="flex items-center p-4"
-                    onSubmit={handleSearchSubmit}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="w-5 h-5 text-gray-400"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <path d="m21 21-4.3-4.3"></path>
-                    </svg>
-                    <input
-                      type="text"
-                      placeholder="Tìm kiếm phim, TV shows..."
-                      className="flex-1 ml-3 bg-transparent border-none focus:outline-none text-white placeholder-gray-400"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      autoFocus
-                    />
-                  </form>
-                  <div className="border-t border-gray-700 px-4 py-3">
-                    <div className="text-sm text-gray-400">
-                      Nhấn Enter để tìm kiếm
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            )}
 
             <button
               className="md:hidden p-1 hover:text-red-500 transition-colors text-white"
@@ -194,6 +161,19 @@ const Header = () => {
           </div>
         )}
       </div>
+
+      {/* Search Modal */}
+      <SearchModal
+        isOpen={isSearchModalOpen}
+        onClose={handleSearchModalClose}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={handleAuthModalClose}
+        onSuccess={handleAuthSuccess}
+      />
     </nav>
   );
 };

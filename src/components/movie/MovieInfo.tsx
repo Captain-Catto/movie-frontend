@@ -14,12 +14,14 @@ const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: M
       <div>
         <h1 className="text-5xl font-bold mb-4 text-white">{title}</h1>
         <div className="flex items-center space-x-4 text-sm">
-          <div className="flex items-center">
-            <div className="w-4 h-4 text-yellow-500 fill-current">
-              ★
+          {rating && parseFloat(String(rating)) > 0 && (
+            <div className="flex items-center">
+              <div className="w-4 h-4 text-yellow-500 fill-current">
+                ★
+              </div>
+              <span className="ml-1 text-white">{rating}</span>
             </div>
-            <span className="ml-1 text-white">{rating}</span>
-          </div>
+          )}
           <span className="text-white">{year}</span>
           <div className="flex items-center text-gray-400">
             <div className="w-4 h-4 border-2 border-current rounded-full relative mr-1">

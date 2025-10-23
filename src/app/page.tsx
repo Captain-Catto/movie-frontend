@@ -98,7 +98,8 @@ export default function Home() {
   // Fallback static hero data
   const fallbackHeroMovies = [
     {
-      id: "1",
+      id: "119051",
+      tmdbId: 119051,
       title: "Mùa Hè Kinh Hãi",
       aliasTitle: "I Know What You Did Last Summer",
       rating: 7.2,
@@ -118,9 +119,11 @@ export default function Home() {
         "https://static.nutscdn.com/vimg/150-0/29cca985f832ea53a5cefa528fa7f666.webp",
         "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
       ],
+      href: "/tv/119051",
     },
     {
-      id: "2",
+      id: "157239",
+      tmdbId: 157239,
       title: "Dính Lẹo",
       aliasTitle: "Together",
       rating: 6.8,
@@ -140,9 +143,11 @@ export default function Home() {
         "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
         "https://static.nutscdn.com/vimg/150-0/7fb03fc7adc8de125e80bc0d67d0e841.webp",
       ],
+      href: "/tv/157239",
     },
     {
-      id: "3",
+      id: "1011985",
+      tmdbId: 1011985,
       title: "Elio: Cậu Bé Đến Từ Trái Đất",
       aliasTitle: "Elio",
       rating: 7.0,
@@ -170,6 +175,7 @@ export default function Home() {
         "https://static.nutscdn.com/vimg/150-0/7fb03fc7adc8de125e80bc0d67d0e841.webp",
         "https://static.nutscdn.com/vimg/150-0/fdf26f9295adea7a951f615d6171cfc2.jpg",
       ],
+      href: "/movie/1011985",
     },
   ];
 
@@ -228,11 +234,12 @@ export default function Home() {
   const fallbackNowPlaying = [
     {
       id: "1",
+      tmdbId: 693134, // Real TMDB ID for Dune: Part Two
       title: "Dune: Part Two",
       aliasTitle: "Dune: Phần Hai",
       poster:
         "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/1",
+      href: "/movie/693134",
       year: 2024,
       genre: "Sci-Fi",
     },

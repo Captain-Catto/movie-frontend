@@ -79,6 +79,7 @@ export interface FrontendMovie {
   posterImage?: string;
   scenes?: string[];
   isComplete?: boolean;
+  mediaType?: "movie" | "tv"; // Added for favorites tracking
 }
 
 // TV Series interfaces

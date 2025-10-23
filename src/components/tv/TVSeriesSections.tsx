@@ -6,7 +6,6 @@ import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
 
 export default function TVSeriesSections() {
-  const [airingTodayTVSeries, setAiringTodayTVSeries] = useState<any[]>([]);
   const [onTheAirTVSeries, setOnTheAirTVSeries] = useState<any[]>([]);
   const [popularTVSeries, setPopularTVSeries] = useState<any[]>([]);
   const [topRatedTVSeries, setTopRatedTVSeries] = useState<any[]>([]);
@@ -17,45 +16,24 @@ export default function TVSeriesSections() {
       try {
         setLoading(true);
 
-        // Fetch all TV categories in parallel
-        const [airingTodayRes, onTheAirRes, popularRes, topRatedRes] =
-          await Promise.all([
-            apiService.getAiringTodayTVSeries({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-            apiService.getOnTheAirTVSeries({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-            apiService.getPopularTVSeries({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-            apiService.getTopRatedTVSeries({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-          ]);
-
-        console.log("📦 TV API Responses:", {
-          airingToday: airingTodayRes,
-          onTheAir: onTheAirRes,
-          popular: popularRes,
-          topRated: topRatedRes,
-        });
-
-        // Transform TMDB data to frontend format
-        if (airingTodayRes.success && airingTodayRes.data) {
-          const mappedTVSeries = airingTodayRes.data.map((tv: any) =>
-            mapTVSeriesToFrontend(tv)
-          );
-          setAiringTodayTVSeries(mappedTVSeries);
-        }
+        // Fetch TV categories in parallel (excluding airing today)
+        const [onTheAirRes, popularRes, topRatedRes] = await Promise.all([
+          apiService.getOnTheAirTVSeries({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          }),
+          apiService.getPopularTVSeries({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          }),
+          apiService.getTopRatedTVSeries({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          }),
+        ]);
 
         if (onTheAirRes.success && onTheAirRes.data) {
           const mappedTVSeries = onTheAirRes.data.map((tv: any) =>
@@ -122,8 +100,6 @@ export default function TVSeriesSections() {
   ];
 
   // Use API data if available, otherwise use fallback
-  const airingTodayToDisplay =
-    airingTodayTVSeries.length > 0 ? airingTodayTVSeries : fallbackTVSeries;
   const onTheAirToDisplay =
     onTheAirTVSeries.length > 0 ? onTheAirTVSeries : fallbackTVSeries;
   const popularToDisplay =
@@ -155,19 +131,6 @@ export default function TVSeriesSections() {
 
   return (
     <div className="space-y-8">
-      {/* Airing Today Section */}
-      <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader title="Airing Today" href="/tv/airing-today" />
-          <MovieGrid
-            movies={airingTodayToDisplay}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
-      </div>
-
       {/* On The Air Section */}
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

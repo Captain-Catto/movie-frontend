@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
@@ -10,9 +10,25 @@ import { mapMoviesToFrontend } from "@/utils/movieMapper";
 
 export default function TrendingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [trending, setTrending] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(() => {
+    const pageParam = searchParams.get("page");
+    return pageParam ? parseInt(pageParam, 10) : 1;
+  });
+  const [totalPages, setTotalPages] = useState(1);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setLoading(true);
+
+    // Update URL with new page parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.replace(`/trending?${params.toString()}`, { scroll: false });
+  };
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -20,12 +36,24 @@ export default function TrendingPage() {
         setLoading(true);
         setError(null);
 
-        const response = await apiService.getTrending();
+        const response = await apiService.getTrending({
+          page: currentPage,
+          limit: 24,
+          language: "en-US",
+        });
 
         if (response.success && response.data) {
           // Use mapMoviesToFrontend for consistent data mapping
           const frontendMovies = mapMoviesToFrontend(response.data);
           setTrending(frontendMovies);
+
+          // Set pagination info from response
+          if ((response as any).pagination) {
+            setTotalPages((response as any).pagination.totalPages);
+          } else if ((response as any).data?.pagination) {
+            // Handle nested pagination structure
+            setTotalPages((response as any).data.pagination.totalPages);
+          }
         } else {
           throw new Error(response.message || "Failed to fetch trending data");
         }
@@ -41,7 +69,7 @@ export default function TrendingPage() {
     };
 
     fetchTrending();
-  }, []);
+  }, [currentPage]); // ✅ Add currentPage dependency
 
   const handleFilterChange = (filters: FilterOptions) => {
     // Chuyển sang trang browse với filters
@@ -66,7 +94,7 @@ export default function TrendingPage() {
     return (
       <Layout>
         <div>
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 pt-16">
             <h1 className="text-3xl font-bold text-white mb-8">
               🔥 Phim Trending
             </h1>
@@ -109,7 +137,7 @@ export default function TrendingPage() {
   return (
     <Layout>
       <div>
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 pt-16">
           <h1 className="text-3xl font-bold text-white mb-8">
             🔥 Phim Trending
           </h1>
@@ -124,7 +152,14 @@ export default function TrendingPage() {
           )}
         </div>
 
-        <MoviesGrid title="" movies={trending} className="py-8" />
+        <MoviesGrid
+          title=""
+          movies={trending}
+          className="py-8"
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </Layout>
   );

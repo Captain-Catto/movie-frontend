@@ -50,7 +50,7 @@ class ApiService {
 
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
-    if (query.genre) params.append("genre", query.genre);
+    if (query.genre) params.append("genres", query.genre); // ✅ Fix: use "genres" not "genre"
     if (query.year) params.append("year", query.year.toString());
     if (query.language) params.append("language", query.language);
     if (query.sortBy) params.append("sortBy", query.sortBy);
@@ -69,6 +69,9 @@ class ApiService {
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
     if (query.language) params.append("language", query.language);
+    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
+    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
+    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
 
     const url = `${API_BASE_URL}/movies/now-playing${
       params.toString() ? `?${params.toString()}` : ""
@@ -82,6 +85,9 @@ class ApiService {
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
     if (query.language) params.append("language", query.language);
+    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
+    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
+    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
 
     const url = `${API_BASE_URL}/movies/popular${
       params.toString() ? `?${params.toString()}` : ""
@@ -95,6 +101,9 @@ class ApiService {
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
     if (query.language) params.append("language", query.language);
+    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
+    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
+    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
 
     const url = `${API_BASE_URL}/movies/top-rated${
       params.toString() ? `?${params.toString()}` : ""
@@ -108,6 +117,9 @@ class ApiService {
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
     if (query.language) params.append("language", query.language);
+    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
+    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
+    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
 
     const url = `${API_BASE_URL}/movies/upcoming${
       params.toString() ? `?${params.toString()}` : ""
@@ -219,8 +231,16 @@ class ApiService {
     return this.fetchWithErrorHandling(url);
   }
 
-  async getTrending(): Promise<TrendingResponse> {
-    const url = `${API_BASE_URL}/trending`;
+  async getTrending(query: MovieQuery = {}): Promise<TrendingResponse> {
+    const params = new URLSearchParams();
+
+    if (query.page) params.append("page", query.page.toString());
+    if (query.limit) params.append("limit", query.limit.toString());
+    if (query.language) params.append("language", query.language);
+
+    const url = `${API_BASE_URL}/trending${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
     return this.fetchWithErrorHandling<TrendingResponse>(url);
   }
 
@@ -739,18 +759,6 @@ class ApiService {
   }
 
   // TV Series Category Methods
-  async getAiringTodayTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
-    const params = new URLSearchParams();
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
-
-    const url = `${API_BASE_URL}/tv/airing-today${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
-  }
-
   async getOnTheAirTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
     const params = new URLSearchParams();
     if (query.page) params.append("page", query.page.toString());

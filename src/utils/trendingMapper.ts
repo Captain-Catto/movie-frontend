@@ -37,8 +37,12 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
   const posterUrl = trending.posterUrl || "/images/no-poster.svg";
   const backdropUrl = trending.backdropUrl || "/images/no-poster.svg";
 
+  const genreSource = Array.isArray(trending.genreIds)
+    ? trending.genreIds
+    : [];
+
   // Map genres from IDs to English names
-  const genres = trending.genreIds
+  const genres = genreSource
     .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[Number(id)])
     .filter(Boolean);
 
@@ -51,7 +55,10 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
     : new Date().getFullYear();
 
   // Format rating
-  const rating = Math.round(trending.voteAverage * 10) / 10;
+  const rating =
+    typeof trending.voteAverage === "number"
+      ? Math.round(trending.voteAverage * 10) / 10
+      : 0;
 
   // Create correct href based on media_type
   const href =
@@ -61,6 +68,7 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
 
   return {
     id: trending.tmdbId.toString(),
+    tmdbId: trending.tmdbId,
     title: trending.title,
     aliasTitle: trending.title,
     poster: posterUrl,
@@ -72,6 +80,7 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
     description: trending.overview,
     backgroundImage: backdropUrl,
     posterImage: posterUrl,
+    mediaType: trending.mediaType, // ✅ Include mediaType for favorites
     // Default values for fields not in backend trending data
     duration: trending.mediaType === "movie" ? "N/A" : "N/A",
     season: trending.mediaType === "tv" ? "Season 1" : undefined,
@@ -84,6 +93,7 @@ export function mapTrendingDataToFrontend(
   trendingItems: any[]
 ): FrontendMovie[] {
   return trendingItems
+    .filter((item) => !item.isHidden)
     .sort((a, b) => b.popularity - a.popularity) // Sort by popularity descending
     .map(mapTrendingToFrontend);
 }

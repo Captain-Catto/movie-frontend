@@ -102,7 +102,7 @@ export default function MoviesPage() {
     return (
       <Layout>
         <div>
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 pt-16">
             <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
 
             {/* Filter skeleton */}
@@ -139,7 +139,7 @@ export default function MoviesPage() {
   return (
     <Layout>
       {/* Movies Grid */}
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pt-16">
         <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
 
         {/* Filter Component */}

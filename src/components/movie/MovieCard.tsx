@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import FavoriteButton from "@/components/ui/FavoriteButton";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info, Star } from "lucide-react";
 
 export interface MovieCardData {
@@ -35,6 +35,15 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
   >("center");
+  const parsedRating =
+    movie.rating === undefined || movie.rating === null
+      ? null
+      : Number(movie.rating);
+  const hasNumericRating =
+    typeof parsedRating === "number" && !Number.isNaN(parsedRating);
+  const shouldShowRating = hasNumericRating && parsedRating > 0;
+
+  console.log("Rendering MovieCard for:", movie);
 
   useEffect(() => {
     const handleMouseEnter = () => {
@@ -94,11 +103,19 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         href={movie.href || `/movie/${movie.tmdbId}`}
         className="v-thumbnail block"
       >
-        <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-transform duration-300 lg:group-hover:scale-110 lg:group-hover:z-20">
+        <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 lg:group-hover:z-20">
           {/* Favorite Button - Top Right Corner */}
           <FavoriteButton
-            item={{ id: movie.id, title: movie.title }}
-            size="sm"
+            movie={{
+              id: movie.tmdbId,
+              title: movie.title,
+              poster_path: movie.poster,
+              vote_average: movie.rating,
+              media_type: movie.href?.includes("/tv/") ? "tv" : "movie", // ✅ Add media_type
+              overview: movie.description,
+              genres:
+                movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
+            }}
             className="!absolute !top-2 !right-2 !bg-black/50 !text-white !opacity-100 lg:!opacity-0 lg:group-hover:!opacity-100 !transition-all !duration-300 group-hover:!text-red-500 hover:!scale-110 !z-10"
           />
           {/* Episode Badge */}
@@ -128,7 +145,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             }
             alt={`Xem Phim ${movie.title}`}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 lg:group-hover:scale-105"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300"
           />
 
           {/* Mobile/Tablet Hover Overlay - Simple */}
@@ -163,8 +180,9 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         <div className="relative h-64">
           <img
             src={
+              movie.backgroundImage ||
               movie.poster ||
-              (movie as any).posterUrl ||
+              movie.posterImage ||
               "/images/no-poster.svg"
             }
             alt={movie.title}
@@ -195,8 +213,16 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               <span>Xem ngay</span>
             </button>
             <FavoriteButton
-              item={{ id: movie.id, title: movie.title }}
-              size="sm"
+              movie={{
+                id: movie.tmdbId,
+                title: movie.title,
+                poster_path: movie.poster,
+                vote_average: movie.rating,
+                media_type: movie.href?.includes("/tv/") ? "tv" : "movie", // ✅ Add media_type
+                overview: movie.description,
+                genres:
+                  movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
+              }}
               className="!w-auto !h-auto px-3 py-1.5 !rounded font-semibold text-xs"
             />
             <Link
@@ -212,10 +238,10 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <div className="space-y-1">
             {/* Rating, Year and Genres - All in one row */}
             <div className="flex flex-wrap gap-1 items-center">
-              {movie.rating && (
+              {shouldShowRating && (
                 <span className="bg-yellow-500 text-black px-2 py-1 rounded flex items-center space-x-1 font-bold text-xs">
                   <Star className="w-3 h-3 fill-current" />
-                  <span>{movie.rating}</span>
+                  <span>{parsedRating}</span>
                 </span>
               )}
               {movie.year && (

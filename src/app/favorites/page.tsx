@@ -1,207 +1,240 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Layout from '@/components/layout/Layout';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  favoritesService,
+  ProcessedFavorite,
+  SimpleFavoriteQueryParams,
+} from "@/services/favorites.service";
+import { Heart } from "lucide-react";
+import Layout from "@/components/layout/Layout";
+import MovieCard from "@/components/movie/MovieCard";
+import { favoriteToMovieCardData } from "./utils/favoriteHelpers";
 
 const FavoritesPage = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [genreFilter, setGenreFilter] = useState('All');
-  const [sortBy, setSortBy] = useState('Latest');
+  const [favorites, setFavorites] = useState<ProcessedFavorite[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const { isAuthenticated } = useAuth();
 
-  // Mock favorites data
-  const favoriteMovies = [
-    {
-      id: '1',
-      title: 'Dune: Part Two',
-      year: 2024,
-      genre: 'Sci-Fi',
-      rating: 8.9,
-      poster: 'https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=800&q=80',
-      href: '/movie/1'
+  // Ref for intersection observer
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // Fetch favorites
+  const fetchFavorites = useCallback(
+    async (pageNum: number = 1, append: boolean = false) => {
+      if (!isAuthenticated) return;
+
+      if (pageNum === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      setError(null);
+
+      try {
+        const queryParams: SimpleFavoriteQueryParams = {
+          page: pageNum,
+          limit: 20,
+        };
+
+        const response = await favoritesService.getUserFavorites(queryParams);
+        console.log("Fetched favorites:", response);
+        if (append && pageNum > 1) {
+          setFavorites((prev) => [...prev, ...response.favorites]);
+        } else {
+          setFavorites(response.favorites);
+        }
+
+        setHasMore(response.hasMore);
+        setPage(pageNum);
+      } catch (err) {
+        console.error("Error fetching favorites:", err);
+        setError("Failed to load favorites. Please try again.");
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     },
-    {
-      id: '2',
-      title: 'Oppenheimer',
-      year: 2023,
-      genre: 'Drama',
-      rating: 9.2,
-      poster: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=800&q=80',
-      href: '/movie/2'
-    },
-    {
-      id: '3',
-      title: 'Poor Things',
-      year: 2024,
-      genre: 'Comedy',
-      rating: 8.7,
-      poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=800&q=80',
-      href: '/movie/3'
+    [isAuthenticated]
+  );
+
+  // Load more when reaching bottom
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasMore) {
+      fetchFavorites(page + 1, true);
     }
-  ];
+  }, [fetchFavorites, page, loadingMore, hasMore]);
 
-  // Mock recommended movies
-  const recommendedMovies = [
-    {
-      id: '4',
-      title: 'The Batman',
-      year: 2024,
-      genre: 'Action',
-      rating: 8.5,
-      poster: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=800&q=80',
-      href: '/movie/4'
-    },
-    {
-      id: '5',
-      title: 'Inception',
-      year: 2023,
-      genre: 'Sci-Fi',
-      rating: 9.0,
-      poster: 'https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?auto=format&fit=crop&w=800&q=80',
-      href: '/movie/5'
-    },
-    {
-      id: '6',
-      title: 'Avatar 3',
-      year: 2024,
-      genre: 'Fantasy',
-      rating: 8.8,
-      poster: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?auto=format&fit=crop&w=800&q=80',
-      href: '/movie/6'
+  // Intersection observer for infinite scroll
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [loadMore, hasMore]);
+
+  // Initial load
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Only fetch local favorites data
+      fetchFavorites(1, false);
     }
-  ];
+  }, [isAuthenticated, fetchFavorites]);
 
-  const handleRemoveFavorite = (movieId: string) => {
-    // Handle remove favorite logic here
-    console.log('Remove favorite:', movieId);
-  };
+  // Sync with Redux state - filter out removed favorites
+  // TEMPORARILY DISABLED - causing all favorites to disappear
+  /* 
+  useEffect(() => {
+    // Don't filter if Redux state is not ready or if we have no local favorites
+    if (favoriteIds.length === 0 || favorites.length === 0) {
+      console.log(`🔍 Skipping filter: Redux IDs=${favoriteIds.length}, Local favorites=${favorites.length}`);
+      return;
+    }
+    
+    console.log(`🔍 Starting filter: Redux IDs=[${favoriteIds.join(',')}], Local favorites=[${favorites.map(f => f.id).join(',')}]`);
+    
+    setFavorites((prevFavorites) => {
+      const filteredFavorites = prevFavorites.filter((favorite) => {
+        const isIncluded = favoriteIds.includes(favorite.id);
+        if (!isIncluded) {
+          console.log(`🗑️ Removing favorite: ${favorite.id} (${favorite.title})`);
+        }
+        return isIncluded;
+      });
+      
+      // Only update if there's actually a change to avoid unnecessary re-renders
+      if (filteredFavorites.length !== prevFavorites.length) {
+        console.log(`🔄 Filtered favorites: ${prevFavorites.length} → ${filteredFavorites.length}`);
+        return filteredFavorites;
+      }
+      
+      return prevFavorites;
+    });
+  }, [favoriteIds, favorites.length]); // Add favorites.length as dependency
+  */
+
+  if (!isAuthenticated) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+          <div className="text-center">
+            <Heart className="mx-auto mb-4 text-red-500" size={64} />
+            <h1 className="text-2xl font-bold mb-2">Your Favorites</h1>
+            <p className="text-gray-400">
+              Please login to view your favorite movies
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-red-500 mx-auto mb-4"></div>
+            <p>Loading your favorites...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button
+              onClick={() => fetchFavorites(1, false)}
+              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-16">
-          <h1 className="text-3xl font-bold mb-8 text-white">My Favorites</h1>
-          
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="flex-1 relative">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-              <input
-                type="text"
-                placeholder="Search movies..."
-                className="w-full pl-10 pr-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-4">
-              <select
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                value={genreFilter}
-                onChange={(e) => setGenreFilter(e.target.value)}
-              >
-                <option value="All">All</option>
-                <option value="Action">Action</option>
-                <option value="Comedy">Comedy</option>
-                <option value="Drama">Drama</option>
-                <option value="Sci-Fi">Sci-Fi</option>
-                <option value="Fantasy">Fantasy</option>
-              </select>
-              <select
-                className="px-4 py-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="Latest">Latest</option>
-                <option value="Highest Rated">Highest Rated</option>
-                <option value="Title A-Z">Title A-Z</option>
-              </select>
-            </div>
+      <div className="min-h-screen bg-gray-900 text-white px-6 pt-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 mb-8">
+            <Heart className="text-red-500 fill-current" size={32} />
+            <h1 className="text-3xl font-bold">My Favorites</h1>
+            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+              {favorites.length} movie{favorites.length !== 1 ? "s" : ""}
+            </span>
           </div>
 
-          {/* Favorites Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {favoriteMovies.map((movie) => (
-              <div key={movie.id} className="bg-gray-800 rounded-xl overflow-hidden group hover:scale-105 transition-transform duration-300">
-                <div className="relative aspect-[3/4]">
-                  <img
-                    src={movie.poster}
-                    alt={movie.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <div className="flex space-x-2">
-                        <a
-                          className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold flex items-center justify-center space-x-2"
-                          href={movie.href}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                          <span>Watch Now</span>
-                        </a>
-                        <button
-                          onClick={() => handleRemoveFavorite(movie.id)}
-                          className="p-2 rounded-lg transition-colors bg-red-500 text-white hover:bg-red-600"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 fill-current">
-                            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold truncate text-white">{movie.title}</h3>
-                    <div className="flex items-center text-yellow-500">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 fill-current">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                      </svg>
-                      <span className="ml-1">{movie.rating}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">{movie.year}</span>
-                    <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded-full text-xs">{movie.genre}</span>
-                  </div>
-                </div>
+          {favorites.length === 0 ? (
+            <div className="text-center py-16">
+              <Heart className="mx-auto mb-4 text-gray-600" size={64} />
+              <h2 className="text-xl font-semibold mb-2 text-gray-400">
+                No favorites yet
+              </h2>
+              <p className="text-gray-500">
+                Start adding movies to your favorites!
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Grid layout */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                {favorites.map((favorite) => {
+                  const movieCardData = favoriteToMovieCardData(favorite);
+                  return (
+                    <MovieCard
+                      key={`${favorite.id}-${favorite.media_type}`}
+                      movie={movieCardData}
+                    />
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Recommended Section */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-8 text-white">Recommended For You</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {recommendedMovies.map((movie) => (
-              <div key={movie.id} className="group relative aspect-video rounded-xl overflow-hidden cursor-pointer">
-                <img
-                  src={movie.poster}
-                  alt={movie.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-xl font-bold mb-2 text-white">{movie.title}</h3>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-yellow-500">{movie.rating}</span>
-                      <span className="text-gray-400">•</span>
-                      <span className="text-gray-400">{movie.year}</span>
+              {/* Infinite scroll trigger */}
+              {hasMore && (
+                <div
+                  ref={loadMoreRef}
+                  className="flex justify-center mt-12 py-8"
+                >
+                  {loadingMore && (
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
+                      <span>Loading more...</span>
                     </div>
-                    <span className="px-3 py-1 bg-red-500/20 text-red-500 rounded-full text-sm">{movie.genre}</span>
-                  </div>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              )}
+
+              {/* End message */}
+              {!hasMore && favorites.length > 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  You&apos;ve reached the end of your favorites!
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </Layout>

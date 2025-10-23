@@ -147,7 +147,7 @@ export default function TVShowsPage() {
     return (
       <Layout>
         <div>
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 pt-16">
             <h1 className="text-3xl font-bold text-white mb-8">
               📺 Phim Bộ / TV Series
             </h1>
@@ -189,7 +189,7 @@ export default function TVShowsPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 pt-16">
         <h1 className="text-3xl font-bold text-white mb-8">
           📺 Phim Bộ / TV Series
         </h1>
