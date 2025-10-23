@@ -25,15 +25,6 @@ export const useRecentSearches = (
 ): UseRecentSearchesReturn => {
   const [searches, setSearches] = useState<RecentSearch[]>([]);
 
-  // Load searches on mount and when user changes
-  useEffect(() => {
-    if (user) {
-      loadUserSearches();
-    } else {
-      loadLocalSearches();
-    }
-  }, [user]);
-
   // Load searches from localStorage
   const loadLocalSearches = useCallback(() => {
     try {
@@ -61,7 +52,13 @@ export const useRecentSearches = (
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          const dbSearches = data.data.map((search: any) => ({
+          interface DbSearch {
+            id?: string;
+            query: string;
+            type: "movie" | "tv" | "all";
+            createdAt: string;
+          }
+          const dbSearches = data.data.map((search: DbSearch) => ({
             ...search,
             timestamp: new Date(search.createdAt),
             source: "database" as const,
@@ -86,6 +83,15 @@ export const useRecentSearches = (
       loadLocalSearches();
     }
   }, [loadLocalSearches]);
+
+  // Load searches on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      loadUserSearches();
+    } else {
+      loadLocalSearches();
+    }
+  }, [user, loadUserSearches, loadLocalSearches]);
 
   // Get local searches synchronously
   const getLocalSearchesSync = (): RecentSearch[] => {
