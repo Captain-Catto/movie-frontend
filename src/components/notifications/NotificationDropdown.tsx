@@ -64,8 +64,16 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
           console.log("📦 User notifications:", data);
 
           if (data.success && data.data?.notifications) {
+            interface RawNotification {
+              id: string;
+              title: string;
+              message: string;
+              type: string;
+              createdAt: string;
+              isRead: boolean;
+            }
             const userNotifications = data.data.notifications.map(
-              (notif: any) => ({
+              (notif: RawNotification) => ({
                 id: notif.id,
                 title: notif.title,
                 message: notif.message,

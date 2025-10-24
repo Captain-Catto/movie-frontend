@@ -6,6 +6,7 @@ import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import MovieCard from "@/components/movie/MovieCard";
 import { MovieCardData } from "@/components/movie/MovieCard";
+import type { CastMember, CrewMember } from "@/types/movie";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { apiService } from "@/services/api";
@@ -23,45 +24,12 @@ interface PersonDetail {
 }
 
 interface PersonCredits {
-  cast: Array<{
-    id: number;
-    title?: string;
-    name?: string;
-    character?: string;
-    job?: string;
-    media_type: "movie" | "tv";
-    poster_path: string | null;
-    release_date?: string;
-    first_air_date?: string;
-    vote_average: number;
-  }>;
-  crew: Array<{
-    id: number;
-    title?: string;
-    name?: string;
-    character?: string;
-    job?: string;
-    media_type: "movie" | "tv";
-    poster_path: string | null;
-    release_date?: string;
-    first_air_date?: string;
-    vote_average: number;
-  }>;
+  cast: CastMember[];
+  crew: CrewMember[];
 }
 
 interface PaginatedCastCredits {
-  cast: Array<{
-    id: number;
-    title?: string;
-    name?: string;
-    character?: string;
-    job?: string;
-    media_type: "movie" | "tv";
-    poster_path: string | null;
-    release_date?: string;
-    first_air_date?: string;
-    vote_average: number;
-  }>;
+  cast: CastMember[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -73,23 +41,12 @@ interface PaginatedCastCredits {
   metadata: {
     fromCache: boolean;
     totalCastItems: number;
-    cacheInfo?: any;
+    cacheInfo?: Record<string, unknown>;
   };
 }
 
 interface PaginatedCrewCredits {
-  crew: Array<{
-    id: number;
-    title?: string;
-    name?: string;
-    character?: string;
-    job?: string;
-    media_type: "movie" | "tv";
-    poster_path: string | null;
-    release_date?: string;
-    first_air_date?: string;
-    vote_average: number;
-  }>;
+  crew: CrewMember[];
   pagination: {
     currentPage: number;
     totalPages: number;
@@ -101,7 +58,7 @@ interface PaginatedCrewCredits {
   metadata: {
     fromCache: boolean;
     totalCrewItems: number;
-    cacheInfo?: any;
+    cacheInfo?: Record<string, unknown>;
   };
 }
 
@@ -119,7 +76,7 @@ const PersonDetailPage = () => {
   const [itemsPerPage] = useState(20);
 
   // Group crew items by movie to combine multiple jobs
-  const groupCrewByMovie = (crewItems: any[]) => {
+  const groupCrewByMovie = (crewItems: PaginatedCrewCredits['crew']) => {
     const grouped = crewItems.reduce((acc, item) => {
       const key = `${item.id}-${item.media_type}`;
       if (acc[key]) {
@@ -135,60 +92,60 @@ const PersonDetailPage = () => {
         acc[key] = { ...item };
       }
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, PaginatedCrewCredits['crew'][0]>);
     
     return Object.values(grouped);
   };
 
-  const fetchAllCredits = async () => {
-    try {
-      const response = await apiService.getPersonCredits(parseInt(personId));
-
-      if (response) {
-        // Split data into cast and crew for separate pagination
-        const castData: PaginatedCastCredits = {
-          cast: response.cast,
-          pagination: {
-            currentPage: 1,
-            totalPages: Math.ceil(response.cast.length / itemsPerPage),
-            totalItems: response.cast.length,
-            limit: itemsPerPage,
-            hasNextPage: 1 < Math.ceil(response.cast.length / itemsPerPage),
-            hasPreviousPage: false,
-          },
-          metadata: {
-            fromCache: true,
-            totalCastItems: response.cast.length,
-          }
-        };
-
-        const groupedCrew = groupCrewByMovie(response.crew);
-        const crewData: PaginatedCrewCredits = {
-          crew: response.crew, // Keep original for grouping
-          pagination: {
-            currentPage: 1,
-            totalPages: Math.ceil(groupedCrew.length / itemsPerPage),
-            totalItems: groupedCrew.length,
-            limit: itemsPerPage,
-            hasNextPage: 1 < Math.ceil(groupedCrew.length / itemsPerPage),
-            hasPreviousPage: false,
-          },
-          metadata: {
-            fromCache: true,
-            totalCrewItems: groupedCrew.length, // Use grouped count
-          }
-        };
-
-        setCastCredits(castData);
-        setCrewCredits(crewData);
-      }
-    } catch (err) {
-      console.error("Error fetching person credits:", err);
-      setError("Không thể tải danh sách phim");
-    }
-  };
-
   useEffect(() => {
+    const fetchAllCredits = async () => {
+      try {
+        const response = await apiService.getPersonCredits(parseInt(personId));
+
+        if (response) {
+          // Split data into cast and crew for separate pagination
+          const castData: PaginatedCastCredits = {
+            cast: response.cast,
+            pagination: {
+              currentPage: 1,
+              totalPages: Math.ceil(response.cast.length / itemsPerPage),
+              totalItems: response.cast.length,
+              limit: itemsPerPage,
+              hasNextPage: 1 < Math.ceil(response.cast.length / itemsPerPage),
+              hasPreviousPage: false,
+            },
+            metadata: {
+              fromCache: true,
+              totalCastItems: response.cast.length,
+            }
+          };
+
+          const groupedCrew = groupCrewByMovie(response.crew);
+          const crewData: PaginatedCrewCredits = {
+            crew: response.crew, // Keep original for grouping
+            pagination: {
+              currentPage: 1,
+              totalPages: Math.ceil(groupedCrew.length / itemsPerPage),
+              totalItems: groupedCrew.length,
+              limit: itemsPerPage,
+              hasNextPage: 1 < Math.ceil(groupedCrew.length / itemsPerPage),
+              hasPreviousPage: false,
+            },
+            metadata: {
+              fromCache: true,
+              totalCrewItems: groupedCrew.length, // Use grouped count
+            }
+          };
+
+          setCastCredits(castData);
+          setCrewCredits(crewData);
+        }
+      } catch (err) {
+        console.error("Error fetching person credits:", err);
+        setError("Không thể tải danh sách phim");
+      }
+    };
+
     const fetchPersonData = async () => {
       try {
         setLoading(true);
@@ -196,7 +153,24 @@ const PersonDetailPage = () => {
         const personResponse = await apiService.getPersonDetails(parseInt(personId));
 
         if (personResponse) {
-          setPersonData(personResponse);
+          const normalizedPerson: PersonDetail = {
+            id: personResponse.id,
+            name: personResponse.name,
+            biography: personResponse.biography ?? "Chưa có tiểu sử",
+            birthday: personResponse.birthday ?? null,
+            deathday: personResponse.deathday ?? null,
+            place_of_birth: personResponse.place_of_birth ?? null,
+            profile_path: personResponse.profile_path ?? null,
+            known_for_department:
+              typeof personResponse.known_for_department === "string"
+                ? personResponse.known_for_department
+                : "Unknown",
+            popularity:
+              typeof personResponse.popularity === "number"
+                ? personResponse.popularity
+                : 0,
+          };
+          setPersonData(normalizedPerson);
         }
 
         // Fetch all credits data
@@ -214,7 +188,7 @@ const PersonDetailPage = () => {
     if (personId) {
       fetchPersonData();
     }
-  }, [personId]);
+  }, [personId, itemsPerPage]);
 
   // Update pagination info when page or tab changes
   useEffect(() => {
@@ -228,7 +202,7 @@ const PersonDetailPage = () => {
         setCurrentPage(1);
       }
     }
-  }, [activeTab, castCredits, crewCredits]);
+  }, [activeTab, castCredits, crewCredits, currentPage]);
 
   // Reset page to 1 when switching tabs  
   const handleTabChange = (tab: "cast" | "crew") => {
@@ -289,21 +263,28 @@ const PersonDetailPage = () => {
   const convertToMovieCardData = (
     item: PersonCredits["cast"][0] | PersonCredits["crew"][0]
   ): MovieCardData => {
+    const posterPath = item.poster_path ?? item.profile_path ?? null;
+    const mediaType = item.media_type === "tv" ? "tv" : "movie";
+    const releaseDate = item.release_date ?? item.first_air_date ?? null;
+    const character =
+      "character" in item && typeof item.character === "string"
+        ? item.character
+        : undefined;
+    const job =
+      "job" in item && typeof item.job === "string" ? item.job : undefined;
+
     return {
       id: item.id.toString(),
       tmdbId: item.id,
       title: item.title || item.name || "",
-      aliasTitle: item.character || item.job || "",
-      poster: item.poster_path
-        ? `https://image.tmdb.org/t/p/w300${item.poster_path}`
+      aliasTitle: character || job || item.title || item.name || "",
+      poster: posterPath
+        ? `https://image.tmdb.org/t/p/w300${posterPath}`
         : "/images/no-poster.svg",
-      href: `/movie/${item.id}`, // Direct TMDB ID - backend now handles TMDB ID by default
-      year: item.release_date
-        ? new Date(item.release_date).getFullYear()
-        : item.first_air_date
-        ? new Date(item.first_air_date).getFullYear()
-        : undefined,
-      rating: item.vote_average,
+      href: mediaType === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`,
+      year: releaseDate ? new Date(releaseDate).getFullYear() : undefined,
+      rating:
+        typeof item.vote_average === "number" ? item.vote_average : undefined,
     };
   };
 

@@ -4,11 +4,12 @@ import MovieGrid from "@/components/movie/MovieGrid";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
+import { MovieCardData } from "@/components/movie/MovieCard";
 
 export default function TVSeriesSections() {
-  const [onTheAirTVSeries, setOnTheAirTVSeries] = useState<any[]>([]);
-  const [popularTVSeries, setPopularTVSeries] = useState<any[]>([]);
-  const [topRatedTVSeries, setTopRatedTVSeries] = useState<any[]>([]);
+  const [onTheAirTVSeries, setOnTheAirTVSeries] = useState<MovieCardData[]>([]);
+  const [popularTVSeries, setPopularTVSeries] = useState<MovieCardData[]>([]);
+  const [topRatedTVSeries, setTopRatedTVSeries] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,22 +36,35 @@ export default function TVSeriesSections() {
           }),
         ]);
 
+        const toRecordArray = (data: unknown): Array<Record<string, unknown>> => {
+          if (Array.isArray(data)) {
+            return data as Array<Record<string, unknown>>;
+          }
+          if (data && typeof data === "object" && "data" in data) {
+            const nested = (data as Record<string, unknown>).data;
+            return Array.isArray(nested)
+              ? (nested as Array<Record<string, unknown>>)
+              : [];
+          }
+          return [];
+        };
+
         if (onTheAirRes.success && onTheAirRes.data) {
-          const mappedTVSeries = onTheAirRes.data.map((tv: any) =>
+          const mappedTVSeries = toRecordArray(onTheAirRes.data).map((tv) =>
             mapTVSeriesToFrontend(tv)
           );
           setOnTheAirTVSeries(mappedTVSeries);
         }
 
         if (popularRes.success && popularRes.data) {
-          const mappedTVSeries = popularRes.data.map((tv: any) =>
+          const mappedTVSeries = toRecordArray(popularRes.data).map((tv) =>
             mapTVSeriesToFrontend(tv)
           );
           setPopularTVSeries(mappedTVSeries);
         }
 
         if (topRatedRes.success && topRatedRes.data) {
-          const mappedTVSeries = topRatedRes.data.map((tv: any) =>
+          const mappedTVSeries = toRecordArray(topRatedRes.data).map((tv) =>
             mapTVSeriesToFrontend(tv)
           );
           setTopRatedTVSeries(mappedTVSeries);
@@ -66,7 +80,7 @@ export default function TVSeriesSections() {
   }, []);
 
   // Fallback data in case API fails
-  const fallbackTVSeries = [
+  const fallbackTVSeriesBase = [
     {
       id: "1",
       title: "Stranger Things",
@@ -98,6 +112,15 @@ export default function TVSeriesSections() {
       genre: "Comedy",
     },
   ];
+
+  const fallbackTVSeries: MovieCardData[] = fallbackTVSeriesBase.map(
+    (item, index) => ({
+      ...item,
+      tmdbId: Number.parseInt(item.id, 10) || index + 1,
+      aliasTitle: item.aliasTitle ?? item.title,
+      genres: item.genre ? [item.genre] : [],
+    })
+  );
 
   // Use API data if available, otherwise use fallback
   const onTheAirToDisplay =

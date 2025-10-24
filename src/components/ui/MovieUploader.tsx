@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, X, CheckCircle, AlertCircle, Film, Cloud } from "lucide-react";
+import { Upload, CheckCircle, AlertCircle, Film, Cloud } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
 
 interface UploadedMovie {
@@ -122,7 +122,9 @@ export default function MovieUploader() {
         }
       }
     } catch (err) {
-      setError(`Upload failed: ${err.message}`);
+      const message =
+        err instanceof Error ? err.message : "Unknown error occurred";
+      setError(`Upload failed: ${message}`);
     } finally {
       setUploading(false);
       setTimeout(() => setUploadProgress(0), 2000);

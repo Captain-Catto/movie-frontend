@@ -1,7 +1,7 @@
 /**
  * Simple JWT decoder (no validation, just parsing)
  */
-export function decodeJWT(token: string): any {
+export function decodeJWT(token: string): Record<string, unknown> | null {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");

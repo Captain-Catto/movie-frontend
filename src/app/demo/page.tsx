@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import VideoPlayer from "@/components/ui/VideoPlayer";
 import MovieUploader from "@/components/ui/MovieUploader";
 import VideoUploader from "@/components/ui/VideoUploader";
-import { Film, Upload, Play, Database, ArrowLeft } from "lucide-react";
+import { Upload, Play, Database } from "lucide-react";
 
 const demoMovies = [
   {
@@ -129,11 +130,15 @@ export default function DemoPage() {
                     className="bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors cursor-pointer"
                     onClick={() => handleMovieSelect(movie)}
                   >
-                    <img
-                      src={movie.poster}
-                      alt={movie.title}
-                      className="w-full h-48 object-cover"
-                    />
+                    <div className="relative w-full h-48">
+                      <Image
+                        src={movie.poster}
+                        alt={movie.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    </div>
                     <div className="p-4">
                       <h3 className="text-xl font-semibold text-white mb-2">
                         {movie.title}
@@ -168,7 +173,7 @@ export default function DemoPage() {
                       <li>
                         Cập nhật URL trong component:{" "}
                         <code className="bg-gray-700 px-2 py-1 rounded">
-                          "/videos/your-movie.mp4"
+                          &quot;/videos/your-movie.mp4&quot;
                         </code>
                       </li>
                       <li>Refresh trang để xem phim</li>

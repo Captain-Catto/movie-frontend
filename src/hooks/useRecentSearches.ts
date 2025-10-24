@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { RecentSearch } from "@/types/search";
 
 interface User {
-  id: string;
+  id: string | number;
   email: string;
   // Add other user properties as needed
 }

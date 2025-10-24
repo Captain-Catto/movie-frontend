@@ -25,75 +25,144 @@ const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
   37: "Western",
 };
 
-export function mapTVSeriesToFrontend(series: any): FrontendTVSeries {
-  // Backend already has full URLs - use them directly
-  const posterUrl =
-    series.posterUrl || series.poster_path
-      ? series.posterUrl ||
-        `${TMDB_IMAGE_BASE_URL}/${POSTER_SIZE}${series.poster_path}`
-      : "/images/no-poster.svg";
+export function mapTVSeriesToFrontend(
+  series: Record<string, unknown>
+): FrontendTVSeries {
+  const ensureString = (value: unknown): string | undefined =>
+    typeof value === "string" && value.length > 0 ? value : undefined;
 
-  const backdropUrl =
-    series.backdropUrl || series.backdrop_path
-      ? series.backdropUrl ||
-        `${TMDB_IMAGE_BASE_URL}/${BACKDROP_SIZE}${series.backdrop_path}`
-      : "/images/no-poster.svg";
+  const ensureNumber = (value: unknown): number | undefined => {
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? undefined : parsed;
+    }
+    return undefined;
+  };
 
-  // Map genres from IDs to English names (convert strings to numbers)
-  const genres = (series.genreIds || series.genre_ids || [])
-    .map((id: string | number) => TMDB_TV_ENGLISH_GENRE_MAP[Number(id)])
-    .filter(Boolean);
+  const ensureNumberArray = (value: unknown): number[] =>
+    Array.isArray(value)
+      ? value
+          .map((item) => {
+            if (typeof item === "number") return item;
+            if (typeof item === "string") {
+              const parsed = Number(item);
+              return Number.isNaN(parsed) ? null : parsed;
+            }
+            return null;
+          })
+          .filter((item): item is number => item !== null)
+      : [];
 
-  // Get primary genre for the genre field
+  const tmdbId =
+    ensureNumber(series.tmdbId) ?? ensureNumber(series.id) ?? NaN;
+
+  if (!Number.isFinite(tmdbId) || tmdbId <= 0) {
+    throw new Error("TV series data is missing a valid tmdbId/id");
+  }
+
+  const idValue =
+    typeof series.id === "number" || typeof series.id === "string"
+      ? series.id.toString()
+      : tmdbId.toString();
+
+  const title =
+    ensureString(series.name) ?? ensureString(series.title) ?? "Unknown";
+
+  const aliasTitle =
+    ensureString(series.originalName) ??
+    ensureString(series.originalTitle) ??
+    title;
+
+  const posterPath = ensureString(series.posterUrl);
+  const poster =
+    posterPath ||
+    (ensureString(series.poster_path)
+      ? `${TMDB_IMAGE_BASE_URL}/${POSTER_SIZE}${series.poster_path}`
+      : "/images/no-poster.svg");
+
+  const backdropPath = ensureString(series.backdropUrl);
+  const backdrop =
+    backdropPath ||
+    (ensureString(series.backdrop_path)
+      ? `${TMDB_IMAGE_BASE_URL}/${BACKDROP_SIZE}${series.backdrop_path}`
+      : "/images/no-poster.svg");
+
+  const firstAirDate =
+    ensureString(series.firstAirDate) ?? ensureString(series.first_air_date);
+  const year = firstAirDate
+    ? new Date(firstAirDate).getFullYear() || new Date().getFullYear()
+    : new Date().getFullYear();
+
+  const ratingValue =
+    ensureNumber(series.voteAverage) ?? ensureNumber(series.vote_average) ?? 0;
+  const rating = Math.round(ratingValue * 10) / 10;
+
+  const genreIds = ensureNumberArray(series.genreIds ?? series.genre_ids);
+  const genres = genreIds
+    .map((id) => TMDB_TV_ENGLISH_GENRE_MAP[id])
+    .filter((genre): genre is string => Boolean(genre));
   const primaryGenre = genres[0] || "TV Series";
 
-  // Format release year
-  const year =
-    series.firstAirDate || series.first_air_date
-      ? new Date(series.firstAirDate || series.first_air_date).getFullYear()
-      : new Date().getFullYear();
-
-  // Format rating
-  const rating =
-    Math.round((series.voteAverage || series.vote_average || 0) * 10) / 10;
-
-  // Determine correct URL based on media_type
-  const baseUrl = series.media_type === "tv" ? "/tv" : "/movie";
-  const itemHref = `${baseUrl}/${series.tmdbId || series.id}`;
+  const mediaType = ensureString(series.media_type) ?? "tv";
+  const baseUrl = mediaType === "tv" ? "/tv" : "/movie";
+  const itemHref = `${baseUrl}/${tmdbId}`;
   const watchUrl =
-    series.media_type === "tv"
-      ? `/watch/tv-${series.tmdbId || series.id}`
-      : `/watch/movie-${series.tmdbId || series.id}`;
+    mediaType === "tv" ? `/watch/tv-${tmdbId}` : `/watch/movie-${tmdbId}`;
+
+  const episodeRunTimeArray = Array.isArray(series.episodeRunTime)
+    ? series.episodeRunTime
+    : Array.isArray(series.episode_run_time)
+    ? series.episode_run_time
+    : [];
+
+  const duration =
+    episodeRunTimeArray && episodeRunTimeArray.length > 0
+      ? `${episodeRunTimeArray[0]}m/ep`
+      : "N/A";
+
+  const numberOfEpisodes =
+    ensureNumber(series.numberOfEpisodes) ??
+    ensureNumber(series.number_of_episodes);
+
+  const numberOfSeasons =
+    ensureNumber(series.numberOfSeasons) ??
+    ensureNumber(series.number_of_seasons) ??
+    1;
+
+  const status = ensureString(series.status);
+  const inProduction = Boolean(series.inProduction ?? series.in_production);
 
   return {
-    id: series.id.toString(),
-    tmdbId: series.tmdbId || series.id,
-    title: series.name || series.title,
-    aliasTitle: series.originalName || series.originalTitle || series.name,
-    poster: posterUrl,
-    href: itemHref, // Dynamic URL based on media type
-    watchHref: watchUrl, // Dynamic watch URL based on media type
+    id: idValue,
+    tmdbId,
+    title,
+    aliasTitle,
+    poster,
+    href: itemHref,
+    watchHref: watchUrl,
     year,
     rating,
     genre: primaryGenre,
     genres,
-    description: series.overview,
-    backgroundImage: backdropUrl,
-    posterImage: posterUrl,
-    episodeNumber: series.numberOfEpisodes,
-    totalEpisodes: series.numberOfEpisodes,
-    isComplete: series.status === "Ended" || !series.inProduction,
-    numberOfSeasons: series.numberOfSeasons || 1,
-    duration: series.episodeRunTime?.[0]
-      ? `${series.episodeRunTime[0]}m/ep`
-      : "N/A",
-    // Default values for fields not in backend
-    scenes: [], // You might want to add this to backend later
+    description: ensureString(series.overview) ?? "",
+    backgroundImage: backdrop,
+    posterImage: poster,
+    episodeNumber: numberOfEpisodes,
+    totalEpisodes: numberOfEpisodes,
+    isComplete: status === "Ended" || !inProduction,
+    numberOfSeasons,
+    duration,
+    scenes: [],
   };
 }
 
 export function mapTVSeriesToFrontendList(
   tvSeries: TVSeries[]
 ): FrontendTVSeries[] {
-  return tvSeries.map(mapTVSeriesToFrontend);
+  return tvSeries.map((series) =>
+    mapTVSeriesToFrontend(series as unknown as Record<string, unknown>)
+  );
 }

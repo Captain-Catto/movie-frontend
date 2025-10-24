@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Autoplay, EffectFade } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import HeroSkeleton from "@/components/ui/HeroSkeleton";
 import { useLoading } from "@/hooks/useLoading";
+import type { MovieCardData } from "@/components/movie/MovieCard";
 
 // Import Swiper styles
 import "swiper/css";
@@ -17,22 +19,7 @@ import "swiper/css/effect-fade";
 import { Info } from "lucide-react";
 
 interface HeroSectionProps {
-  movies: Array<{
-    id: string;
-    title: string;
-    aliasTitle: string;
-    rating: number;
-    year: number;
-    duration: string;
-    season: string;
-    episode: string;
-    genres: string[];
-    description: string;
-    backgroundImage: string;
-    posterImage: string;
-    scenes: string[];
-    href: string;
-  }>;
+  movies: MovieCardData[];
 }
 
 const HeroSection = ({ movies }: HeroSectionProps) => {
@@ -73,27 +60,39 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
       >
-        {movies.map((movie, index) => (
-          <SwiperSlide key={movie.id} className="relative">
-            <div className="slide-elements relative h-full">
-              <Link
-                href={movie.href}
-                className="slide-url absolute inset-0 z-10"
-              />
-              {/* Background Fade */}
-              <div
-                className="background-fade absolute inset-0"
-                style={{ backgroundImage: `url("${movie.backgroundImage}")` }}
-              />
-              {/* Cover Fade */}
-              <div className="cover-fade absolute inset-0">
-                <div className="cover-image w-full h-full">
-                  <img
-                    className="fade-in visible w-full h-full object-cover"
-                    title={movie.title}
-                    loading="lazy"
-                    src={movie.backgroundImage}
-                    alt={movie.title}
+        {movies.map((movie) => {
+          const backgroundImage =
+            movie.backgroundImage || movie.poster || "/images/no-poster.svg";
+          const posterImage =
+            movie.posterImage || movie.poster || backgroundImage;
+          const displayRating = Number(movie.rating ?? 0);
+          const hasRating =
+            !Number.isNaN(displayRating) && displayRating > 0;
+          const year = movie.year ?? new Date().getFullYear();
+
+          return (
+            <SwiperSlide key={movie.id} className="relative">
+              <div className="slide-elements relative h-full">
+                <Link
+                  href={movie.href}
+                  className="slide-url absolute inset-0 z-10"
+                />
+                {/* Background Fade */}
+                <div
+                  className="background-fade absolute inset-0"
+                  style={{ backgroundImage: `url("${backgroundImage}")` }}
+                />
+                {/* Cover Fade */}
+                <div className="cover-fade absolute inset-0">
+                  <div className="cover-image w-full h-full">
+                    <Image
+                      className="fade-in visible w-full h-full object-cover"
+                      title={movie.title}
+                      src={backgroundImage}
+                      alt={movie.title}
+                      fill
+                      sizes="100vw"
+                      priority
                   />
                 </div>
               </div>
@@ -133,7 +132,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                       </div>
 
                       {/* Rating */}
-                      {movie.rating && parseFloat(String(movie.rating)) > 0 && (
+                      {hasRating && (
                         <div className="tag-rating">
                           <span className="bg-yellow-500 text-black px-3 py-1 rounded text-sm font-bold flex items-center gap-1">
                             <svg
@@ -143,7 +142,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                             >
                               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                             </svg>
-                            {movie.rating}
+                            {displayRating}
                           </span>
                         </div>
                       )}
@@ -151,7 +150,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                       {/* Year */}
                       <div className="tag-year">
                         <span className="bg-gray-700 text-white px-3 py-1 rounded text-sm">
-                          {movie.year}
+                          {year}
                         </span>
                       </div>
                     </div>
@@ -191,15 +190,14 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                       <div className="touch-group flex items-center space-x-2">
                         <FavoriteButton
                           movie={{
-                            id: parseInt(movie.id),
+                            id: movie.tmdbId,
                             title: movie.title,
-                            poster_path:
-                              movie.posterImage || movie.backgroundImage,
-                            vote_average: movie.rating || 0,
+                            poster_path: posterImage,
+                            vote_average: displayRating,
                             media_type: movie.href.includes("/tv/")
                               ? "tv"
                               : "movie",
-                            overview: movie.description,
+                            overview: movie.description ?? "",
                             genres:
                               movie.genres?.map((genre) => ({
                                 id: 0,
@@ -218,8 +216,9 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                 </div>
               </div>
             </div>
-          </SwiperSlide>
-        ))}
+            </SwiperSlide>
+          );
+        })}
 
         {/* Custom Pagination */}
         <div className="swiper-pagination-custom absolute bottom-8 left-1/2 -translate-x-1/2 z-30"></div>
@@ -228,11 +227,17 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
       {/* Thumbnail Navigation */}
       {movies.length > 1 && (
         <div className="absolute bottom-8 right-8 z-30 flex space-x-2">
-          {movies.map((movie, index) => (
-            <div
-              key={movie.id}
-              onClick={() => handleThumbnailClick(index)}
-              className={`
+          {movies.map((movie, index) => {
+            const backgroundImage =
+              movie.backgroundImage || movie.poster || "/images/no-poster.svg";
+            const posterImage =
+              movie.posterImage || movie.poster || backgroundImage;
+
+            return (
+              <div
+                key={movie.id}
+                onClick={() => handleThumbnailClick(index)}
+                className={`
                 cursor-pointer transition-all duration-300 rounded-md overflow-hidden
                 ${
                   activeIndex === index
@@ -240,15 +245,17 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                     : "opacity-70 hover:opacity-90 hover:scale-105"
                 }
               `}
-            >
-              <img
-                src={movie.backgroundImage || movie.posterImage}
-                alt={movie.title}
-                className="w-20 h-12 object-cover"
-                loading="lazy"
-              />
-            </div>
-          ))}
+              >
+                <Image
+                  src={backgroundImage || posterImage}
+                  alt={movie.title}
+                  width={80}
+                  height={48}
+                  className="w-20 h-12 object-cover"
+                />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

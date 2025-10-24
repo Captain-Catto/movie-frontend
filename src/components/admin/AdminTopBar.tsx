@@ -1,8 +1,13 @@
 "use client";
 
+interface AdminUser {
+  name?: string;
+  role?: string;
+}
+
 interface AdminTopBarProps {
   onMenuClick: () => void;
-  user: any;
+  user: AdminUser | null;
 }
 
 export default function AdminTopBar({ onMenuClick, user }: AdminTopBarProps) {

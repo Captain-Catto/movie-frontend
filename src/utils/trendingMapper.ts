@@ -1,5 +1,19 @@
 import { FrontendMovie } from "@/types/movie";
 
+type TrendingItem = {
+  tmdbId: number | string;
+  title: string;
+  overview?: string;
+  posterUrl?: string | null;
+  backdropUrl?: string | null;
+  genreIds?: (string | number)[] | null;
+  releaseDate?: string | Date | null;
+  voteAverage?: number;
+  mediaType?: "movie" | "tv" | string;
+  isHidden?: boolean;
+  popularity?: number;
+};
+
 // TMDB Genre mapping to English names
 const TMDB_ENGLISH_GENRE_MAP: Record<number, string> = {
   28: "Action",
@@ -32,7 +46,16 @@ const TMDB_ENGLISH_GENRE_MAP: Record<number, string> = {
   10768: "War & Politics",
 };
 
-export function mapTrendingToFrontend(trending: any): FrontendMovie {
+export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
+  // Normalize TMDB id
+  const tmdbIdRaw = trending.tmdbId;
+  const tmdbId =
+    typeof tmdbIdRaw === "string" ? parseInt(tmdbIdRaw, 10) : tmdbIdRaw;
+
+  if (!tmdbId || Number.isNaN(tmdbId)) {
+    throw new Error("Trending item missing valid tmdbId");
+  }
+
   // Use the full URLs from backend if available
   const posterUrl = trending.posterUrl || "/images/no-poster.svg";
   const backdropUrl = trending.backdropUrl || "/images/no-poster.svg";
@@ -62,13 +85,18 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
 
   // Create correct href based on media_type
   const href =
+    trending.mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
+
+  const mediaType =
     trending.mediaType === "tv"
-      ? `/tv/${trending.tmdbId}`
-      : `/movie/${trending.tmdbId}`;
+      ? "tv"
+      : trending.mediaType === "movie"
+      ? "movie"
+      : undefined;
 
   return {
-    id: trending.tmdbId.toString(),
-    tmdbId: trending.tmdbId,
+    id: tmdbId.toString(),
+    tmdbId,
     title: trending.title,
     aliasTitle: trending.title,
     poster: posterUrl,
@@ -80,7 +108,7 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
     description: trending.overview,
     backgroundImage: backdropUrl,
     posterImage: posterUrl,
-    mediaType: trending.mediaType, // ✅ Include mediaType for favorites
+    mediaType, // ✅ Include normalized mediaType for favorites
     // Default values for fields not in backend trending data
     duration: trending.mediaType === "movie" ? "N/A" : "N/A",
     season: trending.mediaType === "tv" ? "Season 1" : undefined,
@@ -90,10 +118,14 @@ export function mapTrendingToFrontend(trending: any): FrontendMovie {
 }
 
 export function mapTrendingDataToFrontend(
-  trendingItems: any[]
+  trendingItems: TrendingItem[]
 ): FrontendMovie[] {
   return trendingItems
     .filter((item) => !item.isHidden)
-    .sort((a, b) => b.popularity - a.popularity) // Sort by popularity descending
+    .sort((a, b) => {
+      const popA = a.popularity || 0;
+      const popB = b.popularity || 0;
+      return popB - popA;
+    })
     .map(mapTrendingToFrontend);
 }

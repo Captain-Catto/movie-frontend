@@ -14,19 +14,13 @@ import {
   formatWatchDuration,
   WatchContentData,
 } from "@/utils/watchContentMapper";
+import type { CastMember } from "@/types/movie";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
     default: m.CommentSection,
   }))
 );
-
-interface CastMember {
-  id: number;
-  name: string;
-  character: string;
-  profile_path: string | null;
-}
 
 interface Credits {
   cast: CastMember[];
@@ -134,7 +128,27 @@ const WatchPage = () => {
 
         // Set recommendations
         if (recommendationsResponse.success) {
-          setRecommendations(recommendationsResponse.data.slice(0, 5));
+          const mappedRecommendations: RecommendationItem[] =
+            recommendationsResponse.data.slice(0, 5).map((item) => {
+              const releaseDate =
+                typeof item.releaseDate === "string"
+                  ? item.releaseDate.split("T")[0]
+                  : undefined;
+
+              return {
+                id: item.tmdbId ?? item.id,
+                title: item.title,
+                name:
+                  (item as unknown as { name?: string }).name ?? item.title,
+                poster_path: item.posterPath ?? null,
+                release_date: releaseDate,
+                first_air_date: undefined,
+                vote_average:
+                  typeof item.voteAverage === "number" ? item.voteAverage : 0,
+              };
+            });
+
+          setRecommendations(mappedRecommendations);
         }
         setRecommendationsLoading(false);
       } catch (err) {

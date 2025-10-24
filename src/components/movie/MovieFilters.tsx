@@ -1,1 +1,5 @@
-export { default, TableFilters as MovieFilters, type TableFilterOptions as FilterOptions } from './TableFilters';
+export {
+  default,
+  default as MovieFilters,
+  type TableFilterOptions as FilterOptions,
+} from "./TableFilters";

@@ -1,7 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 interface PaginationProps {
   currentPage: number;
@@ -58,7 +56,7 @@ export function Pagination({
     e.preventDefault();
     const page = parseInt(inputValue);
     if (page >= 1 && page <= totalPages) {
-      onPageChange(page);
+      onPageChange?.(page);
     }
     setIsInputMode(false);
   };
@@ -79,7 +77,7 @@ export function Pagination({
     e.preventDefault();
     const page = parseInt(desktopInputValue);
     if (page >= 1 && page <= totalPages) {
-      onPageChange(page);
+      onPageChange?.(page);
     }
     setDesktopInputMode(false);
   };
@@ -108,7 +106,7 @@ export function Pagination({
       <div className="flex items-center space-x-1">
         {/* Previous Page */}
         <button
-          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           className={classNames(
             "relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
@@ -161,7 +159,7 @@ export function Pagination({
           {desktopPages[0] > 1 && (
             <>
               <button
-                onClick={() => onPageChange(1)}
+                onClick={() => onPageChange?.(1)}
                 className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
               >
                 1
@@ -178,7 +176,7 @@ export function Pagination({
           {desktopPages.map((page) => (
             <button
               key={page}
-              onClick={() => onPageChange(page)}
+              onClick={() => onPageChange?.(page)}
               className={classNames(
                 "relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors",
                 page === currentPage
@@ -232,7 +230,7 @@ export function Pagination({
                 </>
               )}
               <button
-                onClick={() => onPageChange(totalPages)}
+                onClick={() => onPageChange?.(totalPages)}
                 className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
               >
                 {totalPages}
@@ -243,7 +241,9 @@ export function Pagination({
 
         {/* Next Page */}
         <button
-          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          onClick={() =>
+            onPageChange?.(Math.min(totalPages, currentPage + 1))
+          }
           disabled={currentPage === totalPages}
           className={classNames(
             "relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",

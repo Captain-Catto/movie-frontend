@@ -25,6 +25,7 @@ interface FavoritesContextValue {
       backdropPath?: string;
       voteAverage?: number;
       genres?: string[];
+      mediaType?: "movie" | "tv";
     }
   ) => Promise<boolean>;
   refreshFavorites: () => Promise<void>;
@@ -50,10 +51,11 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     try {
       setIsLoading(true);
-      const response = await favoritesService.getUserFavorites(1, 1000); // Get all favorites
-      const ids = new Set(
-        response.favorites.map((fav) => parseInt(fav.movieId))
-      );
+      const response = await favoritesService.getUserFavorites({
+        page: 1,
+        limit: 1000,
+      });
+      const ids = new Set(response.favorites.map((fav) => fav.id));
       setFavoriteIds(ids);
     } catch (error) {
       console.error("Failed to fetch favorites:", error);
@@ -93,12 +95,13 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         title: string;
         overview?: string;
         releaseDate?: string;
-        posterPath?: string;
-        backdropPath?: string;
-        voteAverage?: number;
-        genres?: string[];
-      }
-    ): Promise<boolean> => {
+      posterPath?: string;
+      backdropPath?: string;
+      voteAverage?: number;
+      genres?: string[];
+      mediaType?: "movie" | "tv";
+    }
+  ): Promise<boolean> => {
       if (!isAuthenticated) {
         throw new Error("Authentication required");
       }
@@ -117,8 +120,8 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
       try {
         const result = await favoritesService.toggleFavorite({
-          movieId: movieId.toString(),
-          ...movieData,
+          contentId: movieId.toString(),
+          contentType: movieData.mediaType ?? "movie",
         });
 
         // Confirm with server response

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MoviesGrid from "@/components/movie/MoviesGrid";
@@ -8,7 +8,7 @@ import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 
-export default function TrendingPage() {
+function TrendingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [trending, setTrending] = useState<MovieCardData[]>([]);
@@ -48,11 +48,15 @@ export default function TrendingPage() {
           setTrending(frontendMovies);
 
           // Set pagination info from response
-          if ((response as any).pagination) {
-            setTotalPages((response as any).pagination.totalPages);
-          } else if ((response as any).data?.pagination) {
+          const responseWithPagination = response as typeof response & {
+            pagination?: { totalPages: number };
+            data?: { pagination?: { totalPages: number } };
+          };
+          if (responseWithPagination.pagination) {
+            setTotalPages(responseWithPagination.pagination.totalPages);
+          } else if (responseWithPagination.data?.pagination) {
             // Handle nested pagination structure
-            setTotalPages((response as any).data.pagination.totalPages);
+            setTotalPages(responseWithPagination.data.pagination.totalPages);
           }
         } else {
           throw new Error(response.message || "Failed to fetch trending data");
@@ -162,5 +166,19 @@ export default function TrendingPage() {
         />
       </div>
     </Layout>
+  );
+}
+
+export default function TrendingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center text-white">
+          Đang tải nội dung trending...
+        </div>
+      }
+    >
+      <TrendingPageContent />
+    </Suspense>
   );
 }

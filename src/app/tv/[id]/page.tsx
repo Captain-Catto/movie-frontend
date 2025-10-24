@@ -10,6 +10,7 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
+import { TVDetail, CrewMember, Movie, CastMember } from "@/types/movie";
 
 // TMDB TV Genre mapping to English names
 const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
@@ -35,18 +36,11 @@ const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
 );
 
-interface CastMember {
-  id: number;
-  name: string;
-  character: string;
-  profile_path: string | null;
-}
-
 const TVDetailPageContent = () => {
   const params = useParams();
   const tvIdParam = params.id as string;
   const numericTvId = Number(tvIdParam);
-  const [tvData, setTVData] = useState<any>(null);
+  const [tvData, setTVData] = useState<TVDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +60,7 @@ const TVDetailPageContent = () => {
 
           // Find creator from crew
           const creatorPerson =
-            credits.crew?.find((person: any) => person.job === "Creator") ||
+            credits.crew?.find((person: CrewMember) => person.job === "Creator") ||
             credits.created_by?.[0];
           const creator = creatorPerson
             ? {
@@ -79,23 +73,29 @@ const TVDetailPageContent = () => {
           const country = credits.origin_country?.[0] || "Unknown";
 
           // Update tvData with credits info
-          setTVData((prevData: any) => ({
+          setTVData((prevData: TVDetail | null) => {
+            if (!prevData) return prevData;
+            return {
             ...prevData,
             creator,
             country,
             cast: credits.cast || [],
             crew: credits.crew || [],
-          }));
+          };
+          });
         } else {
           console.warn("Failed to fetch TV credits:", creditsResponse.message);
           // Set default values if API fails
-          setTVData((prevData: any) => ({
+          setTVData((prevData: TVDetail | null) => {
+            if (!prevData) return prevData;
+            return {
             ...prevData,
             creator: null,
             country: "Not available",
             cast: [],
             crew: [],
-          }));
+          };
+          });
         }
       } catch (creditsError) {
         console.warn(
@@ -103,24 +103,30 @@ const TVDetailPageContent = () => {
           creditsError
         );
         // Set default values if endpoint doesn't exist
-        setTVData((prevData: any) => ({
+        setTVData((prevData: TVDetail | null) => {
+          if (!prevData) return prevData;
+          return {
           ...prevData,
           creator: null,
           country: "Not available",
           cast: [],
           crew: [],
-        }));
+        };
+        });
       }
     } catch (error) {
       console.error("Error fetching TV credits:", error);
       // Set default values on any error
-      setTVData((prevData: any) => ({
+      setTVData((prevData: TVDetail | null) => {
+        if (!prevData) return prevData;
+        return {
         ...prevData,
         creator: null,
         country: "Error loading",
         cast: [],
         crew: [],
-      }));
+      };
+      });
     } finally {
       setCreditsLoading(false);
     }
@@ -140,56 +146,215 @@ const TVDetailPageContent = () => {
         const response = await apiService.getTVSeriesById(numericTvId);
 
         if (response.success && response.data) {
-          const tv = response.data as any; // Cast to any to handle TV-specific fields
+          const tv = response.data as Movie & Record<string, unknown>; // Include movie fields with additional data
           console.log("TV series data received:", tv);
 
+          const ensureNumber = (value: unknown, fallback = 0): number => {
+            if (typeof value === "number" && Number.isFinite(value)) {
+              return value;
+            }
+            if (typeof value === "string") {
+              const parsed = Number(value);
+              return Number.isNaN(parsed) ? fallback : parsed;
+            }
+            return fallback;
+          };
+
+          const ensureString = (value: unknown, fallback = ""): string =>
+            typeof value === "string" && value.length > 0 ? value : fallback;
+
+          const ensureOptionalString = (
+            value: unknown
+          ): string | undefined =>
+            typeof value === "string" && value.length > 0 ? value : undefined;
+
+          const ensureBoolean = (value: unknown, fallback = false): boolean =>
+            typeof value === "boolean" ? value : fallback;
+
+          const ensureStringArray = (value: unknown): string[] =>
+            Array.isArray(value)
+              ? value.filter((item): item is string => typeof item === "string")
+              : [];
+
+          const ensureNumberArray = (value: unknown): number[] =>
+            Array.isArray(value)
+              ? value
+                  .map((item) => {
+                    if (typeof item === "number") return item;
+                    if (typeof item === "string") {
+                      const parsed = Number(item);
+                      return Number.isNaN(parsed) ? null : parsed;
+                    }
+                    return null;
+                  })
+                  .filter((item): item is number => item !== null)
+              : [];
+
+          const id = ensureNumber(tv.id, numericTvId);
+          const tmdbId = ensureNumber(tv.tmdbId, id);
+
+          const titleCandidate = ensureString(tv.title);
+          const altTitle = ensureString(tv.name);
+          const title = titleCandidate || altTitle || "Untitled";
+
+          const originalTitleCandidate = ensureString(tv.originalTitle);
+          const originalName = ensureString(tv.original_name);
+          const originalTitle =
+            originalTitleCandidate || originalName || title;
+
+          const overview = ensureString(
+            tv.overview,
+            "No overview available."
+          );
+
+          const firstAirDate =
+            ensureOptionalString(tv.releaseDate) ??
+            ensureOptionalString(tv.firstAirDate) ??
+            ensureOptionalString(tv.first_air_date) ??
+            "";
+
+          const lastAirDate =
+            ensureOptionalString(tv.lastAirDate) ??
+            ensureOptionalString(tv.last_air_date);
+
+          const voteAverage = ensureNumber(
+            tv.voteAverage ?? tv.vote_average,
+            0
+          );
+          const voteCount = ensureNumber(tv.voteCount ?? tv.vote_count, 0);
+          const popularity = ensureNumber(tv.popularity, 0);
+
+          const posterPath = ensureString(
+            tv.posterUrl ?? tv.posterPath ?? tv.poster_path,
+            "/images/no-poster.svg"
+          );
+          const backdropPath = ensureString(
+            tv.backdropUrl ?? tv.backdropPath ?? tv.backdrop_path,
+            "/images/no-poster.svg"
+          );
+
+          const rawGenreIds = ensureNumberArray(
+            (tv.genreIds as unknown) ?? (tv.genre_ids as unknown)
+          );
+
+          const numberOfEpisodes = ensureNumber(
+            tv.numberOfEpisodes ?? tv.number_of_episodes,
+            0
+          );
+          const numberOfSeasons = ensureNumber(
+            tv.numberOfSeasons ?? tv.number_of_seasons,
+            0
+          );
+          const episodeRunTime = ensureNumberArray(
+            (tv.episodeRunTime as unknown) ?? (tv.episode_run_time as unknown)
+          );
+
+          const status = ensureString(tv.status, "Unknown");
+          const type = ensureOptionalString(tv.type);
+          const adult = ensureBoolean(tv.adult, false);
+          const inProduction = ensureBoolean(
+            tv.inProduction ?? tv.in_production,
+            false
+          );
+
+          const originCountry = ensureStringArray(
+            (tv.originCountry as unknown) ?? (tv.origin_country as unknown)
+          );
+          const originalLanguage = ensureString(
+            tv.originalLanguage ?? tv.original_language,
+            "unknown"
+          );
+
+          const createdBy = Array.isArray(tv.created_by)
+            ? tv.created_by
+                .map((creator) => {
+                  if (
+                    creator &&
+                    typeof creator === "object" &&
+                    "id" in creator &&
+                    "name" in creator
+                  ) {
+                    const record = creator as Record<string, unknown>;
+                    return {
+                      id: ensureNumber(record.id, 0),
+                      name:
+                        ensureString(record.name, "Unknown") || "Unknown",
+                    };
+                  }
+                  return null;
+                })
+                .filter(
+                  (creator): creator is { id: number; name: string } =>
+                    creator !== null
+                )
+            : [];
+
+          const productionCountries = Array.isArray(tv.production_countries)
+            ? tv.production_countries
+                .map((country) => {
+                  if (
+                    country &&
+                    typeof country === "object" &&
+                    "name" in country &&
+                    "iso_3166_1" in country
+                  ) {
+                    const record = country as Record<string, unknown>;
+                    return {
+                      name: ensureString(record.name, "Unknown"),
+                      iso_3166_1: ensureString(record.iso_3166_1, ""),
+                    };
+                  }
+                  return null;
+                })
+                .filter(
+                  (
+                    country
+                  ): country is { name: string; iso_3166_1: string } =>
+                    country !== null
+                )
+            : [];
+
           // Process TV series data - handle both backend format and TMDB format
-          const processedTVData = {
-            id: tv.id,
-            tmdbId: tv.tmdbId || tv.id,
-            title: tv.title || tv.name,
-            originalTitle:
-              tv.originalTitle || tv.original_name || tv.title || tv.name,
-            overview: tv.overview,
-            firstAirDate:
-              tv.releaseDate || tv.firstAirDate || tv.first_air_date,
-            lastAirDate: tv.lastAirDate || tv.last_air_date,
-            voteAverage: tv.voteAverage || tv.vote_average,
-            voteCount: tv.voteCount || tv.vote_count,
-            popularity: tv.popularity,
-            // Fix: Use posterUrl/backdropUrl from API, fallback to posterPath/backdropPath
-            posterPath: tv.posterUrl || tv.posterPath || tv.poster_path,
-            backdropPath: tv.backdropUrl || tv.backdropPath || tv.backdrop_path,
-            genres:
-              (tv.genreIds || tv.genre_ids)
-                ?.map((id: number) => TMDB_TV_ENGLISH_GENRE_MAP[id])
-                .filter(Boolean) || [],
-            genreIds: tv.genreIds || tv.genre_ids || [],
-            numberOfEpisodes: tv.numberOfEpisodes || tv.number_of_episodes,
-            numberOfSeasons: tv.numberOfSeasons || tv.number_of_seasons,
-            episodeRunTime: tv.episodeRunTime || tv.episode_run_time,
-            status: tv.status || "Unknown",
-            type: tv.type,
-            adult: tv.adult,
-            inProduction: tv.inProduction || tv.in_production,
-            originCountry: tv.originCountry || tv.origin_country,
-            originalLanguage: tv.originalLanguage || tv.original_language,
-            // Handle created_by from TMDB data directly
-            createdBy: tv.created_by || [],
-            // Handle production countries
-            productionCountries: tv.production_countries || [],
+          const processedTVData: TVDetail = {
+            id,
+            tmdbId,
+            title,
+            originalTitle,
+            overview,
+            firstAirDate,
+            lastAirDate,
+            voteAverage,
+            voteCount,
+            popularity,
+            posterPath,
+            backdropPath,
+            genres: rawGenreIds
+              .map((genreId) => TMDB_TV_ENGLISH_GENRE_MAP[genreId])
+              .filter((genre): genre is string => Boolean(genre)),
+            genreIds: rawGenreIds,
+            numberOfEpisodes,
+            numberOfSeasons,
+            episodeRunTime,
+            status,
+            type,
+            adult,
+            inProduction,
+            originCountry,
+            originalLanguage,
+            createdBy,
+            productionCountries,
             // Default values that will be updated by credits
             creator: null,
-            country: "Loading...",
-            cast: [],
-            crew: [],
+            country: ensureString(tv.country, "Loading..."),
+            cast: [] as CastMember[],
+            crew: [] as CrewMember[],
           };
 
           console.log("Processed TV data:", processedTVData);
           setTVData(processedTVData);
 
           // Fetch additional credits data
-          await fetchCredits(tv.tmdbId || tv.id);
+          await fetchCredits(tmdbId);
         } else {
           throw new Error(response.message || "TV series not found");
         }
@@ -370,7 +535,7 @@ const TVDetailPageContent = () => {
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-4">
                   <Link
-                    href={`/watch/tv-${tvData.tmdbId || tvId}`}
+                    href={`/watch/tv-${tvData.tmdbId || numericTvId}`}
                     className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <svg
@@ -388,22 +553,21 @@ const TVDetailPageContent = () => {
                   </Link>
 
                   <FavoriteButton
-                    item={{
-                      id: tvData.id?.toString() || tvId,
-                      title: tvData.title || "Unknown Title",
-                      type: "tv-show",
-                      year: tvData.firstAirDate
-                        ? new Date(tvData.firstAirDate).getFullYear()
-                        : 2025,
-                      rating: tvData.voteAverage,
-                      image: tvData.posterPath,
+                    movie={{
+                      id: tvData.tmdbId,
+                      tmdbId: tvData.tmdbId,
+                      title: tvData.title,
+                      overview: tvData.overview,
+                      poster_path: tvData.posterPath,
+                      vote_average: tvData.voteAverage,
+                      media_type: "tv",
+                      genres: tvData.genres,
                     }}
-                    size="lg"
-                    className="px-8 py-4 !rounded-lg font-semibold"
+                    className="!px-8 !py-4 !rounded-lg !font-semibold"
                   />
 
                   <TrailerButton
-                    movieId={tvData.tmdbId || parseInt(tvId)}
+                    movieId={tvData.tmdbId || numericTvId}
                     movieTitle={tvData.title}
                     contentType="tv"
                     className="px-8 py-4 !rounded-lg font-semibold"
@@ -464,7 +628,7 @@ const TVDetailPageContent = () => {
                     <CastSkeleton />
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                      {tvData.cast.slice(0, 10).map((actor: CastMember) => (
+                      {tvData.cast.slice(0, 10).map((actor) => (
                         <Link
                           key={actor.id}
                           href={`/people/${actor.id}`}
@@ -509,7 +673,7 @@ const TVDetailPageContent = () => {
                     <span className="text-gray-500">Sáng tạo bởi:</span>
                     <div className="mt-1">
                       {tvData.createdBy && tvData.createdBy.length > 0 ? (
-                        tvData.createdBy.map((creator: any, index: number) => (
+                        tvData.createdBy.map((creator, index: number) => (
                           <Link
                             key={creator.id || index}
                             href={`/people/${creator.id}`}
@@ -545,7 +709,7 @@ const TVDetailPageContent = () => {
                         ) : (
                           tvData.cast
                             .slice(0, 6)
-                            .map((actor: CastMember, index: number) => (
+                            .map((actor, index: number) => (
                               <Link
                                 key={index}
                                 href={`/people/${actor.id}`}
@@ -564,7 +728,7 @@ const TVDetailPageContent = () => {
                       {tvData.productionCountries &&
                       tvData.productionCountries.length > 0 ? (
                         tvData.productionCountries.map(
-                          (country: any, index: number) => (
+                          (country, index: number) => (
                             <span
                               key={index}
                               className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"

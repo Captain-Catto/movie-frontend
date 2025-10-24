@@ -3,9 +3,82 @@ import {
   MovieResponse,
   MovieQuery,
   TrendingResponse,
+  TVSeries,
+  TVSeriesResponse,
 } from "@/types/movie";
 
 const API_BASE_URL = "http://localhost:8080/api";
+
+// API Response Types
+interface CastMember {
+  id: number;
+  name: string;
+  character?: string;
+  profile_path?: string;
+  [key: string]: unknown;
+}
+
+interface CrewMember {
+  id: number;
+  name: string;
+  job?: string;
+  department?: string;
+  profile_path?: string;
+  [key: string]: unknown;
+}
+
+interface ProductionCountry {
+  iso_3166_1: string;
+  name: string;
+}
+
+interface ProductionCompany {
+  id: number;
+  name: string;
+  logo_path?: string;
+  origin_country: string;
+}
+
+interface Genre {
+  id: number;
+  name: string;
+}
+
+interface CreditsData {
+  id: number;
+  title?: string;
+  name?: string;
+  cast: CastMember[];
+  crew: CrewMember[];
+  production_countries?: ProductionCountry[];
+  production_companies?: ProductionCompany[];
+  genres?: Genre[];
+  runtime?: number;
+  status?: string;
+  created_by?: CrewMember[];
+  origin_country?: string[];
+  episode_run_time?: number[];
+}
+
+interface PaginationData {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  currentPage?: number;
+  totalItems?: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
+  hasNext?: boolean;
+  hasPrev?: boolean;
+}
+
+interface MetadataInfo {
+  fromCache: boolean;
+  totalCastItems?: number;
+  totalCrewItems?: number;
+  cacheInfo?: Record<string, unknown>;
+}
 
 class ApiService {
   private async fetchWithErrorHandling<T>(
@@ -134,7 +207,12 @@ class ApiService {
     error?: string;
   }> {
     const url = `${API_BASE_URL}/movies/${id}`;
-    return this.fetchWithErrorHandling(url);
+    return this.fetchWithErrorHandling<{
+      success: boolean;
+      message: string;
+      data: TVSeries;
+      error?: string;
+    }>(url);
   }
 
   async getMovieCredits(
@@ -143,17 +221,7 @@ class ApiService {
   ): Promise<{
     success: boolean;
     message: string;
-    data: {
-      id: number;
-      title: string;
-      cast: any[];
-      crew: any[];
-      production_countries: any[];
-      production_companies: any[];
-      genres: any[];
-      runtime: number;
-      status: string;
-    };
+    data: CreditsData;
     error?: string;
   }> {
     const url = `${API_BASE_URL}/movies/${id}/credits?language=${language}`;
@@ -166,17 +234,7 @@ class ApiService {
   ): Promise<{
     success: boolean;
     message: string;
-    data: {
-      id: number;
-      name: string;
-      cast: any[];
-      crew: any[];
-      created_by: any[];
-      origin_country: string[];
-      genres: any[];
-      episode_run_time: number[];
-      status: string;
-    };
+    data: CreditsData;
     error?: string;
   }> {
     const url = `${API_BASE_URL}/tv/${id}/credits?language=${language}`;
@@ -244,7 +302,7 @@ class ApiService {
     return this.fetchWithErrorHandling<TrendingResponse>(url);
   }
 
-  async getTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
     const params = new URLSearchParams();
 
     if (query.page) params.append("page", query.page.toString());
@@ -258,13 +316,13 @@ class ApiService {
     const url = `${API_BASE_URL}/tv${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 
   async getTVSeriesById(id: number): Promise<{
     success: boolean;
     message: string;
-    data: Movie;
+    data: TVSeries;
     error?: string;
   }> {
     const url = `${API_BASE_URL}/tv/${id}`;
@@ -286,7 +344,7 @@ class ApiService {
   async getSyncStats(): Promise<{
     success: boolean;
     message: string;
-    data: any;
+    data: Record<string, unknown>;
     error?: string;
   }> {
     const url = `${API_BASE_URL}/movies/stats/sync`;
@@ -299,7 +357,7 @@ class ApiService {
   ): Promise<{
     success: boolean;
     message: string;
-    data: any[];
+    data: Movie[];
     error?: string;
   }> {
     const url = `${API_BASE_URL}/movies/${id}/recommendations?page=${page}`;
@@ -312,7 +370,7 @@ class ApiService {
   ): Promise<{
     success: boolean;
     message: string;
-    data: any[];
+    data: Movie[];
     error?: string;
   }> {
     const url = `${API_BASE_URL}/tv/${id}/recommendations?page=${page}`;
@@ -322,7 +380,7 @@ class ApiService {
   // People API methods
   async getPopularPeople(page: number = 1): Promise<{
     page: number;
-    results: any[];
+    results: CastMember[];
     total_pages: number;
     total_results: number;
   }> {
@@ -332,7 +390,7 @@ class ApiService {
       message: string;
       data: {
         page: number;
-        results: any[];
+        results: CastMember[];
         total_pages: number;
         total_results: number;
       };
@@ -341,12 +399,12 @@ class ApiService {
     return response.data;
   }
 
-  async getPersonDetails(id: number): Promise<any> {
+  async getPersonDetails(id: number): Promise<CastMember & { biography?: string; birthday?: string; deathday?: string; place_of_birth?: string }> {
     const url = `${API_BASE_URL}/people/${id}`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
-      data: any;
+      data: CastMember & { biography?: string; birthday?: string; deathday?: string; place_of_birth?: string };
     }>(url);
 
     return response.data;
@@ -354,8 +412,8 @@ class ApiService {
 
   async getPersonCredits(id: number): Promise<{
     id: number;
-    cast: any[];
-    crew: any[];
+    cast: CastMember[];
+    crew: CrewMember[];
   }> {
     const url = `${API_BASE_URL}/people/${id}/credits`;
     const response = await this.fetchWithErrorHandling<{
@@ -363,8 +421,8 @@ class ApiService {
       message: string;
       data: {
         id: number;
-        cast: any[];
-        crew: any[];
+        cast: CastMember[];
+        crew: CrewMember[];
       };
     }>(url);
 
@@ -378,44 +436,20 @@ class ApiService {
     mediaType: "movie" | "tv" | "all" = "all",
     sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
   ): Promise<{
-    cast: any[];
-    crew: any[];
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalItems: number;
-      limit: number;
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
-    metadata: {
-      fromCache: boolean;
-      totalCastItems: number;
-      totalCrewItems: number;
-      cacheInfo?: any;
-    };
+    cast: CastMember[];
+    crew: CrewMember[];
+    pagination: PaginationData;
+    metadata: MetadataInfo;
   }> {
     const url = `${API_BASE_URL}/people/${id}/credits/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
       data: {
-        cast: any[];
-        crew: any[];
-        pagination: {
-          currentPage: number;
-          totalPages: number;
-          totalItems: number;
-          limit: number;
-          hasNextPage: boolean;
-          hasPreviousPage: boolean;
-        };
-        metadata: {
-          fromCache: boolean;
-          totalCastItems: number;
-          totalCrewItems: number;
-          cacheInfo?: any;
-        };
+        cast: CastMember[];
+        crew: CrewMember[];
+        pagination: PaginationData;
+        metadata: MetadataInfo;
       };
     }>(url);
 
@@ -429,40 +463,18 @@ class ApiService {
     mediaType: "movie" | "tv" | "all" = "all",
     sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
   ): Promise<{
-    cast: any[];
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalItems: number;
-      limit: number;
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
-    metadata: {
-      fromCache: boolean;
-      totalCastItems: number;
-      cacheInfo?: any;
-    };
+    cast: CastMember[];
+    pagination: PaginationData;
+    metadata: MetadataInfo & { totalCastItems: number };
   }> {
     const url = `${API_BASE_URL}/people/${id}/credits/cast/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
       data: {
-        cast: any[];
-        pagination: {
-          currentPage: number;
-          totalPages: number;
-          totalItems: number;
-          limit: number;
-          hasNextPage: boolean;
-          hasPreviousPage: boolean;
-        };
-        metadata: {
-          fromCache: boolean;
-          totalCastItems: number;
-          cacheInfo?: any;
-        };
+        cast: CastMember[];
+        pagination: PaginationData;
+        metadata: MetadataInfo & { totalCastItems: number };
       };
     }>(url);
 
@@ -476,40 +488,18 @@ class ApiService {
     mediaType: "movie" | "tv" | "all" = "all",
     sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
   ): Promise<{
-    crew: any[];
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalItems: number;
-      limit: number;
-      hasNextPage: boolean;
-      hasPreviousPage: boolean;
-    };
-    metadata: {
-      fromCache: boolean;
-      totalCrewItems: number;
-      cacheInfo?: any;
-    };
+    crew: CrewMember[];
+    pagination: PaginationData;
+    metadata: MetadataInfo & { totalCrewItems: number };
   }> {
     const url = `${API_BASE_URL}/people/${id}/credits/crew/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
       data: {
-        crew: any[];
-        pagination: {
-          currentPage: number;
-          totalPages: number;
-          totalItems: number;
-          limit: number;
-          hasNextPage: boolean;
-          hasPreviousPage: boolean;
-        };
-        metadata: {
-          fromCache: boolean;
-          totalCrewItems: number;
-          cacheInfo?: any;
-        };
+        crew: CrewMember[];
+        pagination: PaginationData;
+        metadata: MetadataInfo & { totalCrewItems: number };
       };
     }>(url);
 
@@ -517,7 +507,7 @@ class ApiService {
   }
 
   async getContentById(id: number): Promise<{
-    content: any;
+    content: Movie | TVSeries | null;
     contentType: "movie" | "tv";
     success: boolean;
     message?: string;
@@ -527,7 +517,7 @@ class ApiService {
       const movieResponse = await this.fetchWithErrorHandling<{
         success: boolean;
         message: string;
-        data: any;
+        data: Movie;
       }>(`${API_BASE_URL}/movies/${id}`);
 
       if (movieResponse.success && movieResponse.data) {
@@ -544,7 +534,7 @@ class ApiService {
           };
         }
       }
-    } catch (movieError) {
+    } catch {
       // Movie failed, try TV
       console.log("Movie not found, trying TV series...");
     }
@@ -554,7 +544,7 @@ class ApiService {
       const tvResponse = await this.fetchWithErrorHandling<{
         success: boolean;
         message: string;
-        data: any;
+        data: TVSeries;
       }>(`${API_BASE_URL}/tv/${id}`);
 
       if (tvResponse.success && tvResponse.data) {
@@ -571,7 +561,7 @@ class ApiService {
           };
         }
       }
-    } catch (tvError) {
+    } catch {
       console.log("TV series not found either");
     }
 
@@ -622,7 +612,7 @@ class ApiService {
 
   // Specific content type fetching methods
   async getMovieByTmdbId(tmdbId: number): Promise<{
-    content: any;
+    content: Movie | null;
     contentType: "movie";
     success: boolean;
     message?: string;
@@ -631,7 +621,7 @@ class ApiService {
       const movieResponse = await this.fetchWithErrorHandling<{
         success: boolean;
         message: string;
-        data: any;
+        data: Movie;
       }>(`${API_BASE_URL}/movies/${tmdbId}`);
 
       if (movieResponse.success && movieResponse.data) {
@@ -659,7 +649,7 @@ class ApiService {
   }
 
   async getTVByTmdbId(tmdbId: number): Promise<{
-    content: any;
+    content: TVSeries | null;
     contentType: "tv";
     success: boolean;
     message?: string;
@@ -668,7 +658,7 @@ class ApiService {
       const tvResponse = await this.fetchWithErrorHandling<{
         success: boolean;
         message: string;
-        data: any;
+        data: TVSeries;
       }>(`${API_BASE_URL}/tv/${tmdbId}`);
 
       if (tvResponse.success && tvResponse.data) {
@@ -759,7 +749,7 @@ class ApiService {
   }
 
   // TV Series Category Methods
-  async getOnTheAirTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getOnTheAirTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
     const params = new URLSearchParams();
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
@@ -768,10 +758,10 @@ class ApiService {
     const url = `${API_BASE_URL}/tv/on-the-air${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 
-  async getPopularTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getPopularTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
     const params = new URLSearchParams();
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
@@ -780,10 +770,10 @@ class ApiService {
     const url = `${API_BASE_URL}/tv/popular-tv${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 
-  async getTopRatedTVSeries(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getTopRatedTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
     const params = new URLSearchParams();
     if (query.page) params.append("page", query.page.toString());
     if (query.limit) params.append("limit", query.limit.toString());
@@ -792,7 +782,7 @@ class ApiService {
     const url = `${API_BASE_URL}/tv/top-rated-tv${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 }
 

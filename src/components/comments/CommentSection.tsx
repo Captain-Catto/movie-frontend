@@ -10,7 +10,6 @@ import {
   CreateCommentDto,
 } from "@/types/comment.types";
 import { useComments } from "@/hooks/use-comments";
-import { useAppSelector } from "@/store/hooks";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 
@@ -19,8 +18,7 @@ export function CommentSection({
   tvSeriesId,
   className = "",
 }: CommentSectionProps) {
-  const [sortBy, setSortBy] = useState<CommentSortOption>("newest");
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const [sortBy] = useState<CommentSortOption>("newest");
 
   const {
     comments,

@@ -62,14 +62,16 @@ export default function GoogleOAuthCallbackPage() {
       } else {
         throw new Error(response.message || "Authentication failed");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("❌ [OAUTH-CALLBACK] Error:", error);
 
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
       // Send error to parent window
-      sendOAuthCallbackToParent(null, error.message);
+      sendOAuthCallbackToParent(null, errorMessage);
 
       setStatus("error");
-      setMessage(`Error: ${error.message}`);
+      setMessage(`Error: ${errorMessage}`);
 
       // Try to close window after delay
       setTimeout(() => {

@@ -40,7 +40,6 @@ export default function VideoPlayer({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
@@ -108,7 +107,7 @@ export default function VideoPlayer({
 
   // Fullscreen toggle
   const toggleFullscreen = () => {
-    if (!isFullscreen) {
+    if (!document.fullscreenElement) {
       videoRef.current?.requestFullscreen();
     } else {
       document.exitFullscreen();

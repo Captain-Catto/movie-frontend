@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface SceneThumbnailsProps {
   scenes: string[];
 }
@@ -10,9 +12,11 @@ const SceneThumbnails = ({ scenes }: SceneThumbnailsProps) => {
           key={index}
           className="w-24 h-16 rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105"
         >
-          <img
+          <Image
             src={scene}
             alt={`Scene ${index + 1}`}
+            width={96}
+            height={64}
             className="w-full h-full object-cover"
           />
         </div>

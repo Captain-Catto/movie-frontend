@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MoviesGrid from "@/components/movie/MoviesGrid";
@@ -7,7 +7,26 @@ import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 
-export default function TVShowsPage() {
+const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
+  10759: "Action & Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  10762: "Kids",
+  9648: "Mystery",
+  10763: "News",
+  10764: "Reality",
+  10765: "Sci-Fi & Fantasy",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics",
+  37: "Western",
+};
+
+function TVShowsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [tvShows, setTVShows] = useState<MovieCardData[]>([]);
@@ -60,43 +79,114 @@ export default function TVShowsPage() {
 
         if (response.success && response.data) {
           // TV API returns nested structure: response.data.data contains the array
-          const responseData = response.data as any;
+          const responseData = response.data as unknown as Record<string, unknown> | Array<Record<string, unknown>>;
           const tvSeriesArray = Array.isArray(responseData)
             ? responseData
-            : responseData.data || [];
+            : (responseData.data as Array<Record<string, unknown>>) || [];
+
+          const ensureNumber = (value: unknown): number | undefined => {
+            if (typeof value === "number" && Number.isFinite(value)) {
+              return value;
+            }
+            if (typeof value === "string") {
+              const parsed = Number(value);
+              return Number.isNaN(parsed) ? undefined : parsed;
+            }
+            return undefined;
+          };
+
+          const ensureString = (value: unknown): string | undefined =>
+            typeof value === "string" && value.length > 0 ? value : undefined;
+
+          const ensureNumberArray = (value: unknown): number[] =>
+            Array.isArray(value)
+              ? value
+                  .map((item) => {
+                    if (typeof item === "number") return item;
+                    if (typeof item === "string") {
+                      const parsed = Number(item);
+                      return Number.isNaN(parsed) ? null : parsed;
+                    }
+                    return null;
+                  })
+                  .filter((item): item is number => item !== null)
+              : [];
+
+          const extractYear = (value: unknown): number | undefined => {
+            if (typeof value === "string" && value.length >= 4) {
+              const parsedYear = new Date(value).getFullYear();
+              return Number.isNaN(parsedYear) ? undefined : parsedYear;
+            }
+            return undefined;
+          };
 
           // Convert API response to MovieCardData format directly
-          const tvShowsWithCardData: MovieCardData[] = tvSeriesArray.map(
-            (series: any) => {
-              // TMDB ID is required since all data comes from TMDB
-              const tmdbId = series.tmdbId || series.id;
+          const tvShowsWithCardData: MovieCardData[] = tvSeriesArray
+            .map((series: Record<string, unknown>) => {
+              const tmdbId =
+                ensureNumber(series.tmdbId) ?? ensureNumber(series.id);
 
               if (!tmdbId) {
                 console.error("TV Series missing tmdbId:", series);
-                throw new Error("TV Series data is missing tmdbId");
+                return null;
               }
 
-              const tvShow = {
-                id: series.id?.toString() || tmdbId.toString(),
-                tmdbId: tmdbId, // Guaranteed to exist
-                title: series.title || series.name || "Unknown",
-                aliasTitle:
-                  series.originalName ||
-                  series.title ||
-                  series.name ||
-                  "Unknown",
-                poster: series.posterUrl || "/images/no-poster.svg",
-                href: `/tv/${tmdbId}`, // Use tmdbId directly
-                year: series.firstAirDate
-                  ? new Date(series.firstAirDate).getFullYear()
-                  : undefined,
-                rating: parseFloat(series.voteAverage) || undefined,
+              const title =
+                ensureString(series.title) ??
+                ensureString(series.name) ??
+                "Unknown";
+
+              const aliasTitle =
+                ensureString(series.originalName) ??
+                ensureString(series.originalTitle) ??
+                title;
+
+              const poster =
+                ensureString(series.posterUrl) ??
+                ensureString(series.poster_path) ??
+                "/images/no-poster.svg";
+
+              const overview = ensureString(series.overview) ?? "";
+
+              const year =
+                extractYear(series.firstAirDate) ??
+                extractYear(series.first_air_date) ??
+                extractYear(series.releaseDate);
+
+              const rating =
+                ensureNumber(series.voteAverage) ??
+                ensureNumber(series.vote_average);
+
+              const episodeCount =
+                ensureNumber(series.numberOfEpisodes) ??
+                ensureNumber(series.number_of_episodes);
+
+              const status = ensureString(series.status);
+              const isComplete = status === "Ended";
+
+              const genreIds = ensureNumberArray(
+                series.genreIds ?? series.genre_ids
+              );
+
+              const genres = genreIds
+                .map((id) => TMDB_TV_ENGLISH_GENRE_MAP[id])
+                .filter((genre): genre is string => Boolean(genre));
+
+              const tvShow: MovieCardData = {
+                id: tmdbId.toString(),
+                tmdbId,
+                title,
+                aliasTitle,
+                poster,
+                href: `/tv/${tmdbId}`,
+                year,
+                rating,
                 genre: "TV Series",
-                genres: [],
-                description: series.overview,
-                episodeNumber: series.numberOfEpisodes,
-                totalEpisodes: series.numberOfEpisodes,
-                isComplete: series.status === "Ended",
+                genres,
+                description: overview,
+                episodeNumber: episodeCount,
+                totalEpisodes: episodeCount,
+                isComplete: Boolean(isComplete),
               };
 
               // Debug log to check the data being passed
@@ -110,14 +200,13 @@ export default function TVShowsPage() {
               });
 
               return tvShow;
-            }
-          );
+            })
+            .filter((tvShow): tvShow is MovieCardData => tvShow !== null);
 
           setTVShows(tvShowsWithCardData);
 
           // Set pagination info from response
-          // Pagination is in response.data.pagination (nested structure)
-          const paginationData = (response.data as any)?.pagination;
+          const paginationData = response.pagination;
           if (paginationData) {
             console.log("🔍 TV Pagination data:", paginationData);
             setTotalPages(paginationData.totalPages);
@@ -215,5 +304,19 @@ export default function TVShowsPage() {
         onPageChange={handlePageChange}
       />
     </Layout>
+  );
+}
+
+export default function TVShowsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center text-white">
+          Đang tải danh sách phim bộ...
+        </div>
+      }
+    >
+      <TVShowsPageContent />
+    </Suspense>
   );
 }

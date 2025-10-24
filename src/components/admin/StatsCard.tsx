@@ -1,6 +1,6 @@
 interface StatsCardProps {
   title: string;
-  value: number;
+  value: number | string;
   icon: React.ReactNode;
   color: string;
   trend?: number;
@@ -18,7 +18,9 @@ export default function StatsCard({
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-gray-400 text-sm mb-1">{title}</p>
-          <p className="text-3xl font-bold text-white">{value.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-white">
+            {typeof value === 'number' ? value.toLocaleString() : value}
+          </p>
           {trend !== undefined && (
             <div className="flex items-center mt-2">
               {trend >= 0 ? (

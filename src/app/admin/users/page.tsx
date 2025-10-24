@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface User {
@@ -24,11 +24,7 @@ export default function AdminUsersPage() {
   }>({ open: false, user: null });
   const [banReason, setBanReason] = useState("");
 
-  useEffect(() => {
-    fetchUsers();
-  }, [filter]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken" not "token"
@@ -50,7 +46,11 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleBanUser = async () => {
     if (!banModal.user || !banReason) return;
@@ -121,10 +121,10 @@ export default function AdminUsersPage() {
         {/* Filters */}
         <div className="flex items-center space-x-4">
           <div className="flex space-x-2">
-            {["all", "active", "banned"].map((status) => (
+            {(["all", "active", "banned"] as const).map((status) => (
               <button
                 key={status}
-                onClick={() => setFilter(status as any)}
+                onClick={() => setFilter(status)}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   filter === status
                     ? "bg-red-600 text-white"
@@ -259,7 +259,7 @@ export default function AdminUsersPage() {
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
               <h3 className="text-xl font-bold text-white mb-4">Ban User</h3>
               <p className="text-gray-400 mb-4">
-                Ban user "{banModal.user?.name}" ({banModal.user?.email})
+                Ban user &quot;{banModal.user?.name}&quot; ({banModal.user?.email})
               </p>
               <textarea
                 value={banReason}

@@ -16,9 +16,15 @@ interface TvCategoryPageProps {
   description: string;
 }
 
+interface ApiResponse {
+  success: boolean;
+  message?: string;
+  data: unknown;
+}
+
 const fetchers: Record<
   CategoryKey,
-  (query?: { page?: number; limit?: number; language?: string }) => Promise<any>
+  (query?: { page?: number; limit?: number; language?: string }) => Promise<ApiResponse>
 > = {
   "on-the-air": apiService.getOnTheAirTVSeries.bind(apiService),
   popular: apiService.getPopularTVSeries.bind(apiService),
@@ -37,7 +43,6 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
 
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [tvShows, setTvShows] = useState<MovieCardData[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -48,7 +53,6 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         setError(null);
 
         const response = await fetchers[category]({
@@ -61,18 +65,27 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
           throw new Error(response.message || "Failed to fetch TV series.");
         }
 
-        const payload = response.data as any;
-        const seriesArray: any[] = Array.isArray(payload)
+        const payload = response.data as Record<string, unknown> | Array<Record<string, unknown>>;
+        const seriesArray: Array<Record<string, unknown>> = Array.isArray(payload)
           ? payload
-          : payload?.data || [];
+          : (payload?.data as Array<Record<string, unknown>>) || [];
 
-        const mapped = seriesArray.map((item: any) =>
+        const mapped = seriesArray.map((item: Record<string, unknown>) =>
           mapTVSeriesToFrontend(item)
         );
         setTvShows(mapped);
 
-        const pagination = payload?.pagination;
-        setTotalPages(pagination?.totalPages || 1);
+        const pagination =
+          !Array.isArray(payload) && payload && "pagination" in payload
+            ? ((payload as Record<string, unknown>).pagination as
+                | { totalPages?: number }
+                | undefined)
+            : undefined;
+        setTotalPages(
+          pagination?.totalPages && Number.isFinite(pagination.totalPages)
+            ? Number(pagination.totalPages)
+            : 1
+        );
       } catch (err) {
         console.error(`Error fetching ${category} TV shows:`, err);
         setError(
@@ -80,8 +93,6 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
         );
         setTvShows([]);
         setTotalPages(1);
-      } finally {
-        setLoading(false);
       }
     };
 

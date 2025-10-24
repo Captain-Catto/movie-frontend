@@ -36,7 +36,7 @@ export default function AccountPage() {
   }
 
   const avatarSrc = user?.image || "/images/no-avatar.svg";
-  const displayName = user?.name || user?.firstName || "User";
+  const displayName = user?.name || "User";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">

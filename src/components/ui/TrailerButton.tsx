@@ -22,7 +22,6 @@ export default function TrailerButton({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [hasVideos, setHasVideos] = useState<boolean | null>(null);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
@@ -73,7 +72,6 @@ export default function TrailerButton({
     }
 
     setLoading(true);
-    setError(null);
 
     try {
       let response;
@@ -87,13 +85,11 @@ export default function TrailerButton({
         setVideos(response.data.results);
         setIsModalOpen(true);
       } else {
-        setError("Không có trailer khả dụng");
         setVideos([]);
         setIsModalOpen(true);
       }
     } catch (err) {
       console.error("Error fetching videos:", err);
-      setError("Không thể tải trailer");
       setVideos([]);
       setIsModalOpen(true);
     } finally {

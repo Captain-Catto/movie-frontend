@@ -7,7 +7,7 @@ interface FilterToggleProps {
   className?: string;
 }
 
-const FilterToggle = ({ onFilterChange, className = "" }: FilterToggleProps) => {
+const FilterToggle = ({ className = "" }: FilterToggleProps) => {
   return (
     <div className={className}>
       <div className="flex justify-between items-center mb-4">

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import {
   FaHeart,
-  FaList,
   FaClock,
   FaUser,
   FaSignOutAlt,

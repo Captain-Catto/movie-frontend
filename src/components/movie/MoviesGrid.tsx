@@ -16,9 +16,7 @@ interface MoviesGridProps {
 }
 
 const MoviesGrid = ({
-  title = "Danh Sách Phim",
   movies,
-  showHeader = true,
   className = "",
   currentPage = 1,
   totalPages = 1,

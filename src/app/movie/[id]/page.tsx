@@ -10,6 +10,13 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
+import {
+  MovieDetail,
+  CastMember,
+  CrewMember,
+  Movie,
+  TVSeries,
+} from "@/types/movie";
 
 // TMDB Genre mapping to English names
 const TMDB_ENGLISH_GENRE_MAP: Record<number, string> = {
@@ -50,7 +57,7 @@ const RecommendationsSection = lazy(
 const MovieDetailPageContent = () => {
   const params = useParams();
   const movieId = params.id as string;
-  const [movieData, setMovieData] = useState<any>(null);
+  const [movieData, setMovieData] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +77,7 @@ const MovieDetailPageContent = () => {
 
         // Find director from crew
         const directorPerson = credits.crew?.find(
-          (person: any) => person.job === "Director"
+          (person: CrewMember) => person.job === "Director" || person.job === "director"
         );
         const director = directorPerson
           ? {
@@ -83,20 +90,23 @@ const MovieDetailPageContent = () => {
         const country = credits.production_countries?.[0]?.name || "Unknown";
 
         // Update movieData with credits info
-        setMovieData((prevData: any) => ({
+        setMovieData((prevData: MovieDetail | null) => {
+          if (!prevData) return prevData;
+          return {
           ...prevData,
           director,
           country,
           cast:
-            credits.cast?.slice(0, 10)?.map((actor: any) => ({
+            credits.cast?.slice(0, 10)?.map((actor: CastMember) => ({
               id: actor.id,
               name: actor.name,
               character: actor.character,
               profile_path: actor.profile_path,
             })) || [],
-          runtime: credits.runtime,
+          runtime: credits.runtime?.toString() || prevData.runtime,
           status: credits.status || prevData.status,
-        }));
+        };
+        });
 
         console.log("Credits loaded successfully:", {
           director,
@@ -141,82 +151,101 @@ const MovieDetailPageContent = () => {
 
         if (content) {
           if (isMovie) {
+            const movieContent = content as Movie;
             // Transform Backend Movie API data
             const genreNames =
-              content.genreIds
+              movieContent.genreIds
                 ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [];
 
             setMovieData({
-              id: content.id,
-              title: content.title,
-              aliasTitle: content.title || content.title,
-              rating: content.voteAverage || 0,
-              year: content.releaseDate
-                ? new Date(content.releaseDate).getFullYear()
-                : 2025,
+              id: movieContent.id,
+              title: movieContent.title,
+              aliasTitle: movieContent.title || movieContent.title,
+              rating: movieContent.voteAverage || 0,
+              year: movieContent.releaseDate
+                ? new Date(movieContent.releaseDate).getFullYear()
+                : new Date().getFullYear(),
               runtime: "N/A",
               genres: genreNames,
-              genreIds: content.genreIds || [],
-              description: content.overview || "No description available",
-              backgroundImage: content.backdropUrl || "/images/no-poster.svg",
-              posterImage: content.posterUrl || "/images/no-poster.svg",
+              genreIds: movieContent.genreIds || [],
+              description:
+                movieContent.overview || "No description available",
+              backgroundImage:
+                movieContent.backdropUrl ||
+                movieContent.backdropPath ||
+                "/images/no-poster.svg",
+              posterImage:
+                movieContent.posterUrl ||
+                movieContent.posterPath ||
+                "/images/no-poster.svg",
               director: null,
               cast: [],
               country: "Loading...",
               status: "Released",
               quality: "HD",
               language:
-                content.originalLanguage === "vi"
+                movieContent.originalLanguage === "vi"
                   ? "Vietsub"
-                  : content.originalLanguage?.toUpperCase() || "",
+                  : movieContent.originalLanguage?.toUpperCase() || "",
               contentType: "movie",
-              tmdbId: content.tmdbId,
-              voteCount: content.voteCount,
-              popularity: content.popularity,
+              tmdbId: movieContent.tmdbId,
+              voteCount: movieContent.voteCount,
+              popularity: movieContent.popularity,
               scenes: [],
             });
 
             // Fetch credits after setting basic data
-            fetchCredits(content.tmdbId || content.id, true);
+            fetchCredits(movieContent.tmdbId || movieContent.id, true);
           } else {
+            const tvContent = content as TVSeries;
             // Transform Backend TV Series API data
             const genreNames =
-              content.genreIds
+              tvContent.genreIds
                 ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [];
 
             setMovieData({
-              id: content.id,
-              title: content.title,
-              aliasTitle: content.title || content.title,
-              rating: content.voteAverage || 0,
-              year: content.releaseDate
-                ? new Date(content.releaseDate).getFullYear()
-                : 2025,
-              runtime: "N/A",
+              id: tvContent.id,
+              title:
+                tvContent.title ||
+                tvContent.originalTitle ||
+                "Untitled",
+              aliasTitle:
+                tvContent.originalTitle ||
+                tvContent.title ||
+                "Untitled",
+              rating: tvContent.voteAverage || 0,
+              year: tvContent.firstAirDate
+                ? new Date(tvContent.firstAirDate).getFullYear()
+                : new Date().getFullYear(),
+              runtime: tvContent.episodeRunTime?.length
+                ? `${tvContent.episodeRunTime[0]}m/ep`
+                : "N/A",
               genres: genreNames,
-              genreIds: content.genreIds || [],
-              description: content.overview || "No description available",
-              backgroundImage: content.backdropUrl || "/images/no-poster.svg",
-              posterImage: content.posterUrl || "/images/no-poster.svg",
+              genreIds: tvContent.genreIds || [],
+              description: tvContent.overview || "No description available",
+              backgroundImage:
+                tvContent.backdropUrl ||
+                tvContent.backdropPath ||
+                "/images/no-poster.svg",
+              posterImage:
+                tvContent.posterUrl ||
+                tvContent.posterPath ||
+                "/images/no-poster.svg",
               director: null,
               cast: [],
               country: "Loading...",
-              status: "Returning Series",
+              status: tvContent.status || "Returning Series",
               quality: "HD",
               language:
-                content.originalLanguage === "vi"
+                tvContent.originalLanguage === "vi"
                   ? "Vietsub"
-                  : content.originalLanguage?.toUpperCase() || "",
+                  : tvContent.originalLanguage?.toUpperCase() || "",
               contentType: "tv",
-              numberOfSeasons: 1,
-              numberOfEpisodes: 0,
-              lastAirDate: content.releaseDate,
-              firstAirDate: content.releaseDate,
-              tmdbId: content.tmdbId,
-              voteCount: content.voteCount,
-              popularity: content.popularity,
+              tmdbId: tvContent.tmdbId,
+              voteCount: tvContent.voteCount,
+              popularity: tvContent.popularity,
               scenes: [],
             });
 
@@ -234,14 +263,12 @@ const MovieDetailPageContent = () => {
 
         // Fallback to mock data
         setMovieData({
-          id: movieId,
+          id: parseInt(movieId),
           title: "Mùa Hè Kinh Hãi",
           aliasTitle: "I Know What You Did Last Summer",
           rating: 7.2,
           year: 2025,
           runtime: "1h 51m",
-          season: "Phần 1",
-          episode: "Tập 14",
           genres: ["Chiếu Rạp", "Gay Cấn", "Kinh Dị", "Bí Ẩn", "Tâm Lý"],
           description:
             "Khi năm người bạn vô tình gây ra một vụ tai nạn xe hơi chết người, họ quyết định che giấu và lập một giao ước giữ bí mật thay vì phải đối mặt với hậu quả.",
@@ -249,12 +276,12 @@ const MovieDetailPageContent = () => {
             "https://static.nutscdn.com/vimg/1920-0/d8a4ebcb52a0c7b9769298a843a355e6.webp",
           posterImage:
             "https://static.nutscdn.com/vimg/0-260/5ced6fb31801f8d66238cbdfaa23136d.webp",
-          director: "Mike Flanagan",
+          director: { id: 1, name: "Mike Flanagan" },
           cast: [
-            "Madison Iseman",
-            "Bill Heck",
-            "Brianne Tju",
-            "Ezekiel Goodman",
+            { id: 1, name: "Madison Iseman", character: "Main Character", profile_path: null },
+            { id: 2, name: "Bill Heck", character: "Supporting", profile_path: null },
+            { id: 3, name: "Brianne Tju", character: "Supporting", profile_path: null },
+            { id: 4, name: "Ezekiel Goodman", character: "Supporting", profile_path: null },
           ],
           country: "Mỹ",
           status: "Completed",
@@ -266,6 +293,11 @@ const MovieDetailPageContent = () => {
             "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
             "https://static.nutscdn.com/vimg/150-0/7fb03fc7adc8de125e80bc0d67d0e841.webp",
           ],
+          tmdbId: parseInt(movieId),
+          genreIds: [27, 9648, 53], // Horror, Mystery, Thriller
+          contentType: "movie",
+          voteCount: 1234,
+          popularity: 85.5,
         });
       } finally {
         setLoading(false);
@@ -362,13 +394,13 @@ const MovieDetailPageContent = () => {
                         </svg>
                         <span>{movieData.rating}</span>
                       </div>
-                      <span>•</span>
+                      <span>&bull;</span>
                     </>
                   )}
                   <span>{movieData.year}</span>
-                  <span>•</span>
+                  <span>&bull;</span>
                   <span>{movieData.runtime}</span>
-                  <span>•</span>
+                  <span>&bull;</span>
                   <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded">
                     {movieData.quality}
                   </span>
@@ -418,16 +450,16 @@ const MovieDetailPageContent = () => {
                   </Link>
 
                   <FavoriteButton
-                    item={{
-                      id: movieData.id?.toString() || movieId,
+                    movie={{
+                      id: movieData.id,
+                      tmdbId: movieData.tmdbId,
                       title: movieData.title || "Unknown Title",
-                      type: contentType === "tv" ? "tv-show" : "movie",
-                      year: movieData.year,
-                      rating: movieData.rating,
-                      image: movieData.posterImage,
+                      overview: movieData.description,
+                      poster_path: movieData.posterImage,
+                      backdrop_path: movieData.backgroundImage,
+                      vote_average: movieData.rating,
+                      genres: movieData.genres,
                     }}
-                    size="lg"
-                    className="px-8 py-4 !rounded-lg font-semibold"
                   />
 
                   <TrailerButton
@@ -467,7 +499,7 @@ const MovieDetailPageContent = () => {
                     <CastSkeleton />
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                      {movieData.cast.map((actor: any, index: number) => (
+                      {movieData.cast.map((actor: CastMember, index: number) => (
                         <Link
                           key={index}
                           href={`/people/${actor.id}`}
@@ -543,7 +575,7 @@ const MovieDetailPageContent = () => {
                         ) : (
                           movieData.cast
                             .slice(0, 6)
-                            .map((actor: any, index: number) => (
+                            .map((actor: CastMember, index: number) => (
                               <Link
                                 key={index}
                                 href={`/people/${actor.id}`}
@@ -564,9 +596,7 @@ const MovieDetailPageContent = () => {
                           Loading...
                         </span>
                       ) : (
-                        movieData.country ||
-                        movieData.origin_country[0] ||
-                        "Unknown"
+                        movieData.country || "Unknown"
                       )}
                     </span>
                   </div>
@@ -582,34 +612,6 @@ const MovieDetailPageContent = () => {
                     </span>
                     <span className="ml-2">{movieData.runtime} phút</span>
                   </div>
-                  {movieData.contentType === "tv" && (
-                    <>
-                      <div>
-                        <span className="text-gray-500">Số mùa:</span>
-                        <span className="ml-2">
-                          {movieData.numberOfSeasons}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Số tập:</span>
-                        <span className="ml-2">
-                          {movieData.numberOfEpisodes}
-                        </span>
-                      </div>
-                      {movieData.lastAirDate && (
-                        <div>
-                          <span className="text-gray-500">
-                            Ngày phát sóng cuối:
-                          </span>
-                          <span className="ml-2">
-                            {new Date(movieData.lastAirDate).toLocaleDateString(
-                              "en-US"
-                            )}
-                          </span>
-                        </div>
-                      )}
-                    </>
-                  )}
                   <div>
                     <span className="text-gray-500">Chất lượng:</span>
                     <span className="ml-2">{movieData.quality}</span>

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info, Star } from "lucide-react";
@@ -22,6 +23,9 @@ export interface MovieCardData {
   genres?: string[];
   duration?: string;
   description?: string;
+  backgroundImage?: string;
+  posterImage?: string;
+  scenes?: string[];
 }
 
 interface MovieCardProps {
@@ -137,15 +141,17 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           )}
 
           {/* Movie Poster */}
-          <img
+          <Image
             src={
               movie.poster ||
-              (movie as any).posterUrl ||
+              ("posterUrl" in movie ? (movie as Record<string, string>).posterUrl : "") ||
               "/images/no-poster.svg"
             }
             alt={`Xem Phim ${movie.title}`}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300"
+            className="object-cover transition-transform duration-300"
           />
 
           {/* Mobile/Tablet Hover Overlay - Simple */}
@@ -178,7 +184,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       >
         {/* Movie Poster - Top Section */}
         <div className="relative h-64">
-          <img
+          <Image
             src={
               movie.backgroundImage ||
               movie.poster ||
@@ -186,7 +192,9 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               "/images/no-poster.svg"
             }
             alt={movie.title}
-            className="w-full h-full object-cover"
+            fill
+            sizes="384px"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
         </div>

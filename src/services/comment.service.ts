@@ -26,6 +26,17 @@ class CommentService {
     };
   }
 
+  private toNumber(value: unknown): number {
+    if (typeof value === "number" && !Number.isNaN(value)) {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number(value);
+      return Number.isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  }
+
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -37,16 +48,28 @@ class CommentService {
   }
 
   // Normalize comment data from backend to frontend format
-  private normalizeComment(comment: any): Comment {
+  private normalizeComment(
+    comment: Record<string, unknown> | Comment
+  ): Comment {
+    const raw = comment as Record<string, unknown>;
+    const likesCount = this.toNumber(
+      raw["likeCount"] ?? raw["likesCount"]
+    );
+    const dislikesCount = this.toNumber(
+      raw["dislikeCount"] ?? raw["dislikesCount"]
+    );
+
     return {
-      ...comment,
-      likesCount: comment.likeCount ?? comment.likesCount ?? 0,
-      dislikesCount: comment.dislikeCount ?? comment.dislikesCount ?? 0,
+      ...(comment as unknown as Comment),
+      likesCount,
+      dislikesCount,
     };
   }
 
-  private normalizeComments(comments: any[]): Comment[] {
-    return comments.map(comment => this.normalizeComment(comment));
+  private normalizeComments(
+    comments: Array<Record<string, unknown> | Comment>
+  ): Comment[] {
+    return comments.map((comment) => this.normalizeComment(comment));
   }
 
   // User Comment Operations
@@ -414,7 +437,7 @@ class CommentService {
   }
 
   // Real-time updates (WebSocket will be implemented in Phase 4)
-  subscribeToComments(callback: (comment: Comment) => void): () => void {
+  subscribeToComments(): () => void {
     // Placeholder for WebSocket implementation
     console.log("WebSocket subscription will be implemented in Phase 4");
     return () => {};

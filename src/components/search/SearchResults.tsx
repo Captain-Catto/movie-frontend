@@ -3,7 +3,7 @@
 import React from "react";
 import { SearchResult } from "@/types/search";
 import SearchResultItem from "./SearchResultItem";
-import { Loader2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 interface SearchResultsProps {
   results: SearchResult[];

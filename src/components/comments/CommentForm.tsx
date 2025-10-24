@@ -4,6 +4,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { CommentFormProps, CreateCommentDto } from "@/types/comment.types";
 import { useContentFilter } from "@/hooks/use-comments";
@@ -192,9 +193,11 @@ export function CommentForm({
       {/* User Info */}
       <div className="ma-user flex items-center gap-3 mb-3">
         <div className="user-avatar">
-          <img
+          <Image
             src={user?.image || "/images/avatars/pack5/02.jpg"}
             alt={user?.name || "User"}
+            width={40}
+            height={40}
             className="w-10 h-10 rounded-full object-cover"
           />
         </div>
@@ -238,9 +241,11 @@ export function CommentForm({
                       className="px-3 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-2"
                       onClick={() => insertMention(user.name)}
                     >
-                      <img
+                      <Image
                         src={user.image || "/images/avatars/pack2/03.jpg"}
                         alt={user.name}
+                        width={24}
+                        height={24}
                         className="w-6 h-6 rounded-full object-cover"
                       />
                       <span className="text-white text-sm">{user.name}</span>

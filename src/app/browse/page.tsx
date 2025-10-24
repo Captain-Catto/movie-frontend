@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
@@ -8,7 +8,7 @@ import MovieCard, { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 
-export default function BrowsePage() {
+function BrowsePageContent() {
   const searchParams = useSearchParams();
   const [movies, setMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -16,9 +16,7 @@ export default function BrowsePage() {
   const [currentFilters, setCurrentFilters] = useState<FilterOptions>({
     countries: [],
     movieType: "",
-    ratings: [],
     genres: [],
-    versions: [],
     years: [],
     customYear: "",
     sortBy: "popularity",
@@ -30,7 +28,15 @@ export default function BrowsePage() {
       setLoading(true);
       setError(null);
 
-      const queryParams: any = {
+      const queryParams: {
+        page: number;
+        limit: number;
+        language: string;
+        countries?: string;
+        genre?: string;
+        year?: number;
+        sortBy?: string;
+      } = {
         page: 1,
         limit: 24,
         language: "en-US",
@@ -66,10 +72,10 @@ export default function BrowsePage() {
         // Handle nested data structure - TV endpoint returns data.data, movies endpoint returns data directly
         const movieData = Array.isArray(response.data)
           ? response.data
-          : response.data.data || [];
-        const frontendMovies = mapMoviesToFrontend(movieData);
+          : (response.data as { data?: unknown[] }).data || [];
+        const frontendMovies = mapMoviesToFrontend(movieData as never[]);
         // Use frontend movies directly since they already match MovieCardData interface
-        setMovies(frontendMovies);
+        setMovies(frontendMovies as MovieCardData[]);
       } else {
         throw new Error(response.message || "Failed to fetch content");
       }
@@ -89,48 +95,6 @@ export default function BrowsePage() {
     fetchMovies(filters, type || undefined);
   };
 
-  // Genre mappings for converting IDs to names
-  const TMDB_MOVIE_GENRE_MAP: Record<number, string> = {
-    28: "Action",
-    12: "Adventure",
-    16: "Animation",
-    35: "Comedy",
-    80: "Crime",
-    99: "Documentary",
-    18: "Drama",
-    10751: "Family",
-    14: "Fantasy",
-    36: "History",
-    27: "Horror",
-    10402: "Music",
-    9648: "Mystery",
-    10749: "Romance",
-    878: "Science Fiction",
-    10770: "TV Movie",
-    53: "Thriller",
-    10752: "War",
-    37: "Western",
-  };
-
-  const TMDB_TV_GENRE_MAP: Record<number, string> = {
-    10759: "Action & Adventure",
-    16: "Animation",
-    35: "Comedy",
-    80: "Crime",
-    99: "Documentary",
-    18: "Drama",
-    10751: "Family",
-    10762: "Kids",
-    9648: "Mystery",
-    10763: "News",
-    10764: "Reality",
-    10765: "Sci-Fi & Fantasy",
-    10766: "Soap",
-    10767: "Talk",
-    10768: "War & Politics",
-    37: "Western",
-  };
-
   // Xử lý URL parameters từ các trang khác
   useEffect(() => {
     const countries =
@@ -138,10 +102,6 @@ export default function BrowsePage() {
     const genreIds =
       searchParams.get("genres")?.split(",").filter(Boolean) || [];
     const years = searchParams.get("years")?.split(",").filter(Boolean) || [];
-    const ratings =
-      searchParams.get("ratings")?.split(",").filter(Boolean) || [];
-    const versions =
-      searchParams.get("versions")?.split(",").filter(Boolean) || [];
     const movieType = searchParams.get("movieType") || "";
     const sortBy = searchParams.get("sortBy") || "popularity";
     const type = searchParams.get("type"); // movie, tv, trending
@@ -167,9 +127,7 @@ export default function BrowsePage() {
     const filtersFromUrl: FilterOptions = {
       countries,
       movieType: type || movieType, // Set movieType based on URL type parameter
-      ratings,
       genres,
-      versions,
       years,
       customYear: "",
       sortBy,
@@ -251,5 +209,19 @@ export default function BrowsePage() {
         )}
       </div>
     </Layout>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center text-white">
+          Đang tải nội dung...
+        </div>
+      }
+    >
+      <BrowsePageContent />
+    </Suspense>
   );
 }

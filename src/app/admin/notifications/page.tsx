@@ -126,7 +126,7 @@ export default function AdminNotificationsPage() {
         console.log("📦 Admin notifications response:", data);
 
         // Ensure data is always an array
-        const notificationsArray: any[] = Array.isArray(
+        const notificationsArray: unknown[] = Array.isArray(
           data.data?.notifications
         )
           ? data.data.notifications
@@ -137,19 +137,21 @@ export default function AdminNotificationsPage() {
           : [];
 
         const normalizedNotifications: Notification[] = notificationsArray.map(
-          (notification: any) =>
-            ({
-              ...notification,
+          (notification: unknown) => {
+            const notif = notification as Record<string, unknown>;
+            return {
+              ...notif,
               analytics: {
                 totalTargetedUsers:
-                  notification.analytics?.totalTargetedUsers ?? 0,
-                deliveredCount: notification.analytics?.deliveredCount ?? 0,
-                readCount: notification.analytics?.readCount ?? 0,
-                dismissedCount: notification.analytics?.dismissedCount ?? 0,
-                clickCount: notification.analytics?.clickCount ?? 0,
+                  (notif.analytics as NotificationAnalyticsSummary | undefined)?.totalTargetedUsers ?? 0,
+                deliveredCount: (notif.analytics as NotificationAnalyticsSummary | undefined)?.deliveredCount ?? 0,
+                readCount: (notif.analytics as NotificationAnalyticsSummary | undefined)?.readCount ?? 0,
+                dismissedCount: (notif.analytics as NotificationAnalyticsSummary | undefined)?.dismissedCount ?? 0,
+                clickCount: (notif.analytics as NotificationAnalyticsSummary | undefined)?.clickCount ?? 0,
               },
-              createdBy: notification.createdBy ?? null,
-            } as Notification)
+              createdBy: notif.createdBy as Notification["createdBy"] ?? null,
+            } as Notification;
+          }
         );
 
         setNotifications(normalizedNotifications);
@@ -217,7 +219,16 @@ export default function AdminNotificationsPage() {
     try {
       const token = localStorage.getItem("authToken");
       let url = "http://localhost:8080/api/admin/notifications/";
-      const payload: any = {
+      const payload: {
+        title: string;
+        message: string;
+        type: string;
+        targetType?: string;
+        role?: string;
+        userId?: number;
+        priority?: number;
+        metadata?: Record<string, string>;
+      } = {
         title: formData.title,
         message: formData.message,
         type: formData.notificationType,
@@ -292,29 +303,6 @@ export default function AdminNotificationsPage() {
     }
   };
 
-  const sendQuickNotification = async (
-    type: "welcome" | "password-reset",
-    userId: string
-  ) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const url = `http://localhost:8080/api/admin/notifications/quick/${type}/${userId}`;
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        fetchNotifications();
-        fetchStats();
-      }
-    } catch (error) {
-      console.error(`Error sending ${type} notification:`, error);
-    }
-  };
 
   return (
     <AdminLayout>
@@ -856,7 +844,7 @@ export default function AdminNotificationsPage() {
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        notificationType: e.target.value as any,
+                        notificationType: e.target.value as "info" | "warning" | "success" | "error",
                       })
                     }
                     disabled={sendModal.type === "maintenance"}
@@ -888,7 +876,7 @@ export default function AdminNotificationsPage() {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          role: e.target.value as any,
+                          role: e.target.value as "user" | "admin",
                         })
                       }
                       className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"

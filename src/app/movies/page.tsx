@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MoviesGrid from "@/components/movie/MoviesGrid";
@@ -8,7 +8,7 @@ import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 
-export default function MoviesPage() {
+function MoviesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [movies, setMovies] = useState<MovieCardData[]>([]);
@@ -28,10 +28,6 @@ export default function MoviesPage() {
     if (filters.genres?.length) params.set("genres", filters.genres.join(","));
     if (filters.years?.length) params.set("years", filters.years.join(","));
     if (filters.movieType) params.set("movieType", filters.movieType);
-    if (filters.ratings?.length)
-      params.set("ratings", filters.ratings.join(","));
-    if (filters.versions?.length)
-      params.set("versions", filters.versions.join(","));
     if (filters.sortBy && filters.sortBy !== "latest")
       params.set("sortBy", filters.sortBy);
     params.set("type", "movie");
@@ -64,7 +60,7 @@ export default function MoviesPage() {
         if (response.success && response.data) {
           const frontendMovies = mapMoviesToFrontend(response.data);
           // Use frontend movies directly since they already match MovieCardData interface
-          setMovies(frontendMovies);
+          setMovies(frontendMovies as MovieCardData[]);
 
           // Set pagination info from response
           if (response.pagination) {
@@ -163,5 +159,19 @@ export default function MoviesPage() {
         onPageChange={handlePageChange}
       />
     </Layout>
+  );
+}
+
+export default function MoviesPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center text-white">
+          Đang tải danh sách phim lẻ...
+        </div>
+      }
+    >
+      <MoviesPageContent />
+    </Suspense>
   );
 }

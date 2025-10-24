@@ -9,13 +9,14 @@ import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
+import { MovieCardData } from "@/components/movie/MovieCard";
 
 export default function Home() {
-  const [nowPlayingMovies, setNowPlayingMovies] = useState<any[]>([]);
-  const [popularMovies, setPopularMovies] = useState<any[]>([]);
-  const [topRatedMovies, setTopRatedMovies] = useState<any[]>([]);
-  const [upcomingMovies, setUpcomingMovies] = useState<any[]>([]);
-  const [heroMovies, setHeroMovies] = useState<any[]>([]);
+  const [nowPlayingMovies, setNowPlayingMovies] = useState<MovieCardData[]>([]);
+  const [popularMovies, setPopularMovies] = useState<MovieCardData[]>([]);
+  const [topRatedMovies, setTopRatedMovies] = useState<MovieCardData[]>([]);
+  const [upcomingMovies, setUpcomingMovies] = useState<MovieCardData[]>([]);
+  const [heroMovies, setHeroMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [heroLoading, setHeroLoading] = useState(true);
 
@@ -96,7 +97,7 @@ export default function Home() {
   }, []);
 
   // Fallback static hero data
-  const fallbackHeroMovies = [
+  const fallbackHeroMoviesRaw = [
     {
       id: "119051",
       tmdbId: 119051,
@@ -179,6 +180,43 @@ export default function Home() {
     },
   ];
 
+  const fallbackHeroMovies: MovieCardData[] = fallbackHeroMoviesRaw.map(
+    (movie) => ({
+      ...movie,
+      poster: movie.posterImage || movie.backgroundImage,
+    })
+  );
+
+  const normalizeFallbackMovies = <
+    T extends {
+      id: string;
+      tmdbId?: number;
+      title: string;
+      aliasTitle?: string;
+      poster: string;
+      href: string;
+      year?: number;
+      genre?: string;
+      genres?: string[];
+      description?: string;
+      rating?: number;
+    }
+  >(
+    movies: T[]
+  ): MovieCardData[] =>
+    movies.map((movie, index) => {
+      const parsedId = Number.parseInt(movie.id, 10);
+      const tmdbId =
+        movie.tmdbId ?? (Number.isNaN(parsedId) ? index + 1 : parsedId);
+
+      return {
+        ...movie,
+        tmdbId,
+        aliasTitle: movie.aliasTitle ?? movie.title,
+        genres: movie.genres ?? (movie.genre ? [movie.genre] : undefined),
+      };
+    });
+
   const categories = [
     {
       id: "1",
@@ -231,7 +269,7 @@ export default function Home() {
   ];
 
   // Fallback static data for each section (6 movies each)
-  const fallbackNowPlaying = [
+  const fallbackNowPlayingRaw = [
     {
       id: "1",
       tmdbId: 693134, // Real TMDB ID for Dune: Part Two
@@ -295,7 +333,9 @@ export default function Home() {
     },
   ];
 
-  const fallbackPopular = [
+  const fallbackNowPlaying = normalizeFallbackMovies(fallbackNowPlayingRaw);
+
+  const fallbackPopularRaw = [
     {
       id: "7",
       title: "Black Panther",
@@ -358,7 +398,9 @@ export default function Home() {
     },
   ];
 
-  const fallbackTopRated = [
+  const fallbackPopular = normalizeFallbackMovies(fallbackPopularRaw);
+
+  const fallbackTopRatedRaw = [
     {
       id: "13",
       title: "The Godfather",
@@ -421,7 +463,9 @@ export default function Home() {
     },
   ];
 
-  const fallbackUpcoming = [
+  const fallbackTopRated = normalizeFallbackMovies(fallbackTopRatedRaw);
+
+  const fallbackUpcomingRaw = [
     {
       id: "19",
       title: "Dune: Part Three",
@@ -483,6 +527,8 @@ export default function Home() {
       genre: "Action",
     },
   ];
+
+  const fallbackUpcoming = normalizeFallbackMovies(fallbackUpcomingRaw);
 
   // Use fetched movies if available, otherwise fall back to static data (updated)
   const nowPlayingToDisplay =

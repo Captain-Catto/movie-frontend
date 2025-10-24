@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authStorage, type StoredUser } from "@/lib/auth-storage";
 import { authApiService } from "@/services/auth-api";
 import {

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { X, Search as SearchIcon } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { SearchResult, RecentSearch } from "@/types/search";
+import { RecentSearch } from "@/types/search";
 import SearchInput from "./SearchInput";
 import SearchResults from "./SearchResults";
 import RecentSearches from "./RecentSearches";

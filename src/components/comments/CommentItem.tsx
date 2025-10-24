@@ -40,15 +40,6 @@ export function CommentItem({
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const canModerate = isAdmin;
 
-  // Auto-load replies when component mounts if there are replies
-  useEffect(() => {
-    // Auto-expand and load if comment has replies (showing first few by default)
-    if (comment.replyCount > 0 && !repliesLoaded && depth < maxDepth) {
-      loadReplies();
-      setShowReplies(true);
-    }
-  }, [comment.replyCount, depth, maxDepth]);
-
   // Format timestamp to Vietnamese
   const formatTimestamp = (dateString: string) => {
     try {
@@ -75,7 +66,37 @@ export function CommentItem({
     }
   };
 
-  // Load replies
+  // Auto-load replies when component mounts if there are replies
+  useEffect(() => {
+    // Load replies function
+    const loadReplies = async () => {
+      if (repliesLoaded) return;
+
+      setLoadingReplies(true);
+      try {
+        const response = await commentService.getReplies(comment.id, {
+          page: 1,
+          limit: 10,
+        });
+
+        console.log(`📥 [CommentItem depth=${depth}] Loaded replies for comment ${comment.id}:`, response.comments);
+        setReplies(response.comments || []);
+        setRepliesLoaded(true);
+      } catch (error) {
+        console.error("Failed to load replies:", error);
+      } finally {
+        setLoadingReplies(false);
+      }
+    };
+
+    // Auto-expand and load if comment has replies (showing first few by default)
+    if (comment.replyCount > 0 && !repliesLoaded && depth < maxDepth) {
+      loadReplies();
+      setShowReplies(true);
+    }
+  }, [comment.replyCount, comment.id, depth, maxDepth, repliesLoaded]);
+
+  // Load replies on demand
   const loadReplies = async () => {
     if (repliesLoaded) return;
 

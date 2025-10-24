@@ -1,14 +1,15 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MovieGrid from "@/components/movie/MovieGrid";
 import LinkPagination from "@/components/ui/LinkPagination";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
+import { MovieCardData } from "@/components/movie/MovieCard";
 
-export default function UpcomingPage() {
-  const [movies, setMovies] = useState<any[]>([]);
+function UpcomingPageContent() {
+  const [movies, setMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -32,7 +33,11 @@ export default function UpcomingPage() {
           setMovies(mappedMovies);
           if (response.pagination) {
             setTotalPages(response.pagination.totalPages);
-            setTotal(response.pagination.totalItems || 0);
+            const totalCount =
+              typeof response.pagination.total === "number"
+                ? response.pagination.total
+                : response.pagination.totalItems || 0;
+            setTotal(totalCount);
           }
         }
       } catch (error) {
@@ -97,5 +102,19 @@ export default function UpcomingPage() {
         </div>
       </div>
     </Layout>
+  );
+}
+
+export default function UpcomingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center text-white">
+          Đang tải danh sách phim sắp chiếu...
+        </div>
+      }
+    >
+      <UpcomingPageContent />
+    </Suspense>
   );
 }

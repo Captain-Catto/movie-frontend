@@ -2,10 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { SearchResult } from "@/types/search";
 import { Calendar, Star, Film, Tv } from "lucide-react";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 
 interface SearchResultItemProps {
   result: SearchResult;
@@ -51,13 +50,15 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
     >
       {/* Poster */}
       <div className="relative w-12 h-16 flex-shrink-0">
-        <img
+        <Image
           src={
             result.posterPath
               ? `https://image.tmdb.org/t/p/w185${result.posterPath}`
               : "/images/no-poster.svg"
           }
           alt={result.title}
+          width={48}
+          height={64}
           className="w-full h-full object-cover rounded"
         />
 

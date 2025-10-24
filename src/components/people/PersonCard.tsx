@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import type { PersonData } from "@/app/people/page";
 
 interface PersonCardProps {
@@ -34,22 +35,15 @@ const PersonCard = ({ person }: PersonCardProps) => {
     }
   };
 
-  const getKnownForMovies = () => {
-    return (
-      person.known_for
-        ?.slice(0, 2)
-        .map((item) => item.title || item.name)
-        .join(", ") || ""
-    );
-  };
-
   return (
     <div className="group relative bg-gray-900 rounded-lg p-4">
       <Link href={`/people/${person.id}`} className="block">
         <div className="w-full h-64 rounded-lg overflow-hidden bg-gray-700 mb-4">
-          <img
+          <Image
             src={getProfileImage()}
             alt={person.name}
+            width={300}
+            height={256}
             className="w-full h-full object-cover"
             onError={(e) => {
               console.error(

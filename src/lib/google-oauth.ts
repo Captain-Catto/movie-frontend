@@ -77,7 +77,7 @@ export function parseOAuthCallback(
 /**
  * Decode JWT token (without verification - for display only)
  */
-export function decodeJWT(token: string): any {
+export function decodeJWT(token: string): Record<string, unknown> | null {
   try {
     const base64Url = token.split(".")[1];
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -95,6 +95,20 @@ export function decodeJWT(token: string): any {
   }
 }
 
+function isGoogleIdTokenPayload(
+  payload: Record<string, unknown>
+): payload is {
+  email: string;
+  name?: string;
+  picture?: string;
+  sub: string;
+} {
+  return (
+    typeof payload.email === "string" &&
+    typeof payload.sub === "string"
+  );
+}
+
 /**
  * Extract user info from Google ID token
  */
@@ -106,14 +120,20 @@ export function extractGoogleUserInfo(idToken: string): {
 } | null {
   const decoded = decodeJWT(idToken);
 
-  if (!decoded) {
+  if (!decoded || !isGoogleIdTokenPayload(decoded)) {
     return null;
   }
 
   return {
     email: decoded.email,
-    name: decoded.name,
-    image: decoded.picture,
+    name:
+      typeof decoded.name === "string" && decoded.name.length > 0
+        ? decoded.name
+        : decoded.email,
+    image:
+      typeof decoded.picture === "string" && decoded.picture.length > 0
+        ? decoded.picture
+        : undefined,
     googleId: decoded.sub,
   };
 }

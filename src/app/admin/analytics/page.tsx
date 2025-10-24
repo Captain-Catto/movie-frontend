@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 interface AnalyticsOverview {
@@ -242,16 +243,20 @@ export default function AdminAnalyticsPage() {
                   <div key={content.tmdbId} className="flex items-center space-x-3 p-2 border-b border-gray-700">
                     <span className="font-bold text-gray-400">#{index + 1}</span>
                     {content.posterPath && (
-                      <img
-                        src={`https://image.tmdb.org/t/p/w92${content.posterPath}`}
-                        alt={content.title}
-                        className="w-12 h-18 object-cover rounded"
-                      />
+                      <div className="relative w-12 h-18">
+                        <Image
+                          src={`https://image.tmdb.org/t/p/w92${content.posterPath}`}
+                          alt={content.title}
+                          fill
+                          className="object-cover rounded"
+                          sizes="48px"
+                        />
+                      </div>
                     )}
                     <div className="flex-1">
                       <h3 className="font-medium">{content.title}</h3>
                       <p className="text-sm text-gray-400">
-                        {content.contentType} • {content.viewCount} views • {content.favoriteCount} favorites
+                        {content.contentType} &bull; {content.viewCount} views &bull; {content.favoriteCount} favorites
                       </p>
                     </div>
                   </div>

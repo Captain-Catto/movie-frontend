@@ -48,7 +48,6 @@ const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string 
 
 export default function AdminSyncDataPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState<SyncTarget | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -59,7 +58,6 @@ export default function AdminSyncDataPage() {
   }, []);
 
   const fetchStats = async () => {
-    setLoading(true);
     try {
       const token = localStorage.getItem("authToken");
       if (!token) {
@@ -81,11 +79,9 @@ export default function AdminSyncDataPage() {
       } else {
         throw new Error(data.message || "Failed to load dashboard stats");
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error loading dashboard stats:", error);
-      setErrorMessage(error.message || "Failed to load dashboard stats.");
-    } finally {
-      setLoading(false);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to load dashboard stats.");
     }
   };
 
@@ -123,9 +119,9 @@ export default function AdminSyncDataPage() {
 
       setSuccessMessage(data.message || `Sync "${target}" triggered successfully.`);
       await fetchStats();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error triggering sync:", error);
-      setErrorMessage(error.message || "Failed to trigger sync.");
+      setErrorMessage(error instanceof Error ? error.message : "Failed to trigger sync.");
     } finally {
       setSyncing(null);
     }

@@ -52,6 +52,10 @@ export interface TableFilterOptions {
   years: string[];
   customYear: string;
   sortBy: string;
+  ratings?: string[];
+  versions?: string[];
+  qualities?: string[];
+  languages?: string[];
 }
 
 interface TableFiltersProps {
@@ -77,13 +81,24 @@ const TableFilters = ({
     years: [],
     customYear: "",
     sortBy: "popularity",
+    ratings: [],
+    versions: [],
+    qualities: [],
+    languages: [],
   });
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Sync with initialFilters from URL parameters
   useEffect(() => {
     if (initialFilters) {
-      setFilters(initialFilters);
+      setFilters((prev) => ({
+        ...prev,
+        ...initialFilters,
+        ratings: initialFilters.ratings ?? prev.ratings,
+        versions: initialFilters.versions ?? prev.versions,
+        qualities: initialFilters.qualities ?? prev.qualities,
+        languages: initialFilters.languages ?? prev.languages,
+      }));
     }
   }, [initialFilters]);
 
