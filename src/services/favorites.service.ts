@@ -1,5 +1,9 @@
 import { mapGenreIdsToNames } from "@/utils/genreMapping";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+const API_URL = `${API_BASE_URL}/api`;
+
 export interface AddFavoriteDto {
   contentId: string;
   contentType: "movie" | "tv";
@@ -71,9 +75,7 @@ export const favoritesService = {
       limit: limit.toString(),
     });
 
-    const url = `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"
-    }/favorites?${queryParams.toString()}`;
+    const url = `${API_URL}/favorites?${queryParams.toString()}`;
 
     const token = localStorage.getItem("authToken");
 
@@ -130,9 +132,7 @@ export const favoritesService = {
   },
 
   async addToFavorites(data: AddFavoriteDto): Promise<Favorite> {
-    const url = `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"
-    }/favorites`;
+    const url = `${API_URL}/favorites`;
 
     // Try to get token from different sources
     const authToken = localStorage.getItem("authToken");
@@ -176,9 +176,7 @@ export const favoritesService = {
     contentId: string,
     contentType: "movie" | "tv"
   ): Promise<{ message: string }> {
-    const url = `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"
-    }/favorites`;
+    const url = `${API_URL}/favorites`;
     const token = localStorage.getItem("authToken");
 
     const response = await fetch(url, {
@@ -260,9 +258,7 @@ export const favoritesService = {
   },
 
   async getUserStats(): Promise<{ totalFavorites: number }> {
-    const url = `${
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api"
-    }/favorites/stats`;
+    const url = `${API_URL}/favorites/stats`;
     const token = localStorage.getItem("authToken");
 
     const response = await fetch(url, {
