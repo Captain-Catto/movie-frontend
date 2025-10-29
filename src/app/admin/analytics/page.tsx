@@ -85,7 +85,11 @@ export default function AdminAnalyticsPage() {
         );
         if (overviewResponse.ok) {
           const overviewData = await overviewResponse.json();
-          setOverview(overviewData.data);
+          setOverview(
+            overviewData?.data && typeof overviewData.data === "object"
+              ? (overviewData.data as AnalyticsOverview)
+              : null
+          );
         }
 
         const viewResponse = await fetch(
@@ -94,7 +98,18 @@ export default function AdminAnalyticsPage() {
         );
         if (viewResponse.ok) {
           const viewData = await viewResponse.json();
-          setViewStats(viewData.data || []);
+          const rawViewStats: unknown[] = Array.isArray(viewData?.data)
+            ? viewData.data
+            : [];
+          const normalizedViewStats: ViewStats[] = rawViewStats.map((item) => {
+            const record = item as Record<string, unknown>;
+            return {
+              date: (record.date as string) ?? "",
+              views: Number(record.views ?? record.count ?? 0),
+              clicks: Number(record.clicks ?? 0),
+            };
+          });
+          setViewStats(normalizedViewStats);
         }
 
         const popularResponse = await fetch(
@@ -103,7 +118,42 @@ export default function AdminAnalyticsPage() {
         );
         if (popularResponse.ok) {
           const popularData = await popularResponse.json();
-          setPopularContent(popularData.data || []);
+          const rawPopular = popularData?.data;
+          const popularArray: unknown =
+            Array.isArray(rawPopular)
+              ? rawPopular
+              : rawPopular
+              ? [
+                  ...((rawPopular.movies as unknown[]) ?? []),
+                  ...((rawPopular.tvSeries as unknown[]) ?? []),
+                ]
+              : [];
+
+          const normalizedPopular: PopularContent[] = Array.isArray(popularArray)
+            ? popularArray.map((item) => {
+                const record = item as Record<string, unknown>;
+                const tmdbId = Number(record.tmdbId ?? record.id ?? 0);
+                const typeValue = (record.contentType ?? record.type) as
+                  | "movie"
+                  | "tv"
+                  | string
+                  | undefined;
+                const poster =
+                  (record.posterPath as string | undefined) ??
+                  (record.posterUrl as string | undefined);
+                return {
+                  tmdbId,
+                  title: (record.title as string) ?? "Unknown title",
+                  contentType: typeValue === "tv" ? "tv" : "movie",
+                  viewCount: Number(record.viewCount ?? 0),
+                  clickCount: Number(record.clickCount ?? 0),
+                  favoriteCount: Number(record.favoriteCount ?? 0),
+                  posterPath: poster ?? undefined,
+                };
+              })
+            : [];
+
+          setPopularContent(normalizedPopular);
         }
 
         const deviceResponse = await fetch(
@@ -112,7 +162,30 @@ export default function AdminAnalyticsPage() {
         );
         if (deviceResponse.ok) {
           const deviceData = await deviceResponse.json();
-          setDeviceStats(deviceData.data || []);
+          const rawDevices: unknown[] = Array.isArray(deviceData?.data)
+            ? deviceData.data
+            : [];
+          const totalDevices = rawDevices.reduce((sum, item) => {
+            const count = Number(
+              (item as Record<string, unknown>).count ?? 0
+            );
+            return sum + (Number.isFinite(count) ? count : 0);
+          }, 0);
+
+          const normalizedDevices: DeviceStats[] = rawDevices.map((item) => {
+            const record = item as Record<string, unknown>;
+            const count = Number(record.count ?? 0);
+            const safeCount = Number.isFinite(count) ? count : 0;
+            const percentage =
+              totalDevices > 0 ? (safeCount / totalDevices) * 100 : 0;
+            return {
+              device: (record.device as string) ?? "Unknown",
+              count: safeCount,
+              percentage,
+            };
+          });
+
+          setDeviceStats(normalizedDevices);
         }
 
         const countryResponse = await fetch(
@@ -121,10 +194,40 @@ export default function AdminAnalyticsPage() {
         );
         if (countryResponse.ok) {
           const countryData = await countryResponse.json();
-          setCountryStats(countryData.data || []);
+          const rawCountries: unknown[] = Array.isArray(countryData?.data)
+            ? countryData.data
+            : [];
+          const totalCountries = rawCountries.reduce((sum, item) => {
+            const count = Number(
+              (item as Record<string, unknown>).count ?? 0
+            );
+            return sum + (Number.isFinite(count) ? count : 0);
+          }, 0);
+
+          const normalizedCountries: CountryStats[] = rawCountries.map(
+            (item) => {
+              const record = item as Record<string, unknown>;
+              const count = Number(record.count ?? 0);
+              const safeCount = Number.isFinite(count) ? count : 0;
+              const percentage =
+                totalCountries > 0 ? (safeCount / totalCountries) * 100 : 0;
+              return {
+                country: (record.country as string) ?? "Unknown",
+                count: safeCount,
+                percentage,
+              };
+            }
+          );
+
+          setCountryStats(normalizedCountries);
         }
       } catch (error) {
         console.error("Error fetching analytics:", error);
+        setOverview(null);
+        setViewStats([]);
+        setPopularContent([]);
+        setDeviceStats([]);
+        setCountryStats([]);
       } finally {
         setLoading(false);
       }
