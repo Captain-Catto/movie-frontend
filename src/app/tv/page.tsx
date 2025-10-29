@@ -191,12 +191,10 @@ function TVShowsPageContent() {
 
               const href = mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
 
-              const episodes = ensureNumber(series.numberOfEpisodes) ??
+              const episodes =
+                ensureNumber(series.numberOfEpisodes) ??
                 ensureNumber(series.episodeNumber) ??
                 ensureNumber(series.number_of_episodes);
-
-              const seasons = ensureNumber(series.numberOfSeasons) ??
-                ensureNumber(series.number_of_seasons);
 
               const tvShow: MovieCardData = {
                 id: tmdbId.toString(),
@@ -214,7 +212,6 @@ function TVShowsPageContent() {
                 posterImage: poster,
                 isComplete: ensureString(series.status) === "Ended",
                 totalEpisodes: episodes,
-                totalSeasons: seasons,
               };
 
               return tvShow;
