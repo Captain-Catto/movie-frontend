@@ -78,12 +78,26 @@ function TVShowsPageContent() {
         });
 
         if (response.success && response.data) {
-          // TV API returns nested structure: response.data.data contains the array
-          const responseData =
-            response.data as unknown as Record<string, unknown> | Array<Record<string, unknown>>;
-          const tvSeriesArray = Array.isArray(responseData)
-            ? responseData
-            : ((responseData.data as Array<Record<string, unknown>>) || []);
+          // TV API may return array directly or nested under data property.
+          const rawData = response.data as unknown;
+          let tvSeriesArray: Array<Record<string, unknown>> = [];
+          let paginationData:
+            | { totalPages?: number }
+            | Record<string, unknown>
+            | undefined;
+
+          if (Array.isArray(rawData)) {
+            tvSeriesArray = rawData as Array<Record<string, unknown>>;
+            paginationData = response.pagination as Record<string, unknown> | undefined;
+          } else if (rawData && typeof rawData === "object") {
+            const dataWrapper = rawData as Record<string, unknown>;
+            const nestedData = dataWrapper.data;
+            if (Array.isArray(nestedData)) {
+              tvSeriesArray = nestedData as Array<Record<string, unknown>>;
+            }
+            paginationData = (dataWrapper.pagination ??
+              response.pagination) as Record<string, unknown> | undefined;
+          }
 
           const ensureNumber = (value: unknown): number | undefined => {
             if (typeof value === "number" && Number.isFinite(value)) {
@@ -221,11 +235,21 @@ function TVShowsPageContent() {
           setTVShows(tvShowsWithCardData);
 
           // Set pagination info from response
-          const paginationData = response.pagination;
           if (paginationData) {
             console.log("🔍 TV Pagination data:", paginationData);
-            setTotalPages(paginationData.totalPages);
-            console.log("📄 Set totalPages to:", paginationData.totalPages);
+            const totalPagesValue =
+              (paginationData as { totalPages?: number }).totalPages ??
+              (paginationData as { total_pages?: number }).total_pages;
+            if (
+              typeof totalPagesValue === "number" &&
+              Number.isFinite(totalPagesValue) &&
+              totalPagesValue > 0
+            ) {
+              setTotalPages(totalPagesValue);
+              console.log("📄 Set totalPages to:", totalPagesValue);
+            } else {
+              setTotalPages(1);
+            }
           } else {
             console.log("❌ No pagination data in TV response");
             setTotalPages(1);
