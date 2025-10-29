@@ -55,6 +55,15 @@ export default function AdminAnalyticsPage() {
     endDate: new Date().toISOString().split('T')[0]
   });
   const [contentType, setContentType] = useState<"all" | "movie" | "tv">("all");
+  const formatNumber = (value?: number | null) => {
+    const numeric = typeof value === "number" && Number.isFinite(value) ? value : 0;
+    return numeric.toLocaleString();
+  };
+
+  const formatPercentageValue = (value?: number | null) => {
+    const numeric = typeof value === "number" && Number.isFinite(value) ? value : 0;
+    return numeric;
+  };
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -124,6 +133,9 @@ export default function AdminAnalyticsPage() {
     fetchAnalytics();
   }, [dateRange, contentType]);
 
+  const maxViewCount =
+    viewStats.length > 0 ? Math.max(...viewStats.map((stat) => stat.views)) : 0;
+
   return (
     <AdminLayout>
       <div className="space-y-6 p-6">
@@ -175,31 +187,31 @@ export default function AdminAnalyticsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Total Users</h3>
-                <p className="text-2xl font-bold text-blue-600">{overview.totalUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-blue-600">{formatNumber(overview.totalUsers)}</p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Total Movies</h3>
-                <p className="text-2xl font-bold text-green-600">{overview.totalMovies.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-green-600">{formatNumber(overview.totalMovies)}</p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Total TV Shows</h3>
-                <p className="text-2xl font-bold text-purple-600">{overview.totalTVShows.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-purple-600">{formatNumber(overview.totalTVShows)}</p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Total Views</h3>
-                <p className="text-2xl font-bold text-red-600">{overview.totalViews.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-red-600">{formatNumber(overview.totalViews)}</p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Total Favorites</h3>
-                <p className="text-2xl font-bold text-yellow-600">{overview.totalFavorites.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-yellow-600">{formatNumber(overview.totalFavorites)}</p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Daily Active Users</h3>
-                <p className="text-2xl font-bold text-indigo-600">{overview.dailyActiveUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-indigo-600">{formatNumber(overview.dailyActiveUsers)}</p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold text-white">Monthly Active Users</h3>
-                <p className="text-2xl font-bold text-pink-600">{overview.monthlyActiveUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-pink-600">{formatNumber(overview.monthlyActiveUsers)}</p>
               </div>
             </div>
           )}
@@ -219,7 +231,10 @@ export default function AdminAnalyticsPage() {
                       <div
                         className="bg-blue-500 w-8 rounded-t"
                         style={{
-                          height: `${Math.max((stat.views / Math.max(...viewStats.map(s => s.views))) * 200, 2)}px`
+                          height: `${Math.max(
+                            maxViewCount > 0 ? (stat.views / maxViewCount) * 200 : 0,
+                            2
+                          )}px`
                         }}
                         title={`${stat.date}: ${stat.views} views`}
                       />
@@ -273,20 +288,26 @@ export default function AdminAnalyticsPage() {
               <div className="text-center text-gray-400">Loading...</div>
             ) : (
               <div className="space-y-3">
-                {deviceStats.map((device, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className="font-medium">{device.device}</span>
-                    <div className="flex items-center space-x-2">
-                      <div className="w-32 bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-blue-500 h-2 rounded-full"
-                          style={{ width: `${device.percentage}%` }}
-                        />
+                {deviceStats.map((device, index) => {
+                  const percentage = formatPercentageValue(device.percentage);
+                  const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+                  return (
+                    <div key={index} className="flex items-center justify-between">
+                      <span className="font-medium">{device.device}</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-32 bg-gray-700 rounded-full h-2">
+                          <div
+                            className="bg-blue-500 h-2 rounded-full"
+                            style={{ width: `${clampedPercentage}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-400">
+                          {percentage.toFixed(1)}%
+                        </span>
                       </div>
-                      <span className="text-sm text-gray-400">{device.percentage.toFixed(1)}%</span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -308,7 +329,9 @@ export default function AdminAnalyticsPage() {
                           style={{ width: `${country.percentage}%` }}
                         />
                       </div>
-                      <span className="text-sm text-gray-400">{country.count}</span>
+                      <span className="text-sm text-gray-400">
+                        {formatNumber(country.count)}
+                      </span>
                     </div>
                   </div>
                 ))}
