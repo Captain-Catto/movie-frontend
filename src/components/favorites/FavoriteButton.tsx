@@ -155,7 +155,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
             : isFavorite
             ? "bg-red-500 text-white hover:bg-red-600"
             : iconOnly
-            ? "bg-black bg-opacity-50 hover:bg-opacity-70 text-white"
+            ? "bg-gray-200 bg-opacity-50 hover:bg-opacity-70 text-white"
             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
         }
         ${className && className.includes("rounded-") ? "" : "rounded-full"}
