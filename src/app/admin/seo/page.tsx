@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
+import { API_BASE_URL } from "@/services/api";
 
 interface SeoStats {
   totalPages: number;
@@ -51,7 +52,7 @@ export default function AdminSeoPage() {
   const fetchSeoData = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch("http://localhost:8080/api/admin/seo", {
+      const response = await fetch(`${API_BASE_URL}/admin/seo`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,7 +77,7 @@ export default function AdminSeoPage() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        "http://localhost:8080/api/admin/seo/stats/overview",
+        `${API_BASE_URL}/admin/seo/stats/overview`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -105,8 +106,8 @@ export default function AdminSeoPage() {
       };
 
       const url = editModal.isNew
-        ? "http://localhost:8080/api/admin/seo"
-        : `http://localhost:8080/api/admin/seo/${editModal.seo?.id}`;
+        ? `${API_BASE_URL}/admin/seo`
+        : `${API_BASE_URL}/admin/seo/${editModal.seo?.id}`;
 
       const method = editModal.isNew ? "POST" : "PUT";
 
@@ -135,7 +136,7 @@ export default function AdminSeoPage() {
 
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(`http://localhost:8080/admin/seo/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/seo/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -155,7 +156,7 @@ export default function AdminSeoPage() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        `http://localhost:8080/admin/seo/${id}/toggle`,
+        `${API_BASE_URL}/admin/seo/${id}/toggle`,
         {
           method: "POST",
           headers: {
@@ -177,7 +178,7 @@ export default function AdminSeoPage() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        "http://localhost:8080/api/admin/seo/setup/defaults",
+        `${API_BASE_URL}/admin/seo/setup/defaults`,
         {
           method: "POST",
           headers: {

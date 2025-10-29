@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { API_BASE_URL } from "@/services/api";
 
 interface NotificationAnalyticsSummary {
   totalTargetedUsers: number;
@@ -113,7 +114,7 @@ export default function AdminNotificationsPage() {
       }
 
       const response = await fetch(
-        `http://localhost:8080/api/admin/notifications?${params.toString()}`,
+        `${API_BASE_URL}/admin/notifications?${params.toString()}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -189,7 +190,7 @@ export default function AdminNotificationsPage() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        "http://localhost:8080/api/admin/notifications/stats",
+        "${API_BASE_URL}/admin/notifications/stats",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -218,7 +219,7 @@ export default function AdminNotificationsPage() {
   const handleSendNotification = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      let url = "http://localhost:8080/api/admin/notifications/";
+      let url = `${API_BASE_URL}/admin/notifications/`;
       const payload: {
         title: string;
         message: string;
@@ -285,7 +286,7 @@ export default function AdminNotificationsPage() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        `http://localhost:8080/api/admin/notifications/${id}`,
+        `${API_BASE_URL}/admin/notifications/${id}`,
         {
           method: "DELETE",
           headers: {

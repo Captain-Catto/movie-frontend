@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { API_BASE_URL } from "@/services/api";
 
 interface AnalyticsOverview {
   totalUsers: number;
@@ -70,7 +71,7 @@ export default function AdminAnalyticsPage() {
         });
 
         const overviewResponse = await fetch(
-          "http://localhost:8080/admin/analytics/overview",
+          `${API_BASE_URL}/admin/analytics/overview`,
           { headers }
         );
         if (overviewResponse.ok) {
@@ -79,7 +80,7 @@ export default function AdminAnalyticsPage() {
         }
 
         const viewResponse = await fetch(
-          `http://localhost:8080/admin/analytics/views?${viewParams}`,
+          `${API_BASE_URL}/admin/analytics/views?${viewParams}`,
           { headers }
         );
         if (viewResponse.ok) {
@@ -88,7 +89,7 @@ export default function AdminAnalyticsPage() {
         }
 
         const popularResponse = await fetch(
-          `http://localhost:8080/admin/analytics/popular?${viewParams}`,
+          `${API_BASE_URL}/admin/analytics/popular?${viewParams}`,
           { headers }
         );
         if (popularResponse.ok) {
@@ -97,7 +98,7 @@ export default function AdminAnalyticsPage() {
         }
 
         const deviceResponse = await fetch(
-          `http://localhost:8080/admin/analytics/devices?${viewParams}`,
+          `${API_BASE_URL}/admin/analytics/devices?${viewParams}`,
           { headers }
         );
         if (deviceResponse.ok) {
@@ -106,7 +107,7 @@ export default function AdminAnalyticsPage() {
         }
 
         const countryResponse = await fetch(
-          `http://localhost:8080/admin/analytics/countries?${viewParams}`,
+          `${API_BASE_URL}/admin/analytics/countries?${viewParams}`,
           { headers }
         );
         if (countryResponse.ok) {

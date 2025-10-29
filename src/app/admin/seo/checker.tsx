@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SeoMetadata } from "@/types/seo";
+import { API_BASE_URL } from "@/services/api";
 
 interface CheckerResult {
   total: number;
@@ -25,7 +26,7 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
   useEffect(() => {
     if (checking) {
       const token = localStorage.getItem("authToken");
-      fetch("http://localhost:8080/api/admin/seo", {
+      fetch(`${API_BASE_URL}/admin/seo`, {
         headers: {
           Authorization: `Bearer ${token || ""}`,
         },

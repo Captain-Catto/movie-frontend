@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
+import { API_BASE_URL } from "@/services/api";
 
 interface User {
   id: number;
@@ -29,7 +30,7 @@ export default function AdminUsersPage() {
     try {
       const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken" not "token"
       const response = await fetch(
-        `http://localhost:8080/api/admin/users/list?status=${filter}`,
+        `${API_BASE_URL}/admin/users/list?status=${filter}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -57,20 +58,17 @@ export default function AdminUsersPage() {
 
     try {
       const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken"
-      const response = await fetch(
-        "http://localhost:8080/api/admin/users/ban",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            userId: banModal.user.id,
-            reason: banReason,
-          }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/admin/users/ban`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: banModal.user.id,
+          reason: banReason,
+        }),
+      });
 
       const data = await response.json();
       if (data.success) {
@@ -87,7 +85,7 @@ export default function AdminUsersPage() {
     try {
       const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken"
       const response = await fetch(
-        `http://localhost:8080/api/admin/users/unban/${userId}`,
+        `${API_BASE_URL}/admin/users/unban/${userId}`,
         {
           method: "POST",
           headers: {

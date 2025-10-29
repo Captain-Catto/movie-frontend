@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
+import { API_BASE_URL } from "@/services/api";
 
 interface DashboardStats {
   totalMovies: number;
@@ -32,7 +33,7 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch(
-        "http://localhost:8080/api/admin/dashboard/stats",
+        `${API_BASE_URL}/admin/dashboard/stats`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,7 +63,7 @@ export default function AdminDashboard() {
         throw new Error("Missing admin authentication token");
       }
 
-      const response = await fetch("http://localhost:8080/api/admin/sync", {
+      const response = await fetch(`${API_BASE_URL}/admin/sync`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

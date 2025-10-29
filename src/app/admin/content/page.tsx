@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Pagination } from "@/components/ui/Pagination";
+import { API_BASE_URL } from "@/services/api";
 
 type TabKey = "movies" | "tv" | "trending";
 type ContentStatusFilter = "all" | "active" | "blocked";
@@ -149,7 +150,7 @@ export default function AdminContentPage() {
         }
 
         const response = await fetch(
-          `http://localhost:8080/api/admin/content/list?${params.toString()}`,
+          `${API_BASE_URL}/admin/content/list?${params.toString()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -200,7 +201,7 @@ export default function AdminContentPage() {
         }
 
         const response = await fetch(
-          `http://localhost:8080/api/admin/content/list?${params.toString()}`,
+          `${API_BASE_URL}/admin/content/list?${params.toString()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -245,7 +246,7 @@ export default function AdminContentPage() {
         });
 
         const response = await fetch(
-          `http://localhost:8080/api/admin/content/trending?${params.toString()}`,
+          `${API_BASE_URL}/admin/content/trending?${params.toString()}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -338,8 +339,8 @@ export default function AdminContentPage() {
     try {
       const token = localStorage.getItem("authToken");
       const endpoint = isTrendingTab
-        ? "http://localhost:8080/api/admin/content/trending/block"
-        : "http://localhost:8080/api/admin/content/block";
+        ? `${API_BASE_URL}/admin/content/trending/block`
+        : `${API_BASE_URL}/admin/content/block`;
       const payload = isTrendingTab
         ? {
             tmdbId: blockModal.content.tmdbId,
@@ -378,8 +379,8 @@ export default function AdminContentPage() {
     try {
       const token = localStorage.getItem("authToken");
       const endpoint = isTrendingTab
-        ? "http://localhost:8080/api/admin/content/trending/unblock"
-        : "http://localhost:8080/api/admin/content/unblock";
+        ? `${API_BASE_URL}/admin/content/trending/unblock`
+        : `${API_BASE_URL}/admin/content/unblock`;
       const payload = isTrendingTab
         ? {
             tmdbId: content.tmdbId,
