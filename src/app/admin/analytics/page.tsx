@@ -165,7 +165,7 @@ export default function AdminAnalyticsPage() {
           const rawDevices: unknown[] = Array.isArray(deviceData?.data)
             ? deviceData.data
             : [];
-          const totalDevices = rawDevices.reduce((sum, item) => {
+          const totalDevices = rawDevices.reduce<number>((sum, item) => {
             const count = Number(
               (item as Record<string, unknown>).count ?? 0
             );
@@ -197,7 +197,7 @@ export default function AdminAnalyticsPage() {
           const rawCountries: unknown[] = Array.isArray(countryData?.data)
             ? countryData.data
             : [];
-          const totalCountries = rawCountries.reduce((sum, item) => {
+          const totalCountries = rawCountries.reduce<number>((sum, item) => {
             const count = Number(
               (item as Record<string, unknown>).count ?? 0
             );
