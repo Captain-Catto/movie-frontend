@@ -109,6 +109,13 @@ function BrowsePageContent() {
         // Call appropriate endpoint based on type
         if (type === "tv") {
           response = await apiService.getTVSeries(queryParams);
+        } else if (type === "trending") {
+          const trendingQuery = {
+            page,
+            limit: paginationInfo.limit || 24,
+            language: queryParams.language,
+          };
+          response = await apiService.getTrending(trendingQuery);
         } else {
           // Default to movies
           response = await apiService.getMovies(queryParams);
@@ -123,18 +130,40 @@ function BrowsePageContent() {
           // Use frontend movies directly since they already match MovieCardData interface
           setMovies(frontendMovies as MovieCardData[]);
 
+          let responseRecord: Record<string, unknown> = {};
+          if (typeof response === "object" && response !== null) {
+            responseRecord = response as unknown as Record<string, unknown>;
+          }
+          const topLevelPagination =
+            (responseRecord.pagination as Record<string, unknown> | undefined) ??
+            undefined;
+
+          const metaRecord =
+            responseRecord.meta && typeof responseRecord.meta === "object"
+              ? (responseRecord.meta as Record<string, unknown>)
+              : undefined;
+          const metaPagination =
+            metaRecord && typeof metaRecord.pagination === "object"
+              ? (metaRecord.pagination as Record<string, unknown>)
+              : undefined;
+
+          const dataRecord =
+            responseRecord.data && typeof responseRecord.data === "object"
+              ? (responseRecord.data as Record<string, unknown>)
+              : undefined;
+          const dataPagination =
+            dataRecord && typeof dataRecord.pagination === "object"
+              ? (dataRecord.pagination as Record<string, unknown>)
+              : undefined;
+
           const rawPagination =
-            (response.pagination as Record<string, unknown> | undefined) ??
-            ((response.meta as Record<string, unknown> | undefined)
-              ?.pagination as Record<string, unknown> | undefined) ??
-            (response.meta as Record<string, unknown> | undefined) ??
-            {};
+            topLevelPagination ?? metaPagination ?? dataPagination ?? {};
 
           const pageFromResponse = Number(
             rawPagination.page ??
               rawPagination.currentPage ??
               rawPagination.current_page ??
-              (response.meta as Record<string, unknown> | undefined)?.page ??
+              (metaRecord?.page as number | undefined) ??
               page ??
               1
           );
