@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
+import { API_BASE_URL } from "@/services/api";
 
 interface Notification {
   id: number;
@@ -50,7 +51,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         if (!token) return;
 
         const response = await fetch(
-          "http://localhost:8080/api/notifications?limit=10",
+          `${API_BASE_URL}/notifications?limit=10`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

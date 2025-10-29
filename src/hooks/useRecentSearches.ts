@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { RecentSearch } from "@/types/search";
+import { API_BASE_URL } from "@/services/api";
 
 interface User {
   id: string | number;
@@ -48,7 +49,7 @@ export const useRecentSearches = (
   // Load searches from database (when user is logged in)
   const loadUserSearches = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/search/recent");
+      const response = await fetch(`${API_BASE_URL}/search/recent`);
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -144,7 +145,7 @@ export const useRecentSearches = (
   const syncLocalToDatabase = async (localSearches: RecentSearch[]) => {
     try {
       for (const search of localSearches) {
-        await fetch("http://localhost:8080/api/search/recent", {
+        await fetch(`${API_BASE_URL}/search/recent`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -189,7 +190,7 @@ export const useRecentSearches = (
         // Save to database
         try {
           const response = await fetch(
-            "http://localhost:8080/api/search/recent",
+            `${API_BASE_URL}/search/recent`,
             {
               method: "POST",
               headers: {
@@ -266,7 +267,7 @@ export const useRecentSearches = (
         // Remove from database
         try {
           const response = await fetch(
-            `http://localhost:8080/api/search/recent/${searchToRemove.id}`,
+            `${API_BASE_URL}/search/recent/${searchToRemove.id}`,
             {
               method: "DELETE",
             }
@@ -301,7 +302,7 @@ export const useRecentSearches = (
       // Clear from database
       try {
         const response = await fetch(
-          "http://localhost:8080/api/search/recent",
+          `${API_BASE_URL}/search/recent`,
           {
             method: "DELETE",
           }
