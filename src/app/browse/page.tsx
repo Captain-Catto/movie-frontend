@@ -1,15 +1,17 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import MovieCard, { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
+import { Pagination } from "@/components/ui/Pagination";
 
 function BrowsePageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [movies, setMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,77 +24,183 @@ function BrowsePageContent() {
     sortBy: "popularity",
   });
   const [pageTitle, setPageTitle] = useState("🎬 Duyệt Phim");
+  const [paginationInfo, setPaginationInfo] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    limit: 24,
+  });
 
-  const fetchMovies = async (filters: FilterOptions, type?: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const queryParams: {
-        page: number;
-        limit: number;
-        language: string;
-        countries?: string;
-        genre?: string;
-        year?: number;
-        sortBy?: string;
-      } = {
-        page: 1,
-        limit: 24,
-        language: "en-US",
-      };
+  const updateUrlWithFilters = useCallback(
+    (filters: FilterOptions, page: number, type?: string | null) => {
+      const params = new URLSearchParams();
 
       if (filters.countries?.length) {
-        queryParams.countries = filters.countries.join(",");
+        params.set("countries", filters.countries.join(","));
       }
-      if (filters.genres?.length) queryParams.genre = filters.genres.join(","); // ✅ Fix: use "genre" to match MovieQuery interface
-      if (filters.years?.length) queryParams.year = parseInt(filters.years[0]);
-      if (filters.sortBy) queryParams.sortBy = filters.sortBy;
+      if (filters.genres?.length) {
+        params.set("genres", filters.genres.join(","));
+      }
+      if (filters.years?.length) {
+        params.set("years", filters.years.join(","));
+      }
+      if (filters.customYear) {
+        params.set("customYear", filters.customYear);
+      }
+      if (filters.sortBy && filters.sortBy !== "popularity") {
+        params.set("sortBy", filters.sortBy);
+      }
+      if (filters.movieType) {
+        params.set("movieType", filters.movieType);
+      }
+      if (type) {
+        params.set("type", type);
+      }
+      if (page > 1) {
+        params.set("page", page.toString());
+      }
 
-      console.log("🔍 Frontend Debug - Current filters:", filters);
-      console.log("🌐 Fetching with queryParams:", queryParams);
-      console.log("📋 QueryParams details:", {
-        countries: queryParams.countries,
-        genre: queryParams.genre, // ✅ Fix: check "genre" to match what we actually set
-        sortBy: queryParams.sortBy,
-        year: queryParams.year,
+      const queryString = params.toString();
+      router.replace(`/browse${queryString ? `?${queryString}` : ""}`, {
+        scroll: false,
       });
+    },
+    [router]
+  );
 
-      let response;
+  const fetchMovies = useCallback(
+    async (filters: FilterOptions, page: number, type?: string) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      // Call appropriate endpoint based on type
-      if (type === "tv") {
-        response = await apiService.getTVSeries(queryParams);
-      } else {
-        // Default to movies
-        response = await apiService.getMovies(queryParams);
+        const queryParams: {
+          page: number;
+          limit: number;
+          language: string;
+          countries?: string;
+          genre?: string;
+          year?: number;
+          sortBy?: string;
+        } = {
+          page,
+          limit: paginationInfo.limit || 24,
+          language: "en-US",
+        };
+
+        if (filters.countries?.length) {
+          queryParams.countries = filters.countries.join(",");
+        }
+        if (filters.genres?.length)
+          queryParams.genre = filters.genres.join(","); // ✅ Fix: use "genre" to match MovieQuery interface
+        const targetYear =
+          filters.customYear ||
+          (filters.years?.length ? filters.years[0] : undefined);
+        if (targetYear) {
+          const parsedYear = parseInt(targetYear, 10);
+          if (!Number.isNaN(parsedYear)) {
+            queryParams.year = parsedYear;
+          }
+        }
+        if (filters.sortBy) queryParams.sortBy = filters.sortBy;
+
+        let response;
+
+        // Call appropriate endpoint based on type
+        if (type === "tv") {
+          response = await apiService.getTVSeries(queryParams);
+        } else {
+          // Default to movies
+          response = await apiService.getMovies(queryParams);
+        }
+
+        if (response.success && response.data) {
+          // Handle nested data structure - TV endpoint returns data.data, movies endpoint returns data directly
+          const movieData = Array.isArray(response.data)
+            ? response.data
+            : (response.data as { data?: unknown[] }).data || [];
+          const frontendMovies = mapMoviesToFrontend(movieData as never[]);
+          // Use frontend movies directly since they already match MovieCardData interface
+          setMovies(frontendMovies as MovieCardData[]);
+
+          const rawPagination =
+            (response.pagination as Record<string, unknown> | undefined) ??
+            ((response.meta as Record<string, unknown> | undefined)
+              ?.pagination as Record<string, unknown> | undefined) ??
+            (response.meta as Record<string, unknown> | undefined) ??
+            {};
+
+          const pageFromResponse = Number(
+            rawPagination.page ??
+              rawPagination.currentPage ??
+              rawPagination.current_page ??
+              (response.meta as Record<string, unknown> | undefined)?.page ??
+              page ??
+              1
+          );
+
+          const totalItems = Number(
+            rawPagination.total ??
+              rawPagination.totalItems ??
+              rawPagination.total_items ??
+              rawPagination.totalResults ??
+              0
+          );
+
+          let totalPages = Number(
+            rawPagination.totalPages ??
+              rawPagination.total_pages ??
+              rawPagination.totalPage ??
+              rawPagination.totalPageCount ??
+              0
+          );
+
+          const limit = paginationInfo.limit || 24;
+          if ((!totalPages || Number.isNaN(totalPages)) && totalItems) {
+            totalPages = Math.ceil(totalItems / limit);
+          }
+
+          if (!totalPages || Number.isNaN(totalPages)) {
+            totalPages = Math.max(
+              1,
+              Math.ceil((movieData as unknown[]).length / (limit || 1)) || 1
+            );
+          }
+
+          setPaginationInfo({
+            currentPage: pageFromResponse || page || 1,
+            totalPages: Math.max(1, totalPages),
+            totalItems,
+            limit,
+          });
+        } else {
+          throw new Error(response.message || "Failed to fetch content");
+        }
+      } catch (err) {
+        console.error("Error fetching content:", err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+        setMovies([]);
+        setPaginationInfo((prev) => ({
+          ...prev,
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+        }));
+      } finally {
+        setLoading(false);
       }
-
-      if (response.success && response.data) {
-        // Handle nested data structure - TV endpoint returns data.data, movies endpoint returns data directly
-        const movieData = Array.isArray(response.data)
-          ? response.data
-          : (response.data as { data?: unknown[] }).data || [];
-        const frontendMovies = mapMoviesToFrontend(movieData as never[]);
-        // Use frontend movies directly since they already match MovieCardData interface
-        setMovies(frontendMovies as MovieCardData[]);
-      } else {
-        throw new Error(response.message || "Failed to fetch content");
-      }
-    } catch (err) {
-      console.error("Error fetching content:", err);
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setMovies([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [paginationInfo.limit]
+  );
 
   const handleFilterChange = (filters: FilterOptions) => {
-    console.log("🎯 handleFilterChange called with:", filters);
     const type = searchParams.get("type");
     setCurrentFilters(filters);
-    fetchMovies(filters, type || undefined);
+    setPaginationInfo((prev) => ({
+      ...prev,
+      currentPage: 1,
+    }));
+    updateUrlWithFilters(filters, 1, type || filters.movieType || null);
   };
 
   // Xử lý URL parameters từ các trang khác
@@ -104,7 +212,9 @@ function BrowsePageContent() {
     const years = searchParams.get("years")?.split(",").filter(Boolean) || [];
     const movieType = searchParams.get("movieType") || "";
     const sortBy = searchParams.get("sortBy") || "popularity";
+    const customYear = searchParams.get("customYear") || "";
     const type = searchParams.get("type"); // movie, tv, trending
+    const page = Math.max(1, Number(searchParams.get("page")) || 1);
 
     // Keep genre IDs as is - no conversion needed
     const genres = genreIds;
@@ -129,13 +239,26 @@ function BrowsePageContent() {
       movieType: type || movieType, // Set movieType based on URL type parameter
       genres,
       years,
-      customYear: "",
+      customYear,
       sortBy,
     };
 
     setCurrentFilters(filtersFromUrl);
-    fetchMovies(filtersFromUrl, type || undefined);
-  }, [searchParams]);
+    setPaginationInfo((prev) => ({
+      ...prev,
+      currentPage: page,
+    }));
+    fetchMovies(filtersFromUrl, page, type || undefined);
+  }, [fetchMovies, searchParams]);
+
+  const handlePageChange = (page: number) => {
+    const type = searchParams.get("type") || currentFilters.movieType || "";
+    setPaginationInfo((prev) => ({
+      ...prev,
+      currentPage: page,
+    }));
+    updateUrlWithFilters(currentFilters, page, type || null);
+  };
 
   return (
     <Layout>
@@ -205,6 +328,16 @@ function BrowsePageContent() {
                 Hãy thử thay đổi bộ lọc để xem kết quả khác.
               </p>
             </div>
+          </div>
+        )}
+
+        {!loading && paginationInfo.totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination
+              currentPage={paginationInfo.currentPage}
+              totalPages={paginationInfo.totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         )}
       </div>
