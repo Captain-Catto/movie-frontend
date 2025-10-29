@@ -228,6 +228,10 @@ const TableFilters = ({
     if (onFilterChange) {
       onFilterChange(filters);
     }
+
+    // Collapse the filter panel after applying filters
+    setIsExpanded(false);
+    onClose?.();
   };
 
   const handleYearClick = (yearValue: string) => {
