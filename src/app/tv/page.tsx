@@ -79,10 +79,11 @@ function TVShowsPageContent() {
 
         if (response.success && response.data) {
           // TV API returns nested structure: response.data.data contains the array
-          const responseData = response.data as unknown as Record<string, unknown> | Array<Record<string, unknown>>;
+          const responseData =
+            response.data as unknown as Record<string, unknown> | Array<Record<string, unknown>>;
           const tvSeriesArray = Array.isArray(responseData)
             ? responseData
-            : (responseData.data as Array<Record<string, unknown>>) || [];
+            : ((responseData.data as Array<Record<string, unknown>>) || []);
 
           const ensureNumber = (value: unknown): number | undefined => {
             if (typeof value === "number" && Number.isFinite(value)) {
@@ -127,50 +128,75 @@ function TVShowsPageContent() {
                 ensureNumber(series.tmdbId) ?? ensureNumber(series.id);
 
               if (!tmdbId) {
-                console.error("TV Series missing tmdbId:", series);
+                console.warn("Skipping series due to missing tmdbId:", series);
                 return null;
               }
 
-              const title =
-                ensureString(series.title) ??
-                ensureString(series.name) ??
-                "Unknown";
-
-              const aliasTitle =
-                ensureString(series.originalName) ??
-                ensureString(series.originalTitle) ??
-                title;
-
+              const posterPath = ensureString(series.posterPath);
+              const posterUrl = ensureString(series.posterUrl);
               const poster =
-                ensureString(series.posterUrl) ??
-                ensureString(series.poster_path) ??
-                "/images/no-poster.svg";
+                posterUrl ||
+                (posterPath
+                  ? `https://image.tmdb.org/t/p/w500${posterPath}`
+                  : "/images/no-poster.svg");
 
-              const overview = ensureString(series.overview) ?? "";
+              const backdropPath = ensureString(series.backdropPath);
+              const backdropUrl = ensureString(series.backdropUrl);
+              const backgroundImage =
+                backdropUrl ||
+                (backdropPath
+                  ? `https://image.tmdb.org/t/p/w1280${backdropPath}`
+                  : poster);
 
-              const year =
-                extractYear(series.firstAirDate) ??
-                extractYear(series.first_air_date) ??
-                extractYear(series.releaseDate);
-
-              const rating =
+              const voteAverage =
                 ensureNumber(series.voteAverage) ??
                 ensureNumber(series.vote_average);
+              const rating =
+                voteAverage !== undefined
+                  ? Math.round(voteAverage * 10) / 10
+                  : undefined;
 
-              const episodeCount =
-                ensureNumber(series.numberOfEpisodes) ??
+              const releaseDate =
+                ensureString(series.firstAirDate) ?? ensureString(series.first_air_date);
+              const year = extractYear(releaseDate) ?? new Date().getFullYear();
+
+              const tvGenres =
+                ensureNumberArray(series.genreIds ?? series.genre_ids) || [];
+
+              const genres =
+                tvGenres
+                  .map((id) => TMDB_TV_ENGLISH_GENRE_MAP[id])
+                  .filter(Boolean) || [];
+
+              const fallbackTitle = ensureString(series.title);
+              const fallbackName = ensureString(series.name);
+              const title =
+                ensureString(series.originalName) ??
+                ensureString(series.original_name) ??
+                fallbackTitle ??
+                fallbackName ??
+                "Untitled";
+
+              const aliasTitle =
+                ensureString(series.aliasTitle) ??
+                ensureString(series.original_name) ??
+                title;
+
+              const description = ensureString(series.overview) ?? "";
+
+              const mediaType =
+                ensureString(series.mediaType) ??
+                ensureString(series.media_type) ??
+                "tv";
+
+              const href = mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
+
+              const episodes = ensureNumber(series.numberOfEpisodes) ??
+                ensureNumber(series.episodeNumber) ??
                 ensureNumber(series.number_of_episodes);
 
-              const status = ensureString(series.status);
-              const isComplete = status === "Ended";
-
-              const genreIds = ensureNumberArray(
-                series.genreIds ?? series.genre_ids
-              );
-
-              const genres = genreIds
-                .map((id) => TMDB_TV_ENGLISH_GENRE_MAP[id])
-                .filter((genre): genre is string => Boolean(genre));
+              const seasons = ensureNumber(series.numberOfSeasons) ??
+                ensureNumber(series.number_of_seasons);
 
               const tvShow: MovieCardData = {
                 id: tmdbId.toString(),
@@ -178,26 +204,18 @@ function TVShowsPageContent() {
                 title,
                 aliasTitle,
                 poster,
-                href: `/tv/${tmdbId}`,
+                href,
                 year,
                 rating,
-                genre: "TV Series",
+                description,
                 genres,
-                description: overview,
-                episodeNumber: episodeCount,
-                totalEpisodes: episodeCount,
-                isComplete: Boolean(isComplete),
+                genre: genres[0] || "Uncategorized",
+                backgroundImage,
+                posterImage: poster,
+                isComplete: ensureString(series.status) === "Ended",
+                totalEpisodes: episodes,
+                totalSeasons: seasons,
               };
-
-              // Debug log to check the data being passed
-              console.log("🔍 TV Series Card Data:", {
-                title: tvShow.title,
-                id: tvShow.id,
-                tmdbId: tvShow.tmdbId,
-                href: tvShow.href,
-                originalSeriesId: series.id,
-                originalSeriesTmdbId: series.tmdbId,
-              });
 
               return tvShow;
             })
