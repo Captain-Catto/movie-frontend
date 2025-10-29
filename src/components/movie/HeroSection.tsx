@@ -27,8 +27,6 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
 
-  console.log("HeroSection movies:", movies);
-
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
   const handleThumbnailClick = (index: number) => {
@@ -65,9 +63,38 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
             movie.backgroundImage || movie.poster || "/images/no-poster.svg";
           const posterImage =
             movie.posterImage || movie.poster || backgroundImage;
-          const displayRating = Number(movie.rating ?? 0);
-          const hasRating =
-            !Number.isNaN(displayRating) && displayRating > 0;
+          const rawRatingCandidates: Array<number | string | null | undefined> = [
+            typeof movie.rating === "number" || typeof movie.rating === "string"
+              ? movie.rating
+              : null,
+            (movie as { voteAverage?: number | string }).voteAverage,
+            (movie as { vote_average?: number | string }).vote_average,
+            (movie as { score?: number | string }).score,
+            (movie as { voteScore?: number | string }).voteScore,
+          ];
+
+          const normalizedRating = rawRatingCandidates.reduce<number | null>(
+            (acc, current) => {
+              if (acc !== null) return acc;
+              if (current === null || current === undefined) return null;
+
+              let value: number;
+              if (typeof current === "string") {
+                const parsed = parseFloat(current.replace(",", "."));
+                if (Number.isNaN(parsed)) return acc;
+                value = parsed;
+              } else {
+                value = current;
+              }
+
+              if (!Number.isFinite(value) || value <= 0) return acc;
+              return Math.round(value * 10) / 10;
+            },
+            null
+          );
+
+          const hasRating = normalizedRating !== null;
+          const displayRating = normalizedRating ?? 0;
           const year = movie.year ?? new Date().getFullYear();
 
           return (
