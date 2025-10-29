@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { SearchResult } from "@/types/search";
+import { API_BASE_URL } from "@/services/api";
 
 interface UseSearchReturn {
   query: string;
@@ -42,7 +43,7 @@ export const useSearch = (): UseSearchReturn => {
         }
 
         const response = await fetch(
-          `http://localhost:8080/api/search?${params.toString()}`
+          `${API_BASE_URL}/search?${params.toString()}`
         );
         const data = await response.json();
 
