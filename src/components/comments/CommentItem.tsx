@@ -240,6 +240,46 @@ export function CommentItem({
     }
   };
 
+  // Handle like for this comment (root-level comments)
+  const handleSelfLike = async () => {
+    console.log(`🔵 [CommentItem depth=${depth}] handleSelfLike called for comment:`, comment.id);
+
+    try {
+      const result = await commentService.likeComment(comment.id);
+      console.log(`🔵 [CommentItem depth=${depth}] Like result:`, result);
+
+      // Propagate to parent to update state
+      if (onLike) {
+        onLike(comment.id);
+      }
+
+      // Force refresh to show updated counts
+      window.location.reload();
+    } catch (error) {
+      console.error(`❌ [CommentItem depth=${depth}] Failed to like comment:`, error);
+    }
+  };
+
+  // Handle dislike for this comment (root-level comments)
+  const handleSelfDislike = async () => {
+    console.log(`🔴 [CommentItem depth=${depth}] handleSelfDislike called for comment:`, comment.id);
+
+    try {
+      const result = await commentService.dislikeComment(comment.id);
+      console.log(`🔴 [CommentItem depth=${depth}] Dislike result:`, result);
+
+      // Propagate to parent to update state
+      if (onDislike) {
+        onDislike(comment.id);
+      }
+
+      // Force refresh to show updated counts
+      window.location.reload();
+    } catch (error) {
+      console.error(`❌ [CommentItem depth=${depth}] Failed to dislike comment:`, error);
+    }
+  };
+
   // Hidden comment
   if (comment.isHidden && !canModerate) {
     return null;
@@ -307,7 +347,7 @@ export function CommentItem({
                   ? "bg-blue-600 text-white"
                   : "bg-gray-700 text-gray-300"
               }`}
-              onClick={() => onLike && onLike(comment.id)}
+              onClick={handleSelfLike}
             >
               {comment.userLike === true ? (
                 <BiSolidLike className="w-4 h-4" />
@@ -325,7 +365,7 @@ export function CommentItem({
                   ? "bg-red-600 text-white"
                   : "bg-gray-700 text-gray-300"
               }`}
-              onClick={() => onDislike && onDislike(comment.id)}
+              onClick={handleSelfDislike}
             >
               {comment.userLike === false ? (
                 <BiSolidDislike className="w-4 h-4" />
