@@ -152,8 +152,15 @@ export function useComments(
       try {
         await commentService.deleteComment(id);
 
-        // Remove from local state
+        // Remove from local state (for top-level comments)
         setComments((prev) => prev.filter((comment) => comment.id !== id));
+
+        // Refresh to update nested replies and reply counts
+        // This ensures both top-level and nested comments are removed
+        setTimeout(() => {
+          loadComments(1, false);
+        }, 100);
+
         showSuccess(
           "Comment deleted",
           "Your comment has been deleted successfully."
@@ -165,7 +172,7 @@ export function useComments(
         throw err;
       }
     },
-    [showSuccess, showError]
+    [showSuccess, showError, loadComments]
   );
 
   // Like comment
