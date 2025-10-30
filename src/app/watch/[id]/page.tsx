@@ -208,16 +208,23 @@ const WatchPage = () => {
         <div className="relative">
           <div className="aspect-video bg-black relative overflow-hidden">
             {isPlaying ? (
-              // Video Player Placeholder - Replace with actual video player
-              <div className="w-full h-full bg-black flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 border-4 border-red-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                  <p className="text-white text-lg">Đang tải phim...</p>
-                  <p className="text-gray-400 text-sm mt-2">
-                    Video player sẽ được tích hợp ở đây
-                  </p>
-                </div>
-              </div>
+              // Video Player with Demo Video
+              <video
+                className="w-full h-full"
+                controls
+                autoPlay
+                poster={movieData.backgroundImage}
+              >
+                <source
+                  src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                  type="video/mp4"
+                />
+                <source
+                  src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+                  type="application/x-mpegURL"
+                />
+                Your browser does not support the video tag.
+              </video>
             ) : (
               // Movie Poster with Play Button
               <div className="relative w-full h-full">
