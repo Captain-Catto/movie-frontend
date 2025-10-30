@@ -152,14 +152,10 @@ export function useComments(
       try {
         await commentService.deleteComment(id);
 
-        // Remove from local state (for top-level comments)
+        // Remove from local state
+        // For top-level comments: remove directly
+        // For nested comments: CommentItem will handle via handleNestedDelete
         setComments((prev) => prev.filter((comment) => comment.id !== id));
-
-        // Refresh to update nested replies and reply counts
-        // This ensures both top-level and nested comments are removed
-        setTimeout(() => {
-          loadComments(1, false);
-        }, 100);
 
         showSuccess(
           "Comment deleted",
@@ -172,7 +168,7 @@ export function useComments(
         throw err;
       }
     },
-    [showSuccess, showError, loadComments]
+    [showSuccess, showError]
   );
 
   // Like comment

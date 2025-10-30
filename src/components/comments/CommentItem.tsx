@@ -34,6 +34,7 @@ export function CommentItem({
   const [replies, setReplies] = useState<CommentType[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
+  const [localReplyCount, setLocalReplyCount] = useState(comment.replyCount);
 
   const { user } = useAppSelector((state) => state.auth);
   const isOwner = user?.id === comment.userId;
@@ -240,6 +241,48 @@ export function CommentItem({
     }
   };
 
+  // Handle delete for nested replies (update local state)
+  const handleNestedDelete = async (replyId: number) => {
+    console.log(`🗑️ [CommentItem depth=${depth}] handleNestedDelete called for reply:`, replyId);
+
+    try {
+      // Check if this reply is in our direct children
+      const isDirectChild = replies.some(r => r.id === replyId);
+
+      if (isDirectChild) {
+        // This is a direct child - call API and update our local state
+        console.log(`🗑️ [CommentItem depth=${depth}] This is a direct child, calling API...`);
+        await commentService.deleteComment(replyId);
+        console.log(`🗑️ [CommentItem depth=${depth}] Delete successful`);
+
+        // Remove from local replies
+        setReplies((prevReplies) => {
+          const filtered = prevReplies.filter((reply) => reply.id !== replyId);
+          console.log(`🗑️ [CommentItem depth=${depth}] Updated local replies state, removed reply ${replyId}`);
+          return filtered;
+        });
+
+        // Decrease reply count
+        setLocalReplyCount((prev) => Math.max(0, prev - 1));
+        console.log(`🗑️ [CommentItem depth=${depth}] Decreased reply count`);
+
+        // Also propagate to parent for global state management
+        if (onDelete) {
+          console.log(`🗑️ [CommentItem depth=${depth}] Propagating to parent...`);
+          onDelete(replyId);
+        }
+      } else {
+        // Not a direct child - just propagate to parent
+        console.log(`🗑️ [CommentItem depth=${depth}] Not a direct child, propagating to parent...`);
+        if (onDelete) {
+          onDelete(replyId);
+        }
+      }
+    } catch (error) {
+      console.error(`❌ [CommentItem depth=${depth}] Failed to delete nested reply:`, error);
+    }
+  };
+
   // Handle like for this comment - delegate to parent (useComments hook)
   const handleSelfLike = async () => {
     if (onLike) {
@@ -404,7 +447,7 @@ export function CommentItem({
         )}
 
         {/* Replies Toggle */}
-        {comment.replyCount > 0 && (
+        {localReplyCount > 0 && (
           <div className="replies-wrap mt-3">
             <a
               className="text-primary text-red-500 cursor-pointer text-sm flex items-center gap-1 hover:text-red-400"
@@ -415,7 +458,7 @@ export function CommentItem({
                 ? "Đang tải..."
                 : showReplies
                   ? "Ẩn bình luận"
-                  : `Xem tất cả bình luận (${comment.replyCount})`
+                  : `Xem tất cả bình luận (${localReplyCount})`
               }
             </a>
           </div>
@@ -432,7 +475,7 @@ export function CommentItem({
                 maxDepth={maxDepth}
                 onReply={onReply}
                 onEdit={onEdit}
-                onDelete={onDelete}
+                onDelete={handleNestedDelete}
                 onLike={handleNestedLike}
                 onDislike={handleNestedDislike}
                 onReport={onReport}
