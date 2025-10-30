@@ -44,22 +44,22 @@ export function CommentItem({
   // Format timestamp to Vietnamese
   const formatTimestamp = (dateString: string) => {
     try {
+      // Parse date - dateString from backend is UTC
       const date = new Date(dateString);
       const now = new Date();
-
-      // Debug log
-      console.log('📅 [formatTimestamp] Input:', dateString);
-      console.log('📅 [formatTimestamp] Parsed date:', date.toISOString());
-      console.log('📅 [formatTimestamp] Current time:', now.toISOString());
 
       const diffInMs = now.getTime() - date.getTime();
       const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
       const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
 
-      console.log('📅 [formatTimestamp] Diff in minutes:', diffInMinutes);
-      console.log('📅 [formatTimestamp] Diff in hours:', diffInHours);
+      // Handle negative diff (future dates - shouldn't happen but just in case)
+      if (diffInMinutes < 0) {
+        return "vừa xong";
+      }
 
-      if (diffInHours < 1) {
+      if (diffInMinutes < 1) {
+        return "vừa xong";
+      } else if (diffInMinutes < 60) {
         return `${diffInMinutes} phút trước`;
       } else if (diffInHours < 24) {
         return `${diffInHours} giờ trước`;
