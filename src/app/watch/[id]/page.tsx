@@ -227,7 +227,7 @@ const WatchPage = () => {
               </video>
             ) : (
               // Movie Poster with Play Button
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full cursor-pointer" onClick={handlePlayMovie}>
                 <Image
                   src={movieData.backgroundImage}
                   alt={movieData.title}
@@ -236,10 +236,7 @@ const WatchPage = () => {
                   priority
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-                  <button
-                    onClick={handlePlayMovie}
-                    className="w-24 h-24 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all transform hover:scale-110 group"
-                  >
+                  <div className="w-24 h-24 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all transform hover:scale-110 group">
                     <svg
                       className="w-10 h-10 text-white ml-1 group-hover:scale-110 transition-transform"
                       fill="currentColor"
@@ -247,7 +244,7 @@ const WatchPage = () => {
                     >
                       <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                     </svg>
-                  </button>
+                  </div>
                 </div>
               </div>
             )}
