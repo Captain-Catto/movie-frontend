@@ -280,6 +280,30 @@ export function CommentItem({
     }
   };
 
+  // Handle delete for this comment
+  const handleSelfDelete = async () => {
+    const confirmed = window.confirm("Bạn có chắc muốn xóa bình luận này?");
+    if (!confirmed) return;
+
+    console.log(`🗑️ [CommentItem depth=${depth}] handleSelfDelete called for comment:`, comment.id);
+
+    try {
+      await commentService.deleteComment(comment.id);
+      console.log(`🗑️ [CommentItem depth=${depth}] Delete successful`);
+
+      // Propagate to parent to update state
+      if (onDelete) {
+        onDelete(comment.id);
+      }
+
+      // Force refresh to show updated list
+      window.location.reload();
+    } catch (error) {
+      console.error(`❌ [CommentItem depth=${depth}] Failed to delete comment:`, error);
+      alert("Không thể xóa bình luận. Vui lòng thử lại.");
+    }
+  };
+
   // Hidden comment
   if (comment.isHidden && !canModerate) {
     return null;
@@ -396,12 +420,7 @@ export function CommentItem({
               <button
                 type="button"
                 className="btn btn-xs btn-basic btn-menu px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
-                onClick={() => {
-                  const confirmed = window.confirm("Bạn có chắc muốn xóa bình luận này?");
-                  if (confirmed && onDelete) {
-                    onDelete(comment.id);
-                  }
-                }}
+                onClick={handleSelfDelete}
               >
                 <i className="fa-solid fa-ellipsis text-xs"></i>
                 <span className="text-xs">Xóa</span>
