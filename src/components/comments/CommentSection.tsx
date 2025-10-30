@@ -28,6 +28,9 @@ export function CommentSection({
     loadMore,
     refresh,
     addComment,
+    deleteComment,
+    likeComment,
+    dislikeComment,
     reportComment,
   } = useComments({
     movieId,
@@ -58,25 +61,19 @@ export function CommentSection({
     console.log("Edit comment:", commentId);
   };
 
-  // Handle delete action
-  const handleDelete = (commentId: number) => {
-    console.log("Delete comment:", commentId);
+  // Handle delete action - use hook's deleteComment
+  const handleDelete = async (commentId: number) => {
+    await deleteComment(commentId);
   };
 
-  // Handle like action
-  // Note: The nested CommentItem components already call the API
-  // This handler is only for root-level state management
+  // Handle like action - use hook's likeComment
   const handleLike = async (commentId: number) => {
-    console.log(`[CommentSection] Like propagated for comment ${commentId} (no-op, API already called)`);
-    // No-op: nested components already called the API
+    await likeComment(commentId);
   };
 
-  // Handle dislike action
-  // Note: The nested CommentItem components already call the API
-  // This handler is only for root-level state management
+  // Handle dislike action - use hook's dislikeComment
   const handleDislike = async (commentId: number) => {
-    console.log(`[CommentSection] Dislike propagated for comment ${commentId} (no-op, API already called)`);
-    // No-op: nested components already called the API
+    await dislikeComment(commentId);
   };
 
   // Handle report action

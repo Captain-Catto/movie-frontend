@@ -14,9 +14,8 @@ import {
   CreateCommentDto,
 } from "@/types/comment.types";
 import CommentForm from "./CommentForm";
-import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { useAppSelector } from "@/store/hooks";
 import { commentService } from "@/services/comment.service";
-import { showToast } from "@/store/slices/toastSlice";
 
 export function CommentItem({
   comment,
@@ -35,11 +34,8 @@ export function CommentItem({
   const [replies, setReplies] = useState<CommentType[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
-  const [localComment, setLocalComment] = useState(comment);
-  const [isDeleted, setIsDeleted] = useState(false);
 
   const { user } = useAppSelector((state) => state.auth);
-  const dispatch = useAppDispatch();
   const isOwner = user?.id === comment.userId;
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const canModerate = isAdmin;
@@ -244,92 +240,32 @@ export function CommentItem({
     }
   };
 
-  // Handle like for this comment (root-level comments)
+  // Handle like for this comment - delegate to parent (useComments hook)
   const handleSelfLike = async () => {
-    console.log(`🔵 [CommentItem depth=${depth}] handleSelfLike called for comment:`, comment.id);
-
-    try {
-      const result = await commentService.likeComment(comment.id);
-      console.log(`🔵 [CommentItem depth=${depth}] Like result:`, result);
-
-      // Update local state
-      setLocalComment((prev) => ({
-        ...prev,
-        likesCount: result.likeCount,
-        dislikesCount: result.dislikeCount,
-        userLike: result.userLike,
-      }));
-
-      // Propagate to parent to update state
-      if (onLike) {
-        onLike(comment.id);
-      }
-    } catch (error) {
-      console.error(`❌ [CommentItem depth=${depth}] Failed to like comment:`, error);
-      dispatch(showToast({ message: "Failed to like comment", type: "error" }));
+    if (onLike) {
+      await onLike(comment.id);
     }
   };
 
-  // Handle dislike for this comment (root-level comments)
+  // Handle dislike for this comment - delegate to parent (useComments hook)
   const handleSelfDislike = async () => {
-    console.log(`🔴 [CommentItem depth=${depth}] handleSelfDislike called for comment:`, comment.id);
-
-    try {
-      const result = await commentService.dislikeComment(comment.id);
-      console.log(`🔴 [CommentItem depth=${depth}] Dislike result:`, result);
-
-      // Update local state
-      setLocalComment((prev) => ({
-        ...prev,
-        likesCount: result.likeCount,
-        dislikesCount: result.dislikeCount,
-        userLike: result.userLike,
-      }));
-
-      // Propagate to parent to update state
-      if (onDislike) {
-        onDislike(comment.id);
-      }
-    } catch (error) {
-      console.error(`❌ [CommentItem depth=${depth}] Failed to dislike comment:`, error);
-      dispatch(showToast({ message: "Failed to dislike comment", type: "error" }));
+    if (onDislike) {
+      await onDislike(comment.id);
     }
   };
 
-  // Handle delete for this comment
+  // Handle delete for this comment - delegate to parent (useComments hook)
   const handleSelfDelete = async () => {
     const confirmed = window.confirm("Bạn có chắc muốn xóa bình luận này?");
     if (!confirmed) return;
 
-    console.log(`🗑️ [CommentItem depth=${depth}] handleSelfDelete called for comment:`, comment.id);
-
-    try {
-      await commentService.deleteComment(comment.id);
-      console.log(`🗑️ [CommentItem depth=${depth}] Delete successful`);
-
-      // Show success toast
-      dispatch(showToast({ message: "Comment deleted successfully", type: "success" }));
-
-      // Mark as deleted to hide from UI
-      setIsDeleted(true);
-
-      // Propagate to parent to update state
-      if (onDelete) {
-        onDelete(comment.id);
-      }
-    } catch (error) {
-      console.error(`❌ [CommentItem depth=${depth}] Failed to delete comment:`, error);
-      dispatch(showToast({ message: "Failed to delete comment", type: "error" }));
+    if (onDelete) {
+      await onDelete(comment.id);
     }
   };
 
   // Hidden comment
   if (comment.isHidden && !canModerate) {
-    return null;
-  }
-
-  // Deleted comment - hide from UI with fade out
-  if (isDeleted) {
     return null;
   }
 
@@ -391,37 +327,37 @@ export function CommentItem({
             <button
               type="button"
               className={`item item-up line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
-                localComment.userLike === true
+                comment.userLike === true
                   ? "bg-blue-600 text-white"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
               onClick={handleSelfLike}
             >
-              {localComment.userLike === true ? (
+              {comment.userLike === true ? (
                 <BiSolidLike className="w-4 h-4" />
               ) : (
                 <BiLike className="w-4 h-4" />
               )}
-              {localComment.likesCount > 0 && (
-                <span className="text-xs">{localComment.likesCount}</span>
+              {comment.likesCount > 0 && (
+                <span className="text-xs">{comment.likesCount}</span>
               )}
             </button>
             <button
               type="button"
               className={`item item-down line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
-                localComment.userLike === false
+                comment.userLike === false
                   ? "bg-red-600 text-white"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
               onClick={handleSelfDislike}
             >
-              {localComment.userLike === false ? (
+              {comment.userLike === false ? (
                 <BiSolidDislike className="w-4 h-4" />
               ) : (
                 <BiDislike className="w-4 h-4" />
               )}
-              {localComment.dislikesCount > 0 && (
-                <span className="text-xs">{localComment.dislikesCount}</span>
+              {comment.dislikesCount > 0 && (
+                <span className="text-xs">{comment.dislikesCount}</span>
               )}
             </button>
           </div>
