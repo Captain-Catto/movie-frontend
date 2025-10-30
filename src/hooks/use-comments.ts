@@ -175,72 +175,88 @@ export function useComments(
   const likeComment = useCallback(
     async (id: number): Promise<void> => {
       try {
-        const result = await commentService.likeComment(id);
+        // Check if this comment exists in our top-level comments
+        const isTopLevel = comments.some(c => c.id === id);
 
-        // Update local state with backend response
-        // Backend uses likeCount/dislikeCount, frontend uses likesCount/dislikesCount
-        setComments((prev) =>
-          prev.map((comment) => {
-            if (comment.id === id) {
-              return {
-                ...comment,
-                likesCount: result.likeCount,
-                dislikesCount: result.dislikeCount,
-                userLike: result.userLike,
-                userInteraction: {
-                  ...comment.userInteraction,
-                  hasLiked: result.userLike === true,
-                  hasDisliked: result.userLike === false,
-                  hasReported: comment.userInteraction?.hasReported || false,
-                },
-              };
-            }
-            return comment;
-          })
-        );
+        // Only call API if it's a top-level comment
+        // Nested comments are handled by CommentItem's handleNestedLike
+        if (isTopLevel) {
+          const result = await commentService.likeComment(id);
+
+          // Update local state with backend response
+          // Backend uses likeCount/dislikeCount, frontend uses likesCount/dislikesCount
+          setComments((prev) =>
+            prev.map((comment) => {
+              if (comment.id === id) {
+                return {
+                  ...comment,
+                  likesCount: result.likeCount,
+                  dislikesCount: result.dislikeCount,
+                  userLike: result.userLike,
+                  userInteraction: {
+                    ...comment.userInteraction,
+                    hasLiked: result.userLike === true,
+                    hasDisliked: result.userLike === false,
+                    hasReported: comment.userInteraction?.hasReported || false,
+                  },
+                };
+              }
+              return comment;
+            })
+          );
+        }
+        // If not top-level, it's a nested comment and will be handled by handleNestedLike
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to like comment";
         showError("Error", errorMessage);
       }
     },
-    [showError]
+    [showError, comments]
   );
 
   // Dislike comment
   const dislikeComment = useCallback(
     async (id: number): Promise<void> => {
       try {
-        const result = await commentService.dislikeComment(id);
+        // Check if this comment exists in our top-level comments
+        const isTopLevel = comments.some(c => c.id === id);
 
-        // Update local state with backend response
-        // Backend uses likeCount/dislikeCount, frontend uses likesCount/dislikesCount
-        setComments((prev) =>
-          prev.map((comment) => {
-            if (comment.id === id) {
-              return {
-                ...comment,
-                likesCount: result.likeCount,
-                dislikesCount: result.dislikeCount,
-                userLike: result.userLike,
-                userInteraction: {
-                  ...comment.userInteraction,
-                  hasLiked: result.userLike === true,
-                  hasDisliked: result.userLike === false,
-                  hasReported: comment.userInteraction?.hasReported || false,
-                },
-              };
-            }
-            return comment;
-          })
-        );
+        // Only call API if it's a top-level comment
+        // Nested comments are handled by CommentItem's handleNestedDislike
+        if (isTopLevel) {
+          const result = await commentService.dislikeComment(id);
+
+          // Update local state with backend response
+          // Backend uses likeCount/dislikeCount, frontend uses likesCount/dislikesCount
+          setComments((prev) =>
+            prev.map((comment) => {
+              if (comment.id === id) {
+                return {
+                  ...comment,
+                  likesCount: result.likeCount,
+                  dislikesCount: result.dislikeCount,
+                  userLike: result.userLike,
+                  userInteraction: {
+                    ...comment.userInteraction,
+                    hasLiked: result.userLike === true,
+                    hasDisliked: result.userLike === false,
+                    hasReported: comment.userInteraction?.hasReported || false,
+                  },
+                };
+              }
+              return comment;
+            })
+          );
+        }
+        // If not top-level, it's a nested comment and will be handled by handleNestedDislike
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to dislike comment";
         showError("Error", errorMessage);
       }
     },
-    [showError]
+    [showError, comments]
   );
 
   // Report comment
