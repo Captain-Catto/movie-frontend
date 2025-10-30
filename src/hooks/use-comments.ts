@@ -106,14 +106,14 @@ export function useComments(
         }
 
         showSuccess(
-          "Bình luận đã đăng",
-          "Bình luận của bạn đã được đăng thành công."
+          "Comment posted",
+          "Your comment has been posted successfully."
         );
         return newComment;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Không thể đăng bình luận";
-        showError("Lỗi", errorMessage);
+          err instanceof Error ? err.message : "Failed to post comment";
+        showError("Error", errorMessage);
         throw err;
       }
     },

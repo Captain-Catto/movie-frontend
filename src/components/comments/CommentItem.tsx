@@ -46,10 +46,20 @@ export function CommentItem({
     try {
       const date = new Date(dateString);
       const now = new Date();
-      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+
+      // Debug log
+      console.log('📅 [formatTimestamp] Input:', dateString);
+      console.log('📅 [formatTimestamp] Parsed date:', date.toISOString());
+      console.log('📅 [formatTimestamp] Current time:', now.toISOString());
+
+      const diffInMs = now.getTime() - date.getTime();
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+      console.log('📅 [formatTimestamp] Diff in minutes:', diffInMinutes);
+      console.log('📅 [formatTimestamp] Diff in hours:', diffInHours);
 
       if (diffInHours < 1) {
-        const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
         return `${diffInMinutes} phút trước`;
       } else if (diffInHours < 24) {
         return `${diffInHours} giờ trước`;
@@ -62,7 +72,8 @@ export function CommentItem({
       } else {
         return formatDistanceToNow(date, { addSuffix: true, locale: vi });
       }
-    } catch {
+    } catch (error) {
+      console.error('❌ [formatTimestamp] Error:', error);
       return "Unknown time";
     }
   };
