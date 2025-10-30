@@ -206,11 +206,11 @@ const WatchPage = () => {
       <div className="min-h-screen bg-gray-900">
         {/* Movie Player Section */}
         <div className="relative">
-          <div className="aspect-video bg-black relative overflow-hidden">
+          <div className="aspect-video bg-black relative overflow-hidden max-h-[70vh]">
             {isPlaying ? (
               // Video Player with Demo Video
               <video
-                className="w-full h-full"
+                className="w-full h-full object-contain"
                 controls
                 autoPlay
                 poster={movieData.backgroundImage}
