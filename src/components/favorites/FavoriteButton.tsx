@@ -69,7 +69,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
   const handleToggleFavorite = async () => {
     if (!isAuthenticated) {
-      showWarning("Login required", "Please login to add favorites");
+      showWarning("Login required", "You have to login to use this feature");
       return;
     }
 

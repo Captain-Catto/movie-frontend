@@ -120,6 +120,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               genres:
                 movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
             }}
+            iconOnly={true}
             className="!absolute !top-2 !right-2 !bg-black/50 !text-white !opacity-100 lg:!opacity-0 lg:group-hover:!opacity-100 !transition-all !duration-300 group-hover:!text-red-500 hover:!scale-110 !z-10"
           />
           {/* Episode Badge */}
