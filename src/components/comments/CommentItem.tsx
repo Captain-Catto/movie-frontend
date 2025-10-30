@@ -14,8 +14,9 @@ import {
   CreateCommentDto,
 } from "@/types/comment.types";
 import CommentForm from "./CommentForm";
-import { useAppSelector } from "@/store/hooks";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { commentService } from "@/services/comment.service";
+import { showToast } from "@/store/slices/toastSlice";
 
 export function CommentItem({
   comment,
@@ -34,8 +35,11 @@ export function CommentItem({
   const [replies, setReplies] = useState<CommentType[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
+  const [localComment, setLocalComment] = useState(comment);
+  const [isDeleted, setIsDeleted] = useState(false);
 
   const { user } = useAppSelector((state) => state.auth);
+  const dispatch = useAppDispatch();
   const isOwner = user?.id === comment.userId;
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const canModerate = isAdmin;
@@ -248,15 +252,21 @@ export function CommentItem({
       const result = await commentService.likeComment(comment.id);
       console.log(`🔵 [CommentItem depth=${depth}] Like result:`, result);
 
+      // Update local state
+      setLocalComment((prev) => ({
+        ...prev,
+        likesCount: result.likeCount,
+        dislikesCount: result.dislikeCount,
+        userLike: result.userLike,
+      }));
+
       // Propagate to parent to update state
       if (onLike) {
         onLike(comment.id);
       }
-
-      // Force refresh to show updated counts
-      window.location.reload();
     } catch (error) {
       console.error(`❌ [CommentItem depth=${depth}] Failed to like comment:`, error);
+      dispatch(showToast({ message: "Failed to like comment", type: "error" }));
     }
   };
 
@@ -268,15 +278,21 @@ export function CommentItem({
       const result = await commentService.dislikeComment(comment.id);
       console.log(`🔴 [CommentItem depth=${depth}] Dislike result:`, result);
 
+      // Update local state
+      setLocalComment((prev) => ({
+        ...prev,
+        likesCount: result.likeCount,
+        dislikesCount: result.dislikeCount,
+        userLike: result.userLike,
+      }));
+
       // Propagate to parent to update state
       if (onDislike) {
         onDislike(comment.id);
       }
-
-      // Force refresh to show updated counts
-      window.location.reload();
     } catch (error) {
       console.error(`❌ [CommentItem depth=${depth}] Failed to dislike comment:`, error);
+      dispatch(showToast({ message: "Failed to dislike comment", type: "error" }));
     }
   };
 
@@ -291,21 +307,29 @@ export function CommentItem({
       await commentService.deleteComment(comment.id);
       console.log(`🗑️ [CommentItem depth=${depth}] Delete successful`);
 
+      // Show success toast
+      dispatch(showToast({ message: "Comment deleted successfully", type: "success" }));
+
+      // Mark as deleted to hide from UI
+      setIsDeleted(true);
+
       // Propagate to parent to update state
       if (onDelete) {
         onDelete(comment.id);
       }
-
-      // Force refresh to show updated list
-      window.location.reload();
     } catch (error) {
       console.error(`❌ [CommentItem depth=${depth}] Failed to delete comment:`, error);
-      alert("Không thể xóa bình luận. Vui lòng thử lại.");
+      dispatch(showToast({ message: "Failed to delete comment", type: "error" }));
     }
   };
 
   // Hidden comment
   if (comment.isHidden && !canModerate) {
+    return null;
+  }
+
+  // Deleted comment - hide from UI with fade out
+  if (isDeleted) {
     return null;
   }
 
@@ -366,38 +390,38 @@ export function CommentItem({
           <div className="group-react line-center flex items-center gap-2">
             <button
               type="button"
-              className={`item item-up line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer ${
-                comment.userLike === true
+              className={`item item-up line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
+                localComment.userLike === true
                   ? "bg-blue-600 text-white"
-                  : "bg-gray-700 text-gray-300"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
               onClick={handleSelfLike}
             >
-              {comment.userLike === true ? (
+              {localComment.userLike === true ? (
                 <BiSolidLike className="w-4 h-4" />
               ) : (
                 <BiLike className="w-4 h-4" />
               )}
-              {comment.likesCount > 0 && (
-                <span className="text-xs">{comment.likesCount}</span>
+              {localComment.likesCount > 0 && (
+                <span className="text-xs">{localComment.likesCount}</span>
               )}
             </button>
             <button
               type="button"
-              className={`item item-down line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer ${
-                comment.userLike === false
+              className={`item item-down line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
+                localComment.userLike === false
                   ? "bg-red-600 text-white"
-                  : "bg-gray-700 text-gray-300"
+                  : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
               onClick={handleSelfDislike}
             >
-              {comment.userLike === false ? (
+              {localComment.userLike === false ? (
                 <BiSolidDislike className="w-4 h-4" />
               ) : (
                 <BiDislike className="w-4 h-4" />
               )}
-              {comment.dislikesCount > 0 && (
-                <span className="text-xs">{comment.dislikesCount}</span>
+              {localComment.dislikesCount > 0 && (
+                <span className="text-xs">{localComment.dislikesCount}</span>
               )}
             </button>
           </div>
