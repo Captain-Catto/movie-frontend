@@ -143,11 +143,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   return (
     <button
       onClick={handleToggleFavorite}
-      disabled={!isAuthenticated}
       className={`
         flex items-center justify-center ${
           iconOnly ? "p-3" : "gap-2 px-4 py-2"
-        } transition-all duration-200
+        } transition-all duration-200 cursor-pointer
         ${
           // Only apply default styling if className doesn't override background
           className && (className.includes("bg-") || className.includes("!bg-"))
@@ -160,7 +159,6 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         }
         ${className && className.includes("rounded-") ? "" : "rounded-full"}
         ${isProcessing ? "opacity-70" : "opacity-100"}
-        ${!isAuthenticated ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         ${className}
       `}
       title={
