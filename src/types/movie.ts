@@ -1,3 +1,6 @@
+// Import types from api.ts for internal use
+import type { CastMember, CrewMember } from './api';
+
 export interface Movie {
   id: number;
   tmdbId: number;
@@ -204,38 +207,6 @@ export interface VideosResponse {
 }
 
 // Additional types for API responses and data structures
-export interface CastMember {
-  id: number;
-  name: string;
-  character?: string;
-  profile_path?: string | null;
-  job?: string;
-  title?: string;
-  original_title?: string;
-  media_type?: "movie" | "tv";
-  poster_path?: string | null;
-  vote_average?: number;
-  release_date?: string;
-  first_air_date?: string;
-  known_for_department?: string;
-  popularity?: number;
-}
-
-export interface CrewMember {
-  id: number;
-  name: string;
-  job?: string;
-  profile_path?: string | null;
-  department?: string;
-  media_type?: "movie" | "tv";
-  poster_path?: string | null;
-  vote_average?: number;
-  release_date?: string;
-  first_air_date?: string;
-  title?: string;
-  original_title?: string;
-}
-
 export interface Director {
   id: number;
   name: string;
@@ -306,18 +277,4 @@ export interface CreditsResponse {
   runtime?: number;
   status?: string;
   created_by?: Array<{ id: number; name: string }>;
-}
-
-export interface ApiResponse {
-  success: boolean;
-  message?: string;
-  data: unknown;
-  pagination?: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    limit: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
 }

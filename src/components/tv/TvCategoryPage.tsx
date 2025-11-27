@@ -7,6 +7,7 @@ import MoviesGrid from "@/components/movie/MoviesGrid";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
+import type { TVSeriesResponse } from "@/types";
 
 type CategoryKey = "on-the-air" | "popular" | "top-rated";
 
@@ -16,15 +17,9 @@ interface TvCategoryPageProps {
   description: string;
 }
 
-interface ApiResponse {
-  success: boolean;
-  message?: string;
-  data: unknown;
-}
-
 const fetchers: Record<
   CategoryKey,
-  (query?: { page?: number; limit?: number; language?: string }) => Promise<ApiResponse>
+  (query?: { page?: number; limit?: number; language?: string }) => Promise<TVSeriesResponse>
 > = {
   "on-the-air": apiService.getOnTheAirTVSeries.bind(apiService),
   popular: apiService.getPopularTVSeries.bind(apiService),

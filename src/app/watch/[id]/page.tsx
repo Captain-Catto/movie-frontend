@@ -14,7 +14,8 @@ import {
   formatWatchDuration,
   WatchContentData,
 } from "@/utils/watchContentMapper";
-import type { CastMember, Movie } from "@/types/movie";
+import type { Movie } from "@/types/movie";
+import type { CastMember } from "@/types";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({

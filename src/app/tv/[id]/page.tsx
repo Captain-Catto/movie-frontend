@@ -10,27 +10,9 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
-import { TVDetail, CrewMember, Movie, CastMember } from "@/types/movie";
-
-// TMDB TV Genre mapping to English names
-const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
-  10759: "Action & Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10751: "Family",
-  10762: "Kids",
-  9648: "Mystery",
-  10763: "News",
-  10764: "Reality",
-  10765: "Sci-Fi & Fantasy",
-  10766: "Soap",
-  10767: "Talk",
-  10768: "War & Politics",
-  37: "Western",
-};
+import { TVDetail, Movie } from "@/types/movie";
+import type { CastMember, CrewMember } from "@/types";
+import { TMDB_TV_ENGLISH_GENRE_MAP } from "@/types/genre";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")

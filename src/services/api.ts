@@ -6,82 +6,21 @@ import {
   TVSeries,
   TVSeriesResponse,
 } from "@/types/movie";
+import {
+  CastMember,
+  CrewMember,
+  ProductionCountry,
+  ProductionCompany,
+  Genre,
+  CreditsData,
+  PaginationData,
+  MetadataInfo,
+} from "@/types/api";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL
     ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`
     : "http://localhost:8080/api";
-
-// API Response Types
-interface CastMember {
-  id: number;
-  name: string;
-  character?: string;
-  profile_path?: string;
-  [key: string]: unknown;
-}
-
-interface CrewMember {
-  id: number;
-  name: string;
-  job?: string;
-  department?: string;
-  profile_path?: string;
-  [key: string]: unknown;
-}
-
-interface ProductionCountry {
-  iso_3166_1: string;
-  name: string;
-}
-
-interface ProductionCompany {
-  id: number;
-  name: string;
-  logo_path?: string;
-  origin_country: string;
-}
-
-interface Genre {
-  id: number;
-  name: string;
-}
-
-interface CreditsData {
-  id: number;
-  title?: string;
-  name?: string;
-  cast: CastMember[];
-  crew: CrewMember[];
-  production_countries?: ProductionCountry[];
-  production_companies?: ProductionCompany[];
-  genres?: Genre[];
-  runtime?: number;
-  status?: string;
-  created_by?: CrewMember[];
-  origin_country?: string[];
-  episode_run_time?: number[];
-}
-
-interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  currentPage?: number;
-  totalItems?: number;
-  hasNextPage?: boolean;
-  hasPreviousPage?: boolean;
-  hasNext?: boolean;
-  hasPrev?: boolean;
-}
-
-interface MetadataInfo {
-  fromCache: boolean;
-  totalCastItems?: number;
-  totalCrewItems?: number;
-  cacheInfo?: Record<string, unknown>;
-}
 
 class ApiService {
   private async fetchWithErrorHandling<T>(
