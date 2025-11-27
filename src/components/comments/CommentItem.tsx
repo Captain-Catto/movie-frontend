@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
 import Image from "next/image";
 import { BiLike, BiDislike, BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import {

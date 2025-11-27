@@ -14,7 +14,7 @@ import {
   formatWatchDuration,
   WatchContentData,
 } from "@/utils/watchContentMapper";
-import type { CastMember } from "@/types/movie";
+import type { CastMember, Movie } from "@/types/movie";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -130,21 +130,20 @@ const WatchPage = () => {
         if (recommendationsResponse.success) {
           console.log("🎬 Recommendations raw data:", recommendationsResponse.data);
           const mappedRecommendations: RecommendationItem[] =
-            recommendationsResponse.data.slice(0, 5).map((item) => {
+            recommendationsResponse.data.slice(0, 5).map((item: Movie) => {
               const releaseDate =
                 typeof item.releaseDate === "string"
                   ? item.releaseDate.split("T")[0]
                   : undefined;
 
-              const mappedItem = {
+              const mappedItem: RecommendationItem = {
                 id: item.tmdbId ?? item.id,
                 title: item.title,
-                name:
-                  (item as unknown as { name?: string }).name ?? item.title,
-                poster_path: (item as any).poster_path ?? item.posterPath ?? null,
+                name: item.title, // Movie type doesn't have 'name', use title
+                poster_path: item.posterPath ?? null,
                 release_date: releaseDate,
                 first_air_date: undefined,
-                vote_average: (item as any).vote_average ?? item.voteAverage ?? 0,
+                vote_average: item.voteAverage ?? 0,
               };
               console.log("🎬 Mapped recommendation:", mappedItem);
               return mappedItem;
