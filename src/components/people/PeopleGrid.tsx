@@ -53,7 +53,7 @@ const PeopleGrid = ({
               />
             </svg>
             <h3 className="text-lg font-medium text-white mb-2">
-              Không có diễn viên nào
+              No actors found
             </h3>
             <p>Danh sách diễn viên hiện tại trống</p>
           </div>

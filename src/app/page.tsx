@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
-import CategoryGrid from "@/components/movie/CategoryGrid";
 import MovieGrid from "@/components/movie/MovieGrid";
 import SectionHeader from "@/components/ui/SectionHeader";
 import TVSeriesSections from "@/components/tv/TVSeriesSections";
@@ -216,57 +215,6 @@ export default function Home() {
         genres: movie.genres ?? (movie.genre ? [movie.genre] : undefined),
       };
     });
-
-  const categories = [
-    {
-      id: "1",
-      name: "Action",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "2",
-      name: "Drama",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1489599858765-d6bf4d1c6f4b?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "3",
-      name: "Comedy",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "4",
-      name: "Thriller",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "5",
-      name: "Romance",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1514905552197-0610a4d8fd73?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "6",
-      name: "Horror",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "7",
-      name: "Sci-Fi",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=500&q=60",
-    },
-    {
-      id: "8",
-      name: "Fantasy",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=500&q=60",
-    },
-  ];
 
   // Fallback static data for each section (6 movies each)
   const fallbackNowPlayingRaw = [
@@ -547,7 +495,6 @@ export default function Home() {
   return (
     <Layout>
       <HeroSection movies={heroMoviesToDisplay} />
-      <CategoryGrid categories={categories} />
 
       {/* Now Playing Section */}
       <div className="py-8">
@@ -606,7 +553,7 @@ export default function Home() {
 
       {(loading || heroLoading) && (
         <div className="text-center text-white py-8">
-          Đang tải phim từ backend...
+          Loading movies from backend...
         </div>
       )}
     </Layout>

@@ -110,7 +110,7 @@ export default function PopularPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Đang tải danh sách phim phổ biến...
+          Loading popular movies...
         </div>
       }
     >

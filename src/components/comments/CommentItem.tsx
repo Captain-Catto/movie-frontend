@@ -54,23 +54,23 @@ export function CommentItem({
 
       // Handle negative diff (future dates - shouldn't happen but just in case)
       if (diffInMinutes < 0) {
-        return "vừa xong";
+        return "just now";
       }
 
       if (diffInMinutes < 1) {
-        return "vừa xong";
+        return "just now";
       } else if (diffInMinutes < 60) {
-        return `${diffInMinutes} phút trước`;
+        return `${diffInMinutes} minutes ago`;
       } else if (diffInHours < 24) {
-        return `${diffInHours} giờ trước`;
+        return `${diffInHours} hours ago`;
       } else if (diffInHours < 48) {
-        return "một ngày trước";
+        return "1 day ago";
       } else if (diffInHours < 72) {
-        return "2 ngày trước";
+        return "2 days ago";
       } else if (diffInHours < 168) {
-        return `${Math.floor(diffInHours / 24)} ngày trước`;
+        return `${Math.floor(diffInHours / 24)} days ago`;
       } else {
-        return formatDistanceToNow(date, { addSuffix: true, locale: vi });
+        return formatDistanceToNow(date, { addSuffix: true });
       }
     } catch (error) {
       console.error('❌ [formatTimestamp] Error:', error);
@@ -310,7 +310,7 @@ export function CommentItem({
 
   // Handle delete for this comment - delegate to parent (useComments hook)
   const handleSelfDelete = async () => {
-    const confirmed = window.confirm("Bạn có chắc muốn xóa bình luận này?");
+    const confirmed = window.confirm("Are you sure you want to delete this comment?");
     if (!confirmed) return;
 
     if (onDelete) {
@@ -424,7 +424,7 @@ export function CommentItem({
               onClick={() => setShowReplyForm(!showReplyForm)}
             >
               <i className="fa-solid fa-reply text-xs"></i>
-              <span className="text-xs">Trả lời</span>
+              <span className="text-xs">Reply</span>
             </button>
           )}
 
@@ -437,7 +437,7 @@ export function CommentItem({
                 onClick={handleSelfDelete}
               >
                 <i className="fa-solid fa-ellipsis text-xs"></i>
-                <span className="text-xs">Xóa</span>
+                <span className="text-xs">Delete</span>
               </button>
             </div>
           )}
@@ -450,7 +450,7 @@ export function CommentItem({
               movieId={comment.movieId}
               tvSeriesId={comment.tvSeriesId || comment.tvId}
               parentId={comment.id}
-              placeholder={`Trả lời ${comment.user?.name || ""}...`}
+              placeholder={`Reply to ${comment.user?.name || ""}...`}
               onSubmit={handleReplySubmit}
               onCancel={() => setShowReplyForm(false)}
             />
@@ -466,10 +466,10 @@ export function CommentItem({
             >
               <i className={`fa-solid ${showReplies ? 'fa-angle-up' : 'fa-angle-down'} text-xs`}></i>
               {loadingReplies
-                ? "Đang tải..."
+                ? "Loading..."
                 : showReplies
-                  ? "Ẩn bình luận"
-                  : `Xem tất cả bình luận (${localReplyCount})`
+                  ? "Hide replies"
+                  : `View all replies (${localReplyCount})`
               }
             </a>
           </div>

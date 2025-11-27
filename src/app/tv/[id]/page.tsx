@@ -408,7 +408,7 @@ const TVDetailPageContent = () => {
     const avgRuntime = Math.round(
       runtimes.reduce((a, b) => a + b, 0) / runtimes.length
     );
-    return `${avgRuntime} phút/tập`;
+    return `${avgRuntime} min/ep`;
   };
 
   if (loading) {
@@ -425,16 +425,16 @@ const TVDetailPageContent = () => {
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-white mb-2">
-              Không tìm thấy TV series
+              TV series not found
             </h1>
             <p className="text-gray-400">
-              {error || "TV series này không tồn tại"}
+              {error || "This TV series does not exist"}
             </p>
             <Link
               href="/tv"
               className="mt-4 inline-block px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              ← Quay lại danh sách TV series
+              ← Back to TV series list
             </Link>
           </div>
         </div>
@@ -549,7 +549,7 @@ const TVDetailPageContent = () => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Xem Series
+                    Watch Series
                   </Link>
 
                   <FavoriteButton
@@ -584,7 +584,7 @@ const TVDetailPageContent = () => {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <h3 className="text-2xl font-bold text-white mb-6">
-                Nội dung phim
+                Overview
               </h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
@@ -598,12 +598,12 @@ const TVDetailPageContent = () => {
                           onClick={() => setShowFullDescription(true)}
                           className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors"
                         >
-                          Xem thêm
+                          Read more
                         </button>
                       </>
                     )
                   ) : (
-                    "Không có mô tả."
+                    "No description available."
                   )}
                 </p>
                 {showFullDescription &&
@@ -613,7 +613,7 @@ const TVDetailPageContent = () => {
                       onClick={() => setShowFullDescription(false)}
                       className="mt-2 text-red-400 hover:text-red-300 font-medium transition-colors"
                     >
-                      Thu gọn
+                      Show less
                     </button>
                   )}
               </div>
@@ -622,7 +622,7 @@ const TVDetailPageContent = () => {
               {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                 <>
                   <h3 className="text-2xl font-bold text-white mb-6">
-                    Diễn viên
+                    Cast
                   </h3>
                   {creditsLoading ? (
                     <CastSkeleton />
@@ -666,11 +666,11 @@ const TVDetailPageContent = () => {
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
                 <h3 className="text-xl font-bold text-white mb-4">
-                  Thông tin phim
+                  Series Info
                 </h3>
                 <div className="space-y-3 text-gray-300">
                   <div>
-                    <span className="text-gray-500">Sáng tạo bởi:</span>
+                    <span className="text-gray-500">Created by:</span>
                     <div className="mt-1">
                       {tvData.createdBy && tvData.createdBy.length > 0 ? (
                         tvData.createdBy.map((creator, index: number) => (
@@ -684,7 +684,7 @@ const TVDetailPageContent = () => {
                         ))
                       ) : creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                          Đang tải...
+                          Loading...
                         </span>
                       ) : tvData.creator ? (
                         <Link
@@ -700,11 +700,11 @@ const TVDetailPageContent = () => {
                   </div>
                   {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                     <div>
-                      <span className="text-gray-500">Diễn viên:</span>
+                      <span className="text-gray-500">Cast:</span>
                       <div className="mt-1">
                         {creditsLoading ? (
                           <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                            Đang tải...
+                            Loading...
                           </span>
                         ) : (
                           tvData.cast
@@ -723,7 +723,7 @@ const TVDetailPageContent = () => {
                     </div>
                   ) : null}
                   <div>
-                    <span className="text-gray-500">Quốc gia:</span>
+                    <span className="text-gray-500">Country:</span>
                     <div className="mt-1">
                       {tvData.productionCountries &&
                       tvData.productionCountries.length > 0 ? (
@@ -751,7 +751,7 @@ const TVDetailPageContent = () => {
                         )
                       ) : creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                          Đang tải...
+                          Loading...
                         </span>
                       ) : (
                         tvData.country || "Unknown"
@@ -759,7 +759,7 @@ const TVDetailPageContent = () => {
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Ngày phát sóng đầu:</span>
+                    <span className="text-gray-500">First Air Date:</span>
                     <span className="ml-2">
                       {formatDate(tvData.firstAirDate)}
                     </span>
@@ -767,7 +767,7 @@ const TVDetailPageContent = () => {
                   {tvData.lastAirDate && (
                     <div>
                       <span className="text-gray-500">
-                        Ngày phát sóng cuối:
+                        Last Air Date:
                       </span>
                       <span className="ml-2">
                         {formatDate(tvData.lastAirDate)}
@@ -776,13 +776,13 @@ const TVDetailPageContent = () => {
                   )}
 
                   <div>
-                    <span className="text-gray-500">Số mùa:</span>
+                    <span className="text-gray-500">Seasons:</span>
                     <span className="ml-2">
                       {tvData.numberOfSeasons || "N/A"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Số tập:</span>
+                    <span className="text-gray-500">Episodes:</span>
                     <span className="ml-2">
                       {tvData.numberOfEpisodes || "N/A"}
                     </span>
@@ -790,29 +790,29 @@ const TVDetailPageContent = () => {
                   {tvData.episodeRunTime &&
                     tvData.episodeRunTime.length > 0 && (
                       <div>
-                        <span className="text-gray-500">Thời lượng/tập:</span>
+                        <span className="text-gray-500">Runtime/Episode:</span>
                         <span className="ml-2">
                           {formatRuntime(tvData.episodeRunTime)}
                         </span>
                       </div>
                     )}
                   <div>
-                    <span className="text-gray-500">Ngôn ngữ:</span>
+                    <span className="text-gray-500">Language:</span>
                     <span className="ml-2">
                       {tvData.originalLanguage?.toUpperCase() || "N/A"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Trạng thái:</span>
+                    <span className="text-gray-500">Status:</span>
                     <span className="ml-2 text-green-500">
                       {tvData.status === "Returning Series"
-                        ? "Đang phát sóng"
+                        ? "On Air"
                         : tvData.status === "Ended"
-                        ? "Đã kết thúc"
+                        ? "Ended"
                         : tvData.status === "Canceled"
-                        ? "Đã hủy"
+                        ? "Canceled"
                         : tvData.status === "In Production"
-                        ? "Đang sản xuất"
+                        ? "In Production"
                         : tvData.status || "Unknown"}
                     </span>
                   </div>
@@ -829,7 +829,7 @@ const TVDetailPageContent = () => {
               <section className="py-12 max-w-6xl mx-auto">
                 <div className="container mx-auto px-4">
                   <h2 className="text-3xl font-bold text-white mb-8">
-                    Gợi ý cho bạn
+                    You May Also Like
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {Array.from({ length: 12 }).map((_, index) => (

@@ -112,7 +112,7 @@ export default function TrailerButton({
     return (
       <button disabled className={combinedClasses}>
         <Loader2 size={20} className="animate-spin" />
-        <span>Kiểm tra trailer...</span>
+        <span>Checking trailer...</span>
       </button>
     );
   }
@@ -124,7 +124,7 @@ export default function TrailerButton({
         disabled={isDisabled}
         className={combinedClasses}
         title={
-          hasVideos === false ? "Không có trailer khả dụng" : "Xem trailer"
+          hasVideos === false ? "No trailer available" : "Watch trailer"
         }
       >
         {loading ? (
@@ -134,10 +134,10 @@ export default function TrailerButton({
         )}
         <span>
           {loading
-            ? "Đang tải..."
+            ? "Loading..."
             : hasVideos === false
-            ? "Không có trailer"
-            : "Xem Trailer"}
+            ? "No trailer available"
+            : "Watch Trailer"}
         </span>
       </button>
 

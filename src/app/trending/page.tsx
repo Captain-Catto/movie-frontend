@@ -100,7 +100,7 @@ function TrendingPageContent() {
         <div>
           <div className="container mx-auto px-4 pt-16">
             <h1 className="text-3xl font-bold text-white mb-8">
-              🔥 Phim Trending
+              🔥 Trending
             </h1>
 
             {/* Filter skeleton */}
@@ -143,7 +143,7 @@ function TrendingPageContent() {
       <div>
         <div className="container mx-auto px-4 pt-16">
           <h1 className="text-3xl font-bold text-white mb-8">
-            🔥 Phim Trending
+            🔥 Trending
           </h1>
 
           {/* Filter Component */}
@@ -151,7 +151,7 @@ function TrendingPageContent() {
 
           {error && (
             <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-              Lỗi: {error}
+              Error: {error}
             </div>
           )}
         </div>
@@ -174,7 +174,7 @@ export default function TrendingPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Đang tải nội dung trending...
+          Loading trending content...
         </div>
       }
     >

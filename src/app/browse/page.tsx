@@ -23,7 +23,7 @@ function BrowsePageContent() {
     customYear: "",
     sortBy: "popularity",
   });
-  const [pageTitle, setPageTitle] = useState("🎬 Duyệt Phim");
+  const [pageTitle, setPageTitle] = useState("🎬 Browse Movies");
   const [paginationInfo, setPaginationInfo] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -248,19 +248,19 @@ function BrowsePageContent() {
     // Keep genre IDs as is - no conversion needed
     const genres = genreIds;
 
-    // Cập nhật title dựa trên type
+    // Update title based on type
     switch (type) {
       case "movie":
-        setPageTitle("🎬 Duyệt Phim Lẻ");
+        setPageTitle("🎬 Browse Movies");
         break;
       case "tv":
-        setPageTitle("📺 Duyệt Phim Bộ");
+        setPageTitle("📺 Browse TV Series");
         break;
       case "trending":
-        setPageTitle("🔥 Duyệt Phim Trending");
+        setPageTitle("🔥 Browse Trending");
         break;
       default:
-        setPageTitle("🎬 Duyệt Phim");
+        setPageTitle("🎬 Browse Movies");
     }
 
     const filtersFromUrl: FilterOptions = {
@@ -304,7 +304,7 @@ function BrowsePageContent() {
 
         {error && (
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-6">
-            Lỗi: {error}
+            Error: {error}
           </div>
         )}
 
@@ -350,11 +350,11 @@ function BrowsePageContent() {
                 />
               </svg>
               <h3 className="text-lg font-medium text-white mb-2">
-                Không có phim nào
+                No movies found
               </h3>
-              <p>Không tìm thấy phim nào với bộ lọc hiện tại.</p>
+              <p>No movies found with the current filters.</p>
               <p className="text-sm mt-2">
-                Hãy thử thay đổi bộ lọc để xem kết quả khác.
+                Try changing the filters to see different results.
               </p>
             </div>
           </div>
@@ -379,7 +379,7 @@ export default function BrowsePage() {
     <Suspense
       fallback={
         <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Đang tải nội dung...
+          Loading content...
         </div>
       }
     >

@@ -99,7 +99,7 @@ function MoviesPageContent() {
       <Layout>
         <div>
           <div className="container mx-auto px-4 pt-16">
-            <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
+            <h1 className="text-3xl font-bold text-white mb-8">🎬 Movies</h1>
 
             {/* Filter skeleton */}
             <div className="mb-8">
@@ -136,7 +136,7 @@ function MoviesPageContent() {
     <Layout>
       {/* Movies Grid */}
       <div className="container mx-auto px-4 pt-16">
-        <h1 className="text-3xl font-bold text-white mb-8">🎬 Phim Lẻ</h1>
+        <h1 className="text-3xl font-bold text-white mb-8">🎬 Movies</h1>
 
         {/* Filter Component */}
         <div className="mb-8">
@@ -145,7 +145,7 @@ function MoviesPageContent() {
 
         {error && (
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-            Lỗi: {error}
+            Error: {error}
           </div>
         )}
       </div>
@@ -167,7 +167,7 @@ export default function MoviesPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Đang tải danh sách phim lẻ...
+          Loading movies...
         </div>
       }
     >

@@ -11,7 +11,7 @@ export default function AccountPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
-        <div className="text-white">Đang tải...</div>
+        <div className="text-white">Loading...</div>
       </div>
     );
   }
@@ -23,10 +23,10 @@ export default function AccountPage() {
         <main className="container mx-auto px-4 pt-24 pb-12">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl font-bold text-white mb-6">
-              Vui lòng đăng nhập
+              Please login
             </h1>
             <p className="text-gray-400">
-              Bạn cần đăng nhập để xem thông tin tài khoản
+              You need to login to view account information
             </p>
           </div>
         </main>
@@ -45,7 +45,7 @@ export default function AccountPage() {
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-white mb-8">
-            👤 Tài khoản của bạn
+            👤 Your Account
           </h1>
 
           {/* Profile Card */}
@@ -72,14 +72,14 @@ export default function AccountPage() {
 
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="bg-gray-700/50 rounded-lg p-4">
-                    <p className="text-gray-400 text-sm mb-1">Vai trò</p>
+                    <p className="text-gray-400 text-sm mb-1">Role</p>
                     <p className="text-white font-medium">
-                      {user?.role === "admin" ? "Quản trị viên" : "Người dùng"}
+                      {user?.role === "admin" ? "Administrator" : "User"}
                     </p>
                   </div>
                   <div className="bg-gray-700/50 rounded-lg p-4">
-                    <p className="text-gray-400 text-sm mb-1">Trạng thái</p>
-                    <p className="text-green-400 font-medium">Đang hoạt động</p>
+                    <p className="text-gray-400 text-sm mb-1">Status</p>
+                    <p className="text-green-400 font-medium">Active</p>
                   </div>
                 </div>
               </div>
@@ -89,16 +89,16 @@ export default function AccountPage() {
           {/* Account Settings */}
           <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700">
             <h3 className="text-xl font-bold text-white mb-6">
-              Cài đặt tài khoản
+              Account Settings
             </h3>
 
             <div className="space-y-4">
               <button className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium mb-1">Đổi mật khẩu</p>
+                    <p className="font-medium mb-1">Change Password</p>
                     <p className="text-sm text-gray-400">
-                      Cập nhật mật khẩu của bạn
+                      Update your password
                     </p>
                   </div>
                   <span className="text-gray-400">→</span>
@@ -108,9 +108,9 @@ export default function AccountPage() {
               <button className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium mb-1">Thông báo</p>
+                    <p className="font-medium mb-1">Notifications</p>
                     <p className="text-sm text-gray-400">
-                      Quản lý tùy chọn thông báo
+                      Manage notification preferences
                     </p>
                   </div>
                   <span className="text-gray-400">→</span>
@@ -120,9 +120,9 @@ export default function AccountPage() {
               <button className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium mb-1">Quyền riêng tư</p>
+                    <p className="font-medium mb-1">Privacy</p>
                     <p className="text-sm text-gray-400">
-                      Cài đặt quyền riêng tư và bảo mật
+                      Privacy and security settings
                     </p>
                   </div>
                   <span className="text-gray-400">→</span>
@@ -132,9 +132,9 @@ export default function AccountPage() {
               <button className="w-full text-left px-6 py-4 bg-red-600/20 hover:bg-red-600/30 border border-red-600/50 rounded-lg transition-colors text-red-400">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium mb-1">Xóa tài khoản</p>
+                    <p className="font-medium mb-1">Delete Account</p>
                     <p className="text-sm text-red-300/70">
-                      Xóa vĩnh viễn tài khoản của bạn
+                      Permanently delete your account
                     </p>
                   </div>
                   <span className="text-red-400">⚠</span>

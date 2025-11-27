@@ -8,7 +8,7 @@ export default function PopularTVPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Đang tải danh sách phim bộ...
+          Loading TV series...
         </div>
       }
     >

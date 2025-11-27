@@ -110,7 +110,7 @@ export default function TopRatedPage() {
     <Suspense
       fallback={
         <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Đang tải danh sách phim top rated...
+          Loading top rated movies...
         </div>
       }
     >

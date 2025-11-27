@@ -20,12 +20,12 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
     },
     {
       id: "movie" as const,
-      label: "Phim lẻ",
+      label: "Movies",
       icon: Film,
     },
     {
       id: "tv" as const,
-      label: "Phim bộ",
+      label: "TV Series",
       icon: Tv,
     },
   ];

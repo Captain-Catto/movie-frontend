@@ -24,7 +24,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
       <div className="p-6 text-center">
         <Clock className="w-12 h-12 text-gray-600 mx-auto mb-3" />
         <h3 className="text-gray-400 font-medium mb-1">
-          Chưa có tìm kiếm gần đây
+          No recent searches
         </h3>
         <p className="text-gray-500 text-sm">
           Các tìm kiếm của bạn sẽ xuất hiện ở đây
@@ -36,9 +36,9 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "movie":
-        return "Phim lẻ";
+        return "Movies";
       case "tv":
-        return "Phim bộ";
+        return "TV Series";
       default:
         return "Tất cả";
     }

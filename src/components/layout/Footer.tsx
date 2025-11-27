@@ -16,7 +16,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-gray-400">
-              Trải nghiệm giải trí tuyệt vời với kho phim đặc sắc và đa dạng.
+              Experience great entertainment with our diverse movie collection.
             </p>
             <div className="flex space-x-4">
               <Link
@@ -104,7 +104,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-white">
-              Liên Kết Nhanh
+              Quick Links
             </h3>
             <ul className="space-y-2">
               <li>
@@ -112,7 +112,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Trang Chủ
+                  Home
                 </Link>
               </li>
               <li>
@@ -120,7 +120,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Phim Mới
+                  New Releases
                 </Link>
               </li>
               <li>
@@ -128,7 +128,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Phim Lẻ
+                  Movies
                 </Link>
               </li>
               <li>
@@ -136,7 +136,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Phim Bộ
+                  TV Series
                 </Link>
               </li>
               <li>
@@ -144,7 +144,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Phim Chiếu Rạp
+                  In Theaters
                 </Link>
               </li>
             </ul>
@@ -152,14 +152,14 @@ const Footer = () => {
 
           {/* Categories */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Thể Loại</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Categories</h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Hành Động
+                  Action
                 </Link>
               </li>
               <li>
@@ -167,7 +167,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Tình Cảm
+                  Romance
                 </Link>
               </li>
               <li>
@@ -175,7 +175,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Hài Hước
+                  Comedy
                 </Link>
               </li>
               <li>
@@ -183,7 +183,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Hoạt Hình
+                  Animation
                 </Link>
               </li>
               <li>
@@ -191,7 +191,7 @@ const Footer = () => {
                   href="#"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Kinh Dị
+                  Horror
                 </Link>
               </li>
             </ul>
@@ -199,7 +199,7 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Liên Hệ</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">Contact</h3>
             <ul className="space-y-4">
               <li className="flex items-center text-gray-400">
                 <svg
@@ -251,13 +251,13 @@ const Footer = () => {
                 href="#"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
-                Điều Khoản Sử Dụng
+                Terms of Use
               </Link>
               <Link
                 href="#"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
-                Chính Sách Bảo Mật
+                Privacy Policy
               </Link>
               <Link
                 href="#"

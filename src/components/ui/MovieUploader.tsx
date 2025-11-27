@@ -156,7 +156,7 @@ export default function MovieUploader() {
                 Upload thành công!
               </h3>
               <p className="text-green-300 text-sm">
-                Phim đã được upload lên AWS S3 và sẵn sàng để phát
+                Movie uploaded to AWS S3 and ready to stream
               </p>
             </div>
           </div>
@@ -216,7 +216,7 @@ export default function MovieUploader() {
       <div className="bg-gray-800 rounded-lg p-6">
         <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
           <Upload className="mr-2" size={24} />
-          Upload Phim Demo lên S3
+          Upload Demo Movie to S3
         </h2>
 
         {error && (

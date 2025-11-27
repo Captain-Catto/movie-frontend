@@ -67,7 +67,7 @@ const MoviesGrid = ({
                 />
               </svg>
               <h3 className="text-lg font-medium text-white mb-2">
-                Không có phim nào
+                No movies found
               </h3>
               <p>Danh sách phim hiện tại trống</p>
             </div>

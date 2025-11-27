@@ -26,14 +26,14 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
     if (result.mediaType === "tv") {
       return {
         icon: Tv,
-        label: "Phim bộ",
+        label: "TV Series",
         href: `/tv/${result.tmdbId}`,
         color: "text-green-400",
       };
     }
     return {
       icon: Film,
-      label: "Phim lẻ",
+      label: "Movies",
       href: `/movie/${result.tmdbId}`,
       color: "text-blue-400",
     };

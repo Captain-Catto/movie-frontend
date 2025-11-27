@@ -140,7 +140,7 @@ const MovieDetailPageContent = () => {
         if (!contentResult.success || !contentResult.content) {
           console.error("Content not found:", contentResult.message);
           setError(
-            `Không tìm thấy nội dung với ID: ${movieId}. Vui lòng thử lại sau hoặc chọn nội dung khác.`
+            `Content not found with ID: ${movieId}. Please try again later or choose different content.`
           );
           return;
         }
@@ -323,7 +323,7 @@ const MovieDetailPageContent = () => {
         <div className="min-h-screen">
           <div className="flex items-center justify-center h-96">
             <div className="text-center text-white">
-              <p>Không tìm thấy thông tin phim.</p>
+              <p>Movie information not found.</p>
             </div>
           </div>
         </div>
@@ -336,7 +336,7 @@ const MovieDetailPageContent = () => {
       <div className="min-h-screen">
         {error && (
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 mx-4 rounded mb-4">
-            Lỗi: {error}
+            Error: {error}
           </div>
         )}
 
@@ -446,7 +446,7 @@ const MovieDetailPageContent = () => {
                         clipRule="evenodd"
                       />
                     </svg>
-                    Xem Phim
+                    Watch Now
                   </Link>
 
                   <FavoriteButton
@@ -480,7 +480,7 @@ const MovieDetailPageContent = () => {
             {/* Main Content */}
             <div className="lg:col-span-2">
               <h3 className="text-2xl font-bold text-white mb-6">
-                Nội dung phim
+                Overview
               </h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
@@ -493,7 +493,7 @@ const MovieDetailPageContent = () => {
               creditsLoading ? (
                 <>
                   <h3 className="text-2xl font-bold text-white mb-6">
-                    Diễn Viên
+                    Cast
                   </h3>
                   {creditsLoading ? (
                     <CastSkeleton />
@@ -541,11 +541,11 @@ const MovieDetailPageContent = () => {
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
                 <h3 className="text-xl font-bold text-white mb-4">
-                  Thông tin phim
+                  Movie Info
                 </h3>
                 <div className="space-y-3 text-gray-300">
                   <div>
-                    <span className="text-gray-500">Đạo diễn:</span>
+                    <span className="text-gray-500">Director:</span>
                     <span className="ml-2">
                       {creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
@@ -566,11 +566,11 @@ const MovieDetailPageContent = () => {
                   {(movieData.cast && movieData.cast.length > 0) ||
                   creditsLoading ? (
                     <div>
-                      <span className="text-gray-500">Diễn viên:</span>
+                      <span className="text-gray-500">Cast:</span>
                       <div className="mt-1">
                         {creditsLoading ? (
                           <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                            Đang tải...
+                            Loading...
                           </span>
                         ) : (
                           movieData.cast
@@ -589,7 +589,7 @@ const MovieDetailPageContent = () => {
                     </div>
                   ) : null}
                   <div>
-                    <span className="text-gray-500">Quốc gia:</span>
+                    <span className="text-gray-500">Country:</span>
                     <span className="ml-2">
                       {creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
@@ -601,29 +601,29 @@ const MovieDetailPageContent = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Năm sản xuất:</span>
+                    <span className="text-gray-500">Release Year:</span>
                     <span className="ml-2">{movieData.year}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">
                       {movieData.contentType === "tv"
-                        ? "Thời lượng/tập:"
-                        : "Thời lượng:"}
+                        ? "Runtime/Episode:"
+                        : "Runtime:"}
                     </span>
-                    <span className="ml-2">{movieData.runtime} phút</span>
+                    <span className="ml-2">{movieData.runtime}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Chất lượng:</span>
+                    <span className="text-gray-500">Quality:</span>
                     <span className="ml-2">{movieData.quality}</span>
                   </div>
                   {movieData.language && (
                     <div>
-                      <span className="text-gray-500">Ngôn ngữ:</span>
+                      <span className="text-gray-500">Language:</span>
                       <span className="ml-2">{movieData.language}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-500">Trạng thái:</span>
+                    <span className="text-gray-500">Status:</span>
                     <span className="ml-2 text-green-500">
                       {movieData.status}
                     </span>

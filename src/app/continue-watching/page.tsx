@@ -15,7 +15,7 @@ export default function ContinueWatchingPage() {
           <div className="bg-gray-800/50 rounded-xl p-12 text-center border border-gray-700">
             <div className="text-6xl mb-4">🎬</div>
             <h2 className="text-2xl font-semibold text-white mb-3">
-              Chưa có lịch sử xem
+              No viewing history
             </h2>
             <p className="text-gray-400 mb-6">
               Bắt đầu xem phim để theo dõi tiến trình của bạn

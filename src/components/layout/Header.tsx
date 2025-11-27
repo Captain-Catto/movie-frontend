@@ -8,24 +8,51 @@ import UserMenu from "@/components/layout/UserMenu";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useAuth } from "@/hooks/useAuth";
 
-const Header = () => {
+interface HeaderProps {
+  hideOnPlay?: boolean;
+  isPlaying?: boolean;
+}
+
+const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true); // Start visible
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const { user, isAuthenticated, logout } = useAuth();
 
-  // Handle scroll to change navbar background
+  // Handle play state - hide header when playing (unless user has scrolled)
+  useEffect(() => {
+    if (hideOnPlay && isPlaying && !hasScrolled) {
+      setIsVisible(false);
+    }
+  }, [hideOnPlay, isPlaying, hasScrolled]);
+
+  // Handle scroll to change navbar background and visibility
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       setIsScrolled(scrollTop > 0);
+
+      // Show header when user scrolls down
+      if (hideOnPlay && scrollTop > 50) {
+        setHasScrolled(true);
+        setIsVisible(true);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [hideOnPlay]);
+
+  // Reset scroll state when play state changes (to allow hiding again on next play)
+  useEffect(() => {
+    if (hideOnPlay && isPlaying) {
+      setHasScrolled(false);
+    }
+  }, [hideOnPlay, isPlaying]);
 
   const handleSearchClick = () => {
     setIsSearchModalOpen(true);
@@ -48,13 +75,13 @@ const Header = () => {
   };
 
   const navigationItems = [
-    { href: "/", label: "Trang chủ" },
+    { href: "/", label: "Home" },
     { href: "/trending", label: "Trending" },
-    { href: "/movies", label: "Phim Lẻ" },
-    { href: "/browse", label: "Duyệt Phim" },
-    { href: "/tv", label: "Phim Bộ" },
-    { href: "/people", label: "Diễn viên" },
-    { href: "/favorites", label: "Yêu thích" },
+    { href: "/movies", label: "Movies" },
+    { href: "/browse", label: "Browse" },
+    { href: "/tv", label: "TV Series" },
+    { href: "/people", label: "Actors" },
+    { href: "/favorites", label: "Favorites" },
     { href: "/demo", label: "🎬 Demo" },
   ];
 
@@ -64,6 +91,8 @@ const Header = () => {
         isScrolled
           ? "bg-gray-800/95 backdrop-blur-sm shadow-lg"
           : "bg-transparent"
+      } ${
+        isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -97,7 +126,7 @@ const Header = () => {
             <button
               className="p-1 hover:text-red-500 transition-colors text-white"
               onClick={handleSearchClick}
-              title="Tìm kiếm"
+              title="Search"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -127,7 +156,7 @@ const Header = () => {
                 onClick={handleAuthModalOpen}
                 className="text-white hover:text-red-500 transition-colors text-sm px-3 py-2 rounded bg-red-600 hover:bg-red-700"
               >
-                Đăng nhập
+                Login
               </button>
             )}
 

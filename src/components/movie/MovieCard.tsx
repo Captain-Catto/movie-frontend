@@ -145,10 +145,12 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <Image
             src={
               movie.poster ||
-              ("posterUrl" in movie ? (movie as Record<string, string>).posterUrl : "") ||
+              ("posterUrl" in movie
+                ? (movie as Record<string, string>).posterUrl
+                : "") ||
               "/images/no-poster.svg"
             }
-            alt={`Xem Phim ${movie.title}`}
+            alt={`Watch Now ${movie.title}`}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
             loading="lazy"
@@ -165,7 +167,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
                 <div className="w-4 h-4 relative">
                   <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-0.5"></div>
                 </div>
-                <span>Xem Phim</span>
+                <span>Watch</span>
               </button>
             </div>
           </div>
@@ -219,7 +221,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               className="flex-1 bg-red-400 hover:bg-red-500 text-white py-1.5 rounded font-semibold text-xs transition-colors flex items-center justify-center space-x-2"
             >
               <Play className="w-4 h-4 fill-white" />
-              <span>Xem ngay</span>
+              <span>Watch</span>
             </button>
             <FavoriteButton
               movie={{
@@ -239,7 +241,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded font-semibold text-xs transition-colors flex items-center space-x-1"
             >
               <Info className="w-4 h-4" />
-              <span>Chi tiết</span>
+              <span>Details</span>
             </Link>
           </div>
 

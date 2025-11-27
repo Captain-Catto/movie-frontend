@@ -96,7 +96,7 @@ export function CommentSection({
           <CommentForm
             movieId={movieId}
             tvSeriesId={tvSeriesId}
-            placeholder="Viết bình luận"
+            placeholder="Write a comment"
             onSubmit={handleCommentSubmit}
             className="mb-6"
           />
@@ -107,7 +107,7 @@ export function CommentSection({
           {loading && (!comments || comments.length === 0) ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
-              <p className="text-gray-400 mt-3">Đang tải bình luận...</p>
+              <p className="text-gray-400 mt-3">Loading comments...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
@@ -138,16 +138,16 @@ export function CommentSection({
                     className="primary-text text-red-500 cursor-pointer hover:text-red-400 block text-center"
                     onClick={loadMore}
                   >
-                    {loading ? "Đang tải..." : "Xem thêm bình luận..."}
+                    {loading ? "Loading..." : "Load more comments..."}
                   </a>
                 </div>
               )}
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-400 text-lg mb-2">Chưa có bình luận nào</p>
+              <p className="text-gray-400 text-lg mb-2">No comments yet</p>
               <p className="text-gray-500 text-sm">
-                Hãy là người đầu tiên chia sẻ cảm nhận của bạn!
+                Be the first to share your thoughts!
               </p>
             </div>
           )}

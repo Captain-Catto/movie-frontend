@@ -279,7 +279,7 @@ export function CommentForm({
               onClick={handleCancel}
               disabled={isSubmitting || checking}
             >
-              <span>Hủy</span>
+              <span>Cancel</span>
             </button>
           )}
 
@@ -298,7 +298,7 @@ export function CommentForm({
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>{editingComment ? "Cập nhật" : "Gửi"}</span>
+                <span>{editingComment ? "Update" : "Send"}</span>
                 <div className="inc-icon icon-20">
                   <svg
                     fill="none"

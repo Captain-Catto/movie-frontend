@@ -18,7 +18,7 @@ export default function SortingSelect({
     },
     {
       value: "top_rated",
-      label: "⭐ Phim được đánh giá cao",
+      label: "⭐ Top Rated",
     },
     {
       value: "latest",

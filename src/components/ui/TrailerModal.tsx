@@ -150,7 +150,7 @@ export default function TrailerModal({
         {/* No Videos Message */}
         {youtubeVideos.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-400">Không có trailer nào khả dụng.</p>
+            <p className="text-gray-400">No trailers available.</p>
           </div>
         )}
       </div>

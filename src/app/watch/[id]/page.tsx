@@ -128,6 +128,7 @@ const WatchPage = () => {
 
         // Set recommendations
         if (recommendationsResponse.success) {
+          console.log("🎬 Recommendations raw data:", recommendationsResponse.data);
           const mappedRecommendations: RecommendationItem[] =
             recommendationsResponse.data.slice(0, 5).map((item) => {
               const releaseDate =
@@ -135,17 +136,18 @@ const WatchPage = () => {
                   ? item.releaseDate.split("T")[0]
                   : undefined;
 
-              return {
+              const mappedItem = {
                 id: item.tmdbId ?? item.id,
                 title: item.title,
                 name:
                   (item as unknown as { name?: string }).name ?? item.title,
-                poster_path: item.posterPath ?? null,
+                poster_path: (item as any).poster_path ?? item.posterPath ?? null,
                 release_date: releaseDate,
                 first_air_date: undefined,
-                vote_average:
-                  typeof item.voteAverage === "number" ? item.voteAverage : 0,
+                vote_average: (item as any).vote_average ?? item.voteAverage ?? 0,
               };
+              console.log("🎬 Mapped recommendation:", mappedItem);
+              return mappedItem;
             });
 
           setRecommendations(mappedRecommendations);
@@ -153,7 +155,7 @@ const WatchPage = () => {
         setRecommendationsLoading(false);
       } catch (err) {
         console.error("Error fetching content data:", err);
-        setError("Không thể tải thông tin nội dung");
+        setError("Unable to load content information");
         setCreditsLoading(false);
         setRecommendationsLoading(false);
       } finally {
@@ -184,16 +186,16 @@ const WatchPage = () => {
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-white mb-2">
-              Không tìm thấy phim
+              Movie not found
             </h1>
             <p className="text-gray-400 mb-4">
-              {error || "Phim này không tồn tại"}
+              {error || "This movie does not exist"}
             </p>
             <button
               onClick={() => router.back()}
               className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
             >
-              Quay lại
+              Go back
             </button>
           </div>
         </div>
@@ -202,7 +204,7 @@ const WatchPage = () => {
   }
 
   return (
-    <Layout>
+    <Layout hideHeaderOnPlay={true} isPlaying={isPlaying}>
       <div className="min-h-screen bg-gray-900">
         {/* Movie Player Section */}
         <div className="relative flex items-center justify-center bg-black">
@@ -432,8 +434,7 @@ const WatchPage = () => {
                       className="text-primary text-red-500 hover:text-red-400 inline-flex items-center"
                       href={`/movie/${movieData.tmdbId}`}
                     >
-                      Thông tin{" "}
-                      {movieData.contentType === "tv" ? "series" : "phim"}
+                      {movieData.contentType === "tv" ? "Series" : "Movie"} information
                       <svg
                         className="w-4 h-4 ml-1"
                         fill="currentColor"
@@ -486,7 +487,7 @@ const WatchPage = () => {
             <div className="lg:col-span-1 space-y-8">
               {/* Cast & Crew */}
               <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-white mb-4">Diễn viên</h3>
+                <h3 className="text-xl font-bold text-white mb-4">Cast</h3>
                 {creditsLoading ? (
                   <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
@@ -545,7 +546,7 @@ const WatchPage = () => {
                   </div>
                 ) : (
                   <p className="text-gray-400 text-sm">
-                    Không có thông tin diễn viên
+                    No cast information available
                   </p>
                 )}
               </div>
@@ -553,7 +554,7 @@ const WatchPage = () => {
               {/* Recommendations */}
               <div className="bg-gray-800 rounded-lg p-6">
                 <h3 className="text-xl font-bold text-white mb-4">
-                  Có thể bạn thích
+                  You May Also Like
                 </h3>
                 {recommendationsLoading ? (
                   <div className="space-y-4">
@@ -633,7 +634,7 @@ const WatchPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-sm">Không có gợi ý phim</p>
+                  <p className="text-gray-400 text-sm">No movie recommendations available</p>
                 )}
               </div>
             </div>

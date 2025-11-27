@@ -142,7 +142,7 @@ const PersonDetailPage = () => {
         }
       } catch (err) {
         console.error("Error fetching person credits:", err);
-        setError("Không thể tải danh sách phim");
+        setError("Unable to load movie list");
       }
     };
 
@@ -156,7 +156,7 @@ const PersonDetailPage = () => {
           const normalizedPerson: PersonDetail = {
             id: personResponse.id,
             name: personResponse.name,
-            biography: personResponse.biography ?? "Chưa có tiểu sử",
+            biography: personResponse.biography ?? "No biography available",
             birthday: personResponse.birthday ?? null,
             deathday: personResponse.deathday ?? null,
             place_of_birth: personResponse.place_of_birth ?? null,
@@ -179,7 +179,7 @@ const PersonDetailPage = () => {
         setError(null);
       } catch (err) {
         console.error("Error fetching person data:", err);
-        setError("Không thể tải thông tin diễn viên");
+        setError("Unable to load actor information");
       } finally {
         setLoading(false);
       }
@@ -220,15 +220,15 @@ const PersonDetailPage = () => {
   const getKnownForText = () => {
     switch (personData?.known_for_department) {
       case "Acting":
-        return "Diễn viên";
+        return "Actor";
       case "Directing":
-        return "Đạo diễn";
+        return "Director";
       case "Writing":
-        return "Biên kịch";
+        return "Writer";
       case "Production":
-        return "Sản xuất";
+        return "Producer";
       default:
-        return personData?.known_for_department || "Nghệ sĩ";
+        return personData?.known_for_department || "Artist";
     }
   };
 
@@ -302,10 +302,10 @@ const PersonDetailPage = () => {
         <div className="min-h-screen bg-gray-900 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-white mb-2">
-              Không tìm thấy diễn viên
+              Actor not found
             </h1>
             <p className="text-gray-400">
-              {error || "Diễn viên này không tồn tại"}
+              {error || "This actor does not exist"}
             </p>
           </div>
         </div>
@@ -368,7 +368,7 @@ const PersonDetailPage = () => {
                   {personData.birthday && (
                     <div>
                       <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                        Ngày sinh
+                        Date of Birth
                       </h3>
                       <p className="text-white">
                         {formatDate(personData.birthday)}
@@ -379,7 +379,7 @@ const PersonDetailPage = () => {
                   {personData.place_of_birth && (
                     <div>
                       <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                        Nơi sinh
+                        Place of Birth
                       </h3>
                       <p className="text-white">{personData.place_of_birth}</p>
                     </div>
@@ -388,7 +388,7 @@ const PersonDetailPage = () => {
                   {personData.deathday && (
                     <div>
                       <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                        Ngày mất
+                        Date of Death
                       </h3>
                       <p className="text-white">
                         {formatDate(personData.deathday)}
@@ -400,7 +400,7 @@ const PersonDetailPage = () => {
                 {/* Biography */}
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-4">
-                    Tiểu sử
+                    Biography
                   </h3>
                   <div className="text-gray-300 leading-relaxed whitespace-pre-line">
                     {personData.biography ? (
@@ -413,13 +413,13 @@ const PersonDetailPage = () => {
                             onClick={() => setShowFullBio(!showFullBio)}
                             className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
                           >
-                            {showFullBio ? "Ẩn bớt" : "Xem thêm"}
+                            {showFullBio ? "Show less" : "Read more"}
                           </button>
                         )}
                       </>
                     ) : (
                       <p className="text-gray-400 italic">
-                        Tiểu sử hiện chưa có
+                        Biography hiện chưa có
                       </p>
                     )}
                   </div>
@@ -444,7 +444,7 @@ const PersonDetailPage = () => {
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                Diễn xuất ({castCredits?.metadata.totalCastItems || 0})
+                Acting ({castCredits?.metadata.totalCastItems || 0})
               </button>
               <button
                 onClick={() => handleTabChange("crew")}
@@ -454,7 +454,7 @@ const PersonDetailPage = () => {
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                Thành viên đoàn phim ({crewCredits?.metadata.totalCrewItems || 0})
+                Crew ({crewCredits?.metadata.totalCrewItems || 0})
               </button>
             </div>
 
@@ -506,7 +506,7 @@ const PersonDetailPage = () => {
               (activeTab === "crew" && crewItems.length === 0)) && (
               <div className="text-center py-12">
                 <p className="text-gray-400">
-                  Không có dữ liệu{" "}
+                  No data available{" "}
                   {activeTab === "cast" ? "diễn xuất" : "thành viên đoàn phim"}
                 </p>
               </div>
