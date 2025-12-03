@@ -220,7 +220,13 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 onClick={handleMarkAllAsRead}
                 disabled={!isConnected || isMarkingAllAsRead}
                 className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
-                title={!isConnected ? "Not connected to notification server" : "Mark all notifications as read"}
+                title={
+                  !isConnected
+                    ? "⚠️ Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng."
+                    : notifications.every(n => n.isRead)
+                      ? "Tất cả thông báo đã được đọc"
+                      : "Đánh dấu tất cả là đã đọc"
+                }
               >
                 {isMarkingAllAsRead ? "Marking..." : "Mark all read"}
               </Button>

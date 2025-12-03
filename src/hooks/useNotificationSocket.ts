@@ -92,6 +92,12 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       setIsConnected(false);
     });
 
+    newSocket.on("auth:error", (error) => {
+      console.error("🔐 Socket authentication failed:", error);
+      setIsConnected(false);
+      // Optional: Trigger token refresh or re-login
+    });
+
     newSocket.on("notification:new", (notification: NotificationData) => {
       console.log("🔔 New notification:", notification);
       setLatestNotification(notification);
