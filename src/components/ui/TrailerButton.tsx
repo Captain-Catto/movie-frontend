@@ -103,7 +103,7 @@ export default function TrailerButton({
 
   const buttonClasses = isDisabled
     ? `${baseClasses} bg-gray-600 text-gray-400 cursor-not-allowed opacity-50`
-    : `${baseClasses} bg-red-600 hover:bg-red-700 text-white`;
+    : `${baseClasses} bg-red-600 hover:bg-red-700 text-white cursor-pointer`;
 
   const combinedClasses = `${buttonClasses} ${className}`;
 

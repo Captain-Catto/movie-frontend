@@ -162,7 +162,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <button
                 onClick={handleWatchMovie}
-                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center space-x-2"
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <div className="w-4 h-4 relative">
                   <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-0.5"></div>
@@ -218,7 +218,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <div className="flex space-x-2">
             <button
               onClick={handleWatchMovie}
-              className="flex-1 bg-red-400 hover:bg-red-500 text-white py-1.5 rounded font-semibold text-xs transition-colors flex items-center justify-center space-x-2"
+              className="flex-1 bg-red-400 hover:bg-red-500 text-white py-1.5 rounded font-semibold text-xs transition-colors flex items-center justify-center space-x-2 cursor-pointer"
             >
               <Play className="w-4 h-4 fill-white" />
               <span>Watch</span>
@@ -238,7 +238,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             />
             <Link
               href={movie.href || `/movie/${movie.tmdbId}`}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded font-semibold text-xs transition-colors flex items-center space-x-1"
+              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded font-semibold text-xs transition-colors flex items-center space-x-1 cursor-pointer"
             >
               <Info className="w-4 h-4" />
               <span>Details</span>
