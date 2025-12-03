@@ -82,7 +82,6 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
     { href: "/tv", label: "TV Series" },
     { href: "/people", label: "Actors" },
     { href: "/favorites", label: "Favorites" },
-    { href: "/demo", label: "🎬 Demo" },
   ];
 
   return (
