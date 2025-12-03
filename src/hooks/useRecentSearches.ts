@@ -49,7 +49,12 @@ export const useRecentSearches = (
   // Load searches from database (when user is logged in)
   const loadUserSearches = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/search/recent`);
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`${API_BASE_URL}/search/recent`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
@@ -144,11 +149,13 @@ export const useRecentSearches = (
   // Sync local searches to database
   const syncLocalToDatabase = async (localSearches: RecentSearch[]) => {
     try {
+      const token = localStorage.getItem("authToken");
       for (const search of localSearches) {
         await fetch(`${API_BASE_URL}/search/recent`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             query: search.query,
@@ -189,12 +196,14 @@ export const useRecentSearches = (
       if (user) {
         // Save to database
         try {
+          const token = localStorage.getItem("authToken");
           const response = await fetch(
             `${API_BASE_URL}/search/recent`,
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
               },
               body: JSON.stringify({
                 query: trimmedQuery,
@@ -266,10 +275,14 @@ export const useRecentSearches = (
       if (user && searchToRemove.id) {
         // Remove from database
         try {
+          const token = localStorage.getItem("authToken");
           const response = await fetch(
             `${API_BASE_URL}/search/recent/${searchToRemove.id}`,
             {
               method: "DELETE",
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             }
           );
 
@@ -301,10 +314,14 @@ export const useRecentSearches = (
     if (user) {
       // Clear from database
       try {
+        const token = localStorage.getItem("authToken");
         const response = await fetch(
           `${API_BASE_URL}/search/recent`,
           {
             method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
 
