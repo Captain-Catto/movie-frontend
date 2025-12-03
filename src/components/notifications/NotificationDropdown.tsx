@@ -24,6 +24,7 @@ interface NotificationDropdownProps {
 export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -114,11 +115,28 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     );
   };
 
-  const handleMarkAllAsRead = () => {
-    markAllAsRead();
-    setNotifications((prev) =>
-      prev.map((notif) => ({ ...notif, isRead: true }))
-    );
+  const handleMarkAllAsRead = async () => {
+    if (!isConnected) {
+      console.warn("⚠️ Cannot mark all as read: Socket not connected");
+      return;
+    }
+
+    setIsMarkingAllAsRead(true);
+    console.log("📝 Marking all notifications as read...");
+
+    try {
+      markAllAsRead();
+      // Update local state immediately for better UX
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, isRead: true }))
+      );
+      console.log("✅ All notifications marked as read");
+    } catch (error) {
+      console.error("❌ Error marking all as read:", error);
+    } finally {
+      // Reset loading state after a short delay
+      setTimeout(() => setIsMarkingAllAsRead(false), 500);
+    }
   };
 
   const handleRemoveNotification = (notificationId: number) => {
@@ -200,9 +218,11 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleMarkAllAsRead}
-                className="text-blue-400 hover:text-blue-300 text-xs"
+                disabled={!isConnected || isMarkingAllAsRead}
+                className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
+                title={!isConnected ? "Not connected to notification server" : "Mark all notifications as read"}
               >
-                Mark all read
+                {isMarkingAllAsRead ? "Marking..." : "Mark all read"}
               </Button>
             )}
           </div>
