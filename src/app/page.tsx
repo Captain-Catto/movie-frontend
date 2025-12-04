@@ -17,7 +17,6 @@ export default function Home() {
   const [upcomingMovies, setUpcomingMovies] = useState<MovieCardData[]>([]);
   const [heroMovies, setHeroMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [heroLoading, setHeroLoading] = useState(true);
 
   useEffect(() => {
     const fetchMovieSections = async () => {
@@ -86,8 +85,6 @@ export default function Home() {
       } catch (error) {
         console.error("Error fetching trending movies for hero:", error);
         // Keep fallback static data
-      } finally {
-        setHeroLoading(false);
       }
     };
 
@@ -186,309 +183,14 @@ export default function Home() {
     })
   );
 
-  const normalizeFallbackMovies = <
-    T extends {
-      id: string;
-      tmdbId?: number;
-      title: string;
-      aliasTitle?: string;
-      poster: string;
-      href: string;
-      year?: number;
-      genre?: string;
-      genres?: string[];
-      description?: string;
-      rating?: number;
-    }
-  >(
-    movies: T[]
-  ): MovieCardData[] =>
-    movies.map((movie, index) => {
-      const parsedId = Number.parseInt(movie.id, 10);
-      const tmdbId =
-        movie.tmdbId ?? (Number.isNaN(parsedId) ? index + 1 : parsedId);
 
-      return {
-        ...movie,
-        tmdbId,
-        aliasTitle: movie.aliasTitle ?? movie.title,
-        genres: movie.genres ?? (movie.genre ? [movie.genre] : undefined),
-      };
-    });
+  // Use fetched movies (no fallback - show skeleton when loading)
+  const nowPlayingToDisplay = nowPlayingMovies;
+  const popularToDisplay = popularMovies;
+  const topRatedToDisplay = topRatedMovies;
+  const upcomingToDisplay = upcomingMovies;
 
-  // Fallback static data for each section (6 movies each)
-  const fallbackNowPlayingRaw = [
-    {
-      id: "1",
-      tmdbId: 693134, // Real TMDB ID for Dune: Part Two
-      title: "Dune: Part Two",
-      aliasTitle: "Dune: Phần Hai",
-      poster:
-        "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/693134",
-      year: 2024,
-      genre: "Sci-Fi",
-    },
-    {
-      id: "2",
-      title: "Oppenheimer",
-      aliasTitle: "Oppenheimer",
-      poster:
-        "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/2",
-      year: 2023,
-      genre: "Drama",
-    },
-    {
-      id: "3",
-      title: "The Batman",
-      aliasTitle: "Người Dơi",
-      poster:
-        "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/3",
-      year: 2024,
-      genre: "Action",
-    },
-    {
-      id: "4",
-      title: "Inception",
-      aliasTitle: "Kỷ Nguyên",
-      poster:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/4",
-      year: 2023,
-      genre: "Thriller",
-    },
-    {
-      id: "5",
-      title: "Avatar 3",
-      aliasTitle: "Thế Thần - Phần 3",
-      poster:
-        "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/5",
-      year: 2024,
-      genre: "Fantasy",
-    },
-    {
-      id: "6",
-      title: "Spider-Man",
-      aliasTitle: "Người Nhện",
-      poster:
-        "https://images.unsplash.com/photo-1635863138275-d9b33299680b?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/6",
-      year: 2024,
-      genre: "Action",
-    },
-  ];
-
-  const fallbackNowPlaying = normalizeFallbackMovies(fallbackNowPlayingRaw);
-
-  const fallbackPopularRaw = [
-    {
-      id: "7",
-      title: "Black Panther",
-      aliasTitle: "Báo Đen",
-      poster:
-        "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/7",
-      year: 2023,
-      genre: "Action",
-    },
-    {
-      id: "8",
-      title: "Interstellar",
-      aliasTitle: "Hố Đen Tử Thần",
-      poster:
-        "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/8",
-      year: 2023,
-      genre: "Sci-Fi",
-    },
-    {
-      id: "9",
-      title: "Wonder Woman",
-      aliasTitle: "Nữ Thần Chiến Binh",
-      poster:
-        "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/9",
-      year: 2024,
-      genre: "Action",
-    },
-    {
-      id: "10",
-      title: "Doctor Strange",
-      aliasTitle: "Bác Sĩ Tử Thần",
-      poster:
-        "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/10",
-      year: 2023,
-      genre: "Fantasy",
-    },
-    {
-      id: "11",
-      title: "Guardians Galaxy",
-      aliasTitle: "Vệ Binh Thiên Hà",
-      poster:
-        "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/11",
-      year: 2024,
-      genre: "Action",
-    },
-    {
-      id: "12",
-      title: "Thor",
-      aliasTitle: "Thần Sấm",
-      poster:
-        "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/12",
-      year: 2024,
-      genre: "Action",
-    },
-  ];
-
-  const fallbackPopular = normalizeFallbackMovies(fallbackPopularRaw);
-
-  const fallbackTopRatedRaw = [
-    {
-      id: "13",
-      title: "The Godfather",
-      aliasTitle: "Bố Già",
-      poster:
-        "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/13",
-      year: 1972,
-      genre: "Drama",
-    },
-    {
-      id: "14",
-      title: "The Shawshank",
-      aliasTitle: "Nhà Tù Shawshank",
-      poster:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/14",
-      year: 1994,
-      genre: "Drama",
-    },
-    {
-      id: "15",
-      title: "Schindler List",
-      aliasTitle: "Danh Sách Schindler",
-      poster:
-        "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/15",
-      year: 1993,
-      genre: "Drama",
-    },
-    {
-      id: "16",
-      title: "Pulp Fiction",
-      aliasTitle: "Pulp Fiction",
-      poster:
-        "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/16",
-      year: 1994,
-      genre: "Crime",
-    },
-    {
-      id: "17",
-      title: "12 Angry Men",
-      aliasTitle: "12 Người Đàn Ông",
-      poster:
-        "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/17",
-      year: 1957,
-      genre: "Drama",
-    },
-    {
-      id: "18",
-      title: "Fight Club",
-      aliasTitle: "Câu Lạc Bộ Đánh Nhau",
-      poster:
-        "https://images.unsplash.com/photo-1635863138275-d9b33299680b?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/18",
-      year: 1999,
-      genre: "Drama",
-    },
-  ];
-
-  const fallbackTopRated = normalizeFallbackMovies(fallbackTopRatedRaw);
-
-  const fallbackUpcomingRaw = [
-    {
-      id: "19",
-      title: "Dune: Part Three",
-      aliasTitle: "Dune: Phần Ba",
-      poster:
-        "https://images.unsplash.com/photo-1534809027769-b00d750a6bac?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/19",
-      year: 2026,
-      genre: "Sci-Fi",
-    },
-    {
-      id: "20",
-      title: "Avatar 4",
-      aliasTitle: "Thế Thần - Phần 4",
-      poster:
-        "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/20",
-      year: 2026,
-      genre: "Fantasy",
-    },
-    {
-      id: "21",
-      title: "Spider-Man 4",
-      aliasTitle: "Người Nhện 4",
-      poster:
-        "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/21",
-      year: 2025,
-      genre: "Action",
-    },
-    {
-      id: "22",
-      title: "The Matrix 5",
-      aliasTitle: "Ma Trận 5",
-      poster:
-        "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/22",
-      year: 2025,
-      genre: "Sci-Fi",
-    },
-    {
-      id: "23",
-      title: "John Wick 5",
-      aliasTitle: "John Wick 5",
-      poster:
-        "https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/23",
-      year: 2025,
-      genre: "Action",
-    },
-    {
-      id: "24",
-      title: "Fast X: Part 2",
-      aliasTitle: "Quá Nhanh Quá Nguy Hiểm X: Phần 2",
-      poster:
-        "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?auto=format&fit=crop&w=500&q=80",
-      href: "/movie/24",
-      year: 2025,
-      genre: "Action",
-    },
-  ];
-
-  const fallbackUpcoming = normalizeFallbackMovies(fallbackUpcomingRaw);
-
-  // Use fetched movies if available, otherwise fall back to static data (updated)
-  const nowPlayingToDisplay =
-    nowPlayingMovies.length > 0 ? nowPlayingMovies : fallbackNowPlaying;
-  const popularToDisplay =
-    popularMovies.length > 0 ? popularMovies : fallbackPopular;
-  const topRatedToDisplay =
-    topRatedMovies.length > 0 ? topRatedMovies : fallbackTopRated;
-  const upcomingToDisplay =
-    upcomingMovies.length > 0 ? upcomingMovies : fallbackUpcoming;
-
-  // Use trending hero movies if available, otherwise fall back to static data
+  // Use trending hero movies if available, otherwise fall back to static data (hero needs fallback for proper display)
   const heroMoviesToDisplay =
     heroMovies.length > 0 ? heroMovies : fallbackHeroMovies;
 
@@ -505,6 +207,7 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
+            loading={loading}
           />
         </div>
       </div>
@@ -518,6 +221,7 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
+            loading={loading}
           />
         </div>
       </div>
@@ -531,6 +235,7 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
+            loading={loading}
           />
         </div>
       </div>
@@ -544,18 +249,13 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
+            loading={loading}
           />
         </div>
       </div>
 
       {/* TV Series Sections */}
       <TVSeriesSections />
-
-      {(loading || heroLoading) && (
-        <div className="text-center text-white py-8">
-          Loading movies from backend...
-        </div>
-      )}
     </Layout>
   );
 }
