@@ -129,7 +129,10 @@ const WatchPage = () => {
 
         // Set recommendations
         if (recommendationsResponse.success) {
-          console.log("🎬 Recommendations raw data:", recommendationsResponse.data);
+          console.log(
+            "🎬 Recommendations raw data:",
+            recommendationsResponse.data
+          );
           const mappedRecommendations: RecommendationItem[] =
             recommendationsResponse.data.slice(0, 5).map((item: Movie) => {
               const releaseDate =
@@ -203,6 +206,13 @@ const WatchPage = () => {
     );
   }
 
+  const durationNumber = Number(movieData.duration);
+  const hasDuration =
+    Number.isFinite(durationNumber) && durationNumber > 0 && !!movieData.duration;
+  const formattedDuration = hasDuration
+    ? formatWatchDuration(durationNumber, movieData.contentType)
+    : "";
+
   return (
     <Layout hideHeaderOnPlay={true} isPlaying={isPlaying}>
       <div className="min-h-screen bg-gray-900">
@@ -229,7 +239,10 @@ const WatchPage = () => {
               </video>
             ) : (
               // Movie Poster with Play Button
-              <div className="relative w-full h-full cursor-pointer" onClick={handlePlayMovie}>
+              <div
+                className="relative w-full h-full cursor-pointer"
+                onClick={handlePlayMovie}
+              >
                 <Image
                   src={movieData.backgroundImage}
                   alt={movieData.title}
@@ -329,13 +342,10 @@ const WatchPage = () => {
                             {movieData.year}
                           </span>
                         </div>
-                        {movieData.duration && (
+                        {hasDuration && formattedDuration && (
                           <div className="tag-classic">
                             <span className="text-white px-2 py-1 rounded text-sm">
-                              {formatWatchDuration(
-                                movieData.duration,
-                                movieData.contentType
-                              )}
+                              {formattedDuration}
                             </span>
                           </div>
                         )}
@@ -434,7 +444,8 @@ const WatchPage = () => {
                       className="text-primary text-red-500 hover:text-red-400 inline-flex items-center"
                       href={`/movie/${movieData.tmdbId}`}
                     >
-                      {movieData.contentType === "tv" ? "Series" : "Movie"} information
+                      {movieData.contentType === "tv" ? "Series" : "Movie"}{" "}
+                      information
                       <svg
                         className="w-4 h-4 ml-1"
                         fill="currentColor"
@@ -634,7 +645,9 @@ const WatchPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-400 text-sm">No movie recommendations available</p>
+                  <p className="text-gray-400 text-sm">
+                    No movie recommendations available
+                  </p>
                 )}
               </div>
             </div>

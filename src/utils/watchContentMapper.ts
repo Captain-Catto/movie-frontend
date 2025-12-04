@@ -26,8 +26,8 @@ interface ContentInput {
   first_air_date?: string;
   voteAverage?: number | string;
   vote_average?: number;
-  runtime?: number;
-  duration?: number;
+  runtime?: number | string;
+  duration?: number | string;
   genreIds?: (string | number)[];
   genre_ids?: (string | number)[];
   posterUrl?: string;
@@ -122,6 +122,8 @@ export function mapMovieToWatchContent(
     ((movieResponse as APIResponse).content as ContentInput) ||
     (movieResponse as ContentInput);
 
+  const duration = normalizeMovieDuration(movie);
+
   return {
     id: movieId,
     tmdbId: movie.tmdbId || movie.id || 0,
@@ -131,7 +133,7 @@ export function mapMovieToWatchContent(
     description: movie.overview || "Không có mô tả",
     releaseDate: movie.releaseDate || movie.release_date || "",
     rating: Number(movie.voteAverage) || movie.vote_average || 0,
-    duration: movie.runtime || movie.duration,
+    duration,
     genres: mapGenreIds(movie.genreIds || movie.genre_ids || []),
     posterImage:
       movie.posterUrl ||
@@ -160,6 +162,8 @@ export function mapTVToWatchContent(
     ((tvResponse as APIResponse).content as ContentInput) ||
     (tvResponse as ContentInput);
 
+  const duration = normalizeTVDuration(tv);
+
   return {
     id: movieId,
     tmdbId: tv.tmdbId || tv.id || 0,
@@ -168,10 +172,7 @@ export function mapTVToWatchContent(
     description: tv.overview || "Không có mô tả",
     releaseDate: tv.firstAirDate || tv.first_air_date || "",
     rating: parseFloat(String(tv.voteAverage)) || tv.vote_average || 0,
-    duration:
-      tv.episodeRunTime?.[0] ||
-      (tv.episode_run_time && tv.episode_run_time[0]) ||
-      undefined,
+    duration,
     genres: mapGenreIds(tv.genreIds || tv.genre_ids || []),
     posterImage:
       tv.posterUrl ||
@@ -233,6 +234,53 @@ function mapGenreIds(genreIds: (string | number)[]): string[] {
   return genreIds
     .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[id])
     .filter(Boolean);
+}
+
+/**
+ * Normalize a duration-ish field to a positive number of minutes.
+ */
+function coerceDuration(raw?: unknown): number | undefined {
+  const num = Number(raw);
+  if (Number.isFinite(num) && num > 0) return num;
+  return undefined;
+}
+
+function normalizeMovieDuration(movie: ContentInput): number | undefined {
+  const candidates = [
+    movie.runtime,
+    movie.duration,
+    (movie as { runtimeMinutes?: number | string }).runtimeMinutes,
+    (movie as { runtime_minutes?: number | string }).runtime_minutes,
+    (movie as { runtime_in_minutes?: number | string }).runtime_in_minutes,
+  ];
+
+  for (const value of candidates) {
+    const parsed = coerceDuration(value);
+    if (parsed !== undefined) return parsed;
+  }
+
+  return undefined;
+}
+
+function normalizeTVDuration(tv: ContentInput): number | undefined {
+  const episodeRuntime =
+    tv.episodeRunTime?.[0] ||
+    (tv.episode_run_time && tv.episode_run_time[0]);
+
+  const candidates = [
+    episodeRuntime,
+    tv.runtime,
+    tv.duration,
+    (tv as { runtimeMinutes?: number | string }).runtimeMinutes,
+    (tv as { runtime_minutes?: number | string }).runtime_minutes,
+  ];
+
+  for (const value of candidates) {
+    const parsed = coerceDuration(value);
+    if (parsed !== undefined) return parsed;
+  }
+
+  return undefined;
 }
 
 /**
