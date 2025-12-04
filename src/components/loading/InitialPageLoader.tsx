@@ -23,7 +23,7 @@ export function InitialPageLoader() {
       setIsVisible(false);
 
       removeTimer = window.setTimeout(() => setIsMounted(false), 450);
-    }, 1400);
+    }, 1000);
 
     return () => {
       window.clearTimeout(hideTimer);
