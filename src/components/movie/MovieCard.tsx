@@ -234,7 +234,9 @@ const MovieCard = ({ movie }: MovieCardProps) => {
                 genres:
                   movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
               }}
-              className="!w-auto !h-auto px-3 py-1.5 !rounded font-semibold text-xs"
+              iconOnly
+              size="compact"
+              className="!w-auto !h-auto !p-2 !rounded font-semibold text-xs !bg-gray-700 hover:!bg-gray-600"
             />
             <Link
               href={movie.href || `/movie/${movie.tmdbId}`}

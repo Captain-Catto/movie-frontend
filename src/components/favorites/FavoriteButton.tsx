@@ -21,12 +21,14 @@ interface FavoriteButtonProps {
   };
   className?: string;
   iconOnly?: boolean;
+  size?: "default" | "compact";
 }
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   movie,
   className = "",
   iconOnly = false,
+  size = "default",
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -128,8 +130,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       <button
         disabled
         className={`
-          px-8 py-4 bg-gray-400 text-white font-semibold rounded-lg
-          flex items-center gap-2 opacity-50 cursor-not-allowed transition-colors
+          ${iconOnly ? "p-3" : size === "compact" ? "px-3 py-2" : "px-8 py-4"}
+          bg-gray-400 text-white font-semibold rounded-lg
+          flex items-center ${size === "compact" ? "gap-1.5 text-xs" : "gap-2"}
+          opacity-50 cursor-not-allowed transition-colors
           ${className}
         `}
       >
@@ -139,18 +143,27 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     );
   }
 
+  const sizeClasses = iconOnly
+    ? size === "compact"
+      ? "p-2 text-sm"
+      : "p-3 text-base"
+    : size === "compact"
+    ? "px-3 py-2 text-xs gap-1.5"
+    : "px-8 py-4 text-base gap-2";
+
   return (
     <button
       onClick={handleToggleFavorite}
       className={`
-        px-8 py-4 font-semibold rounded-lg
-        flex items-center gap-2 transition-colors cursor-pointer
+        font-semibold rounded-lg
+        flex items-center transition-colors cursor-pointer
         ${
           isFavorite
             ? "bg-red-500 hover:bg-red-600 text-white"
             : "bg-gray-600 hover:bg-gray-700 text-white"
         }
         ${isProcessing ? "opacity-70" : "opacity-100"}
+        ${sizeClasses}
         ${className}
       `}
       title={
@@ -162,9 +175,9 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       }
     >
       <i
-        className={`${isFavorite ? "fas" : "far"} fa-heart text-lg ${
-          isProcessing ? "animate-pulse" : ""
-        }`}
+        className={`${isFavorite ? "fas" : "far"} fa-heart ${
+          size === "compact" ? "text-sm" : "text-lg"
+        } ${isProcessing ? "animate-pulse" : ""}`}
       ></i>
       {!iconOnly &&
         (isProcessing
