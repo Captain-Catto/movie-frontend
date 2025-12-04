@@ -122,6 +122,10 @@ export function mapMovieToWatchContent(
     ((movieResponse as APIResponse).content as ContentInput) ||
     (movieResponse as ContentInput);
 
+  const rating = normalizeRating(
+    movie.voteAverage ?? movie.vote_average,
+    movie
+  );
   const duration = normalizeMovieDuration(movie);
 
   return {
@@ -132,7 +136,7 @@ export function mapMovieToWatchContent(
       movie.originalTitle || movie.original_title || movie.original_name,
     description: movie.overview || "Không có mô tả",
     releaseDate: movie.releaseDate || movie.release_date || "",
-    rating: Number(movie.voteAverage) || movie.vote_average || 0,
+    rating,
     duration,
     genres: mapGenreIds(movie.genreIds || movie.genre_ids || []),
     posterImage:
@@ -162,6 +166,10 @@ export function mapTVToWatchContent(
     ((tvResponse as APIResponse).content as ContentInput) ||
     (tvResponse as ContentInput);
 
+  const rating = normalizeRating(
+    tv.voteAverage ?? tv.vote_average,
+    tv
+  );
   const duration = normalizeTVDuration(tv);
 
   return {
@@ -171,7 +179,7 @@ export function mapTVToWatchContent(
     aliasTitle: tv.originalTitle || tv.original_title || tv.original_name,
     description: tv.overview || "Không có mô tả",
     releaseDate: tv.firstAirDate || tv.first_air_date || "",
-    rating: parseFloat(String(tv.voteAverage)) || tv.vote_average || 0,
+    rating,
     duration,
     genres: mapGenreIds(tv.genreIds || tv.genre_ids || []),
     posterImage:
@@ -234,6 +242,27 @@ function mapGenreIds(genreIds: (string | number)[]): string[] {
   return genreIds
     .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[id])
     .filter(Boolean);
+}
+
+/**
+ * Normalize rating from various possible fields.
+ */
+function normalizeRating(
+  primary: unknown,
+  source: ContentInput
+): number {
+  const candidates = [
+    primary,
+    (source as { rating?: number | string }).rating,
+    (source as { score?: number | string }).score,
+  ];
+
+  for (const value of candidates) {
+    const num = Number(value);
+    if (Number.isFinite(num) && num > 0) return parseFloat(num.toFixed(1));
+  }
+
+  return 0;
 }
 
 /**
