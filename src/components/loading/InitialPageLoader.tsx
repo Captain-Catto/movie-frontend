@@ -8,12 +8,16 @@ import { usePathname } from "next/navigation";
  */
 export function InitialPageLoader() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome =
+    typeof window !== "undefined"
+      ? window.location.pathname === "/"
+      : pathname === "/";
   const [isVisible, setIsVisible] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     if (!isHome) {
+      sessionStorage.setItem("initial-loader-dismissed", "true");
       setIsVisible(false);
       setIsMounted(false);
       return;
