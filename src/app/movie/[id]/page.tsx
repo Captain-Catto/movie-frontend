@@ -14,6 +14,7 @@ import { normalizeRatingValue } from "@/utils/rating";
 import { MovieDetail, Movie, TVSeries } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/types/genre";
+import { formatWatchDuration } from "@/utils/watchContentMapper";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -69,7 +70,9 @@ const MovieDetailPageContent = () => {
                 character: actor.character,
                 profile_path: actor.profile_path,
               })) || [],
-            runtime: credits.runtime?.toString() || prevData.runtime,
+            runtime: credits.runtime
+              ? formatWatchDuration(Number(credits.runtime), "movie")
+              : prevData.runtime,
             status: credits.status || prevData.status,
           };
         });
@@ -137,7 +140,12 @@ const MovieDetailPageContent = () => {
               year: movieContent.releaseDate
                 ? new Date(movieContent.releaseDate).getFullYear()
                 : new Date().getFullYear(),
-              runtime: "N/A",
+              runtime: (movieContent as { runtime?: number }).runtime
+                ? formatWatchDuration(
+                    Number((movieContent as { runtime?: number }).runtime),
+                    "movie"
+                  )
+                : "N/A",
               genres: genreNames,
               genreIds: movieContent.genreIds || [],
               description: movieContent.overview || "No description available",
@@ -190,7 +198,7 @@ const MovieDetailPageContent = () => {
                 ? new Date(tvContent.firstAirDate).getFullYear()
                 : new Date().getFullYear(),
               runtime: tvContent.episodeRunTime?.length
-                ? `${tvContent.episodeRunTime[0]}m/ep`
+                ? formatWatchDuration(tvContent.episodeRunTime[0], "tv")
                 : "N/A",
               genres: genreNames,
               genreIds: tvContent.genreIds || [],
