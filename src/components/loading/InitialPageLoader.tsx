@@ -64,7 +64,6 @@ export function InitialPageLoader() {
       aria-live="polite"
     >
       <div className="initial-loader__content">
-        <div className="initial-loader__spinner" aria-hidden="true" />
         <div className="initial-loader__logo">
           <span className="initial-loader__logo-main">Movie</span>
           <span className="initial-loader__logo-accent">Stream</span>

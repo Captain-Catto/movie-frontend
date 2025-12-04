@@ -96,6 +96,12 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
           const hasRating = normalizedRating !== null;
           const displayRating = normalizedRating ?? 0;
           const year = movie.year ?? new Date().getFullYear();
+          const contentType = movie.href.includes("/tv/") ? "tv" : "movie";
+          const watchTargetId =
+            movie.tmdbId || parseInt(movie.id, 10) || movie.id;
+          const watchHref = watchTargetId
+            ? `/watch/${contentType}-${watchTargetId}`
+            : movie.href;
 
           return (
             <SwiperSlide key={movie.id} className="relative">
@@ -202,7 +208,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
 
                     {/* Touch/Action Buttons */}
                     <div className="touch flex items-center space-x-4">
-                      <Link href={movie.href} className="button-play">
+                      <Link href={watchHref} className="button-play">
                         <button className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors">
                           <svg
                             className="w-5 h-5"
