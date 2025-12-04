@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
@@ -163,5 +163,9 @@ function MoviesPageContent() {
 }
 
 export default function MoviesPage() {
-  return <MoviesPageContent />;
+  return (
+    <Suspense fallback={null}>
+      <MoviesPageContent />
+    </Suspense>
+  );
 }
