@@ -9,9 +9,6 @@ import {
 import {
   CastMember,
   CrewMember,
-  ProductionCountry,
-  ProductionCompany,
-  Genre,
   CreditsData,
   PaginationData,
   MetadataInfo,

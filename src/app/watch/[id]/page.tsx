@@ -9,12 +9,9 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { apiService } from "@/services/api";
 import {
   mapContentToWatchContent,
-  mapMovieToWatchContent,
-  mapTVToWatchContent,
   formatWatchDuration,
   WatchContentData,
 } from "@/utils/watchContentMapper";
-import type { Movie } from "@/types/movie";
 import type { CastMember } from "@/types";
 
 const CommentSection = lazy(() =>
@@ -26,6 +23,7 @@ const CommentSection = lazy(() =>
 interface Credits {
   cast: CastMember[];
   crew: unknown[];
+  runtime?: number | string;
 }
 
 interface RecommendationItem {
@@ -67,43 +65,29 @@ const WatchPage = () => {
     return { type: "auto", tmdbId: parseInt(id) };
   };
 
+  const normalizeDuration = (value?: unknown): number | undefined => {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      return parsed;
+    }
+    return undefined;
+  };
+
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
         setLoading(true);
 
-        const { type, tmdbId } = parseContentId(movieId);
-        let response;
-        let contentType: string | undefined;
+        const { tmdbId } = parseContentId(movieId);
+        const response = await apiService.getContentById(tmdbId);
 
-        // Fetch main movie/TV data
-        if (type === "movie") {
-          response = await apiService.getMovieByTmdbId(tmdbId);
-          if (response.success) {
-            const mappedData = mapMovieToWatchContent(response, movieId);
-            setMovieData(mappedData);
-            contentType = "movie";
-          }
-        } else if (type === "tv") {
-          response = await apiService.getTVByTmdbId(tmdbId);
-          if (response.success) {
-            const mappedData = mapTVToWatchContent(response, movieId);
-            setMovieData(mappedData);
-            contentType = "tv";
-          }
-        } else {
-          response = await apiService.getContentById(tmdbId);
-          if (response.success) {
-            const mappedData = mapContentToWatchContent(response, movieId);
-            setMovieData(mappedData);
-            contentType = mappedData.contentType;
-          }
-        }
-
-        if (!response.success) {
+        if (!response.success || !response.content) {
           throw new Error(response.message || "Content not found");
         }
 
+        const mappedData = mapContentToWatchContent(response, movieId);
+        setMovieData(mappedData);
+        const contentType = response.contentType || mappedData.contentType;
         setError(null);
 
         // Fetch credits and recommendations in parallel
@@ -112,11 +96,11 @@ const WatchPage = () => {
 
         const [creditsResponse, recommendationsResponse] = await Promise.all([
           // Fetch credits
-          type === "movie" || (type === "auto" && contentType === "movie")
+          contentType === "movie"
             ? apiService.getMovieCredits(tmdbId)
             : apiService.getTVCredits(tmdbId),
           // Fetch recommendations
-          type === "movie" || (type === "auto" && contentType === "movie")
+          contentType === "movie"
             ? apiService.getMovieRecommendations(tmdbId, 1)
             : apiService.getTVRecommendations(tmdbId, 1),
         ]);
@@ -124,6 +108,14 @@ const WatchPage = () => {
         // Set credits
         if (creditsResponse.success) {
           setCredits(creditsResponse.data);
+          const runtimeFromCredits = normalizeDuration(
+            (creditsResponse.data as Credits)?.runtime
+          );
+          if (runtimeFromCredits) {
+            setMovieData((prev) =>
+              prev ? { ...prev, duration: runtimeFromCredits } : prev
+            );
+          }
         }
         setCreditsLoading(false);
 
@@ -133,25 +125,42 @@ const WatchPage = () => {
             "🎬 Recommendations raw data:",
             recommendationsResponse.data
           );
-          const mappedRecommendations: RecommendationItem[] =
-            recommendationsResponse.data.slice(0, 5).map((item: Movie) => {
-              const releaseDate =
-                typeof item.releaseDate === "string"
-                  ? item.releaseDate.split("T")[0]
-                  : undefined;
+          type RawRecommendation = {
+            tmdbId?: number;
+            id?: number;
+            title?: string;
+            name?: string;
+            posterPath?: string | null;
+            poster_path?: string | null;
+            releaseDate?: string;
+            release_date?: string;
+            firstAirDate?: string;
+            first_air_date?: string;
+            voteAverage?: number;
+            vote_average?: number;
+          };
 
-              const mappedItem: RecommendationItem = {
-                id: item.tmdbId ?? item.id,
-                title: item.title,
-                name: item.title, // Movie type doesn't have 'name', use title
-                poster_path: item.posterPath ?? null,
-                release_date: releaseDate,
-                first_air_date: undefined,
-                vote_average: item.voteAverage ?? 0,
-              };
-              console.log("🎬 Mapped recommendation:", mappedItem);
-              return mappedItem;
-            });
+          const mappedRecommendations: RecommendationItem[] =
+            (recommendationsResponse.data as RawRecommendation[])
+              .slice(0, 5)
+              .map((item) => {
+                const releaseDate =
+                  item.releaseDate || item.release_date || undefined;
+                const firstAirDate =
+                  item.firstAirDate || item.first_air_date || undefined;
+
+                const mappedItem: RecommendationItem = {
+                  id: item.tmdbId ?? item.id ?? 0,
+                  title: item.title || item.name,
+                  name: item.name || item.title,
+                  poster_path: item.posterPath ?? item.poster_path ?? null,
+                  release_date: releaseDate,
+                  first_air_date: firstAirDate,
+                  vote_average: item.voteAverage ?? item.vote_average ?? 0,
+                };
+                console.log("🎬 Mapped recommendation:", mappedItem);
+                return mappedItem;
+              });
 
           setRecommendations(mappedRecommendations);
         }
