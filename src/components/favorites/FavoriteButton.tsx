@@ -128,9 +128,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       <button
         disabled
         className={`
-          flex items-center justify-center ${
-            iconOnly ? "p-3" : "gap-2 px-4 py-2"
-          } rounded-lg bg-gray-200 text-gray-700 opacity-50 cursor-not-allowed
+          px-8 py-4 bg-gray-400 text-white font-semibold rounded-lg
+          flex items-center gap-2 opacity-50 cursor-not-allowed transition-colors
           ${className}
         `}
       >
@@ -144,20 +143,13 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     <button
       onClick={handleToggleFavorite}
       className={`
-        flex items-center justify-center ${
-          iconOnly ? "p-3" : "gap-2 px-4 py-2"
-        } transition-all duration-200 cursor-pointer
+        px-8 py-4 font-semibold rounded-lg
+        flex items-center gap-2 transition-colors cursor-pointer
         ${
-          // Only apply default styling if className doesn't override background
-          className && (className.includes("bg-") || className.includes("!bg-"))
-            ? ""
-            : isFavorite
-            ? "bg-red-500 text-white hover:bg-red-600"
-            : iconOnly
-            ? "bg-gray-200 bg-opacity-50 hover:bg-opacity-70 text-white"
-            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+          isFavorite
+            ? "bg-red-500 hover:bg-red-600 text-white"
+            : "bg-gray-600 hover:bg-gray-700 text-white"
         }
-        ${className && className.includes("rounded-") ? "" : "rounded-full"}
         ${isProcessing ? "opacity-70" : "opacity-100"}
         ${className}
       `}

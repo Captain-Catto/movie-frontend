@@ -11,11 +11,7 @@ import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
 import { normalizeRatingValue } from "@/utils/rating";
-import {
-  MovieDetail,
-  Movie,
-  TVSeries,
-} from "@/types/movie";
+import { MovieDetail, Movie, TVSeries } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/types/genre";
 
@@ -46,7 +42,8 @@ const MovieDetailPageContent = () => {
 
         // Find director from crew
         const directorPerson = credits.crew?.find(
-          (person: CrewMember) => person.job === "Director" || person.job === "director"
+          (person: CrewMember) =>
+            person.job === "Director" || person.job === "director"
         );
         const director = directorPerson
           ? {
@@ -62,19 +59,19 @@ const MovieDetailPageContent = () => {
         setMovieData((prevData: MovieDetail | null) => {
           if (!prevData) return prevData;
           return {
-          ...prevData,
-          director,
-          country,
-          cast:
-            credits.cast?.slice(0, 10)?.map((actor: CastMember) => ({
-              id: actor.id,
-              name: actor.name,
-              character: actor.character,
-              profile_path: actor.profile_path,
-            })) || [],
-          runtime: credits.runtime?.toString() || prevData.runtime,
-          status: credits.status || prevData.status,
-        };
+            ...prevData,
+            director,
+            country,
+            cast:
+              credits.cast?.slice(0, 10)?.map((actor: CastMember) => ({
+                id: actor.id,
+                name: actor.name,
+                character: actor.character,
+                profile_path: actor.profile_path,
+              })) || [],
+            runtime: credits.runtime?.toString() || prevData.runtime,
+            status: credits.status || prevData.status,
+          };
         });
 
         console.log("Credits loaded successfully:", {
@@ -133,7 +130,8 @@ const MovieDetailPageContent = () => {
               aliasTitle: movieContent.title || movieContent.title,
               rating: normalizeRatingValue(
                 movieContent.voteAverage ??
-                  (movieContent as { vote_average?: number | string }).vote_average ??
+                  (movieContent as { vote_average?: number | string })
+                    .vote_average ??
                   (movieContent as unknown as Record<string, unknown>).rating
               ),
               year: movieContent.releaseDate
@@ -142,8 +140,7 @@ const MovieDetailPageContent = () => {
               runtime: "N/A",
               genres: genreNames,
               genreIds: movieContent.genreIds || [],
-              description:
-                movieContent.overview || "No description available",
+              description: movieContent.overview || "No description available",
               backgroundImage:
                 movieContent.backdropUrl ||
                 movieContent.backdropPath ||
@@ -180,17 +177,13 @@ const MovieDetailPageContent = () => {
 
             setMovieData({
               id: tvContent.id,
-              title:
-                tvContent.title ||
-                tvContent.originalTitle ||
-                "Untitled",
+              title: tvContent.title || tvContent.originalTitle || "Untitled",
               aliasTitle:
-                tvContent.originalTitle ||
-                tvContent.title ||
-                "Untitled",
+                tvContent.originalTitle || tvContent.title || "Untitled",
               rating: normalizeRatingValue(
                 tvContent.voteAverage ??
-                  (tvContent as { vote_average?: number | string }).vote_average ??
+                  (tvContent as { vote_average?: number | string })
+                    .vote_average ??
                   (tvContent as unknown as Record<string, unknown>).rating
               ),
               year: tvContent.firstAirDate
@@ -255,10 +248,30 @@ const MovieDetailPageContent = () => {
             "https://static.nutscdn.com/vimg/0-260/5ced6fb31801f8d66238cbdfaa23136d.webp",
           director: { id: 1, name: "Mike Flanagan" },
           cast: [
-            { id: 1, name: "Madison Iseman", character: "Main Character", profile_path: null },
-            { id: 2, name: "Bill Heck", character: "Supporting", profile_path: null },
-            { id: 3, name: "Brianne Tju", character: "Supporting", profile_path: null },
-            { id: 4, name: "Ezekiel Goodman", character: "Supporting", profile_path: null },
+            {
+              id: 1,
+              name: "Madison Iseman",
+              character: "Main Character",
+              profile_path: null,
+            },
+            {
+              id: 2,
+              name: "Bill Heck",
+              character: "Supporting",
+              profile_path: null,
+            },
+            {
+              id: 3,
+              name: "Brianne Tju",
+              character: "Supporting",
+              profile_path: null,
+            },
+            {
+              id: 4,
+              name: "Ezekiel Goodman",
+              character: "Supporting",
+              profile_path: null,
+            },
           ],
           country: "Mỹ",
           status: "Completed",
@@ -444,7 +457,7 @@ const MovieDetailPageContent = () => {
                       vote_average: movieData.rating,
                       genres: movieData.genres,
                     }}
-                    className="!rounded-none px-8 py-4"
+                    className="px-8 py-4"
                   />
 
                   <TrailerButton
@@ -464,9 +477,7 @@ const MovieDetailPageContent = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-6">
-                Overview
-              </h3>
+              <h3 className="text-2xl font-bold text-white mb-6">Overview</h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
                   {movieData.description}
@@ -477,45 +488,45 @@ const MovieDetailPageContent = () => {
               {(movieData.cast && movieData.cast.length > 0) ||
               creditsLoading ? (
                 <>
-                  <h3 className="text-2xl font-bold text-white mb-6">
-                    Cast
-                  </h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">Cast</h3>
                   {creditsLoading ? (
                     <CastSkeleton />
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                      {movieData.cast.map((actor: CastMember, index: number) => (
-                        <Link
-                          key={index}
-                          href={`/people/${actor.id}`}
-                          className="text-center group block"
-                        >
-                          <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-700 relative">
-                            <Image
-                              src={
-                                actor.profile_path
-                                  ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
-                                  : "/images/no-avatar.svg"
-                              }
-                              alt={actor.name}
-                              fill
-                              className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
-                              loading="lazy"
-                              sizes="(max-width: 768px) 50vw, 25vw"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = "/images/no-avatar.svg";
-                              }}
-                            />
-                          </div>
-                          <h4 className="font-semibold text-white mb-1 group-hover:text-red-400 transition-colors">
-                            {actor.name}
-                          </h4>
-                          <p className="text-sm text-gray-400">
-                            {actor.character}
-                          </p>
-                        </Link>
-                      ))}
+                      {movieData.cast.map(
+                        (actor: CastMember, index: number) => (
+                          <Link
+                            key={index}
+                            href={`/people/${actor.id}`}
+                            className="text-center group block"
+                          >
+                            <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-700 relative">
+                              <Image
+                                src={
+                                  actor.profile_path
+                                    ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
+                                    : "/images/no-avatar.svg"
+                                }
+                                alt={actor.name}
+                                fill
+                                className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
+                                loading="lazy"
+                                sizes="(max-width: 768px) 50vw, 25vw"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = "/images/no-avatar.svg";
+                                }}
+                              />
+                            </div>
+                            <h4 className="font-semibold text-white mb-1 group-hover:text-red-400 transition-colors">
+                              {actor.name}
+                            </h4>
+                            <p className="text-sm text-gray-400">
+                              {actor.character}
+                            </p>
+                          </Link>
+                        )
+                      )}
                     </div>
                   )}
                 </>
