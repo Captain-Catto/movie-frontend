@@ -8,17 +8,17 @@ import { usePathname } from "next/navigation";
  */
 export function InitialPageLoader() {
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !sessionStorage.getItem("initial-loader-dismissed");
-  });
-
-  const [isMounted, setIsMounted] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !sessionStorage.getItem("initial-loader-dismissed");
-  });
+  const isHome = pathname === "/";
+  const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    if (!isHome) {
+      setIsVisible(false);
+      setIsMounted(false);
+      return;
+    }
+
     const hasSeenLoader = sessionStorage.getItem("initial-loader-dismissed");
     let removeTimer: number | undefined;
 
@@ -26,6 +26,9 @@ export function InitialPageLoader() {
       setIsMounted(false);
       return;
     }
+
+    setIsMounted(true);
+    setIsVisible(true);
 
     const hideTimer = window.setTimeout(() => {
       sessionStorage.setItem("initial-loader-dismissed", "true");
@@ -40,9 +43,9 @@ export function InitialPageLoader() {
         window.clearTimeout(removeTimer);
       }
     };
-  }, []);
+  }, [isHome]);
 
-  if (pathname !== "/") {
+  if (!isHome) {
     return null;
   }
 
