@@ -1,13 +1,11 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 
 export default function ContinueWatchingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
-      <Header />
-
-      <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-4xl mx-auto">
+    <Layout>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
+        <Container size="narrow" withHeaderOffset className="py-12">
           <h1 className="text-4xl font-bold text-white mb-6">
             ⏱️ Xem tiếp
           </h1>
@@ -27,10 +25,8 @@ export default function ContinueWatchingPage() {
               Tìm phim hay
             </a>
           </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+        </Container>
+      </div>
+    </Layout>
   );
 }

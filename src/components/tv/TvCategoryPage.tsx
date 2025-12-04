@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
@@ -104,25 +105,27 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 pt-16">
-        <h1 className="text-3xl font-bold text-white mb-2">{title}</h1>
-        <p className="text-gray-400 mb-6 max-w-3xl">{description}</p>
+      <Container withHeaderOffset className="py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white mb-2">{title}</h1>
+          <p className="text-gray-400 mb-6 max-w-3xl">{description}</p>
 
-        {error && (
-          <div className="mb-6 rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-            {error}
-          </div>
-        )}
-      </div>
+          {error && (
+            <div className="mb-6 rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              {error}
+            </div>
+          )}
+        </div>
 
-      <MoviesGrid
-        title=""
-        movies={tvShows}
-        className="py-8"
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <MoviesGrid
+          title=""
+          movies={tvShows}
+          className=""
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </Container>
     </Layout>
   );
 };

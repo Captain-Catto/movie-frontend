@@ -9,6 +9,7 @@ import {
 } from "@/services/favorites.service";
 import { Heart } from "lucide-react";
 import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 import MovieCard from "@/components/movie/MovieCard";
 import { favoriteToMovieCardData } from "./utils/favoriteHelpers";
 
@@ -177,8 +178,8 @@ const FavoritesPage = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-900 text-white px-6 pt-16">
-        <div className="max-w-7xl mx-auto">
+      <div className="min-h-screen bg-gray-900 text-white">
+        <Container withHeaderOffset className="py-8">
           <div className="flex items-center gap-3 mb-8">
             <Heart className="text-red-500 fill-current" size={32} />
             <h1 className="text-3xl font-bold">My Favorites</h1>
@@ -235,7 +236,7 @@ const FavoritesPage = () => {
               )}
             </>
           )}
-        </div>
+        </Container>
       </div>
     </Layout>
   );

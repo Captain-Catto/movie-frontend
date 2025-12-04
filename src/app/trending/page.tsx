@@ -2,6 +2,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import { MovieCardData } from "@/components/movie/MovieCard";
@@ -97,51 +98,49 @@ function TrendingPageContent() {
   if (loading) {
     return (
       <Layout>
-        <div>
-          <div className="container mx-auto px-4 pt-16">
-            <h1 className="text-3xl font-bold text-white mb-8">
-              🔥 Trending
-            </h1>
+        <Container withHeaderOffset className="py-8">
+          <h1 className="text-3xl font-bold text-white mb-8">
+            🔥 Trending
+          </h1>
 
-            {/* Filter skeleton */}
-            <div className="mb-8">
-              <div className="w-48 h-8 bg-gray-700/50 animate-pulse rounded mb-4"></div>
-              <div className="w-96 h-10 bg-gray-700/50 animate-pulse rounded"></div>
-            </div>
+          {/* Filter skeleton */}
+          <div className="mb-8">
+            <div className="w-48 h-8 bg-gray-700/50 animate-pulse rounded mb-4"></div>
+            <div className="w-96 h-10 bg-gray-700/50 animate-pulse rounded"></div>
+          </div>
 
-            {/* Trending grid skeleton */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {Array.from({ length: 18 }).map((_, index) => (
-                <div key={index} className="sw-item group relative">
-                  <div className="v-thumbnail block">
-                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                      <div className="absolute inset-0 bg-gray-700/50 animate-pulse" />
-                      <div className="absolute top-2 right-2">
-                        <div className="w-8 h-8 bg-gray-600/50 animate-pulse rounded-full" />
-                      </div>
-                      {/* Trending badge skeleton */}
-                      <div className="absolute top-2 left-2">
-                        <div className="w-12 h-6 bg-yellow-500/50 animate-pulse rounded-full" />
-                      </div>
+          {/* Trending grid skeleton */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+            {Array.from({ length: 18 }).map((_, index) => (
+              <div key={index} className="sw-item group relative">
+                <div className="v-thumbnail block">
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                    <div className="absolute inset-0 bg-gray-700/50 animate-pulse" />
+                    <div className="absolute top-2 right-2">
+                      <div className="w-8 h-8 bg-gray-600/50 animate-pulse rounded-full" />
+                    </div>
+                    {/* Trending badge skeleton */}
+                    <div className="absolute top-2 left-2">
+                      <div className="w-12 h-6 bg-yellow-500/50 animate-pulse rounded-full" />
                     </div>
                   </div>
-                  <div className="info mt-3 space-y-2">
-                    <div className="h-4 bg-gray-700/50 animate-pulse rounded" />
-                    <div className="h-3 w-3/4 bg-gray-700/50 animate-pulse rounded" />
-                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="info mt-3 space-y-2">
+                  <div className="h-4 bg-gray-700/50 animate-pulse rounded" />
+                  <div className="h-3 w-3/4 bg-gray-700/50 animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        </Container>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div>
-        <div className="container mx-auto px-4 pt-16">
+      <Container withHeaderOffset className="py-8">
+        <div className="mb-6">
           <h1 className="text-3xl font-bold text-white mb-8">
             🔥 Trending
           </h1>
@@ -159,12 +158,12 @@ function TrendingPageContent() {
         <MoviesGrid
           title=""
           movies={trending}
-          className="py-8"
+          className=""
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={handlePageChange}
         />
-      </div>
+      </Container>
     </Layout>
   );
 }

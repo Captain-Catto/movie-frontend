@@ -2,6 +2,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import { MovieCardData } from "@/components/movie/MovieCard";
@@ -274,74 +275,74 @@ function TVShowsPageContent() {
   if (loading) {
     return (
       <Layout>
-        <div>
-          <div className="container mx-auto px-4 pt-16">
-            <h1 className="text-3xl font-bold text-white mb-8">
-              📺 TV Series
-            </h1>
+        <Container withHeaderOffset className="py-8">
+          <h1 className="text-3xl font-bold text-white mb-8">
+            📺 TV Series
+          </h1>
 
-            {/* Filter skeleton */}
-            <div className="mb-8">
-              <div className="w-48 h-8 bg-gray-700/50 animate-pulse rounded mb-4"></div>
-              <div className="w-96 h-10 bg-gray-700/50 animate-pulse rounded"></div>
-            </div>
+          {/* Filter skeleton */}
+          <div className="mb-8">
+            <div className="w-48 h-8 bg-gray-700/50 animate-pulse rounded mb-4"></div>
+            <div className="w-96 h-10 bg-gray-700/50 animate-pulse rounded"></div>
+          </div>
 
-            {/* TV series grid skeleton */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-              {Array.from({ length: 16 }).map((_, index) => (
-                <div key={index} className="sw-item group relative">
-                  <div className="v-thumbnail block">
-                    <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
-                      <div className="absolute inset-0 bg-gray-700/50 animate-pulse" />
-                      <div className="absolute top-2 right-2">
-                        <div className="w-8 h-8 bg-gray-600/50 animate-pulse rounded-full" />
-                      </div>
-                      {/* Episode indicator skeleton */}
-                      <div className="absolute bottom-2 left-2">
-                        <div className="w-16 h-4 bg-red-600/50 animate-pulse rounded-sm" />
-                      </div>
+          {/* TV series grid skeleton */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+            {Array.from({ length: 16 }).map((_, index) => (
+              <div key={index} className="sw-item group relative">
+                <div className="v-thumbnail block">
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
+                    <div className="absolute inset-0 bg-gray-700/50 animate-pulse" />
+                    <div className="absolute top-2 right-2">
+                      <div className="w-8 h-8 bg-gray-600/50 animate-pulse rounded-full" />
+                    </div>
+                    {/* Episode indicator skeleton */}
+                    <div className="absolute bottom-2 left-2">
+                      <div className="w-16 h-4 bg-red-600/50 animate-pulse rounded-sm" />
                     </div>
                   </div>
-                  <div className="info mt-3 space-y-2">
-                    <div className="h-4 bg-gray-700/50 animate-pulse rounded" />
-                    <div className="h-3 w-3/4 bg-gray-700/50 animate-pulse rounded" />
-                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="info mt-3 space-y-2">
+                  <div className="h-4 bg-gray-700/50 animate-pulse rounded" />
+                  <div className="h-3 w-3/4 bg-gray-700/50 animate-pulse rounded" />
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
+        </Container>
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 pt-16">
-        <h1 className="text-3xl font-bold text-white mb-8">
-          📺 TV Series
-        </h1>
+      <Container withHeaderOffset className="py-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white mb-8">
+            📺 TV Series
+          </h1>
 
-        {/* Filter Component */}
-        <div className="mb-8">
-          <MovieFilters onFilterChange={handleFilterChange} />
+          {/* Filter Component */}
+          <div className="mb-8">
+            <MovieFilters onFilterChange={handleFilterChange} />
+          </div>
+
+          {error && (
+            <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
+              Error: {error}
+            </div>
+          )}
         </div>
 
-        {error && (
-          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-            Error: {error}
-          </div>
-        )}
-      </div>
-
-      <MoviesGrid
-        title=""
-        movies={tvShows}
-        className="py-8"
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+        <MoviesGrid
+          title=""
+          movies={tvShows}
+          className=""
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </Container>
     </Layout>
   );
 }
