@@ -259,7 +259,7 @@ function normalizeRating(
 
   for (const value of candidates) {
     const num = Number(value);
-    if (Number.isFinite(num) && num > 0) return parseFloat(num.toFixed(1));
+    if (Number.isFinite(num) && num >= 0) return parseFloat(num.toFixed(1));
   }
 
   return 0;
