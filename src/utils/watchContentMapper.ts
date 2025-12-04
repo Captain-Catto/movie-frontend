@@ -1,5 +1,6 @@
 // Utility for mapping content data in watch pages
 // Handles both Movie and TV Series data structures
+import { normalizeRatingFromSource } from "./rating";
 
 // Base API response structure
 interface APIResponse {
@@ -245,24 +246,13 @@ function mapGenreIds(genreIds: (string | number)[]): string[] {
 }
 
 /**
- * Normalize rating from various possible fields.
+ * Normalize rating from various possible fields using shared helper.
  */
 function normalizeRating(
   primary: unknown,
   source: ContentInput
 ): number {
-  const candidates = [
-    primary,
-    (source as { rating?: number | string }).rating,
-    (source as { score?: number | string }).score,
-  ];
-
-  for (const value of candidates) {
-    const num = Number(value);
-    if (Number.isFinite(num) && num >= 0) return parseFloat(num.toFixed(1));
-  }
-
-  return 0;
+  return normalizeRatingFromSource(primary, source as Record<string, unknown>);
 }
 
 /**

@@ -10,6 +10,7 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
+import { normalizeRatingValue } from "@/utils/rating";
 import {
   MovieDetail,
   Movie,
@@ -130,7 +131,11 @@ const MovieDetailPageContent = () => {
               id: movieContent.id,
               title: movieContent.title,
               aliasTitle: movieContent.title || movieContent.title,
-              rating: movieContent.voteAverage || 0,
+              rating: normalizeRatingValue(
+                movieContent.voteAverage ??
+                  (movieContent as { vote_average?: number | string }).vote_average ??
+                  (movieContent as unknown as Record<string, unknown>).rating
+              ),
               year: movieContent.releaseDate
                 ? new Date(movieContent.releaseDate).getFullYear()
                 : new Date().getFullYear(),
@@ -183,7 +188,11 @@ const MovieDetailPageContent = () => {
                 tvContent.originalTitle ||
                 tvContent.title ||
                 "Untitled",
-              rating: tvContent.voteAverage || 0,
+              rating: normalizeRatingValue(
+                tvContent.voteAverage ??
+                  (tvContent as { vote_average?: number | string }).vote_average ??
+                  (tvContent as unknown as Record<string, unknown>).rating
+              ),
               year: tvContent.firstAirDate
                 ? new Date(tvContent.firstAirDate).getFullYear()
                 : new Date().getFullYear(),
@@ -348,36 +357,43 @@ const MovieDetailPageContent = () => {
                   {movieData.aliasTitle}
                 </h2>
 
-                {/* Movie Info */}
-                <div className="flex flex-wrap items-center gap-4 mb-6 text-white">
-                  {movieData.rating && parseFloat(String(movieData.rating)) > 0 && (
-                    <>
-                      <div className="flex items-center">
-                        <svg
-                          className="w-5 h-5 text-yellow-500 mr-1"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span>{movieData.rating}</span>
-                      </div>
+                {/** Precompute rating once to allow zero to show */}
+                {(() => {
+                  const numericRating = Number(movieData.rating);
+                  const hasRating =
+                    Number.isFinite(numericRating) && numericRating >= 0;
+                  return (
+                    <div className="flex flex-wrap items-center gap-4 mb-6 text-white">
+                      {hasRating && (
+                        <>
+                          <div className="flex items-center">
+                            <svg
+                              className="w-5 h-5 text-yellow-500 mr-1"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <span>{numericRating.toFixed(1)}</span>
+                          </div>
+                          <span>&bull;</span>
+                        </>
+                      )}
+                      <span>{movieData.year}</span>
                       <span>&bull;</span>
-                    </>
-                  )}
-                  <span>{movieData.year}</span>
-                  <span>&bull;</span>
-                  <span>{movieData.runtime}</span>
-                  <span>&bull;</span>
-                  <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded">
-                    {movieData.quality}
-                  </span>
-                  {movieData.language && (
-                    <span className="px-2 py-1 bg-blue-500/20 text-blue-500 rounded">
-                      {movieData.language}
-                    </span>
-                  )}
-                </div>
+                      <span>{movieData.runtime}</span>
+                      <span>&bull;</span>
+                      <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded">
+                        {movieData.quality}
+                      </span>
+                      {movieData.language && (
+                        <span className="px-2 py-1 bg-blue-500/20 text-blue-500 rounded">
+                          {movieData.language}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Genres */}
                 <div className="flex flex-wrap gap-2 mb-8">
@@ -428,6 +444,7 @@ const MovieDetailPageContent = () => {
                       vote_average: movieData.rating,
                       genres: movieData.genres,
                     }}
+                    className="!rounded-none px-8 py-4"
                   />
 
                   <TrailerButton
