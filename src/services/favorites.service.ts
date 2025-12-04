@@ -1,8 +1,6 @@
+import axiosInstance from "@/lib/axios-instance";
+import { authStorage } from "@/lib/auth-storage";
 import { mapGenreIdsToNames } from "@/utils/genreMapping";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-const API_URL = `${API_BASE_URL}/api`;
 
 export interface AddFavoriteDto {
   contentId: string;
@@ -75,22 +73,16 @@ export const favoritesService = {
       limit: limit.toString(),
     });
 
-    const url = `${API_URL}/favorites?${queryParams.toString()}`;
-
-    const token = localStorage.getItem("authToken");
-
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch favorites");
+    const token = authStorage.getToken();
+    if (!token) {
+      throw new Error("No authentication token found. Please login again.");
     }
 
-    const data: RawFavoritesResponse = await response.json();
+    const response = await axiosInstance.get<RawFavoritesResponse>(
+      `/favorites?${queryParams.toString()}`
+    );
+
+    const data = response.data;
 
     // Map genreIds to genre names for each favorite
     const favoritesWithGenres = data.favorites.map((favorite: Favorite) => {
@@ -132,78 +124,38 @@ export const favoritesService = {
   },
 
   async addToFavorites(data: AddFavoriteDto): Promise<Favorite> {
-    const url = `${API_URL}/favorites`;
-
-    // Try to get token from different sources
-    const authToken = localStorage.getItem("authToken");
-    const nextAuthToken = localStorage.getItem("next-auth.session-token");
-
-    console.log("🔍 authToken:", authToken ? "exists" : "null");
-    console.log("🔍 nextAuthToken:", nextAuthToken ? "exists" : "null");
-
-    const token = authToken; // Use custom auth token first
+    const token = authStorage.getToken();
 
     if (!token) {
       throw new Error("No authentication token found. Please login again.");
     }
 
-    console.log("🚀 Making request to:", url);
+    console.log("🚀 Making request to: /favorites");
     console.log("🚀 With data:", data);
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
+    const response = await axiosInstance.post<Favorite>("/favorites", data);
 
-    console.log("📡 Response status:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Response error:", errorText);
-      throw new Error(
-        `Failed to add to favorites: ${response.status} ${errorText}`
-      );
-    }
-
-    return response.json();
+    return response.data;
   },
 
   async removeFromFavorites(
     contentId: string,
     contentType: "movie" | "tv"
   ): Promise<{ message: string }> {
-    const url = `${API_URL}/favorites`;
-    const token = localStorage.getItem("authToken");
+    const token = authStorage.getToken();
 
-    const response = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ contentId, contentType }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to remove from favorites");
+    if (!token) {
+      throw new Error("No authentication token found. Please login again.");
     }
 
-    // Handle empty response body gracefully
-    const responseText = await response.text();
-    if (!responseText) {
-      return { message: "Removed from favorites" };
-    }
+    const response = await axiosInstance.delete<{ message: string }>(
+      "/favorites",
+      {
+        data: { contentId, contentType },
+      }
+    );
 
-    try {
-      return JSON.parse(responseText);
-    } catch {
-      console.warn("Response not JSON, treating as success:", responseText);
-      return { message: "Removed from favorites" };
-    }
+    return response.data || { message: "Removed from favorites" };
   },
 
   async toggleFavorite(
@@ -258,20 +210,16 @@ export const favoritesService = {
   },
 
   async getUserStats(): Promise<{ totalFavorites: number }> {
-    const url = `${API_URL}/favorites/stats`;
-    const token = localStorage.getItem("authToken");
+    const token = authStorage.getToken();
 
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to get user stats");
+    if (!token) {
+      throw new Error("No authentication token found. Please login again.");
     }
 
-    return response.json();
+    const response = await axiosInstance.get<{ totalFavorites: number }>(
+      "/favorites/stats"
+    );
+
+    return response.data;
   },
 };

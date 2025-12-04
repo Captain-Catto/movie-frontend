@@ -17,13 +17,37 @@ export function AuthLoader() {
 
     // Listen for storage events (e.g., login in another tab)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "authToken" || e.key === "userData") {
+      if (
+        e.key === "authToken" ||
+        e.key === "refreshToken" ||
+        e.key === "userData"
+      ) {
         dispatch(checkAuth());
       }
     };
 
+    const handleAuthLogout = () => {
+      dispatch(checkAuth());
+    };
+
+    const handleTokenRefreshed = () => {
+      dispatch(checkAuth());
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("auth:logout", handleAuthLogout as EventListener);
+    window.addEventListener(
+      "auth:token-refreshed",
+      handleTokenRefreshed as EventListener
+    );
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth:logout", handleAuthLogout as EventListener);
+      window.removeEventListener(
+        "auth:token-refreshed",
+        handleTokenRefreshed as EventListener
+      );
+    };
   }, [dispatch]);
 
   return null; // This component doesn't render anything

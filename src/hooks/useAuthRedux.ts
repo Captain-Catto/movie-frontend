@@ -5,7 +5,7 @@ import {
   loginWithEmail as loginWithEmailAction,
   register as registerAction,
   loginWithGoogle as loginWithGoogleAction,
-  logout as logoutAction,
+  logoutUser,
   clearError,
 } from "@/store/authSlice";
 import type { StoredUser } from "@/lib/auth-storage";
@@ -13,6 +13,7 @@ import type { StoredUser } from "@/lib/auth-storage";
 export interface UseAuthReturn {
   user: StoredUser | null;
   token: string | null;
+  refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
@@ -41,9 +42,8 @@ export interface UseAuthReturn {
  */
 export function useAuthRedux(): UseAuthReturn {
   const dispatch = useAppDispatch();
-  const { user, token, isLoading, isAuthenticated, error } = useAppSelector(
-    (state) => state.auth
-  );
+  const { user, token, refreshToken, isLoading, isAuthenticated, error } =
+    useAppSelector((state) => state.auth);
 
   const handleCheckAuth = useCallback(() => {
     dispatch(checkAuth());
@@ -102,7 +102,7 @@ export function useAuthRedux(): UseAuthReturn {
   }, [dispatch]);
 
   const handleLogout = useCallback(() => {
-    dispatch(logoutAction());
+    dispatch(logoutUser());
   }, [dispatch]);
 
   const handleClearError = useCallback(() => {
@@ -112,6 +112,7 @@ export function useAuthRedux(): UseAuthReturn {
   return {
     user,
     token,
+    refreshToken,
     isLoading,
     isAuthenticated,
     error,

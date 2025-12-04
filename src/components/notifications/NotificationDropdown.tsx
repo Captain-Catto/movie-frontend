@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
-import { API_BASE_URL } from "@/services/api";
+import axiosInstance from "@/lib/axios-instance";
+import { authStorage } from "@/lib/auth-storage";
 import { formatRelativeTime } from "@/utils/dateFormatter";
 
 interface Notification {
@@ -49,44 +50,33 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+        const token = authStorage.getToken();
         if (!token) return;
 
-        const response = await fetch(
-          `${API_BASE_URL}/notifications?limit=10`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await axiosInstance.get("/notifications", {
+          params: { limit: 10 },
+        });
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("📦 User notifications:", data);
-
-          if (data.success && data.data?.notifications) {
-            interface RawNotification {
-              id: string;
-              title: string;
-              message: string;
-              type: string;
-              createdAt: string;
-              isRead: boolean;
-            }
-            const userNotifications = data.data.notifications.map(
-              (notif: RawNotification) => ({
-                id: notif.id,
-                title: notif.title,
-                message: notif.message,
-                type: notif.type,
-                createdAt: new Date(notif.createdAt),
-                isRead: notif.isRead,
-              })
-            );
-            setNotifications(userNotifications);
+        if (response.data?.success && response.data.data?.notifications) {
+          interface RawNotification {
+            id: string;
+            title: string;
+            message: string;
+            type: string;
+            createdAt: string;
+            isRead: boolean;
           }
+          const userNotifications = response.data.data.notifications.map(
+            (notif: RawNotification) => ({
+              id: notif.id,
+              title: notif.title,
+              message: notif.message,
+              type: notif.type,
+              createdAt: new Date(notif.createdAt),
+              isRead: notif.isRead,
+            })
+          );
+          setNotifications(userNotifications);
         }
       } catch (error) {
         console.error("Error fetching notifications:", error);

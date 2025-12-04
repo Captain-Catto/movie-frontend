@@ -12,6 +12,7 @@ import { decodeJWT } from "@/utils/jwt-decode";
 interface AuthState {
   user: StoredUser | null;
   token: string | null;
+  refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
@@ -20,6 +21,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   token: null,
+  refreshToken: null,
   isLoading: true,
   isAuthenticated: false,
   error: null,
@@ -28,6 +30,7 @@ const initialState: AuthState = {
 // Async thunks
 export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
   const storedToken = authStorage.getToken();
+  const storedRefreshToken = authStorage.getRefreshToken();
   let storedUser = authStorage.getUser();
 
   // If we have a token but no user data, try to decode it from JWT
@@ -49,10 +52,10 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
   }
 
   if (storedToken && storedUser) {
-    return { token: storedToken, user: storedUser };
+    return { token: storedToken, refreshToken: storedRefreshToken, user: storedUser };
   }
 
-  return { token: null, user: null };
+  return { token: null, refreshToken: storedRefreshToken, user: null };
 });
 
 export const loginWithEmail = createAsyncThunk(
@@ -64,13 +67,19 @@ export const loginWithEmail = createAsyncThunk(
     try {
       const response = await authApiService.login({ email, password });
 
-      if (response.success && response.data) {
+      if (
+        response.success &&
+        response.data?.token &&
+        response.data?.refreshToken
+      ) {
         // Save to localStorage
         authStorage.setToken(response.data.token);
+        authStorage.setRefreshToken(response.data.refreshToken);
         authStorage.setUser(response.data.user);
 
         return {
           token: response.data.token,
+          refreshToken: response.data.refreshToken,
           user: response.data.user,
         };
       } else {
@@ -97,13 +106,19 @@ export const register = createAsyncThunk(
         password,
       });
 
-      if (response.success && response.data) {
+      if (
+        response.success &&
+        response.data?.token &&
+        response.data?.refreshToken
+      ) {
         // Save to localStorage
         authStorage.setToken(response.data.token);
+        authStorage.setRefreshToken(response.data.refreshToken);
         authStorage.setUser(response.data.user);
 
         return {
           token: response.data.token,
+          refreshToken: response.data.refreshToken,
           user: response.data.user,
         };
       } else {
@@ -137,9 +152,13 @@ export const loginWithGoogle = createAsyncThunk(
 
       // Wait for callback
       const callbackData: OAuthCallbackData = await waitForOAuthCallback(popup);
+      if (!callbackData.refreshToken) {
+        return rejectWithValue("Missing refresh token");
+      }
 
       // Save to localStorage
       authStorage.setToken(callbackData.token);
+      authStorage.setRefreshToken(callbackData.refreshToken);
       const userToStore = {
         ...callbackData.user,
         name: callbackData.user.name || "User",
@@ -148,12 +167,33 @@ export const loginWithGoogle = createAsyncThunk(
 
       return {
         token: callbackData.token,
+        refreshToken: callbackData.refreshToken,
         user: userToStore,
       };
     } catch (error: unknown) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Google login failed"
       );
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  "auth/logoutUser",
+  async (_, { getState, dispatch }) => {
+    const state = getState() as { auth: AuthState };
+    const refreshToken =
+      state.auth.refreshToken || authStorage.getRefreshToken();
+
+    try {
+      if (refreshToken) {
+        await authApiService.logout(refreshToken);
+      }
+    } catch (error) {
+      // Swallow errors to ensure local logout still happens
+      console.error("Logout API error:", error);
+    } finally {
+      dispatch(logout());
     }
   }
 );
@@ -170,7 +210,9 @@ const authSlice = createSlice({
       // Clear state
       state.user = null;
       state.token = null;
+      state.refreshToken = null;
       state.isAuthenticated = false;
+      state.isLoading = false;
       state.error = null;
     },
     clearError: (state) => {
@@ -186,12 +228,14 @@ const authSlice = createSlice({
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
         state.user = action.payload.user;
         state.isAuthenticated = !!(action.payload.token && action.payload.user);
       })
       .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
         state.token = null;
+        state.refreshToken = null;
         state.user = null;
         state.isAuthenticated = false;
       })
@@ -203,6 +247,7 @@ const authSlice = createSlice({
       .addCase(loginWithEmail.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
@@ -218,6 +263,7 @@ const authSlice = createSlice({
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
@@ -233,12 +279,23 @@ const authSlice = createSlice({
       .addCase(loginWithGoogle.fulfilled, (state, action) => {
         state.isLoading = false;
         state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
         state.user = action.payload.user;
         state.isAuthenticated = true;
       })
       .addCase(loginWithGoogle.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      // Logout
+      .addCase(logoutUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

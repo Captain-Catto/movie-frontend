@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { RecentSearch } from "@/types/search";
-import { API_BASE_URL } from "@/services/api";
+import axiosInstance from "@/lib/axios-instance";
 
 interface User {
   id: string | number;
@@ -49,40 +49,29 @@ export const useRecentSearches = (
   // Load searches from database (when user is logged in)
   const loadUserSearches = useCallback(async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch(`${API_BASE_URL}/search/recent`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          interface DbSearch {
-            id?: string;
-            query: string;
-            type: "movie" | "tv" | "all";
-            createdAt: string;
-          }
-          const dbSearches = data.data.map((search: DbSearch) => ({
-            ...search,
-            timestamp: new Date(search.createdAt),
-            source: "database" as const,
-          }));
-
-          // Merge with local searches if any
-          const localSearches = getLocalSearchesSync();
-          const merged = mergeSearches(localSearches, dbSearches);
-          setSearches(merged);
-
-          // Sync merged searches back to database
-          if (localSearches.length > 0) {
-            await syncLocalToDatabase(localSearches);
-          }
+      const response = await axiosInstance.get("/search/recent");
+      if (response.data?.success) {
+        interface DbSearch {
+          id?: string;
+          query: string;
+          type: "movie" | "tv" | "all";
+          createdAt: string;
         }
-      } else {
-        // Fallback to local searches if API fails
-        loadLocalSearches();
+        const dbSearches = response.data.data.map((search: DbSearch) => ({
+          ...search,
+          timestamp: new Date(search.createdAt),
+          source: "database" as const,
+        }));
+
+        // Merge with local searches if any
+        const localSearches = getLocalSearchesSync();
+        const merged = mergeSearches(localSearches, dbSearches);
+        setSearches(merged);
+
+        // Sync merged searches back to database
+        if (localSearches.length > 0) {
+          await syncLocalToDatabase(localSearches);
+        }
       }
     } catch (error) {
       console.error("Error loading user searches:", error);
@@ -149,18 +138,10 @@ export const useRecentSearches = (
   // Sync local searches to database
   const syncLocalToDatabase = async (localSearches: RecentSearch[]) => {
     try {
-      const token = localStorage.getItem("authToken");
       for (const search of localSearches) {
-        await fetch(`${API_BASE_URL}/search/recent`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            query: search.query,
-            type: search.type,
-          }),
+        await axiosInstance.post("/search/recent", {
+          query: search.query,
+          type: search.type,
         });
       }
 
@@ -196,27 +177,14 @@ export const useRecentSearches = (
       if (user) {
         // Save to database
         try {
-          const token = localStorage.getItem("authToken");
-          const response = await fetch(
-            `${API_BASE_URL}/search/recent`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                query: trimmedQuery,
-                type,
-              }),
-            }
-          );
+          const response = await axiosInstance.post("/search/recent", {
+            query: trimmedQuery,
+            type,
+          });
 
-          if (response.ok) {
-            // Reload searches from database
+          if (response.status >= 200 && response.status < 300) {
             await loadUserSearches();
           } else {
-            // Fallback to local storage
             const updatedSearches = addSearchToList(
               searches,
               newSearch,
@@ -275,15 +243,8 @@ export const useRecentSearches = (
       if (user && searchToRemove.id) {
         // Remove from database
         try {
-          const token = localStorage.getItem("authToken");
-          const response = await fetch(
-            `${API_BASE_URL}/search/recent/${searchToRemove.id}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const response = await axiosInstance.delete(
+            `/search/recent/${searchToRemove.id}`
           );
 
           if (response.ok) {
@@ -314,16 +275,7 @@ export const useRecentSearches = (
     if (user) {
       // Clear from database
       try {
-        const token = localStorage.getItem("authToken");
-        const response = await fetch(
-          `${API_BASE_URL}/search/recent`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axiosInstance.delete("/search/recent");
 
         if (response.ok) {
           setSearches([]);

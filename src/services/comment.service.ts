@@ -14,13 +14,14 @@ import {
   BannedWord,
   BannedWordCreateDto,
 } from "@/types/comment.types";
+import { authStorage } from "@/lib/auth-storage";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 class CommentService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem("token");
+    const token = authStorage.getToken();
     return {
       "Content-Type": "application/json",
       ...(token && { Authorization: `Bearer ${token}` }),

@@ -5,6 +5,7 @@
 
 const AUTH_TOKEN_KEY = "authToken";
 const USER_DATA_KEY = "userData";
+const REFRESH_TOKEN_KEY = "refreshToken";
 
 export interface StoredUser {
   id: number;
@@ -54,6 +55,40 @@ export const authStorage = {
   },
 
   /**
+   * Save refresh token to localStorage
+   */
+  setRefreshToken(token: string): void {
+    try {
+      localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    } catch (error) {
+      console.error("Failed to save refresh token:", error);
+    }
+  },
+
+  /**
+   * Get refresh token from localStorage
+   */
+  getRefreshToken(): string | null {
+    try {
+      return localStorage.getItem(REFRESH_TOKEN_KEY);
+    } catch (error) {
+      console.error("Failed to get refresh token:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Remove refresh token from localStorage
+   */
+  removeRefreshToken(): void {
+    try {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    } catch (error) {
+      console.error("Failed to remove refresh token:", error);
+    }
+  },
+
+  /**
    * Save user data to localStorage
    */
   setUser(user: StoredUser): void {
@@ -93,6 +128,7 @@ export const authStorage = {
    */
   clearAuth(): void {
     this.removeToken();
+    this.removeRefreshToken();
     this.removeUser();
   },
 

@@ -5,6 +5,7 @@
 
 export interface OAuthCallbackData {
   token: string;
+  refreshToken: string;
   user: {
     id: number;
     email: string;

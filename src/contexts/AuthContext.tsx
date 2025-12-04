@@ -14,6 +14,7 @@ import { decodeJWT } from "@/utils/jwt-decode";
 export interface AuthContextValue {
   user: StoredUser | null;
   token: string | null;
+  refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (
@@ -39,6 +40,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<StoredUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   /**
@@ -47,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = useCallback(() => {
     try {
       const storedToken = authStorage.getToken();
+      const storedRefreshToken = authStorage.getRefreshToken();
       let storedUser = authStorage.getUser();
 
       // If we have a token but no user data, try to decode it from JWT
@@ -69,9 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (storedToken && storedUser) {
         setToken(storedToken);
+        setRefreshToken(storedRefreshToken);
         setUser(storedUser);
       } else {
         setToken(null);
+        setRefreshToken(null);
         setUser(null);
       }
     } catch (error) {
@@ -87,13 +92,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for storage events (e.g., login in another tab)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === "authToken" || e.key === "userData") {
+      if (
+        e.key === "authToken" ||
+        e.key === "refreshToken" ||
+        e.key === "userData"
+      ) {
         checkAuth();
       }
     };
 
+    const handleAuthLogout = () => {
+      checkAuth();
+    };
+
+    const handleTokenRefreshed = () => {
+      checkAuth();
+    };
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    window.addEventListener("auth:logout", handleAuthLogout as EventListener);
+    window.addEventListener(
+      "auth:token-refreshed",
+      handleTokenRefreshed as EventListener
+    );
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth:logout", handleAuthLogout as EventListener);
+      window.removeEventListener(
+        "auth:token-refreshed",
+        handleTokenRefreshed as EventListener
+      );
+    };
   }, [checkAuth]);
 
   /**
@@ -106,13 +135,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authApiService.login({ email, password });
 
-      if (response.success && response.data) {
+      if (
+        response.success &&
+        response.data?.token &&
+        response.data?.refreshToken
+      ) {
         // Save to localStorage
         authStorage.setToken(response.data.token);
+        authStorage.setRefreshToken(response.data.refreshToken);
         authStorage.setUser(response.data.user);
 
         // Update state
         setToken(response.data.token);
+        setRefreshToken(response.data.refreshToken);
         setUser(response.data.user);
 
         return { success: true };
@@ -143,13 +178,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
 
-      if (response.success && response.data) {
+      if (
+        response.success &&
+        response.data?.token &&
+        response.data?.refreshToken
+      ) {
         // Save to localStorage
         authStorage.setToken(response.data.token);
+        authStorage.setRefreshToken(response.data.refreshToken);
         authStorage.setUser(response.data.user);
 
         // Update state
         setToken(response.data.token);
+        setRefreshToken(response.data.refreshToken);
         setUser(response.data.user);
 
         return { success: true };
@@ -191,7 +232,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const callbackData: OAuthCallbackData = await waitForOAuthCallback(popup);
 
       // Save to localStorage
+      if (!callbackData.refreshToken) {
+        return { success: false, error: "Missing refresh token" };
+      }
+
       authStorage.setToken(callbackData.token);
+      authStorage.setRefreshToken(callbackData.refreshToken);
       const userToStore = {
         ...callbackData.user,
         name: callbackData.user.name || "User",
@@ -200,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Update state
       setToken(callbackData.token);
+      setRefreshToken(callbackData.refreshToken);
       setUser(userToStore);
 
       return { success: true };
@@ -216,11 +263,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * Logout user
    */
   const logout = () => {
+    // Attempt to revoke refresh token (fire and forget)
+    const tokenToRevoke = refreshToken || authStorage.getRefreshToken();
+    if (tokenToRevoke) {
+      authApiService.logout(tokenToRevoke).catch((error) => {
+        console.error("Failed to revoke refresh token", error);
+      });
+    }
+
     // Clear localStorage
     authStorage.clearAuth();
 
     // Clear state - this triggers re-render across all components using useAuth
     setToken(null);
+    setRefreshToken(null);
     setUser(null);
 
     // Clear search history
@@ -232,6 +288,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextValue = {
     user,
     token,
+    refreshToken,
     isLoading,
     isAuthenticated: !!token && !!user,
     login: loginWithEmail, // Alias for compatibility

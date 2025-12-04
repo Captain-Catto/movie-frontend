@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+import axiosInstance from "@/lib/axios-instance";
 
 export interface LoginCredentials {
   email: string;
@@ -23,7 +22,8 @@ export interface AuthResponse {
       image?: string;
       role: string;
     };
-    token: string;
+    token?: string;
+    refreshToken?: string;
   };
   error?: string;
 }
@@ -34,16 +34,8 @@ class AuthApiService {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const data = await response.json();
-      return data;
+      const response = await axiosInstance.post("/auth/login", credentials);
+      return response.data;
     } catch (error) {
       console.error("Login error:", error);
       return {
@@ -60,16 +52,8 @@ class AuthApiService {
    */
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      const data = await response.json();
-      return data;
+      const response = await axiosInstance.post("/auth/register", userData);
+      return response.data;
     } catch (error) {
       console.error("Registration error:", error);
       return {
@@ -91,16 +75,8 @@ class AuthApiService {
     googleId: string;
   }): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(googleData),
-      });
-
-      const data = await response.json();
-      return data;
+      const response = await axiosInstance.post("/auth/google", googleData);
+      return response.data;
     } catch (error) {
       console.error("Google auth error:", error);
       return {
@@ -117,18 +93,29 @@ class AuthApiService {
    */
   async getProfile(token: string): Promise<AuthResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-        method: "GET",
+      const response = await axiosInstance.get("/auth/me", {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-
-      const data = await response.json();
-      return data;
+      return response.data;
     } catch (error) {
       console.error("Get profile error:", error);
+      return {
+        success: false,
+        message: "Network error. Please try again.",
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  async logout(refreshToken?: string): Promise<AuthResponse> {
+    try {
+      const response = await axiosInstance.post("/auth/logout", { refreshToken });
+      return response.data;
+    } catch (error) {
+      console.error("Logout error:", error);
       return {
         success: false,
         message: "Network error. Please try again.",

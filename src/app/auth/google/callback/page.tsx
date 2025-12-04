@@ -49,6 +49,7 @@ export default function GoogleOAuthCallbackPage() {
         // Send success message to parent window
         sendOAuthCallbackToParent({
           token: response.data.token,
+          refreshToken: response.data.refreshToken,
           user: response.data.user,
         });
 
