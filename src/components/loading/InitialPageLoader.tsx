@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 /**
  * Full-screen loader shown only on the first page load of the session.
  */
 export function InitialPageLoader() {
+  const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(() => {
     if (typeof window === "undefined") return true;
     return !sessionStorage.getItem("initial-loader-dismissed");
@@ -39,6 +41,10 @@ export function InitialPageLoader() {
       }
     };
   }, []);
+
+  if (pathname !== "/") {
+    return null;
+  }
 
   if (!isMounted) {
     return null;
