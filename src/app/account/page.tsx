@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 
@@ -20,15 +21,15 @@ export default function AccountPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
         <Header />
-        <main className="container mx-auto px-4 pt-24 pb-12">
-          <div className="max-w-4xl mx-auto text-center">
+        <main>
+          <Container size="narrow" withHeaderOffset className="text-center pb-12">
             <h1 className="text-4xl font-bold text-white mb-6">
               Please login
             </h1>
             <p className="text-gray-400">
               You need to login to view account information
             </p>
-          </div>
+          </Container>
         </main>
         <Footer />
       </div>
@@ -42,8 +43,8 @@ export default function AccountPage() {
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
       <Header />
 
-      <main className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-4xl mx-auto">
+      <main>
+        <Container size="narrow" withHeaderOffset className="pb-12">
           <h1 className="text-4xl font-bold text-white mb-8">
             👤 Your Account
           </h1>
@@ -142,7 +143,7 @@ export default function AccountPage() {
               </button>
             </div>
           </div>
-        </div>
+        </Container>
       </main>
 
       <Footer />

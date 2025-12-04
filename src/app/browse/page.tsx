@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import MovieCard, { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
@@ -291,7 +292,7 @@ function BrowsePageContent() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 pt-16">
+      <Container withHeaderOffset className="py-8">
         <h1 className="text-3xl font-bold text-white mb-8">{pageTitle}</h1>
 
         {/* Filter Component */}
@@ -369,7 +370,7 @@ function BrowsePageContent() {
             />
           </div>
         )}
-      </div>
+      </Container>
     </Layout>
   );
 }
