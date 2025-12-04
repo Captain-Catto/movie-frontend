@@ -7,6 +7,7 @@ import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/services/api";
+import { formatRelativeTime } from "@/utils/dateFormatter";
 
 interface Notification {
   id: number;
@@ -158,26 +159,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     }
   };
 
-  const formatTime = (date: Date | string) => {
-    const now = new Date();
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
-
-    // Validate date
-    if (!dateObj || isNaN(dateObj.getTime())) {
-      return "Just now";
-    }
-
-    const diff = now.getTime() - dateObj.getTime();
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (days > 0) return `${days}d ago`;
-    if (hours > 0) return `${hours}h ago`;
-    if (minutes > 0) return `${minutes}m ago`;
-    return "Just now";
-  };
-
   return (
     <div className={cn("relative", className)} ref={dropdownRef}>
       {/* Notification Bell Button */}
@@ -261,7 +242,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {formatTime(notification.createdAt)}
+                        {formatRelativeTime(notification.createdAt)}
                       </p>
                     </div>
                     <div className="flex items-center space-x-1">
