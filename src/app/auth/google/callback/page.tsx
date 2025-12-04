@@ -60,9 +60,13 @@ export default function GoogleOAuthCallbackPage() {
         setStatus("success");
         setMessage("Login successful! Closing window...");
 
-        // Close window after short delay
+        // Try to close if allowed; if blocked by COOP, show success state
         setTimeout(() => {
-          window.close();
+          try {
+            window.close();
+          } catch {
+            // ignore; COOP may block close
+          }
         }, 1000);
       } else {
         throw new Error(response.message || "Authentication failed");
@@ -78,9 +82,13 @@ export default function GoogleOAuthCallbackPage() {
       setStatus("error");
       setMessage(`Error: ${errorMessage}`);
 
-      // Try to close window after delay
+      // Try to close window after delay (COOP may block)
       setTimeout(() => {
-        window.close();
+        try {
+          window.close();
+        } catch {
+          // ignore
+        }
       }, 3000);
     }
   };
@@ -116,7 +124,14 @@ export default function GoogleOAuthCallbackPage() {
 
           {status === "error" && (
             <button
-              onClick={() => window.close()}
+              onClick={() => {
+                try {
+                  window.close();
+                } catch {
+                  // If blocked, reload to parent origin as fallback
+                  window.location.href = "/";
+                }
+              }}
               className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
             >
               Đóng cửa sổ

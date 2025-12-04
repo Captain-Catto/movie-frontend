@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Bell, CheckCircle, X, Trash2 } from "lucide-react";
+import { Bell, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -130,12 +130,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     }
   };
 
-  const handleRemoveNotification = (notificationId: number) => {
-    setNotifications((prev) =>
-      prev.filter((notif) => notif.id !== notificationId)
-    );
-  };
-
   const getTypeIcon = (type: string) => {
     switch (type) {
       case "success":
@@ -247,17 +241,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                           <CheckCircle size={14} />
                         </Button>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          handleRemoveNotification(notification.id)
-                        }
-                        className="text-gray-400 hover:text-red-400 text-xs p-1"
-                        title="Remove"
-                      >
-                        <Trash2 size={14} />
-                      </Button>
                     </div>
                   </div>
                 </div>
