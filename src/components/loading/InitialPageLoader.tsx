@@ -6,8 +6,15 @@ import { useEffect, useState } from "react";
  * Full-screen loader shown only on the first page load of the session.
  */
 export function InitialPageLoader() {
-  const [isVisible, setIsVisible] = useState(true);
-  const [isMounted, setIsMounted] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !sessionStorage.getItem("initial-loader-dismissed");
+  });
+
+  const [isMounted, setIsMounted] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return !sessionStorage.getItem("initial-loader-dismissed");
+  });
 
   useEffect(() => {
     const hasSeenLoader = sessionStorage.getItem("initial-loader-dismissed");
