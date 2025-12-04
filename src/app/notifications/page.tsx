@@ -26,12 +26,12 @@ export default function NotificationsPage() {
         });
 
         if (response.data?.success && Array.isArray(response.data.data?.notifications)) {
-          const items = response.data.data.notifications.map((n: any) => ({
-            id: n.id,
-            title: n.title,
-            message: n.message,
-            type: n.type || "info",
-            createdAt: n.createdAt,
+          const items = response.data.data.notifications.map((n: Partial<NotificationItem>) => ({
+            id: n.id ?? crypto.randomUUID(),
+            title: n.title ?? "Notification",
+            message: n.message ?? "",
+            type: (n.type as NotificationItem["type"]) || "info",
+            createdAt: n.createdAt ?? new Date().toISOString(),
             isRead: n.isRead,
           })) as NotificationItem[];
           setNotifications(items);

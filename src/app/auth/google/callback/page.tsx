@@ -43,7 +43,11 @@ export default function GoogleOAuthCallbackPage() {
       setMessage("Authenticating with server...");
       const response = await authApiService.googleAuth(googleUser);
 
-      if (response.success && response.data) {
+      if (
+        response.success &&
+        response.data?.token &&
+        response.data?.refreshToken
+      ) {
         console.log("✅ [OAUTH-CALLBACK] Backend authentication successful");
 
         // Send success message to parent window

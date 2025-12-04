@@ -247,7 +247,7 @@ export const useRecentSearches = (
             `/search/recent/${searchToRemove.id}`
           );
 
-          if (response.ok) {
+          if (response.status >= 200 && response.status < 300) {
             setSearches((prev) =>
               prev.filter((s) => s.id !== searchToRemove.id)
             );
@@ -277,7 +277,7 @@ export const useRecentSearches = (
       try {
         const response = await axiosInstance.delete("/search/recent");
 
-        if (response.ok) {
+        if (response.status >= 200 && response.status < 300) {
           setSearches([]);
         }
       } catch (error) {
