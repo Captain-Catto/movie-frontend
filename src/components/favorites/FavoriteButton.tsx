@@ -31,6 +31,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   size = "default",
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastToggleAt, setLastToggleAt] = useState<number | null>(null);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { showSuccess, showError, showWarning } = useToast();
   const dispatch = useAppDispatch();
@@ -70,6 +71,14 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   }
 
   const handleToggleFavorite = async () => {
+    // Prevent rapid double-clicks/spam
+    if (isProcessing) return;
+    const now = Date.now();
+    if (lastToggleAt && now - lastToggleAt < 400) {
+      return;
+    }
+    setLastToggleAt(now);
+
     if (!isAuthenticated) {
       showWarning("Login required", "You have to login to use this feature");
       return;
