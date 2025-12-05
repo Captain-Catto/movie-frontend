@@ -2,14 +2,13 @@
 
 import { Suspense } from "react";
 import TvCategoryPage from "@/components/tv/TvCategoryPage";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 export default function TopRatedTVPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Loading TV series...
-        </div>
+        <PageSkeleton title="Top Rated TV Shows" items={18} />
       }
     >
       <TvCategoryPage

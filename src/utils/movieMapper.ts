@@ -105,7 +105,10 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   const rating = voteAverage ? Math.round(voteAverage * 10) / 10 : 0;
 
   const contentType = detectContentType(movie as Record<string, unknown>);
+  const mediaType = contentType;
   const isTVSeries = contentType === "tv";
+  const hasFirstAirDate = Boolean(firstAirDate);
+  const hasReleaseDate = Boolean(releaseDate);
 
   const contentTypePrefix = isTVSeries ? "tv" : "movie";
   const href = `/${contentTypePrefix}/${finalTmdbId}`;

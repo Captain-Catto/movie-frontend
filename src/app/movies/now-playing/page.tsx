@@ -10,6 +10,7 @@ import { MovieCardData } from "@/components/movie/MovieCard";
 import { Movie } from "@/types/movie";
 import useMovieCategory from "@/hooks/useMovieCategory";
 import { DEFAULT_LANGUAGE, DEFAULT_MOVIE_PAGE_SIZE } from "@/constants/app.constants";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 function NowPlayingPageContent() {
   const { movies, loading, totalPages, total, currentPage } = useMovieCategory({
@@ -80,9 +81,7 @@ export default function NowPlayingPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Loading now playing movies...
-        </div>
+        <PageSkeleton title="Now Playing Movies" items={16} />
       }
     >
       <NowPlayingPageContent />

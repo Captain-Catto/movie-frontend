@@ -12,6 +12,7 @@ import {
   DEFAULT_LANGUAGE,
   DEFAULT_BROWSE_PAGE_SIZE,
 } from "@/constants/app.constants";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 function TrendingPageContent() {
   const router = useRouter();
@@ -176,9 +177,7 @@ export default function TrendingPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Loading trending content...
-        </div>
+        <PageSkeleton title="Trending" items={18} />
       }
     >
       <TrendingPageContent />

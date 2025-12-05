@@ -14,6 +14,7 @@ import {
 import useMovieCategory from "@/hooks/useMovieCategory";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
 import { TVSeries } from "@/types/movie";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 function TVShowsPageContent() {
   const router = useRouter();
@@ -129,9 +130,7 @@ export default function TVShowsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[50vh] items-center justify-center text-white">
-          Loading TV series...
-        </div>
+        <PageSkeleton title="TV Series" items={16} showFilters />
       }
     >
       <TVShowsPageContent />
