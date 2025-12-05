@@ -9,6 +9,7 @@ import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 export default function Home() {
   const [nowPlayingMovies, setNowPlayingMovies] = useState<MovieCardData[]>([]);
@@ -16,61 +17,31 @@ export default function Home() {
   const [topRatedMovies, setTopRatedMovies] = useState<MovieCardData[]>([]);
   const [upcomingMovies, setUpcomingMovies] = useState<MovieCardData[]>([]);
   const [heroMovies, setHeroMovies] = useState<MovieCardData[]>([]);
-  const [loading, setLoading] = useState(true);
 
+  // Individual loading states for progressive rendering
+  const [loadingStates, setLoadingStates] = useState({
+    nowPlaying: true,
+    popular: true,
+    topRated: true,
+    upcoming: true,
+  });
+
+  // Track if each section has been fetched
+  const [fetched, setFetched] = useState({
+    nowPlaying: false,
+    popular: false,
+    topRated: false,
+    upcoming: false,
+  });
+
+  // Intersection observers for lazy loading
+  const [nowPlayingRef, nowPlayingVisible] = useIntersectionObserver();
+  const [popularRef, popularVisible] = useIntersectionObserver();
+  const [topRatedRef, topRatedVisible] = useIntersectionObserver();
+  const [upcomingRef, upcomingVisible] = useIntersectionObserver();
+
+  // Fetch hero section immediately (highest priority)
   useEffect(() => {
-    const fetchMovieSections = async () => {
-      try {
-        // Fetch different movie categories from TMDB specific endpoints
-        const [nowPlayingRes, popularRes, topRatedRes, upcomingRes] =
-          await Promise.all([
-            apiService.getNowPlayingMovies({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-            apiService.getPopularMovies({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-            apiService.getTopRatedMovies({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-            apiService.getUpcomingMovies({
-              page: 1,
-              limit: 6,
-              language: "en-US",
-            }),
-          ]);
-
-        console.log("📦 Now Playing Response:", nowPlayingRes);
-        console.log("📦 Popular Response:", popularRes);
-        console.log("📦 Top Rated Response:", topRatedRes);
-        console.log("📦 Upcoming Response:", upcomingRes);
-
-        if (nowPlayingRes.success && nowPlayingRes.data) {
-          setNowPlayingMovies(mapMoviesToFrontend(nowPlayingRes.data));
-        }
-        if (popularRes.success && popularRes.data) {
-          setPopularMovies(mapMoviesToFrontend(popularRes.data));
-        }
-        if (topRatedRes.success && topRatedRes.data) {
-          setTopRatedMovies(mapMoviesToFrontend(topRatedRes.data));
-        }
-        if (upcomingRes.success && upcomingRes.data) {
-          setUpcomingMovies(mapMoviesToFrontend(upcomingRes.data));
-        }
-      } catch (error) {
-        console.error("Error fetching movie sections:", error);
-        // Keep static data as fallback
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const fetchTrendingHero = async () => {
       try {
         const trendingResponse = await apiService.getTrending();
@@ -84,13 +55,119 @@ export default function Home() {
         }
       } catch (error) {
         console.error("Error fetching trending movies for hero:", error);
-        // Keep fallback static data
       }
     };
 
-    fetchMovieSections();
     fetchTrendingHero();
   }, []);
+
+  // Fetch Now Playing when visible
+  useEffect(() => {
+    if (nowPlayingVisible && !fetched.nowPlaying) {
+      setFetched(prev => ({ ...prev, nowPlaying: true }));
+
+      const fetchNowPlaying = async () => {
+        try {
+          const res = await apiService.getNowPlayingMovies({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          });
+          console.log("📦 Now Playing Response:", res);
+          if (res.success && res.data) {
+            setNowPlayingMovies(mapMoviesToFrontend(res.data));
+          }
+        } catch (error) {
+          console.error("Error fetching now playing:", error);
+        } finally {
+          setLoadingStates(prev => ({ ...prev, nowPlaying: false }));
+        }
+      };
+
+      fetchNowPlaying();
+    }
+  }, [nowPlayingVisible, fetched.nowPlaying]);
+
+  // Fetch Popular when visible
+  useEffect(() => {
+    if (popularVisible && !fetched.popular) {
+      setFetched(prev => ({ ...prev, popular: true }));
+
+      const fetchPopular = async () => {
+        try {
+          const res = await apiService.getPopularMovies({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          });
+          console.log("📦 Popular Response:", res);
+          if (res.success && res.data) {
+            setPopularMovies(mapMoviesToFrontend(res.data));
+          }
+        } catch (error) {
+          console.error("Error fetching popular:", error);
+        } finally {
+          setLoadingStates(prev => ({ ...prev, popular: false }));
+        }
+      };
+
+      fetchPopular();
+    }
+  }, [popularVisible, fetched.popular]);
+
+  // Fetch Top Rated when visible
+  useEffect(() => {
+    if (topRatedVisible && !fetched.topRated) {
+      setFetched(prev => ({ ...prev, topRated: true }));
+
+      const fetchTopRated = async () => {
+        try {
+          const res = await apiService.getTopRatedMovies({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          });
+          console.log("📦 Top Rated Response:", res);
+          if (res.success && res.data) {
+            setTopRatedMovies(mapMoviesToFrontend(res.data));
+          }
+        } catch (error) {
+          console.error("Error fetching top rated:", error);
+        } finally {
+          setLoadingStates(prev => ({ ...prev, topRated: false }));
+        }
+      };
+
+      fetchTopRated();
+    }
+  }, [topRatedVisible, fetched.topRated]);
+
+  // Fetch Upcoming when visible
+  useEffect(() => {
+    if (upcomingVisible && !fetched.upcoming) {
+      setFetched(prev => ({ ...prev, upcoming: true }));
+
+      const fetchUpcoming = async () => {
+        try {
+          const res = await apiService.getUpcomingMovies({
+            page: 1,
+            limit: 6,
+            language: "en-US",
+          });
+          console.log("📦 Upcoming Response:", res);
+          if (res.success && res.data) {
+            setUpcomingMovies(mapMoviesToFrontend(res.data));
+          }
+        } catch (error) {
+          console.error("Error fetching upcoming:", error);
+        } finally {
+          setLoadingStates(prev => ({ ...prev, upcoming: false }));
+        }
+      };
+
+      fetchUpcoming();
+    }
+  }, [upcomingVisible, fetched.upcoming]);
 
   // Fallback static hero data
   const fallbackHeroMoviesRaw = [
@@ -199,7 +276,7 @@ export default function Home() {
       <HeroSection movies={heroMoviesToDisplay} />
 
       {/* Now Playing Section */}
-      <div className="py-8">
+      <div ref={nowPlayingRef} className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader title="Now Playing" href="/movies/now-playing" />
           <MovieGrid
@@ -207,13 +284,13 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
-            loading={loading}
+            loading={loadingStates.nowPlaying}
           />
         </div>
       </div>
 
       {/* Popular Section */}
-      <div className="py-8">
+      <div ref={popularRef} className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader title="Popular" href="/movies/popular" />
           <MovieGrid
@@ -221,13 +298,13 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
-            loading={loading}
+            loading={loadingStates.popular}
           />
         </div>
       </div>
 
       {/* Top Rated Section */}
-      <div className="py-8">
+      <div ref={topRatedRef} className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader title="Top Rated" href="/movies/top-rated" />
           <MovieGrid
@@ -235,13 +312,13 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
-            loading={loading}
+            loading={loadingStates.topRated}
           />
         </div>
       </div>
 
       {/* Upcoming Section */}
-      <div className="py-8">
+      <div ref={upcomingRef} className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader title="Upcoming" href="/movies/upcoming" />
           <MovieGrid
@@ -249,7 +326,7 @@ export default function Home() {
             showFilters={false}
             maxRows={1}
             containerPadding={false}
-            loading={loading}
+            loading={loadingStates.upcoming}
           />
         </div>
       </div>
