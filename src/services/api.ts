@@ -21,6 +21,37 @@ export const API_BASE_URL =
     : "http://localhost:8080/api";
 
 class ApiService {
+  /**
+   * Build query string from a params object.
+   * Skips undefined/null/empty/false/0 to mirror previous truthy checks.
+   */
+  private buildQueryParams(params: Record<string, unknown>): string {
+    const searchParams = new URLSearchParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      const appendValue = (val: unknown) => {
+        if (
+          val === undefined ||
+          val === null ||
+          val === "" ||
+          val === false ||
+          val === 0
+        ) {
+          return;
+        }
+        searchParams.append(key, String(val));
+      };
+
+      if (Array.isArray(value)) {
+        value.forEach(appendValue);
+      } else {
+        appendValue(value);
+      }
+    });
+
+    return searchParams.toString();
+  }
+
   private async fetchWithErrorHandling<T>(
     url: string,
     options?: RequestInit
@@ -59,83 +90,79 @@ class ApiService {
   }
 
   async getMovies(query: MovieQuery = {}): Promise<MovieResponse> {
-    const params = new URLSearchParams();
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      genres: query.genre, // ✅ Fix: use "genres" not "genre"
+      year: query.year,
+      language: query.language,
+      sortBy: query.sortBy,
+      countries: query.countries,
+    });
 
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.genre) params.append("genres", query.genre); // ✅ Fix: use "genres" not "genre"
-    if (query.year) params.append("year", query.year.toString());
-    if (query.language) params.append("language", query.language);
-    if (query.sortBy) params.append("sortBy", query.sortBy);
-    if (query.countries) params.append("countries", query.countries);
-
-    const url = `${API_BASE_URL}/movies${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}/movies${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling<MovieResponse>(url);
   }
 
   // New category-specific movie endpoints
   async getNowPlayingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
-    const params = new URLSearchParams();
-
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
-    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
-    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
-    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+      genres: query.genre, // ✅ Add genre parameter
+      year: query.year, // ✅ Add year parameter
+      sortBy: query.sortBy, // ✅ Add sortBy parameter
+    });
 
     const url = `${API_BASE_URL}/movies/now-playing${
-      params.toString() ? `?${params.toString()}` : ""
+      params ? `?${params}` : ""
     }`;
     return this.fetchWithErrorHandling<MovieResponse>(url);
   }
 
   async getPopularMovies(query: MovieQuery = {}): Promise<MovieResponse> {
-    const params = new URLSearchParams();
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+      genres: query.genre, // ✅ Add genre parameter
+      year: query.year, // ✅ Add year parameter
+      sortBy: query.sortBy, // ✅ Add sortBy parameter
+    });
 
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
-    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
-    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
-    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
-
-    const url = `${API_BASE_URL}/movies/popular${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}/movies/popular${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling<MovieResponse>(url);
   }
 
   async getTopRatedMovies(query: MovieQuery = {}): Promise<MovieResponse> {
-    const params = new URLSearchParams();
-
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
-    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
-    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
-    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+      genres: query.genre, // ✅ Add genre parameter
+      year: query.year, // ✅ Add year parameter
+      sortBy: query.sortBy, // ✅ Add sortBy parameter
+    });
 
     const url = `${API_BASE_URL}/movies/top-rated${
-      params.toString() ? `?${params.toString()}` : ""
+      params ? `?${params}` : ""
     }`;
     return this.fetchWithErrorHandling<MovieResponse>(url);
   }
 
   async getUpcomingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
-    const params = new URLSearchParams();
-
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
-    if (query.genre) params.append("genres", query.genre); // ✅ Add genre parameter
-    if (query.year) params.append("year", query.year.toString()); // ✅ Add year parameter
-    if (query.sortBy) params.append("sortBy", query.sortBy); // ✅ Add sortBy parameter
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+      genres: query.genre, // ✅ Add genre parameter
+      year: query.year, // ✅ Add year parameter
+      sortBy: query.sortBy, // ✅ Add sortBy parameter
+    });
 
     const url = `${API_BASE_URL}/movies/upcoming${
-      params.toString() ? `?${params.toString()}` : ""
+      params ? `?${params}` : ""
     }`;
     return this.fetchWithErrorHandling<MovieResponse>(url);
   }
@@ -164,7 +191,8 @@ class ApiService {
     data: CreditsData;
     error?: string;
   }> {
-    const url = `${API_BASE_URL}/movies/${id}/credits?language=${language}`;
+    const params = this.buildQueryParams({ language });
+    const url = `${API_BASE_URL}/movies/${id}/credits${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling(url);
   }
 
@@ -177,7 +205,8 @@ class ApiService {
     data: CreditsData;
     error?: string;
   }> {
-    const url = `${API_BASE_URL}/tv/${id}/credits?language=${language}`;
+    const params = this.buildQueryParams({ language });
+    const url = `${API_BASE_URL}/tv/${id}/credits${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling(url);
   }
 
@@ -230,32 +259,28 @@ class ApiService {
   }
 
   async getTrending(query: MovieQuery = {}): Promise<TrendingResponse> {
-    const params = new URLSearchParams();
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
 
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
-
-    const url = `${API_BASE_URL}/trending${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}/trending${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling<TrendingResponse>(url);
   }
 
   async getTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = new URLSearchParams();
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      genre: query.genre,
+      year: query.year,
+      language: query.language,
+      sortBy: query.sortBy,
+      countries: query.countries,
+    });
 
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.genre) params.append("genre", query.genre);
-    if (query.year) params.append("year", query.year.toString());
-    if (query.language) params.append("language", query.language);
-    if (query.sortBy) params.append("sortBy", query.sortBy);
-    if (query.countries) params.append("countries", query.countries);
-
-    const url = `${API_BASE_URL}/tv${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}/tv${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 
@@ -300,7 +325,10 @@ class ApiService {
     data: Movie[];
     error?: string;
   }> {
-    const url = `${API_BASE_URL}/movies/${id}/recommendations?page=${page}`;
+    const params = this.buildQueryParams({ page });
+    const url = `${API_BASE_URL}/movies/${id}/recommendations${
+      params ? `?${params}` : ""
+    }`;
     return this.fetchWithErrorHandling(url);
   }
 
@@ -313,7 +341,10 @@ class ApiService {
     data: Movie[];
     error?: string;
   }> {
-    const url = `${API_BASE_URL}/tv/${id}/recommendations?page=${page}`;
+    const params = this.buildQueryParams({ page });
+    const url = `${API_BASE_URL}/tv/${id}/recommendations${
+      params ? `?${params}` : ""
+    }`;
     return this.fetchWithErrorHandling(url);
   }
 
@@ -324,7 +355,8 @@ class ApiService {
     total_pages: number;
     total_results: number;
   }> {
-    const url = `${API_BASE_URL}/people/popular?page=${page}`;
+    const params = this.buildQueryParams({ page });
+    const url = `${API_BASE_URL}/people/popular${params ? `?${params}` : ""}`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
@@ -381,7 +413,10 @@ class ApiService {
     pagination: PaginationData;
     metadata: MetadataInfo;
   }> {
-    const url = `${API_BASE_URL}/people/${id}/credits/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
+    const params = this.buildQueryParams({ page, limit, mediaType, sortBy });
+    const url = `${API_BASE_URL}/people/${id}/credits/paginated${
+      params ? `?${params}` : ""
+    }`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
@@ -407,7 +442,10 @@ class ApiService {
     pagination: PaginationData;
     metadata: MetadataInfo & { totalCastItems: number };
   }> {
-    const url = `${API_BASE_URL}/people/${id}/credits/cast/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
+    const params = this.buildQueryParams({ page, limit, mediaType, sortBy });
+    const url = `${API_BASE_URL}/people/${id}/credits/cast/paginated${
+      params ? `?${params}` : ""
+    }`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
@@ -432,7 +470,10 @@ class ApiService {
     pagination: PaginationData;
     metadata: MetadataInfo & { totalCrewItems: number };
   }> {
-    const url = `${API_BASE_URL}/people/${id}/credits/crew/paginated?page=${page}&limit=${limit}&mediaType=${mediaType}&sortBy=${sortBy}`;
+    const params = this.buildQueryParams({ page, limit, mediaType, sortBy });
+    const url = `${API_BASE_URL}/people/${id}/credits/crew/paginated${
+      params ? `?${params}` : ""
+    }`;
     const response = await this.fetchWithErrorHandling<{
       success: boolean;
       message: string;
@@ -690,37 +731,36 @@ class ApiService {
 
   // TV Series Category Methods
   async getOnTheAirTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = new URLSearchParams();
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
 
-    const url = `${API_BASE_URL}/tv/on-the-air${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}/tv/on-the-air${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 
   async getPopularTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = new URLSearchParams();
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
 
-    const url = `${API_BASE_URL}/tv/popular-tv${
-      params.toString() ? `?${params.toString()}` : ""
-    }`;
+    const url = `${API_BASE_URL}/tv/popular-tv${params ? `?${params}` : ""}`;
     return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
 
   async getTopRatedTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = new URLSearchParams();
-    if (query.page) params.append("page", query.page.toString());
-    if (query.limit) params.append("limit", query.limit.toString());
-    if (query.language) params.append("language", query.language);
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
 
     const url = `${API_BASE_URL}/tv/top-rated-tv${
-      params.toString() ? `?${params.toString()}` : ""
+      params ? `?${params}` : ""
     }`;
     return this.fetchWithErrorHandling<TVSeriesResponse>(url);
   }
