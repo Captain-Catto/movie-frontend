@@ -1,6 +1,5 @@
 "use client";
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MovieGrid from "@/components/movie/MovieGrid";
@@ -8,52 +7,19 @@ import LinkPagination from "@/components/ui/LinkPagination";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
-import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_MOVIE_PAGE_SIZE,
-} from "@/constants/app.constants";
+import { Movie } from "@/types/movie";
+import useMovieCategory from "@/hooks/useMovieCategory";
+import { DEFAULT_LANGUAGE, DEFAULT_MOVIE_PAGE_SIZE } from "@/constants/app.constants";
 
 function TopRatedPageContent() {
-  const [movies, setMovies] = useState<MovieCardData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-
-  const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get("page")) || 1;
-  const limit = DEFAULT_MOVIE_PAGE_SIZE;
-
-  useEffect(() => {
-    const fetchTopRatedMovies = async () => {
-      setLoading(true);
-      try {
-        const response = await apiService.getTopRatedMovies({
-          page: currentPage,
-          limit: limit,
-          language: DEFAULT_LANGUAGE,
-        });
-
-        if (response.success && response.data) {
-          const mappedMovies = mapMoviesToFrontend(response.data);
-          setMovies(mappedMovies);
-          if (response.pagination) {
-            setTotalPages(response.pagination.totalPages);
-            const totalCount =
-              typeof response.pagination.total === "number"
-                ? response.pagination.total
-                : response.pagination.totalItems || 0;
-            setTotal(totalCount);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching top rated movies:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTopRatedMovies();
-  }, [currentPage, limit]);
+  const { movies, loading, totalPages, total, currentPage } = useMovieCategory({
+    basePath: "/movies/top-rated",
+    fetcher: apiService.getTopRatedMovies.bind(apiService),
+    mapper: (items) =>
+      mapMoviesToFrontend(items as unknown as Movie[]) as MovieCardData[],
+    defaultLimit: DEFAULT_MOVIE_PAGE_SIZE,
+    defaultLanguage: DEFAULT_LANGUAGE,
+  });
 
   return (
     <Layout>

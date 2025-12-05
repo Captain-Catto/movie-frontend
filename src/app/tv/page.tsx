@@ -1,6 +1,6 @@
 "use client";
-import { Suspense, useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { useRouter } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
@@ -10,24 +10,28 @@ import { apiService } from "@/services/api";
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_TV_PAGE_SIZE,
-  TMDB_IMAGE_BASE_URL,
-  TMDB_POSTER_SIZE,
-  TMDB_BACKDROP_SIZE,
-  FALLBACK_POSTER,
 } from "@/constants/app.constants";
-import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import useMovieCategory from "@/hooks/useMovieCategory";
+import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
+import { TVSeries } from "@/types/movie";
 
 function TVShowsPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [tvShows, setTVShows] = useState<MovieCardData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(() => {
-    const pageParam = searchParams.get("page");
-    return pageParam ? parseInt(pageParam, 10) : 1;
+  const {
+    movies: tvShows,
+    loading,
+    error,
+    totalPages,
+    currentPage,
+    handlePageChange,
+  } = useMovieCategory({
+    basePath: "/tv",
+    fetcher: apiService.getTVSeries.bind(apiService),
+    mapper: (items) =>
+      mapTVSeriesToFrontendList(items as unknown as TVSeries[]) as MovieCardData[],
+    defaultLimit: DEFAULT_TV_PAGE_SIZE,
+    defaultLanguage: DEFAULT_LANGUAGE,
   });
-  const [totalPages, setTotalPages] = useState(1);
 
   const handleFilterChange = (filters: FilterOptions) => {
     // Chuyển sang trang browse với filters
@@ -45,222 +49,6 @@ function TVShowsPageContent() {
 
     router.push(`/browse?${params.toString()}`);
   };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    setLoading(true);
-
-    // Update URL with new page parameter
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
-    router.replace(`/tv?${params.toString()}`, { scroll: false });
-  };
-
-  useEffect(() => {
-    const fetchTVShows = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await apiService.getTVSeries({
-          page: currentPage,
-          limit: DEFAULT_TV_PAGE_SIZE,
-          language: DEFAULT_LANGUAGE,
-        });
-
-        if (response.success && response.data) {
-          // TV API may return array directly or nested under data property.
-          const rawData = response.data as unknown;
-          let tvSeriesArray: Array<Record<string, unknown>> = [];
-          let paginationData:
-            | { totalPages?: number }
-            | Record<string, unknown>
-            | undefined;
-
-          if (Array.isArray(rawData)) {
-            tvSeriesArray = rawData as Array<Record<string, unknown>>;
-            paginationData = response.pagination as Record<string, unknown> | undefined;
-          } else if (rawData && typeof rawData === "object") {
-            const dataWrapper = rawData as Record<string, unknown>;
-            const nestedData = dataWrapper.data;
-            if (Array.isArray(nestedData)) {
-              tvSeriesArray = nestedData as Array<Record<string, unknown>>;
-            }
-            paginationData = (dataWrapper.pagination ??
-              response.pagination) as Record<string, unknown> | undefined;
-          }
-
-          const ensureNumber = (value: unknown): number | undefined => {
-            if (typeof value === "number" && Number.isFinite(value)) {
-              return value;
-            }
-            if (typeof value === "string") {
-              const parsed = Number(value);
-              return Number.isNaN(parsed) ? undefined : parsed;
-            }
-            return undefined;
-          };
-
-          const ensureString = (value: unknown): string | undefined =>
-            typeof value === "string" && value.length > 0 ? value : undefined;
-
-          const ensureNumberArray = (value: unknown): number[] =>
-            Array.isArray(value)
-              ? value
-                  .map((item) => {
-                    if (typeof item === "number") return item;
-                    if (typeof item === "string") {
-                      const parsed = Number(item);
-                      return Number.isNaN(parsed) ? null : parsed;
-                    }
-                    return null;
-                  })
-                  .filter((item): item is number => item !== null)
-              : [];
-
-          const extractYear = (value: unknown): number | undefined => {
-            if (typeof value === "string" && value.length >= 4) {
-              const parsedYear = new Date(value).getFullYear();
-              return Number.isNaN(parsedYear) ? undefined : parsedYear;
-            }
-            return undefined;
-          };
-
-          // Convert API response to MovieCardData format directly
-          const tvShowsWithCardData: MovieCardData[] = tvSeriesArray
-            .map((series: Record<string, unknown>) => {
-              const tmdbId =
-                ensureNumber(series.tmdbId) ?? ensureNumber(series.id);
-
-              if (!tmdbId) {
-                console.warn("Skipping series due to missing tmdbId:", series);
-                return null;
-              }
-
-              const posterPath = ensureString(series.posterPath);
-              const posterUrl = ensureString(series.posterUrl);
-              const poster =
-                posterUrl ||
-                (posterPath
-                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`
-                  : FALLBACK_POSTER);
-
-              const backdropPath = ensureString(series.backdropPath);
-              const backdropUrl = ensureString(series.backdropUrl);
-              const backgroundImage =
-                backdropUrl ||
-                (backdropPath
-                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${backdropPath}`
-                  : poster);
-
-              const voteAverage =
-                ensureNumber(series.voteAverage) ??
-                ensureNumber(series.vote_average);
-              const rating =
-                voteAverage !== undefined
-                  ? Math.round(voteAverage * 10) / 10
-                  : undefined;
-
-              const releaseDate =
-                ensureString(series.firstAirDate) ?? ensureString(series.first_air_date);
-              const year = extractYear(releaseDate) ?? new Date().getFullYear();
-
-              const tvGenres =
-                ensureNumberArray(series.genreIds ?? series.genre_ids) || [];
-
-              const genres =
-                tvGenres
-                  .map((id) => TMDB_TV_ENGLISH_GENRE_MAP[id])
-                  .filter(Boolean) || [];
-
-              const fallbackTitle = ensureString(series.title);
-              const fallbackName = ensureString(series.name);
-              const title =
-                ensureString(series.originalName) ??
-                ensureString(series.original_name) ??
-                fallbackTitle ??
-                fallbackName ??
-                "Untitled";
-
-              const aliasTitle =
-                ensureString(series.aliasTitle) ??
-                ensureString(series.original_name) ??
-                title;
-
-              const description = ensureString(series.overview) ?? "";
-
-              const mediaType =
-                ensureString(series.mediaType) ??
-                ensureString(series.media_type) ??
-                "tv";
-
-              const href = mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
-
-              const episodes =
-                ensureNumber(series.numberOfEpisodes) ??
-                ensureNumber(series.episodeNumber) ??
-                ensureNumber(series.number_of_episodes);
-
-              const tvShow: MovieCardData = {
-                id: tmdbId.toString(),
-                tmdbId,
-                title,
-                aliasTitle,
-                poster,
-                href,
-                year,
-                rating,
-                description,
-                genres,
-                genre: genres[0] || "Uncategorized",
-                backgroundImage,
-                posterImage: poster,
-                isComplete: ensureString(series.status) === "Ended",
-                totalEpisodes: episodes,
-              };
-
-              return tvShow;
-            })
-            .filter((tvShow): tvShow is MovieCardData => tvShow !== null);
-
-          setTVShows(tvShowsWithCardData);
-
-          // Set pagination info from response
-          if (paginationData) {
-            console.log("🔍 TV Pagination data:", paginationData);
-            const totalPagesValue =
-              (paginationData as { totalPages?: number }).totalPages ??
-              (paginationData as { total_pages?: number }).total_pages;
-            if (
-              typeof totalPagesValue === "number" &&
-              Number.isFinite(totalPagesValue) &&
-              totalPagesValue > 0
-            ) {
-              setTotalPages(totalPagesValue);
-              console.log("📄 Set totalPages to:", totalPagesValue);
-            } else {
-              setTotalPages(1);
-            }
-          } else {
-            console.log("❌ No pagination data in TV response");
-            setTotalPages(1);
-          }
-        } else {
-          throw new Error(response.message || "Failed to fetch TV series");
-        }
-      } catch (err) {
-        console.error("Error fetching TV series:", err);
-        setError(err instanceof Error ? err.message : "An error occurred");
-
-        // Fallback to empty array
-        setTVShows([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTVShows();
-  }, [currentPage]);
 
   if (loading) {
     return (
