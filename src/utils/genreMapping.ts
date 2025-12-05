@@ -130,6 +130,13 @@ export function getGenreName(id: number, isTV = false): string {
 }
 
 /**
+ * Get genre ID by name
+ */
+export function getGenreId(name: string): number | undefined {
+  return GENRE_NAME_TO_ID[name] ?? getGenreIdByName(name);
+}
+
+/**
  * Map array of genre IDs to genre names
  */
 export function mapGenreIds(ids: number[], isTV = false): string[] {
