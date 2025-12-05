@@ -5,6 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { SearchResult } from "@/types/search";
 import { Calendar, Star, Film, Tv } from "lucide-react";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 interface SearchResultItemProps {
   result: SearchResult;
@@ -53,8 +58,8 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
         <Image
           src={
             result.posterPath
-              ? `https://image.tmdb.org/t/p/w185${result.posterPath}`
-              : "/images/no-poster.svg"
+              ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${result.posterPath}`
+              : FALLBACK_POSTER
           }
           alt={result.title}
           width={48}

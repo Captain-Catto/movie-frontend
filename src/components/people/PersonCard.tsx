@@ -2,6 +2,11 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { PersonData } from "@/app/people/page";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_PROFILE,
+} from "@/constants/app.constants";
 
 interface PersonCardProps {
   person: PersonData;
@@ -13,8 +18,8 @@ const PersonCard = ({ person }: PersonCardProps) => {
 
   const getProfileImage = () => {
     const imageUrl = person.profile_path
-      ? `https://image.tmdb.org/t/p/w300${person.profile_path}`
-      : "/images/no-avatar.svg";
+      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${person.profile_path}`
+      : FALLBACK_PROFILE;
 
     console.log("Profile image URL for", person.name, ":", imageUrl);
     return imageUrl;
@@ -51,7 +56,7 @@ const PersonCard = ({ person }: PersonCardProps) => {
                 person.name,
                 getProfileImage()
               );
-              (e.target as HTMLImageElement).src = "/images/no-avatar.svg";
+              (e.target as HTMLImageElement).src = FALLBACK_PROFILE;
             }}
             onLoad={() => {
               console.log("Successfully loaded image for:", person.name);
