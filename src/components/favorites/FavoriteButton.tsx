@@ -165,7 +165,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       onClick={handleToggleFavorite}
       className={`
         font-semibold rounded-lg
-        flex items-center transition-colors cursor-pointer
+        flex items-center ${iconOnly ? "justify-center" : ""} transition-colors cursor-pointer
         ${
           isFavorite
             ? "bg-red-500 hover:bg-red-600 text-white"

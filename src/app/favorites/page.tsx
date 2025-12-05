@@ -12,6 +12,7 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MovieCard from "@/components/movie/MovieCard";
 import { favoriteToMovieCardData } from "./utils/favoriteHelpers";
+import PageSkeleton from "@/components/ui/PageSkeleton";
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState<ProcessedFavorite[]>([]);
@@ -148,32 +149,7 @@ const FavoritesPage = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-gray-900 text-white">
-          <Container withHeaderOffset className="py-8">
-            <div className="flex items-center gap-3 mb-8">
-              <Heart className="text-red-500 fill-current" size={32} />
-              <h1 className="text-3xl font-bold">My Favorites</h1>
-              <span className="bg-red-500/70 text-white px-3 py-1 rounded-full text-sm">
-                Loading...
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {Array.from({ length: 12 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="animate-pulse rounded-lg bg-gray-800 overflow-hidden"
-                >
-                  <div className="aspect-[2/3] bg-gray-700"></div>
-                  <div className="p-3 space-y-2">
-                    <div className="h-3 bg-gray-700 rounded w-3/4"></div>
-                    <div className="h-2.5 bg-gray-700 rounded w-1/2"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Container>
-        </div>
+        <PageSkeleton title="My Favorites" items={12} />
       </Layout>
     );
   }

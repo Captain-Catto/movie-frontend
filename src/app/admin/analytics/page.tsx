@@ -9,6 +9,7 @@ import {
   TMDB_POSTER_SIZE,
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
+import AnalyticsSkeleton from "@/components/ui/AnalyticsSkeleton";
 
 interface AnalyticsOverview {
   totalUsers: number;
@@ -243,6 +244,16 @@ export default function AdminAnalyticsPage() {
 
   const maxViewCount =
     viewStats.length > 0 ? Math.max(...viewStats.map((stat) => stat.views)) : 0;
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="p-6">
+          <AnalyticsSkeleton />
+        </div>
+      </AdminLayout>
+    );
+  }
 
   return (
     <AdminLayout>

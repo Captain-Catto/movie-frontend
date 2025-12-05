@@ -556,9 +556,7 @@ const MovieDetailPageContent = () => {
                     <span className="text-gray-500">Director:</span>
                     <span className="ml-2">
                       {creditsLoading ? (
-                        <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                          Loading...
-                        </span>
+                        <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
                       ) : movieData.director ? (
                         <Link
                           href={`/people/${movieData.director.id}`}
@@ -577,9 +575,14 @@ const MovieDetailPageContent = () => {
                       <span className="text-gray-500">Cast:</span>
                       <div className="mt-1">
                         {creditsLoading ? (
-                          <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                            Loading...
-                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {Array.from({ length: 4 }).map((_, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-block h-6 w-16 bg-gray-600 animate-pulse rounded"
+                              />
+                            ))}
+                          </div>
                         ) : (
                           movieData.cast
                             .slice(0, 6)
@@ -600,9 +603,7 @@ const MovieDetailPageContent = () => {
                     <span className="text-gray-500">Country:</span>
                     <span className="ml-2">
                       {creditsLoading ? (
-                        <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                          Loading...
-                        </span>
+                        <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
                       ) : (
                         movieData.country || "Unknown"
                       )}

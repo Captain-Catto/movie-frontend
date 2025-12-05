@@ -6,16 +6,13 @@ import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
+import AccountSkeleton from "@/components/ui/AccountSkeleton";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
+    return <AccountSkeleton />;
   }
 
   if (!isAuthenticated) {
