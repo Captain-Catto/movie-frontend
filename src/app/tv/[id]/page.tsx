@@ -13,6 +13,7 @@ import { apiService } from "@/services/api";
 import { TVDetail, Movie } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
 import { TMDB_TV_ENGLISH_GENRE_MAP } from "@/types/genre";
+import RatingBadge from "@/components/ui/RatingBadge";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -472,16 +473,11 @@ const TVDetailPageContent = () => {
 
                 {/* Rating and Info */}
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
-                  {tvData.voteAverage && parseFloat(String(tvData.voteAverage)) > 0 && (
-                    <div className="flex items-center bg-yellow-500 text-black px-3 py-1 rounded-full">
-                      <span className="mr-1">⭐</span>
-                      <span className="font-bold">
-                        {typeof tvData.voteAverage === "number"
-                          ? tvData.voteAverage.toFixed(1)
-                          : parseFloat(tvData.voteAverage)?.toFixed(1) || "N/A"}
-                      </span>
-                    </div>
-                  )}
+                  <RatingBadge
+                    rating={tvData.voteAverage}
+                    variant="badge"
+                    showZero={true}
+                  />
                   <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold">
                     TV Series
                   </span>

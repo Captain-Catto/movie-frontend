@@ -3,7 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
-import { Play, Info, Star } from "lucide-react";
+import { Play, Info } from "lucide-react";
+import RatingBadge from "@/components/ui/RatingBadge";
 
 export interface MovieCardData {
   id: string;
@@ -39,14 +40,6 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
   >("center");
-  const parsedRating =
-    movie.rating === undefined || movie.rating === null
-      ? null
-      : Number(movie.rating);
-  const hasNumericRating =
-    typeof parsedRating === "number" && !Number.isNaN(parsedRating);
-  const shouldShowRating = hasNumericRating && parsedRating > 0;
-
   console.log("Rendering MovieCard for:", movie);
 
   useEffect(() => {
@@ -251,12 +244,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <div className="space-y-1">
             {/* Rating, Year and Genres - All in one row */}
             <div className="flex flex-wrap gap-1 items-center">
-              {shouldShowRating && (
-                <span className="bg-yellow-500 text-black px-2 py-1 rounded flex items-center space-x-1 font-bold text-xs">
-                  <Star className="w-3 h-3 fill-current" />
-                  <span>{parsedRating}</span>
-                </span>
-              )}
+              <RatingBadge rating={movie.rating} variant="default" showZero={false} />
               {movie.year && (
                 <span className="bg-gray-700 text-white px-2 py-1 rounded font-medium text-xs">
                   {movie.year}
