@@ -8,6 +8,10 @@ import LinkPagination from "@/components/ui/LinkPagination";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_MOVIE_PAGE_SIZE,
+} from "@/constants/app.constants";
 
 function TopRatedPageContent() {
   const [movies, setMovies] = useState<MovieCardData[]>([]);
@@ -17,7 +21,7 @@ function TopRatedPageContent() {
 
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
-  const limit = 20;
+  const limit = DEFAULT_MOVIE_PAGE_SIZE;
 
   useEffect(() => {
     const fetchTopRatedMovies = async () => {
@@ -26,7 +30,7 @@ function TopRatedPageContent() {
         const response = await apiService.getTopRatedMovies({
           page: currentPage,
           limit: limit,
-          language: "en-US",
+          language: DEFAULT_LANGUAGE,
         });
 
         if (response.success && response.data) {

@@ -9,6 +9,10 @@ import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
 import type { TVSeriesResponse } from "@/types";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_TV_PAGE_SIZE,
+} from "@/constants/app.constants";
 
 type CategoryKey = "on-the-air" | "popular" | "top-rated";
 
@@ -53,8 +57,8 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
 
         const response = await fetchers[category]({
           page: currentPage,
-          limit: 24,
-          language: "en-US",
+          limit: DEFAULT_TV_PAGE_SIZE,
+          language: DEFAULT_LANGUAGE,
         });
 
         if (!response.success) {

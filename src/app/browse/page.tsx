@@ -9,6 +9,10 @@ import MovieCard, { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { Pagination } from "@/components/ui/Pagination";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_BROWSE_PAGE_SIZE,
+} from "@/constants/app.constants";
 
 function BrowsePageContent() {
   const searchParams = useSearchParams();
@@ -29,7 +33,7 @@ function BrowsePageContent() {
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,
-    limit: 24,
+    limit: DEFAULT_BROWSE_PAGE_SIZE,
   });
 
   const updateUrlWithFilters = useCallback(
@@ -85,8 +89,8 @@ function BrowsePageContent() {
           sortBy?: string;
         } = {
           page,
-          limit: paginationInfo.limit || 24,
-          language: "en-US",
+          limit: paginationInfo.limit || DEFAULT_BROWSE_PAGE_SIZE,
+          language: DEFAULT_LANGUAGE,
         };
 
         if (filters.countries?.length) {
@@ -113,7 +117,7 @@ function BrowsePageContent() {
         } else if (type === "trending") {
           const trendingQuery = {
             page,
-            limit: paginationInfo.limit || 24,
+            limit: paginationInfo.limit || DEFAULT_BROWSE_PAGE_SIZE,
             language: queryParams.language,
           };
           response = await apiService.getTrending(trendingQuery);

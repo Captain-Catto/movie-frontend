@@ -1,5 +1,5 @@
-// TMDB Genre mappings for frontend
-export const MOVIE_GENRES: Record<number, string> = {
+// TMDB genre mappings (canonical)
+export const TMDB_MOVIE_GENRE_MAP: Record<number, string> = {
   28: "Action",
   12: "Adventure",
   16: "Animation",
@@ -21,7 +21,7 @@ export const MOVIE_GENRES: Record<number, string> = {
   37: "Western",
 };
 
-export const TV_GENRES: Record<number, string> = {
+export const TMDB_TV_GENRE_MAP: Record<number, string> = {
   10759: "Action & Adventure",
   16: "Animation",
   35: "Comedy",
@@ -41,22 +41,34 @@ export const TV_GENRES: Record<number, string> = {
 };
 
 // Combined genre mapping
-export const ALL_GENRES: Record<number, string> = {
-  ...MOVIE_GENRES,
-  ...TV_GENRES,
+export const TMDB_ENGLISH_GENRE_MAP: Record<number, string> = {
+  ...TMDB_MOVIE_GENRE_MAP,
+  ...TMDB_TV_GENRE_MAP,
 };
+
+export const GENRE_NAME_TO_ID: Record<string, number> = Object.entries(
+  TMDB_ENGLISH_GENRE_MAP
+).reduce((acc, [id, name]) => {
+  acc[name] = Number(id);
+  return acc;
+}, {} as Record<string, number>);
+
+// Backwards-compatible aliases
+export const MOVIE_GENRES = TMDB_MOVIE_GENRE_MAP;
+export const TV_GENRES = TMDB_TV_GENRE_MAP;
+export const ALL_GENRES = TMDB_ENGLISH_GENRE_MAP;
 
 /**
  * Map genre IDs to genre names
  */
-export function mapGenreIdsToNames(genreIds: number[]): string[] {
-  if (!genreIds || !Array.isArray(genreIds)) {
-    return [];
-  }
+export function mapGenreIdsToNames(
+  genreIds: Array<number | string>
+): string[] {
+  if (!genreIds || !Array.isArray(genreIds)) return [];
 
-  // Use ALL_GENRES which combines both movie and TV genres
-  // This ensures we can map genres regardless of content type mismatches
-  return genreIds.map((id) => ALL_GENRES[id]).filter(Boolean); // Remove undefined entries
+  return genreIds
+    .map((id) => TMDB_ENGLISH_GENRE_MAP[Number(id)])
+    .filter(Boolean);
 }
 
 /**
@@ -98,15 +110,28 @@ export function getAllGenreIdsFromFavorites(
  * Get genre name by ID
  */
 export function getGenreNameById(genreId: number): string {
-  return ALL_GENRES[genreId] || `Genre ${genreId}`;
+  return TMDB_ENGLISH_GENRE_MAP[genreId] || `Genre ${genreId}`;
 }
 
 /**
  * Get genre ID by name
  */
 export function getGenreIdByName(genreName: string): number | undefined {
-  const entry = Object.entries(ALL_GENRES).find(
-    ([, name]) => name === genreName
-  );
+  const entry = Object.entries(TMDB_ENGLISH_GENRE_MAP).find(([, name]) => name === genreName);
   return entry ? parseInt(entry[0]) : undefined;
+}
+
+/**
+ * Get genre name by ID with optional TV override
+ */
+export function getGenreName(id: number, isTV = false): string {
+  const map = isTV ? TMDB_TV_GENRE_MAP : TMDB_MOVIE_GENRE_MAP;
+  return map[id] || TMDB_ENGLISH_GENRE_MAP[id] || "Unknown";
+}
+
+/**
+ * Map array of genre IDs to genre names
+ */
+export function mapGenreIds(ids: number[], isTV = false): string[] {
+  return ids.map((id) => getGenreName(id, isTV));
 }

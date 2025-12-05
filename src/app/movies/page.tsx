@@ -8,6 +8,11 @@ import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_BROWSE_PAGE_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 function MoviesPageContent() {
   const router = useRouter();
@@ -54,8 +59,8 @@ function MoviesPageContent() {
 
         const response = await apiService.getMovies({
           page: currentPage,
-          limit: 24,
-          language: "en-US",
+          limit: DEFAULT_BROWSE_PAGE_SIZE,
+          language: DEFAULT_LANGUAGE,
         });
 
         if (response.success && response.data) {
@@ -81,7 +86,8 @@ function MoviesPageContent() {
             tmdbId: 0,
             title: "Loading...",
             aliasTitle: "Backend not available",
-            poster: "/images/no-poster.svg",
+            poster: FALLBACK_POSTER,
+            posterImage: FALLBACK_POSTER,
             href: "/movie/1",
             isComplete: false,
           },

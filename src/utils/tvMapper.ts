@@ -1,29 +1,11 @@
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  TMDB_BACKDROP_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
+import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { TVSeries, FrontendTVSeries } from "@/types/movie";
-
-// TMDB poster and backdrop base URLs
-const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
-const POSTER_SIZE = "w500";
-const BACKDROP_SIZE = "w1280";
-
-// TMDB TV Genre mapping to English names
-const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
-  10759: "Action & Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10751: "Family",
-  10762: "Kids",
-  9648: "Mystery",
-  10763: "News",
-  10764: "Reality",
-  10765: "Sci-Fi & Fantasy",
-  10766: "Soap",
-  10767: "Talk",
-  10768: "War & Politics",
-  37: "Western",
-};
 
 export function mapTVSeriesToFrontend(
   series: Record<string, unknown>
@@ -80,15 +62,15 @@ export function mapTVSeriesToFrontend(
   const poster =
     posterPath ||
     (ensureString(series.poster_path)
-      ? `${TMDB_IMAGE_BASE_URL}/${POSTER_SIZE}${series.poster_path}`
-      : "/images/no-poster.svg");
+      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${series.poster_path}`
+      : FALLBACK_POSTER);
 
   const backdropPath = ensureString(series.backdropUrl);
   const backdrop =
     backdropPath ||
     (ensureString(series.backdrop_path)
-      ? `${TMDB_IMAGE_BASE_URL}/${BACKDROP_SIZE}${series.backdrop_path}`
-      : "/images/no-poster.svg");
+      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${series.backdrop_path}`
+      : FALLBACK_POSTER);
 
   const firstAirDate =
     ensureString(series.firstAirDate) ?? ensureString(series.first_air_date);

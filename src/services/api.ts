@@ -13,6 +13,7 @@ import {
   PaginationData,
   MetadataInfo,
 } from "@/types/api";
+import { DEFAULT_LANGUAGE } from "@/constants/app.constants";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL
@@ -156,7 +157,7 @@ class ApiService {
 
   async getMovieCredits(
     id: number,
-    language: string = "en-US"
+    language: string = DEFAULT_LANGUAGE
   ): Promise<{
     success: boolean;
     message: string;
@@ -169,7 +170,7 @@ class ApiService {
 
   async getTVCredits(
     id: number,
-    language: string = "en-US"
+    language: string = DEFAULT_LANGUAGE
   ): Promise<{
     success: boolean;
     message: string;

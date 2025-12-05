@@ -1,4 +1,6 @@
 import { FrontendMovie } from "@/types/movie";
+import { FALLBACK_POSTER } from "@/constants/app.constants";
+import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 
 type TrendingItem = {
   tmdbId: number | string;
@@ -14,38 +16,6 @@ type TrendingItem = {
   popularity?: number;
 };
 
-// TMDB Genre mapping to English names
-const TMDB_ENGLISH_GENRE_MAP: Record<number, string> = {
-  28: "Action",
-  12: "Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10751: "Family",
-  14: "Fantasy",
-  36: "History",
-  27: "Horror",
-  10402: "Music",
-  9648: "Mystery",
-  10749: "Romance",
-  878: "Science Fiction",
-  10770: "TV Movie",
-  53: "Thriller",
-  10752: "War",
-  37: "Western",
-  // TV genres
-  10759: "Action & Adventure",
-  10762: "Kids",
-  10763: "News",
-  10764: "Reality",
-  10765: "Sci-Fi & Fantasy",
-  10766: "Soap",
-  10767: "Talk",
-  10768: "War & Politics",
-};
-
 export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
   // Normalize TMDB id
   const tmdbIdRaw = trending.tmdbId;
@@ -57,8 +27,8 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
   }
 
   // Use the full URLs from backend if available
-  const posterUrl = trending.posterUrl || "/images/no-poster.svg";
-  const backdropUrl = trending.backdropUrl || "/images/no-poster.svg";
+  const posterUrl = trending.posterUrl || FALLBACK_POSTER;
+  const backdropUrl = trending.backdropUrl || FALLBACK_POSTER;
 
   const genreSource = Array.isArray(trending.genreIds)
     ? trending.genreIds

@@ -7,25 +7,15 @@ import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { apiService } from "@/services/api";
-
-const TMDB_TV_ENGLISH_GENRE_MAP: Record<number, string> = {
-  10759: "Action & Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10751: "Family",
-  10762: "Kids",
-  9648: "Mystery",
-  10763: "News",
-  10764: "Reality",
-  10765: "Sci-Fi & Fantasy",
-  10766: "Soap",
-  10767: "Talk",
-  10768: "War & Politics",
-  37: "Western",
-};
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_TV_PAGE_SIZE,
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  TMDB_BACKDROP_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
+import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 
 function TVShowsPageContent() {
   const router = useRouter();
@@ -74,8 +64,8 @@ function TVShowsPageContent() {
 
         const response = await apiService.getTVSeries({
           page: currentPage,
-          limit: 24,
-          language: "en-US",
+          limit: DEFAULT_TV_PAGE_SIZE,
+          language: DEFAULT_LANGUAGE,
         });
 
         if (response.success && response.data) {
@@ -152,15 +142,15 @@ function TVShowsPageContent() {
               const poster =
                 posterUrl ||
                 (posterPath
-                  ? `https://image.tmdb.org/t/p/w500${posterPath}`
-                  : "/images/no-poster.svg");
+                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`
+                  : FALLBACK_POSTER);
 
               const backdropPath = ensureString(series.backdropPath);
               const backdropUrl = ensureString(series.backdropUrl);
               const backgroundImage =
                 backdropUrl ||
                 (backdropPath
-                  ? `https://image.tmdb.org/t/p/w1280${backdropPath}`
+                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${backdropPath}`
                   : poster);
 
               const voteAverage =

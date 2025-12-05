@@ -1,5 +1,12 @@
 // Utility for mapping content data in watch pages
 // Handles both Movie and TV Series data structures
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  TMDB_ORIGINAL_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
+import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { normalizeRatingFromSource } from "./rating";
 
 // Base API response structure
@@ -78,39 +85,6 @@ export interface WatchContentData {
   }>;
 }
 
-// TMDB Genre mapping to English names
-const TMDB_ENGLISH_GENRE_MAP: Record<string | number, string> = {
-  // Movie genres
-  28: "Action",
-  12: "Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10751: "Family",
-  14: "Fantasy",
-  36: "History",
-  27: "Horror",
-  10402: "Music",
-  9648: "Mystery",
-  10749: "Romance",
-  878: "Science Fiction",
-  10770: "TV Movie",
-  53: "Thriller",
-  10752: "War",
-  37: "Western",
-  // TV genres
-  10759: "Action & Adventure",
-  10762: "Kids",
-  10763: "News",
-  10764: "Reality",
-  10765: "Sci-Fi & Fantasy",
-  10766: "Soap",
-  10767: "Talk",
-  10768: "War & Politics",
-};
-
 /**
  * Maps movie data from backend API response to WatchContentData format
  */
@@ -143,13 +117,13 @@ export function mapMovieToWatchContent(
     posterImage:
       movie.posterUrl ||
       (movie.poster_path
-        ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-        : "/images/no-poster.svg"),
+        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${movie.poster_path}`
+        : FALLBACK_POSTER),
     backgroundImage:
       movie.backdropUrl ||
       (movie.backdrop_path
-        ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-        : "/images/no-poster.svg"),
+        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_ORIGINAL_SIZE}${movie.backdrop_path}`
+        : FALLBACK_POSTER),
     year: getYear(movie.releaseDate || movie.release_date),
     contentType: "movie",
   };
@@ -186,13 +160,13 @@ export function mapTVToWatchContent(
     posterImage:
       tv.posterUrl ||
       (tv.poster_path
-        ? `https://image.tmdb.org/t/p/w500${tv.poster_path}`
-        : "/images/no-poster.svg"),
+        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${tv.poster_path}`
+        : FALLBACK_POSTER),
     backgroundImage:
       tv.backdropUrl ||
       (tv.backdrop_path
-        ? `https://image.tmdb.org/t/p/original${tv.backdrop_path}`
-        : "/images/no-poster.svg"),
+        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_ORIGINAL_SIZE}${tv.backdrop_path}`
+        : FALLBACK_POSTER),
     year: getYear(tv.firstAirDate || tv.first_air_date),
     contentType: "tv",
     numberOfSeasons: tv.numberOfSeasons || tv.number_of_seasons,
@@ -241,7 +215,7 @@ function mapGenreIds(genreIds: (string | number)[]): string[] {
   if (!genreIds || !Array.isArray(genreIds)) return [];
 
   return genreIds
-    .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[id])
+    .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[Number(id)])
     .filter(Boolean);
 }
 

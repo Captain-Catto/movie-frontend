@@ -5,6 +5,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
+import { DEFAULT_LANGUAGE } from "@/constants/app.constants";
 
 export default function TVSeriesSections() {
   const [onTheAirTVSeries, setOnTheAirTVSeries] = useState<MovieCardData[]>([]);
@@ -22,17 +23,17 @@ export default function TVSeriesSections() {
           apiService.getOnTheAirTVSeries({
             page: 1,
             limit: 6,
-            language: "en-US",
+            language: DEFAULT_LANGUAGE,
           }),
           apiService.getPopularTVSeries({
             page: 1,
             limit: 6,
-            language: "en-US",
+            language: DEFAULT_LANGUAGE,
           }),
           apiService.getTopRatedTVSeries({
             page: 1,
             limit: 6,
-            language: "en-US",
+            language: DEFAULT_LANGUAGE,
           }),
         ]);
 
