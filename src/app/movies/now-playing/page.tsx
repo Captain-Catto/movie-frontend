@@ -36,20 +36,15 @@ function NowPlayingPageContent() {
             </p>
           </div>
 
-          {/* Loading State */}
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            </div>
-          )}
-
           {/* Movies Grid */}
-          {!loading && movies.length > 0 && (
+          {(loading || movies.length > 0) && (
             <>
               <MovieGrid
                 movies={movies}
                 showFilters={false}
                 containerPadding={false}
+                loading={loading}
+                skeletonCount={SKELETON_COUNT_MOVIE}
               />
 
               {/* Pagination */}
