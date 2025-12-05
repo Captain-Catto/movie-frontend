@@ -11,6 +11,7 @@ import HeroSkeleton from "@/components/ui/HeroSkeleton";
 import { useLoading } from "@/hooks/useLoading";
 import type { MovieCardData } from "@/components/movie/MovieCard";
 import GenreBadge from "@/components/ui/GenreBadge";
+import { FALLBACK_POSTER } from "@/constants/app.constants";
 
 // Import Swiper styles
 import "swiper/css";
@@ -61,9 +62,9 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
       >
         {movies.map((movie) => {
           const backgroundImage =
-            movie.backgroundImage || movie.poster || "/images/no-poster.svg";
+            movie.backgroundImage || movie.poster || FALLBACK_POSTER;
           const posterImage =
-            movie.posterImage || movie.poster || backgroundImage;
+            movie.posterImage || movie.poster || backgroundImage || FALLBACK_POSTER;
           const rawRatingCandidates: Array<number | string | null | undefined> = [
             typeof movie.rating === "number" || typeof movie.rating === "string"
               ? movie.rating
@@ -262,7 +263,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
         <div className="absolute bottom-8 right-8 z-30 flex space-x-2">
           {movies.map((movie, index) => {
             const backgroundImage =
-              movie.backgroundImage || movie.poster || "/images/no-poster.svg";
+            movie.backgroundImage || movie.poster || FALLBACK_POSTER;
             const posterImage =
               movie.posterImage || movie.poster || backgroundImage;
 

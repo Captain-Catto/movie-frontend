@@ -10,6 +10,12 @@ import type { CastMember, CrewMember } from "@/types";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { apiService } from "@/services/api";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_POSTER,
+  FALLBACK_PROFILE,
+} from "@/constants/app.constants";
 
 interface PersonDetail {
   id: number;
@@ -212,9 +218,9 @@ const PersonDetailPage = () => {
 
   const getProfileImage = () => {
     if (personData?.profile_path) {
-      return `https://image.tmdb.org/t/p/w500${personData.profile_path}`;
+      return `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${personData.profile_path}`;
     }
-    return "/images/no-avatar.svg";
+    return FALLBACK_PROFILE;
   };
 
   const getKnownForText = () => {
@@ -279,8 +285,8 @@ const PersonDetailPage = () => {
       title: item.title || item.name || "",
       aliasTitle: character || job || item.title || item.name || "",
       poster: posterPath
-        ? `https://image.tmdb.org/t/p/w300${posterPath}`
-        : "/images/no-poster.svg",
+        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`
+        : FALLBACK_POSTER,
       href: mediaType === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`,
       year: releaseDate ? new Date(releaseDate).getFullYear() : undefined,
       rating:

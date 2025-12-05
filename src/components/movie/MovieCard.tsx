@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info } from "lucide-react";
 import RatingBadge from "@/components/ui/RatingBadge";
+import { FALLBACK_POSTER } from "@/constants/app.constants";
 
 export interface MovieCardData {
   id: string;
@@ -46,6 +47,12 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const isTVSeries = movie.href?.includes("/tv/");
   const contentTypePrefix = isTVSeries ? "tv" : "movie";
   const detailHref = movie.href || `/${contentTypePrefix}/${movie.tmdbId}`;
+  const posterSafe =
+    movie.poster ||
+    ("posterUrl" in movie
+      ? (movie as Record<string, string | undefined>).posterUrl
+      : undefined) ||
+    FALLBACK_POSTER;
 
   useEffect(() => {
     const handleMouseEnter = () => {
@@ -111,7 +118,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             movie={{
               id: movie.tmdbId,
               title: movie.title,
-              poster_path: movie.poster,
+              poster_path: posterSafe,
               vote_average: movie.rating,
               media_type: movie.href?.includes("/tv/") ? "tv" : "movie", // ✅ Add media_type
               overview: movie.description,
@@ -142,11 +149,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           {/* Movie Poster */}
           <Image
             src={
-              movie.poster ||
-              ("posterUrl" in movie
-                ? (movie as Record<string, string>).posterUrl
-                : "") ||
-              "/images/no-poster.svg"
+              posterSafe
             }
             alt={`Watch Now ${movie.title}`}
             fill
@@ -187,10 +190,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         <div className="relative h-64">
           <Image
             src={
-              movie.backgroundImage ||
-              movie.poster ||
-              movie.posterImage ||
-              "/images/no-poster.svg"
+              movie.backgroundImage || movie.posterImage || posterSafe || FALLBACK_POSTER
             }
             alt={movie.title}
             fill
@@ -225,7 +225,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               movie={{
                 id: movie.tmdbId,
                 title: movie.title,
-                poster_path: movie.poster,
+                poster_path: posterSafe,
                 vote_average: movie.rating,
                 media_type: movie.href?.includes("/tv/") ? "tv" : "movie", // ✅ Add media_type
                 overview: movie.description,

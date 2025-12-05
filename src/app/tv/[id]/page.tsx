@@ -15,6 +15,12 @@ import type { CastMember, CrewMember } from "@/types";
 import { TMDB_TV_ENGLISH_GENRE_MAP } from "@/types/genre";
 import RatingBadge from "@/components/ui/RatingBadge";
 import GenreBadge from "@/components/ui/GenreBadge";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  TMDB_BACKDROP_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -210,11 +216,11 @@ const TVDetailPageContent = () => {
 
           const posterPath = ensureString(
             tv.posterUrl ?? tv.posterPath ?? tv.poster_path,
-            "/images/no-poster.svg"
+            FALLBACK_POSTER
           );
           const backdropPath = ensureString(
             tv.backdropUrl ?? tv.backdropPath ?? tv.backdrop_path,
-            "/images/no-poster.svg"
+            FALLBACK_POSTER
           );
 
           const rawGenreIds = ensureNumberArray(
@@ -355,31 +361,15 @@ const TVDetailPageContent = () => {
 
   // Helper functions
   const getPosterUrl = (posterPath: string | null) => {
-    console.log("Poster path:", posterPath);
-    if (!posterPath) return "/images/no-poster.svg";
-    // If it's already a full URL, return it as is
-    if (posterPath.startsWith("http")) {
-      console.log("Generated poster URL (full):", posterPath);
-      return posterPath;
-    }
-    // Otherwise construct TMDB URL
-    const url = `https://image.tmdb.org/t/p/w500${posterPath}`;
-    console.log("Generated poster URL (constructed):", url);
-    return url;
+    if (!posterPath) return FALLBACK_POSTER;
+    if (posterPath.startsWith("http")) return posterPath;
+    return `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`;
   };
 
   const getBackdropUrl = (backdropPath: string | null) => {
-    console.log("Backdrop path:", backdropPath);
-    if (!backdropPath) return "/images/no-poster.svg";
-    // If it's already a full URL, return it as is
-    if (backdropPath.startsWith("http")) {
-      console.log("Generated backdrop URL (full):", backdropPath);
-      return backdropPath;
-    }
-    // Otherwise construct TMDB URL
-    const url = `https://image.tmdb.org/t/p/w1280${backdropPath}`;
-    console.log("Generated backdrop URL (constructed):", url);
-    return url;
+    if (!backdropPath) return FALLBACK_POSTER;
+    if (backdropPath.startsWith("http")) return backdropPath;
+    return `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${backdropPath}`;
   };
 
   const formatDate = (dateString: string) => {
@@ -615,8 +605,8 @@ const TVDetailPageContent = () => {
                             <Image
                               src={
                                 actor.profile_path
-                                  ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
-                                  : "/images/no-avatar.svg"
+                                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path}`
+                                  : FALLBACK_POSTER
                               }
                               alt={actor.name}
                               fill

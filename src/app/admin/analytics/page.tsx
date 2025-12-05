@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { API_BASE_URL } from "@/services/api";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 interface AnalyticsOverview {
   totalUsers: number;
@@ -364,7 +369,11 @@ export default function AdminAnalyticsPage() {
                     {content.posterPath && (
                       <div className="relative w-12 h-18">
                         <Image
-                          src={`https://image.tmdb.org/t/p/w92${content.posterPath}`}
+                          src={
+                            content.posterPath
+                              ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${content.posterPath}`
+                              : FALLBACK_POSTER
+                          }
                           alt={content.title}
                           fill
                           className="object-cover rounded"

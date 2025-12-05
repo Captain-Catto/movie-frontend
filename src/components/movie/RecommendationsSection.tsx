@@ -4,6 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { apiService } from "@/services/api";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 interface RecommendationsProps {
   tmdbId: number;
@@ -96,8 +101,8 @@ export default function RecommendationsSection({
           {recommendations.map((item) => {
             const title = item.title || item.name || "Untitled";
             const posterPath = item.poster_path
-              ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-              : "/images/no-poster.svg";
+              ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.poster_path}`
+              : FALLBACK_POSTER;
             const year = item.release_date
               ? new Date(item.release_date).getFullYear()
               : item.first_air_date

@@ -11,6 +11,7 @@ import {
   FaSignOutAlt,
   FaBell,
 } from "react-icons/fa";
+import { FALLBACK_PROFILE } from "@/constants/app.constants";
 
 interface UserMenuProps {
   user: {
@@ -53,7 +54,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
     };
   }, [isOpen]);
 
-  const avatarSrc = user?.image || "/images/no-avatar.svg";
+  const avatarSrc = user?.image || FALLBACK_PROFILE;
   const displayName =
     user?.name || user?.firstName || user?.email?.split("@")[0] || "User";
 
@@ -103,7 +104,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
             height={40}
             className="object-cover"
             onError={(e) => {
-              e.currentTarget.src = "/images/no-avatar.svg";
+              e.currentTarget.src = FALLBACK_PROFILE;
             }}
           />
         </div>
@@ -126,7 +127,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
                   height={48}
                   className="object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/images/no-avatar.svg";
+                    e.currentTarget.src = FALLBACK_PROFILE;
                   }}
                 />
               </div>

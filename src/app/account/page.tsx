@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
+import { FALLBACK_PROFILE } from "@/constants/app.constants";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -36,7 +37,7 @@ export default function AccountPage() {
     );
   }
 
-  const avatarSrc = user?.image || "/images/no-avatar.svg";
+  const avatarSrc = user?.image || FALLBACK_PROFILE;
   const displayName = user?.name || "User";
 
   return (
@@ -60,7 +61,7 @@ export default function AccountPage() {
                   height={96}
                   className="object-cover"
                   onError={(e) => {
-                    e.currentTarget.src = "/images/no-avatar.svg";
+                    e.currentTarget.src = FALLBACK_PROFILE;
                   }}
                 />
               </div>

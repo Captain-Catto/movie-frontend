@@ -13,6 +13,11 @@ import {
   WatchContentData,
 } from "@/utils/watchContentMapper";
 import type { CastMember } from "@/types";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -526,7 +531,11 @@ const WatchPage = () => {
                           <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-700 mx-auto">
                             {actor.profile_path ? (
                               <Image
-                                src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
+                                src={
+                                  actor.profile_path
+                                    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path}`
+                                    : FALLBACK_POSTER
+                                }
                                 alt={actor.name}
                                 width={64}
                                 height={64}
@@ -603,7 +612,11 @@ const WatchPage = () => {
                         <div className="w-16 h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
                           {item.poster_path ? (
                             <Image
-                              src={`https://image.tmdb.org/t/p/w154${item.poster_path}`}
+                              src={
+                                item.poster_path
+                                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.poster_path}`
+                                  : FALLBACK_POSTER
+                              }
                               alt={item.title || item.name || "Movie poster"}
                               width={64}
                               height={96}

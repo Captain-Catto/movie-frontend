@@ -16,6 +16,11 @@ import { MovieDetail, Movie, TVSeries } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/types/genre";
 import { formatWatchDuration } from "@/utils/watchContentMapper";
+import {
+  TMDB_IMAGE_BASE_URL,
+  TMDB_POSTER_SIZE,
+  FALLBACK_POSTER,
+} from "@/constants/app.constants";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -153,11 +158,11 @@ const MovieDetailPageContent = () => {
               backgroundImage:
                 movieContent.backdropUrl ||
                 movieContent.backdropPath ||
-                "/images/no-poster.svg",
+                FALLBACK_POSTER,
               posterImage:
                 movieContent.posterUrl ||
                 movieContent.posterPath ||
-                "/images/no-poster.svg",
+                FALLBACK_POSTER,
               director: null,
               cast: [],
               country: "Loading...",
@@ -207,11 +212,11 @@ const MovieDetailPageContent = () => {
               backgroundImage:
                 tvContent.backdropUrl ||
                 tvContent.backdropPath ||
-                "/images/no-poster.svg",
+                FALLBACK_POSTER,
               posterImage:
                 tvContent.posterUrl ||
                 tvContent.posterPath ||
-                "/images/no-poster.svg",
+                FALLBACK_POSTER,
               director: null,
               cast: [],
               country: "Loading...",
@@ -511,8 +516,8 @@ const MovieDetailPageContent = () => {
                               <Image
                                 src={
                                   actor.profile_path
-                                    ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
-                                    : "/images/no-avatar.svg"
+                                    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path}`
+                                    : FALLBACK_POSTER
                                 }
                                 alt={actor.name}
                                 fill
