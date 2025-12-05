@@ -1,6 +1,7 @@
 import { FrontendMovie } from "@/types/movie";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import { detectContentType } from "@/utils/contentType";
 
 type TrendingItem = {
   tmdbId: number | string;
@@ -53,16 +54,8 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
       ? Math.round(trending.voteAverage * 10) / 10
       : 0;
 
-  // Create correct href based on media_type
-  const href =
-    trending.mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
-
-  const mediaType =
-    trending.mediaType === "tv"
-      ? "tv"
-      : trending.mediaType === "movie"
-      ? "movie"
-      : undefined;
+  const mediaType = detectContentType(trending as Record<string, unknown>);
+  const href = mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
 
   return {
     id: tmdbId.toString(),

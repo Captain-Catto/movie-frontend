@@ -7,6 +7,7 @@ import {
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import { detectContentType } from "@/utils/contentType";
 import { normalizeRatingFromSource } from "./rating";
 
 // Base API response structure
@@ -189,17 +190,8 @@ export function mapContentToWatchContent(
     ((response as APIResponse).content as ContentInput) ||
     (response as ContentInput);
 
-  // Detect if it's TV or Movie based on available fields
-  const isTVSeries = !!(
-    content.firstAirDate ||
-    content.first_air_date ||
-    content.numberOfSeasons ||
-    content.number_of_seasons ||
-    content.numberOfEpisodes ||
-    content.number_of_episodes ||
-    content.created_by ||
-    (response as APIResponse).contentType === "tv"
-  );
+  const contentType = detectContentType(content as Record<string, unknown>);
+  const isTVSeries = contentType === "tv";
 
   if (isTVSeries) {
     return mapTVToWatchContent(response, movieId);

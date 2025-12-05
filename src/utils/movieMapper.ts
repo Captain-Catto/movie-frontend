@@ -6,6 +6,7 @@ import {
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import { detectContentType } from "@/utils/contentType";
 
 interface MovieInput {
   id?: number; // TMDB ID from API responses (may be optional in some endpoints)
@@ -103,17 +104,8 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // Format rating
   const rating = voteAverage ? Math.round(voteAverage * 10) / 10 : 0;
 
-  // Detect content type: TV series if has firstAirDate or media_type is "tv"
-  const mediaType = movie.media_type || movie.mediaType;
-  const hasFirstAirDate = !!firstAirDate;
-  const hasReleaseDate = !!releaseDate;
-
-  // It's a TV series if:
-  // 1. Explicitly marked as "tv" via media_type/mediaType, OR
-  // 2. Has firstAirDate but no releaseDate (TV series use firstAirDate)
-  const isTVSeries =
-    mediaType === "tv" ||
-    (hasFirstAirDate && !hasReleaseDate);
+  const contentType = detectContentType(movie as Record<string, unknown>);
+  const isTVSeries = contentType === "tv";
 
   const contentTypePrefix = isTVSeries ? "tv" : "movie";
   const href = `/${contentTypePrefix}/${finalTmdbId}`;
