@@ -31,6 +31,8 @@ type UseMovieCategoryOptions<Response extends CategoryResponse> = {
   additionalQuery?: Partial<MovieQuery>;
 };
 
+const EMPTY_QUERY: Partial<MovieQuery> = {};
+
 const normalizePagination = (pagination?: Record<string, unknown>) => {
   const totalPages =
     typeof pagination?.totalPages === "number"
@@ -80,7 +82,7 @@ export function useMovieCategory<Response extends CategoryResponse>({
   mapper,
   defaultLimit = DEFAULT_MOVIE_PAGE_SIZE,
   defaultLanguage = DEFAULT_LANGUAGE,
-  additionalQuery = {},
+  additionalQuery,
 }: UseMovieCategoryOptions<Response>) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -101,14 +103,19 @@ export function useMovieCategory<Response extends CategoryResponse>({
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
   }, [searchParams]);
 
+  const normalizedAdditionalQuery = useMemo(
+    () => additionalQuery ?? EMPTY_QUERY,
+    [additionalQuery]
+  );
+
   const query = useMemo(
     () => ({
       page: currentPage,
       limit: defaultLimit,
       language: defaultLanguage,
-      ...additionalQuery,
+      ...normalizedAdditionalQuery,
     }),
-    [additionalQuery, currentPage, defaultLanguage, defaultLimit]
+    [normalizedAdditionalQuery, currentPage, defaultLanguage, defaultLimit]
   );
 
   const [movies, setMovies] = useState<MovieCardData[]>([]);
