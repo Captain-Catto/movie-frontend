@@ -1,3 +1,5 @@
+import { Star } from "lucide-react";
+
 interface MovieInfoProps {
   title: string;
   rating: number;
@@ -16,9 +18,7 @@ const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: M
         <div className="flex items-center space-x-4 text-sm">
           {rating && parseFloat(String(rating)) > 0 && (
             <div className="flex items-center">
-              <div className="w-4 h-4 text-yellow-500 fill-current">
-                ★
-              </div>
+              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
               <span className="ml-1 text-white">{rating}</span>
             </div>
           )}

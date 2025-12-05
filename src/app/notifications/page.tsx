@@ -151,36 +151,49 @@ export default function NotificationsPage() {
 
                 return (
                   <div key={dateKey} className="space-y-3">
-                    <div className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+                    <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide px-1">
                       {dayLabel}
                     </div>
                     {groupedByDate[dateKey].map((notif) => (
                       <div
                         key={notif.id}
-                        className="bg-gray-850 border border-gray-750 rounded-xl p-4 shadow flex items-start gap-4"
+                        className={`bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl ${
+                          notif.isRead ? 'border-gray-750/50' : 'border-blue-700/40 bg-gray-850/80'
+                        }`}
                       >
-                        <div
-                          className={`px-2 py-1 text-xs rounded-md font-semibold capitalize ${badgeStyles[notif.type]}`}
-                        >
-                          {notif.type}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="text-white font-semibold">{notif.title}</div>
-                              <div className="text-gray-300 text-sm mt-1 leading-relaxed">
-                                {notif.message}
+                        <div className="flex items-start gap-4">
+                          {/* Type Icon/Badge */}
+                          <div
+                            className={`px-3 py-1.5 text-xs rounded-lg font-semibold capitalize shadow-sm ${badgeStyles[notif.type]}`}
+                          >
+                            {notif.type}
+                          </div>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <h3 className="text-white font-semibold text-base leading-tight">
+                                {notif.title}
+                              </h3>
+                              <div className="text-xs text-gray-500 whitespace-nowrap">
+                                {formatRelativeTime(new Date(notif.createdAt))}
                               </div>
                             </div>
-                            <div className="text-xs text-gray-500 whitespace-nowrap">
-                              {formatRelativeTime(new Date(notif.createdAt))}
-                            </div>
+
+                            <p className="text-gray-300 text-sm leading-relaxed">
+                              {notif.message}
+                            </p>
+
+                            {/* Unread indicator */}
+                            {!notif.isRead && (
+                              <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 rounded-md">
+                                <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                                <span className="text-xs text-blue-300 font-medium">
+                                  Mới
+                                </span>
+                              </div>
+                            )}
                           </div>
-                          {!notif.isRead && (
-                            <div className="mt-2 text-xs text-blue-300 font-semibold">
-                              Chưa đọc
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
