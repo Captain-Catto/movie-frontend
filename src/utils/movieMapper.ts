@@ -60,6 +60,8 @@ interface MovieInput {
   vote_average?: number; // snake_case from TMDB API
   genreIds?: (string | number)[] | null;
   genre_ids?: (string | number)[] | null; // snake_case from TMDB API
+  media_type?: string; // "movie" or "tv"
+  mediaType?: string; // camelCase version
   [key: string]: unknown; // Allow for additional properties
 }
 
@@ -134,8 +136,16 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // Format rating
   const rating = voteAverage ? Math.round(voteAverage * 10) / 10 : 0;
 
-  const href = `/movie/${finalTmdbId}`;
-  const watchHref = `/watch/movie-${finalTmdbId}`;
+  // Detect content type: TV series if has name/first_air_date or media_type is "tv"
+  const mediaType = movie.media_type || movie.mediaType;
+  const isTVSeries =
+    mediaType === "tv" ||
+    (!!movie.name && !movie.title) ||
+    (!!movie.first_air_date && !movie.release_date);
+
+  const contentTypePrefix = isTVSeries ? "tv" : "movie";
+  const href = `/${contentTypePrefix}/${finalTmdbId}`;
+  const watchHref = `/watch/${contentTypePrefix}-${finalTmdbId}`;
 
   return {
     id: finalTmdbId.toString(),
