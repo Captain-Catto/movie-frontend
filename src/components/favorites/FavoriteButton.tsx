@@ -141,7 +141,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         className={`
           ${iconOnly ? "p-3" : size === "compact" ? "px-3 py-2" : "px-8 py-4"}
           bg-gray-400 text-white font-semibold rounded-lg
-          flex items-center ${size === "compact" ? "gap-1.5 text-xs" : "gap-2"}
+          flex items-center ${iconOnly ? "justify-center" : ""} ${size === "compact" ? "gap-1.5 text-xs" : "gap-2"}
           opacity-50 cursor-not-allowed transition-colors
           ${className}
         `}
