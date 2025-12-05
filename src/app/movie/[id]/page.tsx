@@ -9,6 +9,7 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
+import GenreBadge from "@/components/ui/GenreBadge";
 import { apiService } from "@/services/api";
 import { normalizeRatingValue } from "@/utils/rating";
 import { MovieDetail, Movie, TVSeries } from "@/types/movie";
@@ -421,15 +422,13 @@ const MovieDetailPageContent = () => {
                   {movieData.genres?.map((genre: string, index: number) => {
                     const genreId = movieData.genreIds?.[index];
                     return (
-                      <Link
+                      <GenreBadge
                         key={index}
-                        href={`/browse?type=movie&genres=${
-                          genreId || encodeURIComponent(genre)
-                        }`}
-                        className="px-3 py-1 bg-gray-800/60 text-white text-sm rounded-full hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
-                      >
-                        {genre}
-                      </Link>
+                        genre={genre}
+                        genreId={genreId}
+                        contentType={movieData.contentType || "movie"}
+                        variant="default"
+                      />
                     );
                   })}
                 </div>

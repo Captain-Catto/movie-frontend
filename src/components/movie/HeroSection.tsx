@@ -10,6 +10,7 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import HeroSkeleton from "@/components/ui/HeroSkeleton";
 import { useLoading } from "@/hooks/useLoading";
 import type { MovieCardData } from "@/components/movie/MovieCard";
+import GenreBadge from "@/components/ui/GenreBadge";
 
 // Import Swiper styles
 import "swiper/css";
@@ -191,13 +192,12 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                     {/* Genre Tags */}
                     <div className="hl-tags mb-4 flex flex-wrap gap-2">
                       {movie.genres?.map((genre, genreIndex) => (
-                        <Link
+                        <GenreBadge
                           key={genreIndex}
-                          href={`/genre/${genre}`}
-                          className="tag-topic"
-                        >
-                          {genre}
-                        </Link>
+                          genre={genre}
+                          contentType={contentType}
+                          variant="hero"
+                        />
                       ))}
                     </div>
 

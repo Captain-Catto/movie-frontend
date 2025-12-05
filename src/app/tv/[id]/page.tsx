@@ -14,6 +14,7 @@ import { TVDetail, Movie } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
 import { TMDB_TV_ENGLISH_GENRE_MAP } from "@/types/genre";
 import RatingBadge from "@/components/ui/RatingBadge";
+import GenreBadge from "@/components/ui/GenreBadge";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -497,15 +498,13 @@ const TVDetailPageContent = () => {
                   {tvData.genres.map((genre: string, index: number) => {
                     const genreId = tvData.genreIds?.[index];
                     return (
-                      <Link
+                      <GenreBadge
                         key={index}
-                        href={`/browse?type=tv&genres=${
-                          genreId || encodeURIComponent(genre)
-                        }`}
-                        className="px-3 py-1 bg-gray-700 text-gray-300 rounded-full text-sm hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
-                      >
-                        {genre}
-                      </Link>
+                        genre={genre}
+                        genreId={genreId}
+                        contentType="tv"
+                        variant="detail"
+                      />
                     );
                   })}
                 </div>
