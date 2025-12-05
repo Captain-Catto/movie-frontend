@@ -55,7 +55,8 @@ interface MovieInput {
   backdropUrl?: string; // from backend API
   releaseDate?: string | Date | null;
   release_date?: string | null; // snake_case from TMDB API
-  first_air_date?: string | null; // for TV series
+  first_air_date?: string | null; // for TV series (snake_case)
+  firstAirDate?: string | Date | null; // for TV series (camelCase from backend)
   voteAverage?: number;
   vote_average?: number; // snake_case from TMDB API
   genreIds?: (string | number)[] | null;
@@ -91,8 +92,9 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // Handle both snake_case (from TMDB API) and camelCase (from backend)
   const posterPath = movie.posterPath || movie.poster_path;
   const backdropPath = movie.backdropPath || movie.backdrop_path;
-  const releaseDate =
-    movie.releaseDate || movie.release_date || movie.first_air_date;
+  // Note: Don't fallback to first_air_date here - we need to detect content type first
+  const releaseDate = movie.releaseDate || movie.release_date;
+  const firstAirDate = movie.firstAirDate || movie.first_air_date;
   const voteAverage = movie.voteAverage || movie.vote_average;
   const genreIds = movie.genreIds || movie.genre_ids;
 
@@ -128,24 +130,51 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // Get primary genre for the genre field
   const primaryGenre = genres[0] || "Uncategorized";
 
-  // Format release year
-  const year = releaseDate
-    ? new Date(releaseDate).getFullYear()
-    : new Date().getFullYear();
-
   // Format rating
   const rating = voteAverage ? Math.round(voteAverage * 10) / 10 : 0;
 
-  // Detect content type: TV series if has name/first_air_date or media_type is "tv"
+  // Detect content type: TV series if has firstAirDate or media_type is "tv"
   const mediaType = movie.media_type || movie.mediaType;
+  const hasFirstAirDate = !!firstAirDate;
+  const hasReleaseDate = !!releaseDate;
+
+  // It's a TV series if:
+  // 1. Explicitly marked as "tv" via media_type/mediaType, OR
+  // 2. Has firstAirDate but no releaseDate (TV series use firstAirDate)
   const isTVSeries =
     mediaType === "tv" ||
-    (!!movie.name && !movie.title) ||
-    (!!movie.first_air_date && !movie.release_date);
+    (hasFirstAirDate && !hasReleaseDate);
 
   const contentTypePrefix = isTVSeries ? "tv" : "movie";
   const href = `/${contentTypePrefix}/${finalTmdbId}`;
   const watchHref = `/watch/${contentTypePrefix}-${finalTmdbId}`;
+
+  // Use appropriate date field based on content type
+  const displayDate = isTVSeries ? firstAirDate : releaseDate;
+
+  // Format release year from appropriate date field
+  const year = displayDate
+    ? new Date(displayDate).getFullYear()
+    : new Date().getFullYear();
+
+  // Debug log to help diagnose issues
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[movieMapper] ${title}:`, {
+      tmdbId: finalTmdbId,
+      mediaType,
+      hasFirstAirDate,
+      hasReleaseDate,
+      isTVSeries,
+      href,
+      contentTypePrefix,
+      raw: {
+        firstAirDate: movie.firstAirDate,
+        first_air_date: movie.first_air_date,
+        releaseDate: movie.releaseDate,
+        release_date: movie.release_date
+      }
+    });
+  }
 
   return {
     id: finalTmdbId.toString(),
