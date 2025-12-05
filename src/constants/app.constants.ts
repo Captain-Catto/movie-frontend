@@ -10,6 +10,12 @@ export const FALLBACK_PROFILE = FALLBACK_POSTER;
 
 export const DEFAULT_LANGUAGE = "en-US";
 
+// Page sizes
 export const DEFAULT_MOVIE_PAGE_SIZE = 20;
 export const DEFAULT_TV_PAGE_SIZE = 24;
 export const DEFAULT_BROWSE_PAGE_SIZE = 24;
+
+// Skeleton counts (should match page sizes for consistency)
+export const SKELETON_COUNT_MOVIE = DEFAULT_MOVIE_PAGE_SIZE;
+export const SKELETON_COUNT_TV = DEFAULT_TV_PAGE_SIZE;
+export const SKELETON_COUNT_BROWSE = DEFAULT_BROWSE_PAGE_SIZE;

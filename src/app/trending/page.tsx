@@ -11,6 +11,7 @@ import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_BROWSE_PAGE_SIZE,
+  SKELETON_COUNT_BROWSE,
 } from "@/constants/app.constants";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 
@@ -116,7 +117,7 @@ function TrendingPageContent() {
 
           {/* Trending grid skeleton */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {Array.from({ length: 18 }).map((_, index) => (
+            {Array.from({ length: SKELETON_COUNT_BROWSE }).map((_, index) => (
               <div key={index} className="sw-item group relative">
                 <div className="v-thumbnail block">
                   <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800">
@@ -177,7 +178,7 @@ export default function TrendingPage() {
   return (
     <Suspense
       fallback={
-        <PageSkeleton title="Trending" items={18} />
+        <PageSkeleton title="Trending" items={SKELETON_COUNT_BROWSE} />
       }
     >
       <TrendingPageContent />

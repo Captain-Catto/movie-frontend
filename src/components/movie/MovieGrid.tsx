@@ -8,6 +8,7 @@ interface MovieGridProps {
   maxRows?: number;
   containerPadding?: boolean;
   loading?: boolean;
+  skeletonCount?: number;
 }
 
 const MovieGrid = ({
@@ -16,11 +17,12 @@ const MovieGrid = ({
   showFilters = true,
   maxRows,
   containerPadding = true,
-  loading = false
+  loading = false,
+  skeletonCount: customSkeletonCount
 }: MovieGridProps) => {
   // Limit movies to 6 per row if maxRows is 1
   const displayMovies = maxRows === 1 ? movies.slice(0, 6) : movies;
-  const skeletonCount = maxRows === 1 ? 6 : 12;
+  const skeletonCount = customSkeletonCount ?? (maxRows === 1 ? 6 : 12);
 
   return (
     <div className={containerPadding ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" : ""}>

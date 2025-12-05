@@ -13,6 +13,7 @@ import Container from "@/components/ui/Container";
 import MovieCard from "@/components/movie/MovieCard";
 import { favoriteToMovieCardData } from "./utils/favoriteHelpers";
 import PageSkeleton from "@/components/ui/PageSkeleton";
+import { SKELETON_COUNT_MOVIE } from "@/constants/app.constants";
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState<ProcessedFavorite[]>([]);
@@ -149,7 +150,7 @@ const FavoritesPage = () => {
   if (loading) {
     return (
       <Layout>
-        <PageSkeleton title="My Favorites" items={12} />
+        <PageSkeleton title="My Favorites" items={SKELETON_COUNT_MOVIE} />
       </Layout>
     );
   }

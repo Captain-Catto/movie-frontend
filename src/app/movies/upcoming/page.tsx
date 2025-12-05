@@ -9,7 +9,7 @@ import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { Movie } from "@/types/movie";
 import useMovieCategory from "@/hooks/useMovieCategory";
-import { DEFAULT_LANGUAGE, DEFAULT_MOVIE_PAGE_SIZE } from "@/constants/app.constants";
+import { DEFAULT_LANGUAGE, DEFAULT_MOVIE_PAGE_SIZE, SKELETON_COUNT_MOVIE } from "@/constants/app.constants";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 
 function UpcomingPageContent() {
@@ -81,7 +81,7 @@ export default function UpcomingPage() {
   return (
     <Suspense
       fallback={
-        <PageSkeleton title="Upcoming Movies" items={16} />
+        <PageSkeleton title="Upcoming Movies" items={SKELETON_COUNT_MOVIE} />
       }
     >
       <UpcomingPageContent />

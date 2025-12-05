@@ -4,6 +4,7 @@ import MovieCard, { MovieCardData } from "./MovieCard";
 import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { useLoading } from "@/hooks/useLoading";
+import { SKELETON_COUNT_TV } from "@/constants/app.constants";
 
 interface MoviesGridProps {
   title?: string;
@@ -13,6 +14,7 @@ interface MoviesGridProps {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  skeletonCount?: number;
 }
 
 const MoviesGrid = ({
@@ -21,6 +23,7 @@ const MoviesGrid = ({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
+  skeletonCount = SKELETON_COUNT_TV,
 }: MoviesGridProps) => {
   const { isLoading } = useLoading({ delay: 800 });
 
@@ -37,7 +40,7 @@ const MoviesGrid = ({
       <div className="cards-grid-wrapper">
         {isLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-            {Array.from({ length: 16 }).map((_, index) => (
+            {Array.from({ length: skeletonCount }).map((_, index) => (
               <MovieCardSkeleton key={index} />
             ))}
           </div>
