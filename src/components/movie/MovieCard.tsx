@@ -42,6 +42,11 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   >("center");
   console.log("Rendering MovieCard for:", movie);
 
+  // Detect content type from href to create proper fallback
+  const isTVSeries = movie.href?.includes("/tv/");
+  const contentTypePrefix = isTVSeries ? "tv" : "movie";
+  const detailHref = movie.href || `/${contentTypePrefix}/${movie.tmdbId}`;
+
   useEffect(() => {
     const handleMouseEnter = () => {
       if (!cardRef.current || !hoverCardRef.current) return;
@@ -97,7 +102,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     <div ref={cardRef} className="sw-item group relative">
       {/* Main Card */}
       <Link
-        href={movie.href || `/movie/${movie.tmdbId}`}
+        href={detailHref}
         className="v-thumbnail block"
       >
         <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 lg:group-hover:z-20">
@@ -232,7 +237,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               className="!w-auto !h-auto !p-2 !rounded font-semibold text-xs !bg-gray-700 hover:!bg-gray-600"
             />
             <Link
-              href={movie.href || `/movie/${movie.tmdbId}`}
+              href={detailHref}
               className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded font-semibold text-xs transition-colors flex items-center space-x-1 cursor-pointer"
             >
               <Info className="w-4 h-4" />
@@ -273,7 +278,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       <div className="info mt-3 space-y-1">
         <h4 className="item-title text-white">
           <Link
-            href={movie.href || `/movie/${movie.tmdbId}`}
+            href={detailHref}
             title={movie.title}
             className="text-sm font-semibold hover:text-red-500 transition-colors line-clamp-2"
           >
@@ -282,7 +287,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         </h4>
         <h4 className="alias-title text-gray-400">
           <Link
-            href={movie.href || `/movie/${movie.tmdbId}`}
+            href={detailHref}
             title={movie.aliasTitle}
             className="text-xs hover:text-red-500 transition-colors line-clamp-1"
           >
