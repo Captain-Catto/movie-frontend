@@ -120,15 +120,14 @@ export default function AdminSeoPage() {
             ogDescription:
               getString("ogDescription") || getString("og_description"),
             ogImage: getString("ogImage") || getString("og_image"),
-            twitterTitle: getString("twitterTitle") || getString("twitter_title"),
+            twitterTitle:
+              getString("twitterTitle") || getString("twitter_title"),
             twitterDescription:
               getString("twitterDescription") ||
               getString("twitter_description"),
-            twitterImage: getString("twitterImage") || getString("twitter_image"),
-            isActive:
-              getBoolean("isActive") ??
-              getBoolean("is_active") ??
-              true,
+            twitterImage:
+              getString("twitterImage") || getString("twitter_image"),
+            isActive: getBoolean("isActive") ?? getBoolean("is_active") ?? true,
             createdAt: getString("createdAt") || getString("created_at"),
             updatedAt: getString("updatedAt") || getString("updated_at"),
           } as SeoMetadata;
@@ -147,14 +146,11 @@ export default function AdminSeoPage() {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        `${API_BASE_URL}/admin/seo/stats/overview`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/admin/seo/stats/overview`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -222,13 +218,19 @@ export default function AdminSeoPage() {
       resetForm();
       fetchSeoData();
       fetchStats();
-      showSuccess("Saved", editModal.isNew ? "Created SEO metadata" : "Updated SEO metadata");
+      showSuccess(
+        "Saved",
+        editModal.isNew ? "Created SEO metadata" : "Updated SEO metadata"
+      );
     } catch (error) {
       console.error("Error saving SEO data:", error);
       setErrorMessage(
         error instanceof Error ? error.message : "Error saving SEO data"
       );
-      showError("Save failed", error instanceof Error ? error.message : "Error saving SEO data");
+      showError(
+        "Save failed",
+        error instanceof Error ? error.message : "Error saving SEO data"
+      );
     }
   };
 
@@ -250,27 +252,28 @@ export default function AdminSeoPage() {
         showSuccess("Deleted", "SEO metadata removed");
       } else {
         const body = await response.json().catch(() => null);
-        const msg = body?.message || body?.error || "Failed to delete SEO metadata";
+        const msg =
+          body?.message || body?.error || "Failed to delete SEO metadata";
         showError("Delete failed", msg);
       }
     } catch (error) {
       console.error("Error deleting SEO data:", error);
-      showError("Delete failed", error instanceof Error ? error.message : "Unknown error");
+      showError(
+        "Delete failed",
+        error instanceof Error ? error.message : "Unknown error"
+      );
     }
   };
 
   const handleToggleActive = async (id: number) => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        `${API_BASE_URL}/admin/seo/${id}/toggle`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/admin/seo/${id}/toggle`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         fetchSeoData();
@@ -278,27 +281,28 @@ export default function AdminSeoPage() {
         showSuccess("Toggled", "SEO status updated");
       } else {
         const body = await response.json().catch(() => null);
-        const msg = body?.message || body?.error || "Failed to toggle SEO status";
+        const msg =
+          body?.message || body?.error || "Failed to toggle SEO status";
         showError("Toggle failed", msg);
       }
     } catch (error) {
       console.error("Error toggling SEO status:", error);
-      showError("Toggle failed", error instanceof Error ? error.message : "Unknown error");
+      showError(
+        "Toggle failed",
+        error instanceof Error ? error.message : "Unknown error"
+      );
     }
   };
 
   const setupDefaults = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        `${API_BASE_URL}/admin/seo/setup/defaults`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/admin/seo/setup/defaults`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
         fetchSeoData();
@@ -311,7 +315,10 @@ export default function AdminSeoPage() {
       }
     } catch (error) {
       console.error("Error setting up defaults:", error);
-      showError("Setup failed", error instanceof Error ? error.message : "Unknown error");
+      showError(
+        "Setup failed",
+        error instanceof Error ? error.message : "Unknown error"
+      );
     }
   };
 
@@ -377,7 +384,8 @@ export default function AdminSeoPage() {
         <div className="mb-6 space-y-4">
           <h1 className="text-2xl font-bold text-white mb-2">SEO Management</h1>
           <p className="text-gray-400">
-            Monitor and tune metadata so search crawlers pick up the latest updates.
+            Monitor and tune metadata so search crawlers pick up the latest
+            updates.
           </p>
 
           {errorMessage && (
@@ -404,7 +412,9 @@ export default function AdminSeoPage() {
           {stats && (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">Total Pages</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  Total Pages
+                </h3>
                 <p className="text-2xl font-bold text-blue-600">
                   {stats.totalPages}
                 </p>
@@ -422,7 +432,9 @@ export default function AdminSeoPage() {
                 </p>
               </div>
               <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">Avg Title Length</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  Avg Title Length
+                </h3>
                 <p className="text-2xl font-bold text-purple-600">
                   {stats.avgTitleLength}
                 </p>
@@ -562,11 +574,11 @@ export default function AdminSeoPage() {
                         >
                           {seo.isActive ? (
                             <>
-                              <EyeOff className="w-4 h-4" /> Deactivate
+                              <EyeOff className="w-4 h-4" />
                             </>
                           ) : (
                             <>
-                              <Eye className="w-4 h-4" /> Activate
+                              <Eye className="w-4 h-4" />
                             </>
                           )}
                         </button>
@@ -614,8 +626,8 @@ export default function AdminSeoPage() {
                       ))}
                     </select>
                     <p className="text-xs text-gray-400 mt-1">
-                      Must match backend enum: home, movies, tv_series, trending,
-                      browse, favorites, people, custom.
+                      Must match backend enum: home, movies, tv_series,
+                      trending, browse, favorites, people, custom.
                     </p>
                   </div>
                   <div>
