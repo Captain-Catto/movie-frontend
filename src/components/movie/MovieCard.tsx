@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -6,6 +6,7 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info } from "lucide-react";
 import RatingBadge from "@/components/ui/RatingBadge";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
+import { useWindowWidth } from "@/hooks/useWindowWidth";
 
 export interface MovieCardData {
   id: string;
@@ -41,6 +42,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
   >("center");
+  const { width: viewportWidth } = useWindowWidth();
   console.log("Rendering MovieCard for:", movie);
 
   // Detect content type from href to create proper fallback
@@ -54,40 +56,27 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       : undefined) ||
     FALLBACK_POSTER;
 
-  useEffect(() => {
-    const handleMouseEnter = () => {
-      if (!cardRef.current || !hoverCardRef.current) return;
+  const handleHoverPosition = () => {
+    if (!cardRef.current || !hoverCardRef.current || viewportWidth === 0) return;
 
-      const cardRect = cardRef.current.getBoundingClientRect();
-      const hoverCardWidth = 384; // w-96 = 384px
-      const viewportWidth = window.innerWidth;
-      const margin = 20; // Safe margin from edge
+    const cardRect = cardRef.current.getBoundingClientRect();
+    const hoverCardWidth = 384; // w-96 = 384px
+    const margin = 20; // Safe margin from edge
 
-      // Calculate where the center of hover card would be
-      const cardCenterX = cardRect.left + cardRect.width / 2;
-      const hoverCardLeft = cardCenterX - hoverCardWidth / 2;
-      const hoverCardRight = cardCenterX + hoverCardWidth / 2;
+    // Calculate where the center of hover card would be
+    const cardCenterX = cardRect.left + cardRect.width / 2;
+    const hoverCardLeft = cardCenterX - hoverCardWidth / 2;
+    const hoverCardRight = cardCenterX + hoverCardWidth / 2;
 
-      // Check if hover card would overflow
-      if (hoverCardLeft < margin) {
-        // Too close to left edge - align card to left
-        setHoverPosition("left");
-      } else if (hoverCardRight > viewportWidth - margin) {
-        // Too close to right edge - align card to right
-        setHoverPosition("right");
-      } else {
-        // Safe to center
-        setHoverPosition("center");
-      }
-    };
-
-    const cardElement = cardRef.current;
-    if (cardElement) {
-      cardElement.addEventListener("mouseenter", handleMouseEnter);
-      return () =>
-        cardElement.removeEventListener("mouseenter", handleMouseEnter);
+    // Check if hover card would overflow
+    if (hoverCardLeft < margin) {
+      setHoverPosition("left");
+    } else if (hoverCardRight > viewportWidth - margin) {
+      setHoverPosition("right");
+    } else {
+      setHoverPosition("center");
     }
-  }, []);
+  };
 
   const handleWatchMovie = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -106,7 +95,11 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   };
 
   return (
-    <div ref={cardRef} className="sw-item group relative">
+    <div
+      ref={cardRef}
+      className="sw-item group relative"
+      onMouseEnter={handleHoverPosition}
+    >
       {/* Main Card */}
       <Link
         href={detailHref}
