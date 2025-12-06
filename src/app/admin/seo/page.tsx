@@ -6,6 +6,7 @@ import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
 import { useToastRedux } from "@/hooks/useToastRedux";
+import { Eye, EyeOff } from "lucide-react";
 
 const PAGE_TYPE_OPTIONS = [
   "home",
@@ -89,10 +90,9 @@ export default function AdminSeoPage() {
             const value = item[key];
             return typeof value === "string" ? value : fallback;
           };
-
-          const getBoolean = (key: string, fallback = true) => {
+          const getBoolean = (key: string): boolean | undefined => {
             const value = item[key];
-            return typeof value === "boolean" ? value : fallback;
+            return typeof value === "boolean" ? value : undefined;
           };
 
           const rawKeywords = item["keywords"];
@@ -126,7 +126,9 @@ export default function AdminSeoPage() {
               getString("twitter_description"),
             twitterImage: getString("twitterImage") || getString("twitter_image"),
             isActive:
-              getBoolean("isActive", true) || getBoolean("is_active", true),
+              getBoolean("isActive") ??
+              getBoolean("is_active") ??
+              true,
             createdAt: getString("createdAt") || getString("created_at"),
             updatedAt: getString("updatedAt") || getString("updated_at"),
           } as SeoMetadata;
@@ -556,9 +558,17 @@ export default function AdminSeoPage() {
                         </button>
                         <button
                           onClick={() => handleToggleActive(seo.id)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
                         >
-                          {seo.isActive ? "Deactivate" : "Activate"}
+                          {seo.isActive ? (
+                            <>
+                              <EyeOff className="w-4 h-4" /> Deactivate
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-4 h-4" /> Activate
+                            </>
+                          )}
                         </button>
                         <button
                           onClick={() => handleDelete(seo.id)}
