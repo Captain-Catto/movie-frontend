@@ -95,10 +95,13 @@ function BrowsePageContent() {
           queryParams.countries = filters.countries.join(",");
         }
         if (filters.genres?.length) {
-          // Backend expects numeric genre ids; allow either ids or names from the URL
-          // If a value is numeric string, keep it; otherwise leave as-is so backend can attempt a match
-          const normalizedGenres = filters.genres.map((g) => g.trim());
-          queryParams.genre = normalizedGenres.join(",");
+          // Backend expects numeric genre ids; pass through trimmed ids
+          const normalizedGenres = filters.genres
+            .map((g) => g.trim())
+            .filter(Boolean);
+          if (normalizedGenres.length) {
+            queryParams.genre = normalizedGenres.join(",");
+          }
         }
         const targetYear =
           filters.customYear ||
@@ -230,13 +233,13 @@ function BrowsePageContent() {
   );
 
   const handleFilterChange = (filters: FilterOptions) => {
-    const type = searchParams.get("type");
+    const typeFromFilters = filters.movieType || searchParams.get("type") || "";
     setCurrentFilters(filters);
     setPaginationInfo((prev) => ({
       ...prev,
       currentPage: 1,
     }));
-    updateUrlWithFilters(filters, 1, type || filters.movieType || null);
+    updateUrlWithFilters(filters, 1, typeFromFilters || null);
   };
 
   // Xử lý URL parameters từ các trang khác
@@ -288,7 +291,8 @@ function BrowsePageContent() {
   }, [fetchMovies, searchParams]);
 
   const handlePageChange = (page: number) => {
-    const type = searchParams.get("type") || currentFilters.movieType || "";
+    const type =
+      currentFilters.movieType || searchParams.get("type") || "";
     setPaginationInfo((prev) => ({
       ...prev,
       currentPage: page,

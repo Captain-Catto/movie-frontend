@@ -273,7 +273,7 @@ class ApiService {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
-      genre: query.genre,
+      genres: query.genre,
       year: query.year,
       language: query.language,
       sortBy: query.sortBy,
