@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
 import MovieGrid from "@/components/movie/MovieGrid";
@@ -10,6 +10,7 @@ import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useWindowWidth } from "@/hooks/useWindowWidth";
 
 export default function Home() {
   const [nowPlayingMovies, setNowPlayingMovies] = useState<MovieCardData[]>([]);
@@ -33,12 +34,28 @@ export default function Home() {
     topRated: false,
     upcoming: false,
   });
+  const { breakpoint } = useWindowWidth();
+  const responsiveLimit = useMemo(() => {
+    if (breakpoint === "desktop") return 10;
+    if (breakpoint === "tablet") return 8;
+    return 5;
+  }, [breakpoint]);
 
   // Intersection observers for lazy loading
   const [nowPlayingRef, nowPlayingVisible] = useIntersectionObserver();
   const [popularRef, popularVisible] = useIntersectionObserver();
   const [topRatedRef, topRatedVisible] = useIntersectionObserver();
   const [upcomingRef, upcomingVisible] = useIntersectionObserver();
+
+  useEffect(() => {
+    // Reset fetch flags when the responsive limit changes so we refetch with new counts
+    setFetched({
+      nowPlaying: false,
+      popular: false,
+      topRated: false,
+      upcoming: false,
+    });
+  }, [responsiveLimit]);
 
   // Fetch hero section immediately (highest priority)
   useEffect(() => {
@@ -48,7 +65,7 @@ export default function Home() {
 
         if (trendingResponse.success && trendingResponse.data) {
           const heroTrendingMovies = mapTrendingDataToFrontend(
-            trendingResponse.data.slice(0, 5)
+            trendingResponse.data.slice(0, responsiveLimit)
           );
           setHeroMovies(heroTrendingMovies);
           console.log("🎬 Hero Trending Movies:", heroTrendingMovies);
@@ -59,7 +76,7 @@ export default function Home() {
     };
 
     fetchTrendingHero();
-  }, []);
+  }, [responsiveLimit]);
 
   // Fetch Now Playing when visible
   useEffect(() => {
@@ -70,7 +87,7 @@ export default function Home() {
         try {
           const res = await apiService.getNowPlayingMovies({
             page: 1,
-            limit: 6,
+            limit: responsiveLimit,
             language: "en-US",
           });
           console.log("📦 Now Playing Response:", res);
@@ -86,7 +103,7 @@ export default function Home() {
 
       fetchNowPlaying();
     }
-  }, [nowPlayingVisible, fetched.nowPlaying]);
+  }, [nowPlayingVisible, fetched.nowPlaying, responsiveLimit]);
 
   // Fetch Popular when visible
   useEffect(() => {
@@ -97,7 +114,7 @@ export default function Home() {
         try {
           const res = await apiService.getPopularMovies({
             page: 1,
-            limit: 6,
+            limit: responsiveLimit,
             language: "en-US",
           });
           console.log("📦 Popular Response:", res);
@@ -113,7 +130,7 @@ export default function Home() {
 
       fetchPopular();
     }
-  }, [popularVisible, fetched.popular]);
+  }, [popularVisible, fetched.popular, responsiveLimit]);
 
   // Fetch Top Rated when visible
   useEffect(() => {
@@ -124,7 +141,7 @@ export default function Home() {
         try {
           const res = await apiService.getTopRatedMovies({
             page: 1,
-            limit: 6,
+            limit: responsiveLimit,
             language: "en-US",
           });
           console.log("📦 Top Rated Response:", res);
@@ -140,7 +157,7 @@ export default function Home() {
 
       fetchTopRated();
     }
-  }, [topRatedVisible, fetched.topRated]);
+  }, [topRatedVisible, fetched.topRated, responsiveLimit]);
 
   // Fetch Upcoming when visible
   useEffect(() => {
@@ -151,7 +168,7 @@ export default function Home() {
         try {
           const res = await apiService.getUpcomingMovies({
             page: 1,
-            limit: 6,
+            limit: responsiveLimit,
             language: "en-US",
           });
           console.log("📦 Upcoming Response:", res);
@@ -167,7 +184,7 @@ export default function Home() {
 
       fetchUpcoming();
     }
-  }, [upcomingVisible, fetched.upcoming]);
+  }, [upcomingVisible, fetched.upcoming, responsiveLimit]);
 
   // Fallback static hero data
   const fallbackHeroMoviesRaw = [
