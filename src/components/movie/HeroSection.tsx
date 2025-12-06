@@ -93,7 +93,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                 value = current;
               }
 
-              if (!Number.isFinite(value) || value <= 0) return acc;
+              if (!Number.isFinite(value) || value < 0) return acc;
               return Math.round(value * 10) / 10;
             },
             null
