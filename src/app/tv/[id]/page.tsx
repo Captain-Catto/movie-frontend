@@ -360,13 +360,18 @@ const TVDetailPageContent = () => {
   }, [numericTvId, tvIdParam]);
 
   // Helper functions
+  const isLocalFallback = (path: string | null) =>
+    !path || path === FALLBACK_POSTER || path.startsWith("/images/");
+
   const getPosterUrl = (posterPath: string | null) => {
+    if (isLocalFallback(posterPath)) return FALLBACK_POSTER;
     if (!posterPath) return FALLBACK_POSTER;
     if (posterPath.startsWith("http")) return posterPath;
     return `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`;
   };
 
   const getBackdropUrl = (backdropPath: string | null) => {
+    if (isLocalFallback(backdropPath)) return FALLBACK_POSTER;
     if (!backdropPath) return FALLBACK_POSTER;
     if (backdropPath.startsWith("http")) return backdropPath;
     return `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${backdropPath}`;
