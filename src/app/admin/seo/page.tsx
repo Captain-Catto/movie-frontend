@@ -61,10 +61,65 @@ export default function AdminSeoPage() {
       if (response.ok) {
         const data = await response.json();
         console.log("🔍 SEO API response:", data);
-        // Handle both direct array and nested object responses
-        const seoArray = data.data || data || [];
-        console.log("🔍 SEO array:", seoArray);
-        setSeoData(Array.isArray(seoArray) ? seoArray : []);
+
+        // Unwrap common shapes: ApiResponse { data: { data: [...] } } or plain array
+        const payload = data?.data ?? data;
+        const items = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+          ? payload.data
+          : [];
+
+        const normalized = items.map((item: Record<string, unknown>) => {
+          const getString = (key: string, fallback = "") => {
+            const value = item[key];
+            return typeof value === "string" ? value : fallback;
+          };
+
+          const getBoolean = (key: string, fallback = true) => {
+            const value = item[key];
+            return typeof value === "boolean" ? value : fallback;
+          };
+
+          const rawKeywords = item["keywords"];
+          const keywordsArray = Array.isArray(rawKeywords)
+            ? rawKeywords
+            : typeof rawKeywords === "string"
+            ? rawKeywords
+                .replace(/[{}]/g, "")
+                .split(/[;,]/)
+                .map((k) => k.trim())
+                .filter(Boolean)
+            : [];
+
+          return {
+            id: item["id"] as number,
+            pageType: getString("pageType") || getString("page_type"),
+            path:
+              getString("pageSlug") ||
+              getString("page_slug") ||
+              getString("path"),
+            title: getString("title"),
+            description: getString("description"),
+            keywords: keywordsArray,
+            ogTitle: getString("ogTitle") || getString("og_title"),
+            ogDescription:
+              getString("ogDescription") || getString("og_description"),
+            ogImage: getString("ogImage") || getString("og_image"),
+            twitterTitle: getString("twitterTitle") || getString("twitter_title"),
+            twitterDescription:
+              getString("twitterDescription") ||
+              getString("twitter_description"),
+            twitterImage: getString("twitterImage") || getString("twitter_image"),
+            isActive:
+              getBoolean("isActive", true) || getBoolean("is_active", true),
+            createdAt: getString("createdAt") || getString("created_at"),
+            updatedAt: getString("updatedAt") || getString("updated_at"),
+          } as SeoMetadata;
+        });
+
+        console.log("🔍 Normalized SEO array:", normalized);
+        setSeoData(normalized);
       }
     } catch (error) {
       console.error("Error fetching SEO data:", error);
