@@ -40,7 +40,6 @@ const TVDetailPageContent = () => {
   const fetchCredits = async (tvId: number) => {
     try {
       setCreditsLoading(true);
-      console.log(`Fetching credits for TV series ID: ${tvId}`);
 
       // Try to get TV credits, fallback if endpoint doesn't exist
       try {
@@ -50,8 +49,9 @@ const TVDetailPageContent = () => {
 
           // Find creator from crew
           const creatorPerson =
-            credits.crew?.find((person: CrewMember) => person.job === "Creator") ||
-            credits.created_by?.[0];
+            credits.crew?.find(
+              (person: CrewMember) => person.job === "Creator"
+            ) || credits.created_by?.[0];
           const creator = creatorPerson
             ? {
                 id: creatorPerson.id,
@@ -66,12 +66,12 @@ const TVDetailPageContent = () => {
           setTVData((prevData: TVDetail | null) => {
             if (!prevData) return prevData;
             return {
-            ...prevData,
-            creator,
-            country,
-            cast: credits.cast || [],
-            crew: credits.crew || [],
-          };
+              ...prevData,
+              creator,
+              country,
+              cast: credits.cast || [],
+              crew: credits.crew || [],
+            };
           });
         } else {
           console.warn("Failed to fetch TV credits:", creditsResponse.message);
@@ -79,12 +79,12 @@ const TVDetailPageContent = () => {
           setTVData((prevData: TVDetail | null) => {
             if (!prevData) return prevData;
             return {
-            ...prevData,
-            creator: null,
-            country: "Not available",
-            cast: [],
-            crew: [],
-          };
+              ...prevData,
+              creator: null,
+              country: "Not available",
+              cast: [],
+              crew: [],
+            };
           });
         }
       } catch (creditsError) {
@@ -96,12 +96,12 @@ const TVDetailPageContent = () => {
         setTVData((prevData: TVDetail | null) => {
           if (!prevData) return prevData;
           return {
-          ...prevData,
-          creator: null,
-          country: "Not available",
-          cast: [],
-          crew: [],
-        };
+            ...prevData,
+            creator: null,
+            country: "Not available",
+            cast: [],
+            crew: [],
+          };
         });
       }
     } catch (error) {
@@ -110,12 +110,12 @@ const TVDetailPageContent = () => {
       setTVData((prevData: TVDetail | null) => {
         if (!prevData) return prevData;
         return {
-        ...prevData,
-        creator: null,
-        country: "Error loading",
-        cast: [],
-        crew: [],
-      };
+          ...prevData,
+          creator: null,
+          country: "Error loading",
+          cast: [],
+          crew: [],
+        };
       });
     } finally {
       setCreditsLoading(false);
@@ -132,12 +132,10 @@ const TVDetailPageContent = () => {
           throw new Error("Invalid TV series ID");
         }
 
-        console.log("Fetching TV series details for ID:", numericTvId);
         const response = await apiService.getTVSeriesById(numericTvId);
 
         if (response.success && response.data) {
-          const tv = response.data as Movie & Record<string, unknown>; // Include movie fields with additional data
-          console.log("TV series data received:", tv);
+          const tv = response.data as Movie & Record<string, unknown>;
 
           const ensureNumber = (value: unknown, fallback = 0): number => {
             if (typeof value === "number" && Number.isFinite(value)) {
@@ -153,9 +151,7 @@ const TVDetailPageContent = () => {
           const ensureString = (value: unknown, fallback = ""): string =>
             typeof value === "string" && value.length > 0 ? value : fallback;
 
-          const ensureOptionalString = (
-            value: unknown
-          ): string | undefined =>
+          const ensureOptionalString = (value: unknown): string | undefined =>
             typeof value === "string" && value.length > 0 ? value : undefined;
 
           const ensureBoolean = (value: unknown, fallback = false): boolean =>
@@ -189,13 +185,9 @@ const TVDetailPageContent = () => {
 
           const originalTitleCandidate = ensureString(tv.originalTitle);
           const originalName = ensureString(tv.original_name);
-          const originalTitle =
-            originalTitleCandidate || originalName || title;
+          const originalTitle = originalTitleCandidate || originalName || title;
 
-          const overview = ensureString(
-            tv.overview,
-            "No overview available."
-          );
+          const overview = ensureString(tv.overview, "No overview available.");
 
           const firstAirDate =
             ensureOptionalString(tv.releaseDate) ??
@@ -267,8 +259,7 @@ const TVDetailPageContent = () => {
                     const record = creator as Record<string, unknown>;
                     return {
                       id: ensureNumber(record.id, 0),
-                      name:
-                        ensureString(record.name, "Unknown") || "Unknown",
+                      name: ensureString(record.name, "Unknown") || "Unknown",
                     };
                   }
                   return null;
@@ -297,9 +288,7 @@ const TVDetailPageContent = () => {
                   return null;
                 })
                 .filter(
-                  (
-                    country
-                  ): country is { name: string; iso_3166_1: string } =>
+                  (country): country is { name: string; iso_3166_1: string } =>
                     country !== null
                 )
             : [];
@@ -340,7 +329,6 @@ const TVDetailPageContent = () => {
             crew: [] as CrewMember[],
           };
 
-          console.log("Processed TV data:", processedTVData);
           setTVData(processedTVData);
 
           // Fetch additional credits data
@@ -555,9 +543,7 @@ const TVDetailPageContent = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-6">
-                Overview
-              </h3>
+              <h3 className="text-2xl font-bold text-white mb-6">Overview</h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
                   {tvData.overview ? (
@@ -593,9 +579,7 @@ const TVDetailPageContent = () => {
               {/* Cast Section */}
               {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                 <>
-                  <h3 className="text-2xl font-bold text-white mb-6">
-                    Cast
-                  </h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">Cast</h3>
                   {creditsLoading ? (
                     <CastSkeleton />
                   ) : (
@@ -738,9 +722,7 @@ const TVDetailPageContent = () => {
                   </div>
                   {tvData.lastAirDate && (
                     <div>
-                      <span className="text-gray-500">
-                        Last Air Date:
-                      </span>
+                      <span className="text-gray-500">Last Air Date:</span>
                       <span className="ml-2">
                         {formatDate(tvData.lastAirDate)}
                       </span>

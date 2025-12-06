@@ -130,9 +130,6 @@ export const favoritesService = {
       throw new Error("No authentication token found. Please login again.");
     }
 
-    console.log("🚀 Making request to: /favorites");
-    console.log("🚀 With data:", data);
-
     const response = await axiosInstance.post<Favorite>("/favorites", data);
 
     return response.data;

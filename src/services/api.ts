@@ -507,7 +507,6 @@ class ApiService {
       }
     } catch {
       // Movie failed, try TV
-      console.log("Movie not found, trying TV series...");
     }
 
     try {
@@ -533,7 +532,6 @@ class ApiService {
         }
       }
     } catch {
-      console.log("TV series not found either");
     }
 
     return {

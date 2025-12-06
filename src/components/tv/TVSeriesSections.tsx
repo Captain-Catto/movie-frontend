@@ -58,7 +58,6 @@ export default function TVSeriesSections() {
             limit: 6,
             language: DEFAULT_LANGUAGE,
           });
-          console.log("📦 On The Air Response:", res);
           if (res.success && res.data) {
             const mappedTVSeries = toRecordArray(res.data).map((tv) =>
               mapTVSeriesToFrontend(tv)
@@ -88,7 +87,6 @@ export default function TVSeriesSections() {
             limit: 6,
             language: DEFAULT_LANGUAGE,
           });
-          console.log("📦 Popular TV Response:", res);
           if (res.success && res.data) {
             const mappedTVSeries = toRecordArray(res.data).map((tv) =>
               mapTVSeriesToFrontend(tv)
@@ -118,7 +116,6 @@ export default function TVSeriesSections() {
             limit: 6,
             language: DEFAULT_LANGUAGE,
           });
-          console.log("📦 Top Rated TV Response:", res);
           if (res.success && res.data) {
             const mappedTVSeries = toRecordArray(res.data).map((tv) =>
               mapTVSeriesToFrontend(tv)

@@ -28,12 +28,14 @@ export function CommentItem({
   onReport,
   onAddComment,
 }: CommentItemProps) {
+  const [currentComment, setCurrentComment] = useState(comment);
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replies, setReplies] = useState<CommentType[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
   const [localReplyCount, setLocalReplyCount] = useState(comment.replyCount);
+  const [isEditing, setIsEditing] = useState(false);
 
   const { user } = useAppSelector((state) => state.auth);
   const isOwner = user?.id === comment.userId;

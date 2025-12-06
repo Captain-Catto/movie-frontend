@@ -24,8 +24,6 @@ export default function GoogleOAuthCallbackPage() {
       const hash = window.location.hash;
       const params = parseOAuthCallback(hash);
 
-      console.log("📥 [OAUTH-CALLBACK] Received params:", params);
-
       if (!params || !params.id_token) {
         throw new Error("No ID token received from Google");
       }
@@ -37,8 +35,6 @@ export default function GoogleOAuthCallbackPage() {
         throw new Error("Failed to extract user info from ID token");
       }
 
-      console.log("👤 [OAUTH-CALLBACK] Extracted user:", googleUser);
-
       // Authenticate with backend
       setMessage("Authenticating with server...");
       const response = await authApiService.googleAuth(googleUser);
@@ -48,8 +44,6 @@ export default function GoogleOAuthCallbackPage() {
         response.data?.token &&
         response.data?.refreshToken
       ) {
-        console.log("✅ [OAUTH-CALLBACK] Backend authentication successful");
-
         // Send success message to parent window
         sendOAuthCallbackToParent({
           token: response.data.token,

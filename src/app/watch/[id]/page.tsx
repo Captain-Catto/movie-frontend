@@ -126,10 +126,6 @@ const WatchPage = () => {
 
         // Set recommendations
         if (recommendationsResponse.success) {
-          console.log(
-            "🎬 Recommendations raw data:",
-            recommendationsResponse.data
-          );
           type RawRecommendation = {
             tmdbId?: number;
             id?: number;
@@ -163,7 +159,6 @@ const WatchPage = () => {
                   first_air_date: firstAirDate,
                   vote_average: item.voteAverage ?? item.vote_average ?? 0,
                 };
-                console.log("🎬 Mapped recommendation:", mappedItem);
                 return mappedItem;
               });
 

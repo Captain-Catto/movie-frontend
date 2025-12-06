@@ -46,7 +46,6 @@ const FavoritesPage = () => {
         };
 
         const response = await favoritesService.getUserFavorites(queryParams);
-        console.log("Fetched favorites:", response);
         if (append && pageNum > 1) {
           setFavorites((prev) => [...prev, ...response.favorites]);
         } else {
@@ -98,38 +97,6 @@ const FavoritesPage = () => {
       fetchFavorites(1, false);
     }
   }, [isAuthenticated, fetchFavorites]);
-
-  // Sync with Redux state - filter out removed favorites
-  // TEMPORARILY DISABLED - causing all favorites to disappear
-  /* 
-  useEffect(() => {
-    // Don't filter if Redux state is not ready or if we have no local favorites
-    if (favoriteIds.length === 0 || favorites.length === 0) {
-      console.log(`🔍 Skipping filter: Redux IDs=${favoriteIds.length}, Local favorites=${favorites.length}`);
-      return;
-    }
-    
-    console.log(`🔍 Starting filter: Redux IDs=[${favoriteIds.join(',')}], Local favorites=[${favorites.map(f => f.id).join(',')}]`);
-    
-    setFavorites((prevFavorites) => {
-      const filteredFavorites = prevFavorites.filter((favorite) => {
-        const isIncluded = favoriteIds.includes(favorite.id);
-        if (!isIncluded) {
-          console.log(`🗑️ Removing favorite: ${favorite.id} (${favorite.title})`);
-        }
-        return isIncluded;
-      });
-      
-      // Only update if there's actually a change to avoid unnecessary re-renders
-      if (filteredFavorites.length !== prevFavorites.length) {
-        console.log(`🔄 Filtered favorites: ${prevFavorites.length} → ${filteredFavorites.length}`);
-        return filteredFavorites;
-      }
-      
-      return prevFavorites;
-    });
-  }, [favoriteIds, favorites.length]); // Add favorites.length as dependency
-  */
 
   if (!isAuthenticated) {
     return (

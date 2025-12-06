@@ -40,10 +40,6 @@ const MovieDetailPageContent = () => {
   const fetchCredits = async (movieId: number, isMovie: boolean = true) => {
     try {
       setCreditsLoading(true);
-      console.log(
-        `Fetching credits for ${isMovie ? "movie" : "tv"} ID: ${movieId}`
-      );
-
       const creditsResponse = await apiService.getMovieCredits(movieId);
       if (creditsResponse.success && creditsResponse.data) {
         const credits = creditsResponse.data;
@@ -84,12 +80,6 @@ const MovieDetailPageContent = () => {
           };
         });
 
-        console.log("Credits loaded successfully:", {
-          director,
-          country,
-          castCount: credits.cast?.length || 0,
-          crewCount: credits.crew?.length || 0,
-        });
       }
     } catch (error) {
       console.error("Error fetching credits:", error);
@@ -105,10 +95,6 @@ const MovieDetailPageContent = () => {
         setLoading(true);
         setError(null);
 
-        // Backend now uses TMDB ID by default, so use unified content detection
-        console.log(
-          `Fetching content for ID ${movieId} (now treated as TMDB ID by backend)`
-        );
         const contentResult = await apiService.getContentById(
           parseInt(movieId)
         );

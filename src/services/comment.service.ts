@@ -139,8 +139,6 @@ class CommentService {
   }
 
   async createComment(data: CreateCommentDto): Promise<Comment> {
-    console.log("Creating comment with data:", data);
-
     const response = await fetch(`${API_BASE_URL}/api/comments`, {
       method: "POST",
       headers: this.getAuthHeaders(),
@@ -154,11 +152,8 @@ class CommentService {
       error?: string;
     }>(response);
 
-    console.log("Create comment API response:", result);
-
     // Handle the backend response structure
     if (result.success && result.data) {
-      console.log("Comment created successfully:", result.data);
       return this.normalizeComment(result.data);
     }
 
@@ -172,7 +167,6 @@ class CommentService {
     // This handles older API format where response is directly the comment
     const resultAsComment = result as unknown as Comment;
     if (resultAsComment.id) {
-      console.log("Using fallback format, comment:", result);
       return resultAsComment;
     }
 

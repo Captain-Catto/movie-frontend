@@ -118,7 +118,6 @@ export default function MovieUploader() {
       } else {
         setError(result.message || "Upload failed");
         if (result.data?.instructions) {
-          console.log("AWS Setup Instructions:", result.data.instructions);
         }
       }
     } catch (err) {
@@ -203,8 +202,6 @@ export default function MovieUploader() {
           <VideoPlayer
             src={uploadedMovie.streamUrl}
             title={uploadedMovie.title}
-            onTimeUpdate={(time) => console.log("Watching time:", time)}
-            onEnded={() => console.log("Movie ended")}
           />
         </div>
       </div>

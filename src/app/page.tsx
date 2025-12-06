@@ -89,7 +89,6 @@ export default function Home() {
             limit: responsiveLimit,
             language: "en-US",
           });
-          console.log("📦 Now Playing Response:", res);
           if (res.success && res.data) {
             setNowPlayingMovies(mapMoviesToFrontend(res.data));
           }
@@ -116,7 +115,6 @@ export default function Home() {
             limit: responsiveLimit,
             language: "en-US",
           });
-          console.log("📦 Popular Response:", res);
           if (res.success && res.data) {
             setPopularMovies(mapMoviesToFrontend(res.data));
           }
@@ -143,7 +141,6 @@ export default function Home() {
             limit: responsiveLimit,
             language: "en-US",
           });
-          console.log("📦 Top Rated Response:", res);
           if (res.success && res.data) {
             setTopRatedMovies(mapMoviesToFrontend(res.data));
           }
@@ -170,7 +167,6 @@ export default function Home() {
             limit: responsiveLimit,
             language: "en-US",
           });
-          console.log("📦 Upcoming Response:", res);
           if (res.success && res.data) {
             setUpcomingMovies(mapMoviesToFrontend(res.data));
           }
