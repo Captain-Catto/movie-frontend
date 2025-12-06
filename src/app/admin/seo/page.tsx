@@ -7,6 +7,17 @@ import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
 import { useToastRedux } from "@/hooks/useToastRedux";
 
+const PAGE_TYPE_OPTIONS = [
+  "home",
+  "movies",
+  "tv_series",
+  "trending",
+  "browse",
+  "favorites",
+  "people",
+  "custom",
+];
+
 interface SeoStats {
   totalPages: number;
   activePages: number;
@@ -156,13 +167,24 @@ export default function AdminSeoPage() {
     try {
       const token = localStorage.getItem("authToken");
       setErrorMessage(null);
+
+      if (!PAGE_TYPE_OPTIONS.includes(formData.pageType)) {
+        const msg = "Page type must be one of the predefined options.";
+        setErrorMessage(msg);
+        showError("Invalid page type", msg);
+        return;
+      }
+
+      const normalizedKeywords = formData.keywords
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean)
+        .join(", ");
+
       const payload = {
         ...formData,
         pageSlug: formData.path || null,
-        keywords: formData.keywords
-          .split(",")
-          .map((k) => k.trim())
-          .filter((k) => k),
+        keywords: normalizedKeywords,
       };
 
       const url = editModal.isNew
@@ -567,15 +589,24 @@ export default function AdminSeoPage() {
                     <label className="block text-sm font-medium text-white">
                       Page Type
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={formData.pageType}
                       onChange={(e) =>
                         setFormData({ ...formData, pageType: e.target.value })
                       }
-                      className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2"
-                      placeholder="e.g., movie, tv, home"
-                    />
+                      className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
+                    >
+                      <option value="">Select page type</option>
+                      {PAGE_TYPE_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Must match backend enum: home, movies, tv_series, trending,
+                      browse, favorites, people, custom.
+                    </p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-white">
