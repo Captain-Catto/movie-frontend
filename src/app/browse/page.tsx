@@ -56,9 +56,6 @@ function BrowsePageContent() {
       if (filters.sortBy && filters.sortBy !== "popularity") {
         params.set("sortBy", filters.sortBy);
       }
-      if (filters.movieType) {
-        params.set("movieType", filters.movieType);
-      }
       if (type) {
         params.set("type", type);
       }
@@ -97,8 +94,12 @@ function BrowsePageContent() {
         if (filters.countries?.length) {
           queryParams.countries = filters.countries.join(",");
         }
-        if (filters.genres?.length)
-          queryParams.genre = filters.genres.join(","); // ✅ Fix: use "genre" to match MovieQuery interface
+        if (filters.genres?.length) {
+          // Backend expects numeric genre ids; allow either ids or names from the URL
+          // If a value is numeric string, keep it; otherwise leave as-is so backend can attempt a match
+          const normalizedGenres = filters.genres.map((g) => g.trim());
+          queryParams.genre = normalizedGenres.join(",");
+        }
         const targetYear =
           filters.customYear ||
           (filters.years?.length ? filters.years[0] : undefined);

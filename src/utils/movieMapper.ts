@@ -92,11 +92,15 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
       : FALLBACK_POSTER);
 
   // Map genres from IDs to English names (convert strings to numbers)
-  const genres = genreIds
+  const normalizedGenreIds = genreIds
     ? genreIds
-        .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[Number(id)])
-        .filter(Boolean)
+        .map((id: string | number) => Number(id))
+        .filter((id) => !Number.isNaN(id))
     : [];
+
+  const genres = normalizedGenreIds
+    .map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
+    .filter(Boolean);
 
   // Get primary genre for the genre field
   const primaryGenre = genres[0] || "Uncategorized";
@@ -152,6 +156,7 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
     year,
     rating,
     genre: primaryGenre,
+    genreIds: normalizedGenreIds,
     genres,
     description: movie.overview || "",
     backgroundImage: backdropUrl,

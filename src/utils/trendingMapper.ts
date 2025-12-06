@@ -34,11 +34,12 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
   const genreSource = Array.isArray(trending.genreIds)
     ? trending.genreIds
     : [];
+  const genreIds = genreSource
+    .map((id: string | number) => Number(id))
+    .filter((id) => !Number.isNaN(id));
 
   // Map genres from IDs to English names
-  const genres = genreSource
-    .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[Number(id)])
-    .filter(Boolean);
+  const genres = genreIds.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id]).filter(Boolean);
 
   // Get primary genre for the genre field
   const primaryGenre = genres[0] || "Uncategorized";
@@ -70,6 +71,7 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
     href,
     year,
     genre: primaryGenre,
+    genreIds,
     rating,
     genres,
     description: trending.overview,

@@ -200,6 +200,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                         <GenreBadge
                           key={genreIndex}
                           genre={genre}
+                          genreId={movie.genreIds?.[genreIndex]}
                           contentType={contentType}
                           variant="hero"
                         />

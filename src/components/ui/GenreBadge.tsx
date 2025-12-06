@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 
 interface GenreBadgeProps {
   /** Genre name to display */
@@ -24,9 +25,19 @@ export default function GenreBadge({
   variant = "default",
   className = "",
 }: GenreBadgeProps) {
-  // Construct proper browse URL
+  // Prefer numeric genre id; if not provided, attempt lookup by name
+  const resolvedId =
+    genreId ??
+    (() => {
+      const entry = Object.entries(TMDB_ENGLISH_GENRE_MAP).find(
+        ([, name]) => name?.toLowerCase() === genre.toLowerCase()
+      );
+      return entry ? Number(entry[0]) : undefined;
+    })();
+
+  // Construct browse URL with numeric id when possible
   const browseUrl = `/browse?type=${contentType}&genres=${
-    genreId || encodeURIComponent(genre)
+    resolvedId ?? encodeURIComponent(genre)
   }`;
 
   // Variant: Hero (for HeroSection)

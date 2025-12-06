@@ -24,6 +24,7 @@ export interface MovieCardData {
   rating?: number;
   genre?: string;
   genres?: string[];
+  genreIds?: number[];
   duration?: string;
   description?: string;
   backgroundImage?: string;

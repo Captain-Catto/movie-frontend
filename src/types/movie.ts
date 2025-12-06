@@ -93,6 +93,7 @@ export interface FrontendMovie {
   episode?: string;
   genre: string;
   genres: string[];
+  genreIds?: number[];
   description?: string;
   backgroundImage?: string;
   posterImage?: string;
