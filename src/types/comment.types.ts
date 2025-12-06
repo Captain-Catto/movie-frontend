@@ -152,7 +152,7 @@ export interface CommentItemProps {
   depth?: number;
   maxDepth?: number;
   onReply?: (commentId: number) => void;
-  onEdit?: (commentId: number) => void;
+  onEdit?: (commentId: number, content: string) => Promise<Comment | void> | void;
   onDelete?: (commentId: number) => void;
   onLike?: (commentId: number) => void;
   onDislike?: (commentId: number) => void;
@@ -191,6 +191,8 @@ export interface UseCommentsOptions {
   sortBy?: "newest" | "oldest" | "likes";
   limit?: number;
   autoRefresh?: boolean;
+  enableRealtime?: boolean;
+  realtimeIntervalMs?: number;
 }
 
 export interface UseCommentsReturn {

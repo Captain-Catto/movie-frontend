@@ -28,6 +28,7 @@ export function CommentSection({
     loadMore,
     refresh,
     addComment,
+    updateComment,
     deleteComment,
     likeComment,
     dislikeComment,
@@ -57,8 +58,9 @@ export function CommentSection({
   };
 
   // Handle edit action
-  const handleEdit = (commentId: number) => {
-    console.log("Edit comment:", commentId);
+  const handleEdit = async (commentId: number, content: string) => {
+    const updated = await updateComment(commentId, { content });
+    return updated;
   };
 
   // Handle delete action - use hook's deleteComment

@@ -79,9 +79,6 @@ class CommentService {
     let url: string;
     const queryParams = new URLSearchParams();
 
-    // Add a dummy userId for testing (since no auth)
-    queryParams.append("userId", "1");
-
     // Build query params (excluding movieId/tvSeriesId as they go in the path)
     Object.entries(params).forEach(([key, value]) => {
       if (
@@ -257,9 +254,6 @@ class CommentService {
   ): Promise<CommentResponse> {
     const queryParams = new URLSearchParams();
 
-    // Add a dummy userId for testing (since no auth)
-    queryParams.append("userId", "1");
-
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -432,11 +426,15 @@ class CommentService {
     return { isAllowed: true };
   }
 
-  // Real-time updates (WebSocket will be implemented in Phase 4)
-  subscribeToComments(): () => void {
-    // Placeholder for WebSocket implementation
-    console.log("WebSocket subscription will be implemented in Phase 4");
-    return () => {};
+  // Real-time updates (polling placeholder until WebSocket is available)
+  subscribeToComments(onChange?: () => void, intervalMs: number = 15000): () => void {
+    if (!onChange) return () => {};
+
+    const timer = setInterval(() => {
+      onChange();
+    }, intervalMs);
+
+    return () => clearInterval(timer);
   }
 
   // Search users for mentions

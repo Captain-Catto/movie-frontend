@@ -10,6 +10,13 @@ interface NotificationData {
   message: string;
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: Date;
+  metadata?: {
+    movieId?: number;
+    tvId?: number;
+    commentId?: number;
+    parentId?: number;
+    [key: string]: unknown;
+  };
 }
 
 interface UseNotificationSocketReturn {
@@ -95,7 +102,11 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
     });
 
     newSocket.on("notification:new", (notification: NotificationData) => {
-      setLatestNotification(notification);
+      const createdAt =
+        notification?.createdAt instanceof Date
+          ? notification.createdAt
+          : new Date(notification?.createdAt || Date.now());
+      setLatestNotification({ ...notification, createdAt });
     });
 
     newSocket.on("notification:unread-count", (data: { count: number }) => {

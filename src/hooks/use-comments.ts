@@ -25,6 +25,8 @@ export function useComments(
     sortBy = "newest",
     limit = 10,
     autoRefresh = false,
+    enableRealtime = true,
+    realtimeIntervalMs = 15000,
   } = options;
 
   const [comments, setComments] = useState<Comment[]>([]);
@@ -312,6 +314,20 @@ export function useComments(
 
     return () => clearInterval(interval);
   }, [autoRefresh, refresh]);
+
+  // Lightweight polling subscription until WebSocket is available
+  useEffect(() => {
+    if (!enableRealtime || autoRefresh) return;
+
+    const unsubscribe = commentService.subscribeToComments(
+      refresh,
+      realtimeIntervalMs
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, [enableRealtime, autoRefresh, movieId, tvSeriesId, refresh, realtimeIntervalMs]);
 
   return {
     comments,

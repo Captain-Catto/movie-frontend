@@ -37,7 +37,7 @@ const MovieDetailPageContent = () => {
   const [contentType, setContentType] = useState<"movie" | "tv" | null>(null);
 
   // Function to fetch credits after basic movie data is loaded
-  const fetchCredits = async (movieId: number, isMovie: boolean = true) => {
+  const fetchCredits = async (movieId: number) => {
     try {
       setCreditsLoading(true);
       const creditsResponse = await apiService.getMovieCredits(movieId);
@@ -167,7 +167,7 @@ const MovieDetailPageContent = () => {
             });
 
             // Fetch credits after setting basic data
-            fetchCredits(movieContent.tmdbId || movieContent.id, true);
+            fetchCredits(movieContent.tmdbId || movieContent.id);
           } else {
             const tvContent = content as TVSeries;
             // Transform Backend TV Series API data

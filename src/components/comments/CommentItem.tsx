@@ -34,13 +34,18 @@ export function CommentItem({
   const [replies, setReplies] = useState<CommentType[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
-  const [localReplyCount, setLocalReplyCount] = useState(comment.replyCount);
+  const [localReplyCount, setLocalReplyCount] = useState(currentComment.replyCount);
   const [isEditing, setIsEditing] = useState(false);
 
   const { user } = useAppSelector((state) => state.auth);
-  const isOwner = user?.id === comment.userId;
+  const isOwner = user?.id === currentComment.userId;
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const canModerate = isAdmin;
+
+  useEffect(() => {
+    setCurrentComment(comment);
+    setLocalReplyCount(comment.replyCount);
+  }, [comment]);
 
   // Format timestamp to Vietnamese
   const formatTimestamp = (dateString: string) => {
@@ -87,12 +92,11 @@ export function CommentItem({
 
       setLoadingReplies(true);
       try {
-        const response = await commentService.getReplies(comment.id, {
+        const response = await commentService.getReplies(currentComment.id, {
           page: 1,
           limit: 10,
         });
 
-        console.log(`📥 [CommentItem depth=${depth}] Loaded replies for comment ${comment.id}:`, response.comments);
         setReplies(response.comments || []);
         setRepliesLoaded(true);
       } catch (error) {
@@ -103,11 +107,11 @@ export function CommentItem({
     };
 
     // Auto-expand and load if comment has replies (showing first few by default)
-    if (comment.replyCount > 0 && !repliesLoaded && depth < maxDepth) {
+    if (currentComment.replyCount > 0 && !repliesLoaded && depth < maxDepth) {
       loadReplies();
       setShowReplies(true);
     }
-  }, [comment.replyCount, comment.id, depth, maxDepth, repliesLoaded]);
+  }, [currentComment.replyCount, currentComment.id, depth, maxDepth, repliesLoaded]);
 
   // Load replies on demand
   const loadReplies = async () => {
@@ -115,12 +119,11 @@ export function CommentItem({
 
     setLoadingReplies(true);
     try {
-      const response = await commentService.getReplies(comment.id, {
+      const response = await commentService.getReplies(currentComment.id, {
         page: 1,
         limit: 10,
       });
 
-      console.log(`📥 [CommentItem depth=${depth}] Loaded replies for comment ${comment.id}:`, response.comments);
       setReplies(response.comments || []);
       setRepliesLoaded(true);
     } catch (error) {
@@ -161,22 +164,59 @@ export function CommentItem({
     }
   };
 
-  // Handle like for nested replies (update local state)
-  const handleNestedLike = async (replyId: number) => {
-    console.log(`🔵 [CommentItem depth=${depth}] handleNestedLike called for reply:`, replyId);
+  // Handle edit submit
+  const handleEditSubmit = async (commentData: CreateCommentDto) => {
+    const trimmed = commentData.content?.trim() || "";
+    if (!trimmed) {
+      return currentComment;
+    }
 
     try {
+      let updated: CommentType | undefined;
+
+      if (onEdit) {
+        updated = (await onEdit(currentComment.id, trimmed)) as
+          | CommentType
+          | undefined;
+      } else {
+        updated = await commentService.updateComment(currentComment.id, {
+          content: trimmed,
+        });
+      }
+
+      const mergedComment = {
+        ...currentComment,
+        ...(updated || {}),
+        content: trimmed,
+        isEdited: true,
+        updatedAt: updated?.updatedAt || new Date().toISOString(),
+      };
+
+      setCurrentComment(mergedComment);
+      setIsEditing(false);
+      return mergedComment;
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      throw error;
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  // Handle like for nested replies (update local state)
+  const handleNestedLike = async (replyId: number) => {
+    try {
       // Check if this reply is in our direct children
-      const isDirectChild = replies.some(r => r.id === replyId);
+      const isDirectChild = replies.some((r) => r.id === replyId);
 
       if (isDirectChild) {
         // This is a direct child - call API and update our local state
-        console.log(`🔵 [CommentItem depth=${depth}] This is a direct child, calling API...`);
         const result = await commentService.likeComment(replyId);
-        console.log(`🔵 [CommentItem depth=${depth}] Like result:`, result);
 
         setReplies((prevReplies) => {
-          const updated = prevReplies.map((reply) =>
+          return prevReplies.map((reply) =>
             reply.id === replyId
               ? {
                   ...reply,
@@ -186,20 +226,16 @@ export function CommentItem({
                 }
               : reply
           );
-          console.log(`🔵 [CommentItem depth=${depth}] Updated local replies state`);
-          return updated;
         });
 
         // Also propagate to parent for global state management
         if (onLike) {
-          console.log(`🔵 [CommentItem depth=${depth}] Propagating to parent...`);
-          onLike(replyId);
+          await onLike(replyId);
         }
       } else {
         // Not a direct child - just propagate to parent
-        console.log(`🔵 [CommentItem depth=${depth}] Not a direct child, propagating to parent...`);
         if (onLike) {
-          onLike(replyId);
+          await onLike(replyId);
         }
       }
     } catch (error) {
@@ -209,20 +245,16 @@ export function CommentItem({
 
   // Handle dislike for nested replies (update local state)
   const handleNestedDislike = async (replyId: number) => {
-    console.log(`🔴 [CommentItem depth=${depth}] handleNestedDislike called for reply:`, replyId);
-
     try {
       // Check if this reply is in our direct children
-      const isDirectChild = replies.some(r => r.id === replyId);
+      const isDirectChild = replies.some((r) => r.id === replyId);
 
       if (isDirectChild) {
         // This is a direct child - call API and update our local state
-        console.log(`🔴 [CommentItem depth=${depth}] This is a direct child, calling API...`);
         const result = await commentService.dislikeComment(replyId);
-        console.log(`🔴 [CommentItem depth=${depth}] Dislike result:`, result);
 
         setReplies((prevReplies) => {
-          const updated = prevReplies.map((reply) =>
+          return prevReplies.map((reply) =>
             reply.id === replyId
               ? {
                   ...reply,
@@ -232,21 +264,15 @@ export function CommentItem({
                 }
               : reply
           );
-          console.log(`🔴 [CommentItem depth=${depth}] Updated local replies state`);
-          return updated;
         });
 
         // Also propagate to parent for global state management
         if (onDislike) {
-          console.log(`🔴 [CommentItem depth=${depth}] Propagating to parent...`);
-          onDislike(replyId);
+          await onDislike(replyId);
         }
-      } else {
+      } else if (onDislike) {
         // Not a direct child - just propagate to parent
-        console.log(`🔴 [CommentItem depth=${depth}] Not a direct child, propagating to parent...`);
-        if (onDislike) {
-          onDislike(replyId);
-        }
+        await onDislike(replyId);
       }
     } catch (error) {
       console.error(`❌ [CommentItem depth=${depth}] Failed to dislike nested reply:`, error);
@@ -255,40 +281,29 @@ export function CommentItem({
 
   // Handle delete for nested replies (update local state)
   const handleNestedDelete = async (replyId: number) => {
-    console.log(`🗑️ [CommentItem depth=${depth}] handleNestedDelete called for reply:`, replyId);
-
     try {
       // Check if this reply is in our direct children
-      const isDirectChild = replies.some(r => r.id === replyId);
+      const isDirectChild = replies.some((r) => r.id === replyId);
 
       if (isDirectChild) {
         // This is a direct child - call API and update our local state
-        console.log(`🗑️ [CommentItem depth=${depth}] This is a direct child, calling API...`);
         await commentService.deleteComment(replyId);
-        console.log(`🗑️ [CommentItem depth=${depth}] Delete successful`);
 
         // Remove from local replies
         setReplies((prevReplies) => {
-          const filtered = prevReplies.filter((reply) => reply.id !== replyId);
-          console.log(`🗑️ [CommentItem depth=${depth}] Updated local replies state, removed reply ${replyId}`);
-          return filtered;
+          return prevReplies.filter((reply) => reply.id !== replyId);
         });
 
         // Decrease reply count
         setLocalReplyCount((prev) => Math.max(0, prev - 1));
-        console.log(`🗑️ [CommentItem depth=${depth}] Decreased reply count`);
 
         // Also propagate to parent for global state management
         if (onDelete) {
-          console.log(`🗑️ [CommentItem depth=${depth}] Propagating to parent...`);
-          onDelete(replyId);
+          await onDelete(replyId);
         }
-      } else {
+      } else if (onDelete) {
         // Not a direct child - just propagate to parent
-        console.log(`🗑️ [CommentItem depth=${depth}] Not a direct child, propagating to parent...`);
-        if (onDelete) {
-          onDelete(replyId);
-        }
+        await onDelete(replyId);
       }
     } catch (error) {
       console.error(`❌ [CommentItem depth=${depth}] Failed to delete nested reply:`, error);
@@ -298,14 +313,14 @@ export function CommentItem({
   // Handle like for this comment - delegate to parent (useComments hook)
   const handleSelfLike = async () => {
     if (onLike) {
-      await onLike(comment.id);
+      await onLike(currentComment.id);
     }
   };
 
   // Handle dislike for this comment - delegate to parent (useComments hook)
   const handleSelfDislike = async () => {
     if (onDislike) {
-      await onDislike(comment.id);
+      await onDislike(currentComment.id);
     }
   };
 
@@ -315,21 +330,21 @@ export function CommentItem({
     if (!confirmed) return;
 
     if (onDelete) {
-      await onDelete(comment.id);
+      await onDelete(currentComment.id);
     }
   };
 
   // Hidden comment
-  if (comment.isHidden && !canModerate) {
+  if (currentComment.isHidden && !canModerate) {
     return null;
   }
 
   return (
-    <div className="d-item flex gap-3 py-4" id={`cm-${comment.id}`}>
+    <div className="d-item flex gap-3 py-4" id={`cm-${currentComment.id}`}>
       <div className="user-avatar flex-shrink-0">
         <Image
-          src={comment.user?.image || "/images/avatars/pack2/03.jpg"}
-          alt={comment.user?.name || "User"}
+          src={currentComment.user?.image || "/images/avatars/pack2/03.jpg"}
+          alt={currentComment.user?.name || "User"}
           width={40}
           height={40}
           className="rounded-full object-cover"
@@ -341,7 +356,7 @@ export function CommentItem({
         <div className="comment-header flex items-center justify-between mb-2">
           <div className="user-name line-center gr-free flex items-center gap-2">
             <span className="text-white text-sm font-medium">
-              {comment.user?.name || "Anonymous"}
+              {currentComment.user?.name || "Anonymous"}
               {isAdmin && (
                 <i className="fa-solid fa-infinity text-primary ms-2 text-red-500"></i>
               )}
@@ -349,31 +364,47 @@ export function CommentItem({
           </div>
           <div className="ch-logs">
             <div className="c-time text-gray-400 text-xs">
-              {formatTimestamp(comment.createdAt)}
+              {formatTimestamp(currentComment.createdAt)}
+              {currentComment.isEdited && (
+                <span className="text-gray-500 ml-2">(Edited)</span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Comment Text */}
-        <div className="text">
-          <span className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-            {comment.content}
-          </span>
-          {/* Display mentions */}
-          {comment.mentions && comment.mentions.length > 0 && (
-            <div className="mentions-list flex flex-wrap gap-1 mt-2">
-              {comment.mentions.map((mention) => (
-                <span
-                  key={mention.id}
-                  className="mention-badge inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs"
-                >
-                  <i className="fa-solid fa-at text-xs"></i>
-                  {mention.name}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Comment Text / Edit Form */}
+        {isEditing ? (
+          <div className="text">
+            <CommentForm
+              movieId={currentComment.movieId}
+              tvSeriesId={currentComment.tvSeriesId || currentComment.tvId}
+              editingComment={currentComment}
+              onSubmit={handleEditSubmit}
+              onCancel={handleCancelEdit}
+              placeholder="Chỉnh sửa bình luận"
+            />
+          </div>
+        ) : (
+          <div className="text">
+            <span className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+              {currentComment.content}
+            </span>
+            {/* Display mentions */}
+            {currentComment.mentions && currentComment.mentions.length > 0 && (
+              <div className="mentions-list flex flex-wrap gap-1 mt-2">
+                {currentComment.mentions.map((mention) => (
+                  <span
+                    key={mention.id}
+                    className="mention-badge inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs"
+                  >
+                    <i className="fa-solid fa-at text-xs"></i>
+                    {mention.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Comment Bottom - Actions */}
         <div className="comment-bottom line-center d-flex mt-3 flex items-center gap-2">
@@ -382,37 +413,37 @@ export function CommentItem({
             <button
               type="button"
               className={`item item-up line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
-                comment.userLike === true
+                currentComment.userLike === true
                   ? "bg-blue-600 text-white"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
               onClick={handleSelfLike}
             >
-              {comment.userLike === true ? (
+              {currentComment.userLike === true ? (
                 <BiSolidLike className="w-4 h-4" />
               ) : (
                 <BiLike className="w-4 h-4" />
               )}
-              {comment.likesCount > 0 && (
-                <span className="text-xs">{comment.likesCount}</span>
+              {currentComment.likesCount > 0 && (
+                <span className="text-xs">{currentComment.likesCount}</span>
               )}
             </button>
             <button
               type="button"
               className={`item item-down line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
-                comment.userLike === false
+                currentComment.userLike === false
                   ? "bg-red-600 text-white"
                   : "bg-gray-700 text-gray-300 hover:bg-gray-600"
               }`}
               onClick={handleSelfDislike}
             >
-              {comment.userLike === false ? (
+              {currentComment.userLike === false ? (
                 <BiSolidDislike className="w-4 h-4" />
               ) : (
                 <BiDislike className="w-4 h-4" />
               )}
-              {comment.dislikesCount > 0 && (
-                <span className="text-xs">{comment.dislikesCount}</span>
+              {currentComment.dislikesCount > 0 && (
+                <span className="text-xs">{currentComment.dislikesCount}</span>
               )}
             </button>
           </div>
@@ -431,13 +462,24 @@ export function CommentItem({
 
           {/* More button - Edit/Delete */}
           {(isOwner || canModerate) && (
-            <div className="dropdown">
+            <div className="flex items-center gap-2">
+              {isOwner && (
+                <button
+                  type="button"
+                  className="btn btn-xs btn-basic px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
+                  onClick={() => setIsEditing(true)}
+                  disabled={isEditing}
+                >
+                  <i className="fa-solid fa-pen text-xs"></i>
+                  <span className="text-xs">Edit</span>
+                </button>
+              )}
               <button
                 type="button"
                 className="btn btn-xs btn-basic btn-menu px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
                 onClick={handleSelfDelete}
               >
-                <i className="fa-solid fa-ellipsis text-xs"></i>
+                <i className="fa-solid fa-trash text-xs"></i>
                 <span className="text-xs">Delete</span>
               </button>
             </div>
@@ -448,10 +490,10 @@ export function CommentItem({
         {showReplyForm && (
           <div className="mt-4">
             <CommentForm
-              movieId={comment.movieId}
-              tvSeriesId={comment.tvSeriesId || comment.tvId}
-              parentId={comment.id}
-              placeholder={`Reply to ${comment.user?.name || ""}...`}
+              movieId={currentComment.movieId}
+              tvSeriesId={currentComment.tvSeriesId || currentComment.tvId}
+              parentId={currentComment.id}
+              placeholder={`Reply to ${currentComment.user?.name || ""}...`}
               onSubmit={handleReplySubmit}
               onCancel={() => setShowReplyForm(false)}
             />
@@ -502,3 +544,4 @@ export function CommentItem({
 }
 
 export default CommentItem;
+

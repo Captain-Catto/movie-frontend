@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
 import { formatRelativeTime } from "@/utils/dateFormatter";
+import { useRouter } from "next/navigation";
 
 interface Notification {
   id: number;
@@ -17,6 +18,13 @@ interface Notification {
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: Date;
   isRead: boolean;
+  metadata?: {
+    movieId?: number;
+    tvId?: number;
+    commentId?: number;
+    parentId?: number;
+    [key: string]: unknown;
+  };
 }
 
 interface NotificationDropdownProps {
@@ -28,6 +36,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const {
     unreadCount,
@@ -59,6 +68,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
             type: string;
             createdAt: string;
             isRead: boolean;
+            metadata?: Notification["metadata"];
           }
           const userNotifications = response.data.data.notifications.map(
             (notif: RawNotification) => ({
@@ -68,6 +78,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
               type: notif.type,
               createdAt: new Date(notif.createdAt),
               isRead: notif.isRead,
+              metadata: notif.metadata,
             })
           );
           setNotifications(userNotifications);
@@ -98,6 +109,24 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         notif.id === notificationId ? { ...notif, isRead: true } : notif
       )
     );
+  };
+
+  const resolveTargetUrl = (
+    metadata?: Notification["metadata"]
+  ): string | null => {
+    if (!metadata) return null;
+    if (metadata.movieId) return `/watch/movie-${metadata.movieId}`;
+    if (metadata.tvId) return `/watch/tv-${metadata.tvId}`;
+    return null;
+  };
+
+  const handleNotificationClick = (notification: Notification) => {
+    const targetUrl = resolveTargetUrl(notification.metadata);
+    if (targetUrl) {
+      handleMarkAsRead(notification.id);
+      router.push(targetUrl);
+      setIsOpen(false);
+    }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -205,6 +234,14 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                     "p-4 border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50 transition-colors",
                     !notification.isRead && "bg-blue-900/20"
                   )}
+                  onClick={() => handleNotificationClick(notification)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleNotificationClick(notification);
+                    }
+                  }}
                 >
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-1">
