@@ -49,9 +49,13 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
     : new Date().getFullYear();
 
   // Format rating
+  const ratingRaw =
+    typeof trending.voteAverage === "string"
+      ? parseFloat(trending.voteAverage)
+      : trending.voteAverage;
   const rating =
-    typeof trending.voteAverage === "number"
-      ? Math.round(trending.voteAverage * 10) / 10
+    typeof ratingRaw === "number" && Number.isFinite(ratingRaw)
+      ? Math.round(ratingRaw * 10) / 10
       : 0;
 
   const mediaType = detectContentType(trending as Record<string, unknown>);
