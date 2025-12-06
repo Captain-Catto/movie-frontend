@@ -83,20 +83,20 @@ function TrendingPageContent() {
   }, [currentPage]); // ✅ Add currentPage dependency
 
   const handleFilterChange = (filters: FilterOptions) => {
-    // Chuyển sang trang browse với filters
+    // Chuyển sang trang browse với filters, ưu tiên movieType người dùng chọn
     const params = new URLSearchParams();
     if (filters.countries?.length)
       params.set("countries", filters.countries.join(","));
     if (filters.genres?.length) params.set("genres", filters.genres.join(","));
     if (filters.years?.length) params.set("years", filters.years.join(","));
-    if (filters.movieType) params.set("movieType", filters.movieType);
+    const targetType = filters.movieType || "trending";
     if (filters.ratings?.length)
       params.set("ratings", filters.ratings.join(","));
     if (filters.versions?.length)
       params.set("versions", filters.versions.join(","));
     if (filters.sortBy && filters.sortBy !== "latest")
       params.set("sortBy", filters.sortBy);
-    params.set("type", "trending");
+    params.set("type", targetType);
 
     router.push(`/browse?${params.toString()}`);
   };

@@ -59,8 +59,6 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       return;
     }
 
-    console.log("🔗 Creating WebSocket connection...");
-
     const API_BASE_URL =
       process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
@@ -77,13 +75,11 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
     socketRef.current = newSocket;
 
     newSocket.on("connect", () => {
-      console.log("✅ Connected to notification WebSocket");
       setIsConnected(true);
       setSocket(newSocket);
     });
 
-    newSocket.on("disconnect", (reason) => {
-      console.log("❌ Disconnected from notification WebSocket:", reason);
+    newSocket.on("disconnect", () => {
       setIsConnected(false);
     });
 
@@ -99,18 +95,15 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
     });
 
     newSocket.on("notification:new", (notification: NotificationData) => {
-      console.log("🔔 New notification:", notification);
       setLatestNotification(notification);
     });
 
     newSocket.on("notification:unread-count", (data: { count: number }) => {
-      console.log("📊 Unread count:", data.count);
       setUnreadCount(data.count);
     });
 
     // Cleanup function
     return () => {
-      console.log("🧹 Cleaning up WebSocket connection");
       newSocket.disconnect();
       socketRef.current = null;
       setSocket(null);

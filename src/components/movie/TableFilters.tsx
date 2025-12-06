@@ -59,6 +59,7 @@ const TableFilters = ({
     { value: "", label: "All" },
     { value: "movie", label: "Movie" },
     { value: "tv", label: "TV Series" },
+    { value: "trending", label: "Trending" },
   ];
 
   // Dynamically get genres based on selected movie type

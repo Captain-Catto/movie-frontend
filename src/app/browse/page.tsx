@@ -136,7 +136,20 @@ function BrowsePageContent() {
           const movieData = Array.isArray(response.data)
             ? response.data
             : (response.data as { data?: unknown[] }).data || [];
-          const frontendMovies = mapMoviesToFrontend(movieData as never[]);
+          let frontendMovies = mapMoviesToFrontend(movieData as never[]);
+
+          // Client-side genre filter for trending (backend doesn't support genre filter)
+          if (type === "trending" && filters.genres?.length) {
+            const genreFilterIds = filters.genres
+              .map((g) => Number(g))
+              .filter((n) => Number.isFinite(n));
+            if (genreFilterIds.length) {
+              frontendMovies = frontendMovies.filter((movie) => {
+                if (!movie.genreIds || movie.genreIds.length === 0) return false;
+                return movie.genreIds.some((id) => genreFilterIds.includes(id));
+              });
+            }
+          }
           // Use frontend movies directly since they already match MovieCardData interface
           setMovies(frontendMovies as MovieCardData[]);
 

@@ -124,7 +124,6 @@ export default function AdminNotificationsPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("📦 Admin notifications response:", data);
 
         // Ensure data is always an array
         const notificationsArray: unknown[] = Array.isArray(

@@ -44,7 +44,6 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     "center" | "left" | "right"
   >("center");
   const { width: viewportWidth } = useWindowWidth();
-  console.log("Rendering MovieCard for:", movie);
 
   // Detect content type from href to create proper fallback
   const isTVSeries = movie.href?.includes("/tv/");
@@ -91,7 +90,6 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
     // Create proper watch URL - tmdbId is guaranteed to exist since all data comes from TMDB
     const watchUrl = `/watch/${contentType}-${movie.tmdbId}`;
-    console.log("Navigating to watch page:", watchUrl);
     router.push(watchUrl);
   };
 

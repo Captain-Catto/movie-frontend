@@ -27,14 +27,6 @@ const MoviesGrid = ({
 }: MoviesGridProps) => {
   const { isLoading } = useLoading({ delay: 800 });
 
-  // Debug log for pagination props
-  console.log("🔍 MoviesGrid pagination props:", {
-    currentPage,
-    totalPages,
-    hasOnPageChange: !!onPageChange,
-    moviesCount: movies.length,
-  });
-
   return (
     <div className={`mx-auto px-4 py-8 ${className}`}>
       <div className="cards-grid-wrapper">

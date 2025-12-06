@@ -109,10 +109,7 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   const rating = voteAverage ? Math.round(voteAverage * 10) / 10 : 0;
 
   const contentType = detectContentType(movie as Record<string, unknown>);
-  const mediaType = contentType;
   const isTVSeries = contentType === "tv";
-  const hasFirstAirDate = Boolean(firstAirDate);
-  const hasReleaseDate = Boolean(releaseDate);
 
   const contentTypePrefix = isTVSeries ? "tv" : "movie";
   const href = `/${contentTypePrefix}/${finalTmdbId}`;
@@ -125,25 +122,6 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   const year = displayDate
     ? new Date(displayDate).getFullYear()
     : new Date().getFullYear();
-
-  // Debug log to help diagnose issues
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[movieMapper] ${title}:`, {
-      tmdbId: finalTmdbId,
-      mediaType,
-      hasFirstAirDate,
-      hasReleaseDate,
-      isTVSeries,
-      href,
-      contentTypePrefix,
-      raw: {
-        firstAirDate: movie.firstAirDate,
-        first_air_date: movie.first_air_date,
-        releaseDate: movie.releaseDate,
-        release_date: movie.release_date
-      }
-    });
-  }
 
   return {
     id: finalTmdbId.toString(),

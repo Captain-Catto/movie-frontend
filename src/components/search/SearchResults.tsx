@@ -20,8 +20,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onLoadMore,
   onClose,
 }) => {
-  console.log("SearchResults received:", { results, isLoading }); // Debug log
-
   // Ensure results is always an array
   const safeResults = Array.isArray(results) ? results : [];
   // Loading skeleton

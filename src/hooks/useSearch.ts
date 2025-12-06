@@ -47,8 +47,6 @@ export const useSearch = (): UseSearchReturn => {
         );
         const data = await response.json();
 
-        console.log("Search API response:", data); // Debug log
-
         if (data.success && data.data) {
           // Handle nested data structure from backend
           const responseData = data.data.data || data.data || [];

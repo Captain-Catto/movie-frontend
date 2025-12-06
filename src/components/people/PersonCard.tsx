@@ -13,15 +13,10 @@ interface PersonCardProps {
 }
 
 const PersonCard = ({ person }: PersonCardProps) => {
-  // Debug: Log person data
-  console.log("PersonCard received person:", person);
-
   const getProfileImage = () => {
     const imageUrl = person.profile_path
       ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${person.profile_path}`
       : FALLBACK_PROFILE;
-
-    console.log("Profile image URL for", person.name, ":", imageUrl);
     return imageUrl;
   };
 
@@ -57,9 +52,6 @@ const PersonCard = ({ person }: PersonCardProps) => {
                 getProfileImage()
               );
               e.currentTarget.src = FALLBACK_PROFILE;
-            }}
-            onLoad={() => {
-              console.log("Successfully loaded image for:", person.name);
             }}
           />
         </div>

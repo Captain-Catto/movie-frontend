@@ -37,12 +37,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     markAllAsRead,
   } = useNotificationSocket();
 
-  // Debug logging
-  useEffect(() => {
-    console.log("🔔 NotificationDropdown - unreadCount:", unreadCount);
-    console.log("🔗 NotificationDropdown - isConnected:", isConnected);
-  }, [unreadCount, isConnected]);
-
   // Close dropdown when clicking outside
   useClickOutside(dropdownRef, () => setIsOpen(false));
 
@@ -113,7 +107,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     }
 
     setIsMarkingAllAsRead(true);
-    console.log("📝 Marking all notifications as read...");
 
     try {
       markAllAsRead();
@@ -121,7 +114,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
       setNotifications((prev) =>
         prev.map((notif) => ({ ...notif, isRead: true }))
       );
-      console.log("✅ All notifications marked as read");
     } catch (error) {
       console.error("❌ Error marking all as read:", error);
     } finally {

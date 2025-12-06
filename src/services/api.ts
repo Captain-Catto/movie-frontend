@@ -57,7 +57,6 @@ class ApiService {
     options?: RequestInit
   ): Promise<T> {
     try {
-      console.log("🌐 Making API request:", url);
       const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
@@ -66,25 +65,16 @@ class ApiService {
         ...options,
       });
 
-      console.log(
-        "📡 API response status:",
-        response.status,
-        response.statusText
-      );
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ API Error Response:", errorText);
         throw new Error(
           `HTTP error! status: ${response.status} - ${errorText}`
         );
       }
 
       const data = await response.json();
-      console.log("✅ API Success:", url, data);
       return data;
     } catch (error) {
-      console.error("API request failed:", error);
       throw error;
     }
   }

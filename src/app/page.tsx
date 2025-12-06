@@ -68,7 +68,6 @@ export default function Home() {
             trendingResponse.data.slice(0, responsiveLimit)
           );
           setHeroMovies(heroTrendingMovies);
-          console.log("🎬 Hero Trending Movies:", heroTrendingMovies);
         }
       } catch (error) {
         console.error("Error fetching trending movies for hero:", error);

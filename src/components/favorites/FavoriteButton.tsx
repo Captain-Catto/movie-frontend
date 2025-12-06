@@ -90,13 +90,6 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       return;
     }
 
-    // Debug log
-    console.log("💚 Toggling favorite for:", {
-      id: movieId,
-      title: movie.title,
-      mediaType: movie.media_type,
-    });
-
     // Optimistic update - toggle immediately for better UX
     dispatch(optimisticToggle(movieId));
     setIsProcessing(true);
@@ -106,11 +99,6 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       const movieData = {
         mediaType: movie.media_type || "movie",
       };
-
-      console.log("📤 Sending to backend:", {
-        movieId,
-        movieData,
-      });
 
       // Dispatch async action
       const result = await dispatch(

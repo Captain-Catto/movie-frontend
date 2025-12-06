@@ -75,7 +75,6 @@ export default function AdminSeoPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("🔍 SEO API response:", data);
 
         // Unwrap common shapes: ApiResponse { data: { data: [...] } } or plain array
         const payload = data?.data ?? data;
@@ -133,7 +132,6 @@ export default function AdminSeoPage() {
           } as SeoMetadata;
         });
 
-        console.log("🔍 Normalized SEO array:", normalized);
         setSeoData(normalized);
       }
     } catch (error) {
