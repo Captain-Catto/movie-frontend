@@ -38,7 +38,7 @@ export default function Home() {
   const responsiveLimit = useMemo(() => {
     if (breakpoint === "desktop") return 10;
     if (breakpoint === "tablet") return 8;
-    return 5;
+    return 4;
   }, [breakpoint]);
 
   // Intersection observers for lazy loading
@@ -81,7 +81,7 @@ export default function Home() {
   // Fetch Now Playing when visible
   useEffect(() => {
     if (nowPlayingVisible && !fetched.nowPlaying) {
-      setFetched(prev => ({ ...prev, nowPlaying: true }));
+      setFetched((prev) => ({ ...prev, nowPlaying: true }));
 
       const fetchNowPlaying = async () => {
         try {
@@ -97,7 +97,7 @@ export default function Home() {
         } catch (error) {
           console.error("Error fetching now playing:", error);
         } finally {
-          setLoadingStates(prev => ({ ...prev, nowPlaying: false }));
+          setLoadingStates((prev) => ({ ...prev, nowPlaying: false }));
         }
       };
 
@@ -108,7 +108,7 @@ export default function Home() {
   // Fetch Popular when visible
   useEffect(() => {
     if (popularVisible && !fetched.popular) {
-      setFetched(prev => ({ ...prev, popular: true }));
+      setFetched((prev) => ({ ...prev, popular: true }));
 
       const fetchPopular = async () => {
         try {
@@ -124,7 +124,7 @@ export default function Home() {
         } catch (error) {
           console.error("Error fetching popular:", error);
         } finally {
-          setLoadingStates(prev => ({ ...prev, popular: false }));
+          setLoadingStates((prev) => ({ ...prev, popular: false }));
         }
       };
 
@@ -135,7 +135,7 @@ export default function Home() {
   // Fetch Top Rated when visible
   useEffect(() => {
     if (topRatedVisible && !fetched.topRated) {
-      setFetched(prev => ({ ...prev, topRated: true }));
+      setFetched((prev) => ({ ...prev, topRated: true }));
 
       const fetchTopRated = async () => {
         try {
@@ -151,7 +151,7 @@ export default function Home() {
         } catch (error) {
           console.error("Error fetching top rated:", error);
         } finally {
-          setLoadingStates(prev => ({ ...prev, topRated: false }));
+          setLoadingStates((prev) => ({ ...prev, topRated: false }));
         }
       };
 
@@ -162,7 +162,7 @@ export default function Home() {
   // Fetch Upcoming when visible
   useEffect(() => {
     if (upcomingVisible && !fetched.upcoming) {
-      setFetched(prev => ({ ...prev, upcoming: true }));
+      setFetched((prev) => ({ ...prev, upcoming: true }));
 
       const fetchUpcoming = async () => {
         try {
@@ -178,7 +178,7 @@ export default function Home() {
         } catch (error) {
           console.error("Error fetching upcoming:", error);
         } finally {
-          setLoadingStates(prev => ({ ...prev, upcoming: false }));
+          setLoadingStates((prev) => ({ ...prev, upcoming: false }));
         }
       };
 
@@ -276,7 +276,6 @@ export default function Home() {
       poster: movie.posterImage || movie.backgroundImage,
     })
   );
-
 
   // Use fetched movies (no fallback - show skeleton when loading)
   const nowPlayingToDisplay = nowPlayingMovies;
