@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -29,15 +29,9 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
   const { isLoading } = useLoading({ delay: 1200 });
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
-  const [thumbCount, setThumbCount] = useState(5);
-  const { width } = useWindowWidth();
-
-  useEffect(() => {
-    if (width === 0) return;
-    if (width >= 1024) setThumbCount(10); // laptop+
-    else if (width >= 640) setThumbCount(8); // tablet
-    else setThumbCount(5); // mobile
-  }, [width]);
+  const { breakpoint } = useWindowWidth();
+  const thumbCount =
+    breakpoint === "desktop" ? 10 : breakpoint === "tablet" ? 8 : 5;
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
@@ -270,8 +264,18 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
 
       {/* Thumbnail Navigation */}
       {movies.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 w-full px-4">
-          <div className="mx-auto flex flex-wrap justify-center gap-2">
+        <div
+          className={`absolute bottom-6 z-30 ${
+            breakpoint === "mobile"
+              ? "left-1/2 -translate-x-1/2 w-full px-4"
+              : "right-6"
+          }`}
+        >
+          <div
+            className={`flex flex-wrap gap-2 ${
+              breakpoint === "mobile" ? "justify-center" : "justify-end"
+            }`}
+          >
             {movies.slice(0, thumbCount).map((movie, index) => {
               const backgroundImage =
                 movie.backgroundImage || movie.poster || FALLBACK_POSTER;
