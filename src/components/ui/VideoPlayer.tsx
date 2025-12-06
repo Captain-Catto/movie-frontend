@@ -381,7 +381,7 @@ export default function VideoPlayer({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .slider::-webkit-slider-thumb {
           appearance: none;
           height: 16px;

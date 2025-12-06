@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import type { SyntheticEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
@@ -103,7 +104,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
             width={40}
             height={40}
             className="object-cover"
-            onError={(e) => {
+            onError={(e: SyntheticEvent<HTMLImageElement>) => {
               e.currentTarget.src = FALLBACK_PROFILE;
             }}
           />
@@ -126,7 +127,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
                   width={48}
                   height={48}
                   className="object-cover"
-                  onError={(e) => {
+                  onError={(e: SyntheticEvent<HTMLImageElement>) => {
                     e.currentTarget.src = FALLBACK_PROFILE;
                   }}
                 />

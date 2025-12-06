@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, lazy, Suspense } from "react";
+import type { SyntheticEvent } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -524,9 +525,8 @@ const MovieDetailPageContent = () => {
                                 className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
                                 loading="lazy"
                                 sizes="(max-width: 768px) 50vw, 25vw"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = "/images/no-avatar.svg";
+                                onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                                  e.currentTarget.src = "/images/no-avatar.svg";
                                 }}
                               />
                             </div>

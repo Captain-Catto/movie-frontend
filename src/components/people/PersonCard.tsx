@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type SyntheticEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { PersonData } from "@/app/people/page";
@@ -50,13 +50,13 @@ const PersonCard = ({ person }: PersonCardProps) => {
             width={300}
             height={256}
             className="w-full h-full object-cover"
-            onError={(e) => {
+            onError={(e: SyntheticEvent<HTMLImageElement>) => {
               console.error(
                 "Failed to load image for:",
                 person.name,
                 getProfileImage()
               );
-              (e.target as HTMLImageElement).src = FALLBACK_PROFILE;
+              e.currentTarget.src = FALLBACK_PROFILE;
             }}
             onLoad={() => {
               console.log("Successfully loaded image for:", person.name);

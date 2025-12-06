@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
+import type { SyntheticEvent } from "react";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 import AccountSkeleton from "@/components/ui/AccountSkeleton";
 
@@ -57,7 +58,7 @@ export default function AccountPage() {
                   width={96}
                   height={96}
                   className="object-cover"
-                  onError={(e) => {
+                  onError={(e: SyntheticEvent<HTMLImageElement>) => {
                     e.currentTarget.src = FALLBACK_PROFILE;
                   }}
                 />
