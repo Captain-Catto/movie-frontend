@@ -5,6 +5,7 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
+import { useToastRedux } from "@/hooks/useToastRedux";
 
 interface SeoStats {
   totalPages: number;
@@ -20,6 +21,8 @@ export default function AdminSeoPage() {
   const [loading, setLoading] = useState(true);
   const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(null);
   const [lastCheckSummary, setLastCheckSummary] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { showSuccess, showError } = useToastRedux();
   const [editModal, setEditModal] = useState<{
     open: boolean;
     seo: SeoMetadata | null;
@@ -152,8 +155,10 @@ export default function AdminSeoPage() {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("authToken");
+      setErrorMessage(null);
       const payload = {
         ...formData,
+        pageSlug: formData.path || null,
         keywords: formData.keywords
           .split(",")
           .map((k) => k.trim())
@@ -175,14 +180,31 @@ export default function AdminSeoPage() {
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        setEditModal({ open: false, seo: null, isNew: false });
-        resetForm();
-        fetchSeoData();
-        fetchStats();
+      if (!response.ok) {
+        // Bubble up server error (e.g., duplicate pageType/pageSlug)
+        let message = `Failed to save (HTTP ${response.status})`;
+        try {
+          const body = await response.json();
+          message = body?.message || body?.error || message;
+        } catch {
+          // ignore parse error, keep default message
+        }
+        setErrorMessage(message);
+        showError("Save failed", message);
+        return;
       }
+
+      setEditModal({ open: false, seo: null, isNew: false });
+      resetForm();
+      fetchSeoData();
+      fetchStats();
+      showSuccess("Saved", editModal.isNew ? "Created SEO metadata" : "Updated SEO metadata");
     } catch (error) {
       console.error("Error saving SEO data:", error);
+      setErrorMessage(
+        error instanceof Error ? error.message : "Error saving SEO data"
+      );
+      showError("Save failed", error instanceof Error ? error.message : "Error saving SEO data");
     }
   };
 
@@ -201,9 +223,15 @@ export default function AdminSeoPage() {
       if (response.ok) {
         fetchSeoData();
         fetchStats();
+        showSuccess("Deleted", "SEO metadata removed");
+      } else {
+        const body = await response.json().catch(() => null);
+        const msg = body?.message || body?.error || "Failed to delete SEO metadata";
+        showError("Delete failed", msg);
       }
     } catch (error) {
       console.error("Error deleting SEO data:", error);
+      showError("Delete failed", error instanceof Error ? error.message : "Unknown error");
     }
   };
 
@@ -223,9 +251,15 @@ export default function AdminSeoPage() {
       if (response.ok) {
         fetchSeoData();
         fetchStats();
+        showSuccess("Toggled", "SEO status updated");
+      } else {
+        const body = await response.json().catch(() => null);
+        const msg = body?.message || body?.error || "Failed to toggle SEO status";
+        showError("Toggle failed", msg);
       }
     } catch (error) {
       console.error("Error toggling SEO status:", error);
+      showError("Toggle failed", error instanceof Error ? error.message : "Unknown error");
     }
   };
 
@@ -245,9 +279,15 @@ export default function AdminSeoPage() {
       if (response.ok) {
         fetchSeoData();
         fetchStats();
+        showSuccess("Defaults created", "Default SEO entries set up");
+      } else {
+        const body = await response.json().catch(() => null);
+        const msg = body?.message || body?.error || "Failed to setup defaults";
+        showError("Setup failed", msg);
       }
     } catch (error) {
       console.error("Error setting up defaults:", error);
+      showError("Setup failed", error instanceof Error ? error.message : "Unknown error");
     }
   };
 
@@ -315,6 +355,12 @@ export default function AdminSeoPage() {
           <p className="text-gray-400">
             Monitor and tune metadata so search crawlers pick up the latest updates.
           </p>
+
+          {errorMessage && (
+            <div className="rounded-md border border-red-500 bg-red-900/50 px-4 py-3 text-sm text-red-200">
+              {errorMessage}
+            </div>
+          )}
 
           <CheckSeoHealth
             onComplete={(res) => {
