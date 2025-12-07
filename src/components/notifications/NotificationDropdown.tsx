@@ -187,10 +187,13 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         variant="ghost"
         size="icon"
         onClick={handleBellClick}
-        className="relative text-white hover:bg-gray-700"
+        className="relative text-white hover:bg-transparent group"
         title={`${unreadCount} unread notifications`}
       >
-        <Bell size={20} />
+        <Bell
+          size={20}
+          className="transition-colors text-white group-hover:text-red-500"
+        />
 
         {/* Unread count badge */}
         {unreadCount > 0 && (
@@ -198,15 +201,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
             {unreadCount > 99 ? "99+" : unreadCount}
           </div>
         )}
-
-        {/* Connection status indicator */}
-        <div
-          className={cn(
-            "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-800",
-            isConnected ? "bg-green-500" : "bg-red-500"
-          )}
-          title={isConnected ? "Connected" : "Disconnected"}
-        />
       </Button>
 
       {/* Dropdown */}
@@ -225,9 +219,9 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 title={
                   !isConnected
                     ? "⚠️ Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng."
-                    : notifications.every(n => n.isRead)
-                      ? "Tất cả thông báo đã được đọc"
-                      : "Đánh dấu tất cả là đã đọc"
+                    : notifications.every((n) => n.isRead)
+                    ? "Tất cả thông báo đã được đọc"
+                    : "Đánh dấu tất cả là đã đọc"
                 }
               >
                 {isMarkingAllAsRead ? "Marking..." : "Mark all read"}

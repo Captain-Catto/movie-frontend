@@ -91,7 +91,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
         }}
         className="flex items-center space-x-2 focus:outline-none group"
       >
-        <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 group-hover:border-red-500 transition-colors">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 group-hover:border-red-500 transition-colors cursor-pointer">
           <Image
             src={avatarSrc}
             alt={displayName}

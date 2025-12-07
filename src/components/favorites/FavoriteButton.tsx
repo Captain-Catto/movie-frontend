@@ -20,9 +20,7 @@ interface FavoriteButtonProps {
     media_type?: "movie" | "tv";
   };
   className?: string;
-  /**
-   * Extra classes to apply when the item is favorited (active state)
-   */
+  // thêm class active để ép style khi favorited
   activeClassName?: string;
   iconOnly?: boolean;
   size?: "default" | "compact";
@@ -33,7 +31,7 @@ interface FavoriteButtonProps {
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   movie,
   className = "",
-  activeClassName = "",
+  activeClassName = "!bg-red-600 !hover:bg-red-700 !text-white",
   iconOnly = false,
   size = "default",
   stopPropagation = true,

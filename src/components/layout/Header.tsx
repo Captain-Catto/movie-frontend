@@ -129,7 +129,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
                 {/* Search */}
                 <button
-                  className="p-1 hover:text-red-500 transition-colors text-white flex-shrink-0"
+                  className="p-1 hover:text-red-500 transition-colors text-white flex-shrink-0 cursor-pointer"
                   onClick={handleSearchClick}
                   title="Search"
                 >
@@ -198,7 +198,6 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
               </button>
             </div>
           </div>
-
         </div>
       </nav>
       {/* Mobile Menu Dropdown (outside nav to avoid stacking issues) */}
