@@ -19,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-scroll-behavior="smooth">
-      <body className={`${inter.variable} ${roboto.variable} antialiased`}>
+    <html lang="en" data-scroll-behavior="smooth" className="overflow-x-hidden">
+      <body className={`${inter.variable} ${roboto.variable} antialiased overflow-x-hidden`}>
         <ReduxProvider>
           <InitialPageLoader />
           <AuthLoader />

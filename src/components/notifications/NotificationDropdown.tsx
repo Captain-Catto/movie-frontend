@@ -131,6 +131,20 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     }
   };
 
+  const goToNotificationsPage = () => {
+    router.push("/notifications");
+    setIsOpen(false);
+  };
+
+  const handleBellClick = () => {
+    // On mobile, skip dropdown and go straight to notifications page
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      goToNotificationsPage();
+      return;
+    }
+    setIsOpen(!isOpen);
+  };
+
   const handleMarkAllAsRead = async () => {
     if (!isConnected) {
       console.warn("⚠️ Cannot mark all as read: Socket not connected");
@@ -172,7 +186,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleBellClick}
         className="relative text-white hover:bg-gray-700"
         title={`${unreadCount} unread notifications`}
       >
@@ -287,6 +301,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 variant="ghost"
                 size="sm"
                 className="w-full text-blue-400 hover:text-blue-300 text-sm"
+                onClick={goToNotificationsPage}
               >
                 View all notifications
               </Button>

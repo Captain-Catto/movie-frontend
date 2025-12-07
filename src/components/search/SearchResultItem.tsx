@@ -14,16 +14,20 @@ import {
 interface SearchResultItemProps {
   result: SearchResult;
   onClose: () => void;
+  onResultClick?: () => void;
 }
 
 const SearchResultItem: React.FC<SearchResultItemProps> = ({
   result,
   onClose,
+  onResultClick,
 }) => {
   const releaseDate = result.releaseDate || result.firstAirDate;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
 
   const handleClick = () => {
+    // ✅ Save to recent searches when clicking result
+    onResultClick?.();
     onClose();
   };
 

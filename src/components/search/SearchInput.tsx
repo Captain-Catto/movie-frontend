@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useCallback, useRef } from "react";
+import React, { forwardRef } from "react";
 import { Search, Loader2, X } from "lucide-react";
 
 interface SearchInputProps {
@@ -12,43 +12,21 @@ interface SearchInputProps {
 
 const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   ({ query, onQueryChange, onSearch, isLoading }, ref) => {
-    const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-    // Custom debounce implementation
-    const debouncedSearch = useCallback(
-      (searchQuery: string) => {
-        if (debounceRef.current) {
-          clearTimeout(debounceRef.current);
-        }
-
-        debounceRef.current = setTimeout(() => {
-          if (searchQuery.trim().length >= 2) {
-            onSearch(searchQuery);
-          }
-        }, 300);
-      },
-      [onSearch]
-    );
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newQuery = e.target.value;
       onQueryChange(newQuery);
-      debouncedSearch(newQuery);
+      // ❌ REMOVED: Don't save to recent searches while typing
+      // Debouncing now happens in useSearch hook for API calls only
     };
 
     const handleClear = () => {
       onQueryChange("");
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
+      // ✅ Save to recent searches ONLY when user presses Enter
       if (query.trim().length >= 2) {
-        if (debounceRef.current) {
-          clearTimeout(debounceRef.current);
-        }
         onSearch(query);
       }
     };

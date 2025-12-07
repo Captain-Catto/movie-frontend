@@ -11,6 +11,7 @@ interface SearchResultsProps {
   hasMore: boolean;
   onLoadMore: () => void;
   onClose: () => void;
+  onResultClick?: () => void;
 }
 
 const SearchResults: React.FC<SearchResultsProps> = ({
@@ -19,6 +20,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   hasMore,
   onLoadMore,
   onClose,
+  onResultClick,
 }) => {
   // Ensure results is always an array
   const safeResults = Array.isArray(results) ? results : [];
@@ -70,6 +72,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               key={`${result.mediaType}-${result.tmdbId}`}
               result={result}
               onClose={onClose}
+              onResultClick={onResultClick}
             />
           ))}
         </div>

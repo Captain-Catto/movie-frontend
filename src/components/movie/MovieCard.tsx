@@ -98,10 +98,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       onMouseEnter={handleHoverPosition}
     >
       {/* Main Card */}
-      <Link
-        href={detailHref}
-        className="v-thumbnail block"
-      >
+      <Link href={detailHref} className="v-thumbnail block">
         <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 lg:group-hover:z-20">
           {/* Favorite Button - Top Right Corner */}
           <FavoriteButton
@@ -139,9 +136,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
           {/* Movie Poster */}
           <Image
-            src={
-              posterSafe
-            }
+            src={posterSafe}
             alt={`Watch Now ${movie.title}`}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
@@ -193,8 +188,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           vote_average: movie.rating,
           media_type: contentTypePrefix === "tv" ? "tv" : "movie",
           overview: movie.description,
-          genres:
-            movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
+          genres: movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
         }}
       />
 
@@ -204,18 +198,9 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <Link
             href={detailHref}
             title={movie.title}
-            className="text-sm font-semibold hover:text-red-500 transition-colors line-clamp-2"
+            className="text-sm text-center font-semibold hover:text-red-500 transition-colors line-clamp-3"
           >
             {movie.title}
-          </Link>
-        </h4>
-        <h4 className="alias-title text-gray-400">
-          <Link
-            href={detailHref}
-            title={movie.aliasTitle}
-            className="text-xs hover:text-red-500 transition-colors line-clamp-1"
-          >
-            {movie.aliasTitle}
           </Link>
         </h4>
       </div>

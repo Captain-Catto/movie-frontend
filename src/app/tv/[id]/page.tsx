@@ -413,7 +413,7 @@ const TVDetailPageContent = () => {
     <Layout>
       <div className="min-h-screen">
         {/* Hero Section */}
-        <div className="relative h-[70vh] lg:pt-16 md:pt-36 pt-32">
+        <div className="relative h-[70vh] lg:pt-16 md:pt-20 pt-18">
           <div className="absolute inset-0">
             <Image
               src={getBackdropUrl(tvData.backdropPath)}
@@ -428,35 +428,35 @@ const TVDetailPageContent = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
           </div>
 
-          <div className="relative max-w-6xl mx-auto px-4 z-10">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+          <div className="relative max-w-6xl mx-auto px-3 sm:px-4 z-10">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6 lg:gap-8">
               {/* Poster */}
-              <div className="hidden md:block flex-shrink-0">
-                <div className="relative w-64 h-96">
+              <div className="flex-shrink-0">
+                <div className="relative w-48 h-72 sm:w-56 sm:h-84 md:w-64 md:h-96 lg:w-72 lg:h-108">
                   <Image
                     src={getPosterUrl(tvData.posterPath)}
                     alt={tvData.title}
                     fill
                     className="object-cover rounded-lg shadow-2xl"
                     loading="lazy"
-                    sizes="256px"
+                    sizes="(max-width: 768px) 192px, (max-width: 1024px) 256px, 288px"
                   />
                 </div>
               </div>
 
               {/* TV Info */}
-              <div className="flex-1 text-center lg:text-left">
-                <h1 className="text-5xl font-bold text-white mb-4 drop-shadow-lg">
+              <div className="flex-1 text-center md:text-left min-w-0 w-full md:w-auto">
+                <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4 drop-shadow-lg break-words">
                   {tvData.title}
                 </h1>
                 {tvData.originalTitle !== tvData.title && (
-                  <p className="text-xl text-gray-300 mb-4">
+                  <p className="text-xs sm:text-sm md:text-lg lg:text-xl text-gray-300 mb-2 sm:mb-3 md:mb-4 break-words">
                     {tvData.originalTitle}
                   </p>
                 )}
 
                 {/* Rating and Info */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-6">
+                <div className="flex flex-wrap items-center justify-start gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-5 md:mb-6">
                   <RatingBadge
                     rating={tvData.voteAverage}
                     variant="badge"
@@ -477,7 +477,7 @@ const TVDetailPageContent = () => {
                 </div>
 
                 {/* Genres */}
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-8">
+                <div className="flex flex-wrap justify-start gap-2 mb-4 sm:mb-6 md:mb-8">
                   {tvData.genres.map((genre: string, index: number) => {
                     const genreId = tvData.genreIds?.[index];
                     return (
@@ -493,13 +493,13 @@ const TVDetailPageContent = () => {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4">
                   <Link
                     href={`/watch/tv-${tvData.tmdbId || numericTvId}`}
-                    className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
+                    className="px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm sm:text-base font-semibold rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4 sm:w-5 sm:h-5"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
@@ -523,14 +523,14 @@ const TVDetailPageContent = () => {
                       media_type: "tv",
                       genres: tvData.genres,
                     }}
-                    className="!px-8 !py-4 !rounded-lg !font-semibold"
+                    className="!px-3 !py-1.5 sm:!px-4 sm:!py-2 md:!px-5 md:!py-2.5 !rounded-lg !font-semibold !text-sm sm:!text-base"
                   />
 
                   <TrailerButton
                     movieId={tvData.tmdbId || numericTvId}
                     movieTitle={tvData.title}
                     contentType="tv"
-                    className="px-8 py-4 !rounded-lg font-semibold"
+                    className="!px-3 !py-1.5 sm:!px-4 sm:!py-2 md:!px-5 md:!py-2.5 !rounded-lg !font-semibold !text-sm sm:!text-base"
                   />
                 </div>
               </div>

@@ -80,6 +80,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     setSelectedType(recentSearch.type);
   };
 
+  const handleResultClick = () => {
+    // ✅ Save to recent searches when user clicks a search result
+    if (query.trim().length >= 2) {
+      handleSearch(query);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -152,6 +159,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
               hasMore={hasMore}
               onLoadMore={loadMore}
               onClose={onClose}
+              onResultClick={handleResultClick}
             />
           )}
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { SearchResult } from "@/types/search";
 import { API_BASE_URL } from "@/services/api";
 
@@ -26,6 +26,7 @@ export const useSearch = (): UseSearchReturn => {
   );
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const searchAPI = useCallback(
     async (searchQuery: string, searchType: string, pageNum: number = 1) => {
@@ -89,15 +90,32 @@ export const useSearch = (): UseSearchReturn => {
     []
   );
 
-  // Search when query or type changes
+  // Search when query or type changes with debounce
   useEffect(() => {
-    if (query.trim().length >= 2) {
-      searchAPI(query, selectedType, 1);
-    } else {
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Clear results immediately if query is too short
+    if (query.trim().length < 2) {
       setResults([]);
       setHasMore(false);
       setPage(1);
+      return;
     }
+
+    // Debounce search API call
+    debounceTimerRef.current = setTimeout(() => {
+      searchAPI(query, selectedType, 1);
+    }, 600); // 600ms debounce - only search after user stops typing
+
+    // Cleanup on unmount or query change
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
   }, [query, selectedType, searchAPI]);
 
   const loadMore = useCallback(() => {

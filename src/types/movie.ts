@@ -176,6 +176,7 @@ export interface FrontendTVSeries {
   numberOfSeasons?: number;
   genre: string;
   genres: string[];
+  genreIds?: number[];
   description?: string;
   backgroundImage?: string;
   posterImage?: string;

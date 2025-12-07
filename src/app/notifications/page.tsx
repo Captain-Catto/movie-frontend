@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 interface NotificationItem {
   id: string | number;
@@ -15,9 +16,17 @@ interface NotificationItem {
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: string;
   isRead?: boolean;
+   metadata?: {
+    movieId?: number;
+    tvId?: number;
+    commentId?: number;
+    parentId?: number;
+    [key: string]: unknown;
+  };
 }
 
 export default function NotificationsPage() {
+  const router = useRouter();
   const { isLoading } = useAuth();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,15 +41,21 @@ export default function NotificationsPage() {
           params: { limit: 50 },
         });
 
-        if (response.data?.success && Array.isArray(response.data.data?.notifications)) {
-          const items = response.data.data.notifications.map((n: Partial<NotificationItem>) => ({
-            id: n.id ?? crypto.randomUUID(),
-            title: n.title ?? "Notification",
-            message: n.message ?? "",
-            type: (n.type as NotificationItem["type"]) || "info",
-            createdAt: n.createdAt ?? new Date().toISOString(),
-            isRead: n.isRead,
-          })) as NotificationItem[];
+        if (
+          response.data?.success &&
+          Array.isArray(response.data.data?.notifications)
+        ) {
+          const items = response.data.data.notifications.map(
+            (n: Partial<NotificationItem>) => ({
+              id: n.id ?? crypto.randomUUID(),
+              title: n.title ?? "Notification",
+              message: n.message ?? "",
+              type: (n.type as NotificationItem["type"]) || "info",
+              createdAt: n.createdAt ?? new Date().toISOString(),
+              isRead: n.isRead,
+              metadata: n.metadata,
+            })
+          ) as NotificationItem[];
           setNotifications(items);
           setIsEmpty(items.length === 0);
         } else {
@@ -70,6 +85,7 @@ export default function NotificationsPage() {
   const filteredNotifications = showUnreadOnly
     ? notifications.filter((n) => !n.isRead)
     : notifications;
+  const filteredEmpty = filteredNotifications.length === 0;
 
   // Group notifications by date (YYYY-MM-DD)
   const groupedByDate = filteredNotifications.reduce<
@@ -83,6 +99,13 @@ export default function NotificationsPage() {
   const sortedDateKeys = Object.keys(groupedByDate).sort((a, b) =>
     a < b ? 1 : -1
   );
+
+  const resolveTargetUrl = (metadata?: NotificationItem["metadata"]) => {
+    if (!metadata) return null;
+    if (metadata.movieId) return `/watch/movie-${metadata.movieId}`;
+    if (metadata.tvId) return `/watch/tv-${metadata.tvId}`;
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
@@ -129,13 +152,29 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          {!loading && !isLoading && isEmpty && !error && (
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300">
-              <div className="text-lg font-semibold text-white mb-2">Chưa có thông báo</div>
-              <p className="text-sm text-gray-400">
-                Khi có cập nhật mới, thông báo sẽ xuất hiện ở đây.
-              </p>
-            </div>
+          {!loading && !isLoading && !error && (
+            <>
+              {isEmpty ? (
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300 min-h-[300px] flex flex-col items-center justify-center">
+                  <div className="text-lg font-semibold text-white mb-2">
+                    Chưa có thông báo
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Khi có cập nhật mới, thông báo sẽ xuất hiện ở đây.
+                  </p>
+                </div>
+              ) : filteredEmpty ? (
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300 min-h-[300px] flex flex-col items-center justify-center">
+                  <div className="text-lg font-semibold text-white mb-2">
+                    Không có thông báo chưa đọc
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Bạn đã xem hết các thông báo. Chuyển sang &quot;Hiển thị tất
+                    cả&quot; để xem lịch sử.
+                  </p>
+                </div>
+              ) : null}
+            </>
           )}
 
           {sortedDateKeys.length > 0 && (
@@ -154,17 +193,38 @@ export default function NotificationsPage() {
                     <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide px-1">
                       {dayLabel}
                     </div>
-                    {groupedByDate[dateKey].map((notif) => (
-                      <div
-                        key={notif.id}
-                        className={`bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl ${
-                          notif.isRead ? 'border-gray-750/50' : 'border-blue-700/40 bg-gray-850/80'
-                        }`}
-                      >
+                    {groupedByDate[dateKey].map((notif) => {
+                      const targetUrl = resolveTargetUrl(notif.metadata);
+                      const isClickable = Boolean(targetUrl);
+                      return (
+                        <div
+                          key={notif.id}
+                          className={`bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl ${
+                            notif.isRead
+                              ? "border-gray-750/50"
+                              : "border-blue-700/40 bg-gray-850/80"
+                          } ${isClickable ? "cursor-pointer" : ""}`}
+                          role={isClickable ? "button" : undefined}
+                          tabIndex={isClickable ? 0 : undefined}
+                          onClick={() => {
+                            if (targetUrl) {
+                              router.push(targetUrl);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (!isClickable) return;
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              targetUrl && router.push(targetUrl);
+                            }
+                          }}
+                        >
                         <div className="flex items-start gap-4">
                           {/* Type Icon/Badge */}
                           <div
-                            className={`px-3 py-1.5 text-xs rounded-lg font-semibold capitalize shadow-sm ${badgeStyles[notif.type]}`}
+                            className={`px-3 py-1.5 text-xs rounded-lg font-semibold capitalize shadow-sm ${
+                              badgeStyles[notif.type]
+                            }`}
                           >
                             {notif.type}
                           </div>
@@ -195,8 +255,9 @@ export default function NotificationsPage() {
                             )}
                           </div>
                         </div>
-                      </div>
-                    ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}

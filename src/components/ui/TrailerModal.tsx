@@ -50,13 +50,16 @@ export default function TrailerModal({
 
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
+      // Store original overflow value
+      const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
-    }
 
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
-    };
+      return () => {
+        document.removeEventListener("keydown", handleEscape);
+        // Restore original overflow value instead of unset
+        document.body.style.overflow = originalOverflow;
+      };
+    }
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;

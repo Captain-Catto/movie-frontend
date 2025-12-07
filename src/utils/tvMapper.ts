@@ -128,6 +128,7 @@ export function mapTVSeriesToFrontend(
     year,
     rating,
     genre: primaryGenre,
+    genreIds,
     genres,
     description: ensureString(series.overview) ?? "",
     backgroundImage: backdrop,

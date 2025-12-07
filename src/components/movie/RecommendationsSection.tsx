@@ -154,7 +154,7 @@ export default function RecommendationsSection({
                   </div>
 
                   <div className="space-y-1">
-                    <h3 className="text-white font-semibold text-sm line-clamp-2 group-hover:text-blue-400 transition-colors">
+                    <h3 className="text-white font-semibold text-sm line-clamp-3 group-hover:text-blue-400 transition-colors">
                       {title}
                     </h3>
                     {year && <p className="text-gray-400 text-xs">{year}</p>}

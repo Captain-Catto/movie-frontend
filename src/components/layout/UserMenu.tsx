@@ -5,13 +5,7 @@ import type { SyntheticEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import {
-  FaHeart,
-  FaClock,
-  FaUser,
-  FaSignOutAlt,
-  FaBell,
-} from "react-icons/fa";
+import { FaHeart, FaClock, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 
 interface UserMenuProps {

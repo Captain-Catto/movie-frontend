@@ -99,7 +99,7 @@ export function HoverPreviewCard({
         <div className="text-center space-y-1">
           <h3 className="text-white font-bold text-lg line-clamp-2">{title}</h3>
           {overview && (
-            <span className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium line-clamp-2">
+            <span className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium line-clamp-3">
               {overview}
             </span>
           )}

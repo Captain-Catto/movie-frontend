@@ -229,7 +229,7 @@ const WatchPage = () => {
       <div className="min-h-screen bg-gray-900">
         {/* Movie Player Section */}
         <div className="relative flex items-center justify-center bg-black">
-          <div className="w-full aspect-video max-h-[100vh] flex items-center justify-center">
+          <div className="w-full aspect-video max-h-[100vh] min-h-[240px] sm:min-h-[320px] flex items-center justify-center">
             {isPlaying ? (
               // Video Player with Demo Video
               <video
