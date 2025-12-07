@@ -203,7 +203,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
       {/* Mobile Menu Dropdown (outside nav to avoid stacking issues) */}
       {isMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-[200] w-screen h-screen bg-gray-900 opacity-100 transition-all duration-300 ease-out">
-          <div className="min-h-screen overflow-y-auto px-4 pt-16 pb-6 space-y-3 relative z-[210] pointer-events-auto">
+          <div className="min-h-screen h-screen overflow-y-auto px-4 pt-16 pb-6 relative z-[210] pointer-events-auto flex flex-col gap-3">
             <button
               onClick={() => setIsMenuOpen(false)}
               aria-label="Close menu"
@@ -226,94 +226,94 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
               </svg>
             </button>
 
-            {/* Mobile profile & actions */}
-            <div className="flex flex-col items-end gap-3 bg-gray-900/80 rounded-lg px-4 py-3 w-full">
-              <Link
-                href={isAuthenticated ? "/account" : "#"}
-                onClick={() => isAuthenticated && setIsMenuOpen(false)}
-                className="flex flex-row-reverse items-center gap-3 w-full"
-                aria-label="Go to account"
-              >
-                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
-                  {isHydrated && isAuthenticated && user?.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.image}
-                      alt={user.name || "Profile"}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-sm font-semibold">
-                      {isHydrated && isAuthenticated
-                        ? user?.name?.[0] || "U"
-                        : "?"}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col items-end text-right">
-                  <span className="text-white text-sm font-semibold">
-                    {isHydrated && isAuthenticated
-                      ? user?.name || "User"
-                      : "Guest"}
-                  </span>
-                  <span className="text-gray-400 text-xs">
-                    {isHydrated && isAuthenticated
-                      ? user?.email || "Signed in"
-                      : "Not signed in"}
-                  </span>
-                </div>
-              </Link>
-
-              <div className="flex items-center gap-2 flex-wrap justify-end w-full">
-                {isHydrated && isAuthenticated && (
-                  <div className="flex-shrink-0">
-                    <NotificationDropdown />
-                  </div>
-                )}
-                {/* Favorites as heart icon (mobile) */}
+            <div className="flex flex-col gap-3">
+              {/* Mobile profile & actions */}
+              <div className="flex flex-col items-end gap-3 bg-gray-900/80 rounded-lg px-4 py-4 w-full">
                 <Link
-                  href="/favorites"
-                  className="p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-                  aria-label="Favorites"
-                  onClick={() => setIsMenuOpen(false)}
+                  href={isAuthenticated ? "/account" : "#"}
+                  onClick={() => isAuthenticated && setIsMenuOpen(false)}
+                  className="flex flex-row-reverse items-center gap-3 w-full"
+                  aria-label="Go to account"
                 >
-                  <HeartIcon size={16}></HeartIcon>
+                  <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+                    {isHydrated && isAuthenticated && user?.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={user.image}
+                        alt={user.name || "Profile"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-base font-semibold">
+                        {isHydrated && isAuthenticated
+                          ? user?.name?.[0] || "U"
+                          : "?"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col items-end text-right">
+                    <span className="text-white text-lg font-semibold leading-tight">
+                      {isHydrated && isAuthenticated
+                        ? user?.name || "User"
+                        : "Guest"}
+                    </span>
+                    <span className="text-gray-400 text-sm leading-tight">
+                      {isHydrated && isAuthenticated
+                        ? user?.email || "Signed in"
+                        : "Not signed in"}
+                    </span>
+                  </div>
                 </Link>
+
+                <div className="flex items-center gap-2 justify-end w-full">
+                  {isHydrated && isAuthenticated && <NotificationDropdown />}
+                  {/* Favorites as heart icon (mobile) */}
+                  <Link
+                    href="/favorites"
+                    className="p-2 text-white hover:text-red-500 transition-colors inline-flex items-center justify-center"
+                    aria-label="Favorites"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <HeartIcon size={16}></HeartIcon>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleSearchClick();
+                    }}
+                    className="p-2 text-white hover:text-red-500 transition-colors inline-flex items-center justify-center"
+                    aria-label="Search"
+                  >
+                    <Search size={16} />
+                  </button>
+                </div>
+              </div>
+
+              {!isAuthenticated && (
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
-                    handleSearchClick();
+                    handleAuthModalOpen();
                   }}
-                  className="p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
-                  aria-label="Search"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-lg transition-colors text-lg"
                 >
-                  <Search size={16} />
+                  Login / Sign up
                 </button>
+              )}
+
+              <div className="flex flex-col gap-3">
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block w-full px-4 py-4 rounded-md transition-all duration-200 text-white hover:text-red-500 hover:bg-gray-700/50 font-medium text-right text-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
-
-            {!isAuthenticated && (
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  handleAuthModalOpen();
-                }}
-                className="w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-2 rounded-lg transition-colors"
-              >
-                Login / Sign up
-              </button>
-            )}
-
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block w-full px-4 py-3 rounded-md transition-all duration-200 text-white hover:text-red-500 hover:bg-gray-700/50 font-medium text-right"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
           </div>
         </div>
       )}
