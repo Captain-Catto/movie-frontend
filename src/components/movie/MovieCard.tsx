@@ -3,8 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
-import { Play, Info } from "lucide-react";
-import RatingBadge from "@/components/ui/RatingBadge";
+import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 
@@ -39,7 +38,6 @@ interface MovieCardProps {
 const MovieCard = ({ movie }: MovieCardProps) => {
   const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
-  const hoverCardRef = useRef<HTMLDivElement>(null);
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
   >("center");
@@ -57,7 +55,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     FALLBACK_POSTER;
 
   const handleHoverPosition = () => {
-    if (!cardRef.current || !hoverCardRef.current || viewportWidth === 0) return;
+    if (!cardRef.current || viewportWidth === 0) return;
 
     const cardRect = cardRef.current.getBoundingClientRect();
     const hoverCardWidth = 384; // w-96 = 384px
@@ -118,7 +116,8 @@ const MovieCard = ({ movie }: MovieCardProps) => {
                 movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
             }}
             iconOnly={true}
-            className="!absolute !top-2 !right-2 !bg-black/50 !text-white !opacity-100 lg:!opacity-0 lg:group-hover:!opacity-100 !transition-all !duration-300 group-hover:!text-red-500 hover:!scale-110 !z-10 [data-state=on]:!bg-red-500 [data-state=on]:hover:!bg-red-600 [data-state=on]:!text-white"
+            className="!absolute !top-2 !right-2 !bg-black/50 !text-white !opacity-100 lg:!opacity-0 lg:group-hover:!opacity-100 !transition-all !duration-300 group-hover:!text-red-500 hover:!scale-110 !z-10 [data-state=on]:!bg-red-500 [data-state=on]:hover:!bg-red-600 [data-state=on]:!text-white [data-state=on]:lg:!opacity-100"
+            activeClassName="!bg-red-500 !text-white hover:!bg-red-600 !opacity-100"
           />
           {/* Episode Badge */}
           {movie.episodeNumber && (
@@ -168,103 +167,36 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       </Link>
 
       {/* Desktop Hover Card - Large Overlay Style */}
-      <div
-        ref={hoverCardRef}
-        className={`hidden lg:block absolute top-1/2 -translate-y-1/2 w-96 bg-gray-900 rounded-xl shadow-2xl opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto transition-all duration-300 z-30 transform scale-95 group-hover:scale-100 overflow-hidden ${
-          hoverPosition === "left"
-            ? "left-0 translate-x-0"
-            : hoverPosition === "right"
-            ? "right-0 translate-x-0"
-            : "left-1/2 -translate-x-1/2"
-        }`}
-      >
-        {/* Movie Poster - Top Section */}
-        <div className="relative h-64">
-          <Image
-            src={
-              movie.backgroundImage || movie.posterImage || posterSafe || FALLBACK_POSTER
-            }
-            alt={movie.title}
-            fill
-            sizes="384px"
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
-        </div>
-
-        {/* Content - Bottom Section */}
-        <div className="p-6 space-y-4">
-          {/* Title Section */}
-          <div className="text-center">
-            <h3 className="text-white font-bold text-lg mb-1 line-clamp-2">
-              {movie.title}
-            </h3>
-            <p className="text-yellow-400 text-xs font-medium">
-              {movie.aliasTitle}
-            </p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-2">
-            <button
-              onClick={handleWatchMovie}
-              className="flex-1 bg-red-400 hover:bg-red-500 text-white py-1.5 rounded font-semibold text-xs transition-colors flex items-center justify-center space-x-2 cursor-pointer"
-            >
-              <Play className="w-4 h-4 fill-white" />
-              <span>Watch</span>
-            </button>
-            <FavoriteButton
-              movie={{
-                id: movie.tmdbId,
-                title: movie.title,
-                poster_path: posterSafe,
-                vote_average: movie.rating,
-                media_type: movie.href?.includes("/tv/") ? "tv" : "movie", // ✅ Add media_type
-                overview: movie.description,
-                genres:
-                  movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
-              }}
-              iconOnly
-              size="compact"
-              className="!w-auto !h-auto !p-2 !rounded font-semibold text-xs !bg-gray-700 hover:!bg-gray-600 [data-state=on]:!bg-red-500 [data-state=on]:hover:!bg-red-600 [data-state=on]:!text-white"
-            />
-            <Link
-              href={detailHref}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded font-semibold text-xs transition-colors flex items-center space-x-1 cursor-pointer"
-            >
-              <Info className="w-4 h-4" />
-              <span>Details</span>
-            </Link>
-          </div>
-
-          {/* Movie Info */}
-          <div className="space-y-1">
-            {/* Rating, Year and Genres - All in one row */}
-            <div className="flex flex-wrap gap-1 items-center">
-              <RatingBadge rating={movie.rating} variant="default" showZero={false} />
-              {movie.year && (
-                <span className="bg-gray-700 text-white px-2 py-1 rounded font-medium text-xs">
-                  {movie.year}
-                </span>
-              )}
-              {movie.genres && movie.genres.length > 0
-                ? movie.genres.map((genre) => (
-                    <span
-                      key={genre}
-                      className="bg-gray-700 text-white px-2 py-1 rounded text-xs font-medium"
-                    >
-                      {genre}
-                    </span>
-                  ))
-                : movie.genre && (
-                    <span className="bg-gray-700 text-white px-2 py-1 rounded text-xs font-medium">
-                      {movie.genre}
-                    </span>
-                  )}
-            </div>
-          </div>
-        </div>
-      </div>
+      <HoverPreviewCard
+        title={movie.title}
+        subtitle={movie.aliasTitle}
+        image={
+          movie.backgroundImage ||
+          movie.posterImage ||
+          posterSafe ||
+          FALLBACK_POSTER
+        }
+        watchHref={`/watch/${contentTypePrefix}-${movie.tmdbId}`}
+        detailHref={detailHref}
+        rating={movie.rating}
+        year={movie.year}
+        overview={movie.description}
+        contentType={contentTypePrefix === "tv" ? "tv" : "movie"}
+        placement={hoverPosition}
+        genreIds={movie.genreIds}
+        genreNames={movie.genres}
+        favoriteButton={{
+          id: movie.tmdbId,
+          tmdbId: movie.tmdbId,
+          title: movie.title,
+          poster_path: posterSafe,
+          vote_average: movie.rating,
+          media_type: contentTypePrefix === "tv" ? "tv" : "movie",
+          overview: movie.description,
+          genres:
+            movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
+        }}
+      />
 
       {/* Movie Info - Always visible */}
       <div className="info mt-3 space-y-1">

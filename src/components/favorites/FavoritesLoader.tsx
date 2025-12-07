@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { fetchFavorites, clearFavorites } from "@/store/favoritesSlice";
 
@@ -9,17 +9,37 @@ import { fetchFavorites, clearFavorites } from "@/store/favoritesSlice";
  * and clear them when user logs out
  */
 export function FavoritesLoader() {
-  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { isLoading, token, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
   const dispatch = useAppDispatch();
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      // Load favorites when user is authenticated
-      dispatch(fetchFavorites());
-    } else if (!isAuthenticated && !isLoading) {
+    // Wait until auth finishes initializing
+    if (isLoading) return;
+
+    // If we have a token (even if isAuthenticated hasn't flipped yet), try load favorites
+    if (token) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug(
+          "[FavoritesLoader] Token detected, requesting favorites...",
+          { isAuthenticated }
+        );
+      }
+      // Load favorites when user is authenticated (only once per session change)
+      if (!hasFetched.current) {
+        dispatch(fetchFavorites());
+        hasFetched.current = true;
+      }
+    } else {
+      if (process.env.NODE_ENV === "development") {
+        console.debug("[FavoritesLoader] No token, clearing favorites.");
+      }
       // Clear favorites when user logs out
       dispatch(clearFavorites());
+      hasFetched.current = false;
     }
-  }, [isAuthenticated, isLoading, dispatch]);
+  }, [isAuthenticated, isLoading, token, dispatch]);
   return null; // This component doesn't render anything
 }

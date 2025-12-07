@@ -562,8 +562,8 @@ class ApiService {
           };
         }
       }
-    } catch (tvError) {
-      // console.log("⚠️ [ApiService] TV endpoint failed:", tvError);
+    } catch {
+      // console.log("⚠️ [ApiService] TV endpoint failed");
     }
 
     console.error("❌ [ApiService] Content not found in both movie and TV databases");

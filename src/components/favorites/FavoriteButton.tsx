@@ -20,6 +20,10 @@ interface FavoriteButtonProps {
     media_type?: "movie" | "tv";
   };
   className?: string;
+  /**
+   * Extra classes to apply when the item is favorited (active state)
+   */
+  activeClassName?: string;
   iconOnly?: boolean;
   size?: "default" | "compact";
   stopPropagation?: boolean; // chặn click lên cha
@@ -29,6 +33,7 @@ interface FavoriteButtonProps {
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   movie,
   className = "",
+  activeClassName = "",
   iconOnly = false,
   size = "default",
   stopPropagation = true,
@@ -41,19 +46,30 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   const dispatch = useAppDispatch();
 
   // Get favorite status from Redux store
-  const favoriteIds = useAppSelector((state) => state.favorites.favoriteIds);
+  const favoriteKeys = useAppSelector((state) => state.favorites.favoriteKeys);
 
   // Memoize movie ID to prevent unnecessary re-renders
   const movieId = useMemo(() => {
     // Prefer tmdbId, fallback to id if it's a number
     if (movie?.tmdbId) return movie.tmdbId;
     if (movie?.id && typeof movie.id === "number") return movie.id;
+    // Support numeric string ids
+    if (movie?.id && typeof movie.id === "string") {
+      const parsed = parseInt(movie.id, 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
     return null;
   }, [movie?.tmdbId, movie?.id]);
 
+  const movieType = movie?.media_type || "movie";
+  const favoriteKey = useMemo(() => {
+    if (movieId === null || movieId === undefined) return null;
+    return `${movieType}-${movieId}`;
+  }, [movieId, movieType]);
+
   const isFavorite = useMemo(
-    () => (movieId ? favoriteIds.includes(movieId) : false),
-    [favoriteIds, movieId]
+    () => (favoriteKey ? favoriteKeys.includes(favoriteKey) : false),
+    [favoriteKeys, favoriteKey]
   );
 
   // Don't render if movie data is invalid - fail silently for better UX
@@ -100,7 +116,9 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     }
 
     // Optimistic update - toggle immediately for better UX
-    dispatch(optimisticToggle(movieId));
+    if (favoriteKey) {
+      dispatch(optimisticToggle(favoriteKey));
+    }
     setIsProcessing(true);
 
     try {
@@ -111,7 +129,11 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
       // Dispatch async action
       const result = await dispatch(
-        toggleFavoriteAsync({ movieId, movieData })
+        toggleFavoriteAsync({
+          movieId,
+          movieKey: favoriteKey || `${movieData.mediaType}-${movieId}`,
+          movieData,
+        })
       ).unwrap();
 
       // Show success message
@@ -121,8 +143,6 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         showSuccess("Removed from favorites", movie.title);
       }
     } catch (error) {
-      // Revert optimistic update on error
-      dispatch(optimisticToggle(movieId));
       console.error("Error toggling favorite:", error);
       showError("Failed to update favorite status");
     } finally {
@@ -177,6 +197,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         ${isProcessing ? "opacity-70" : "opacity-100"}
         ${sizeClasses}
         ${className}
+        ${isFavorite ? activeClassName : ""}
       `}
       title={
         !isAuthenticated

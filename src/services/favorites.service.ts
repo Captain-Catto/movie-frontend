@@ -158,8 +158,7 @@ export const favoritesService = {
   async toggleFavorite(
     data: AddFavoriteDto
   ): Promise<{ isFavorite: boolean; message: string }> {
-    const token = localStorage.getItem("authToken");
-
+    const token = authStorage.getToken();
     if (!token) {
       throw new Error("No authentication token found. Please login again.");
     }
@@ -196,11 +195,38 @@ export const favoritesService = {
       throw new Error("No authentication token found. Please login again.");
     }
 
-    const response = await axiosInstance.get<{ ids: Array<{ contentId: string; contentType: string }>; total: number }>(
+    if (process.env.NODE_ENV === "development") {
+      console.debug("[favoritesService] Fetching favorite IDs");
+    }
+
+    type RawFavoriteId = {
+      contentId?: string;
+      contentid?: string;
+      contentType?: string;
+      contenttype?: string;
+    };
+
+    const response = await axiosInstance.get<{ ids: RawFavoriteId[]; total: number }>(
       "/favorites/ids"
     );
 
-    return response.data.ids;
+    if (process.env.NODE_ENV === "development") {
+      console.debug("[favoritesService] Favorite IDs response", response.data);
+    }
+
+    // Normalize casing from backend (contentid/contenttype vs contentId/contentType)
+    const normalizedIds = response.data.ids.reduce<
+      Array<{ contentId: string; contentType: string }>
+    >((acc, item) => {
+      const contentId = item.contentId ?? item.contentid;
+      const contentType = item.contentType ?? item.contenttype;
+      if (contentId && contentType) {
+        acc.push({ contentId, contentType });
+      }
+      return acc;
+    }, []);
+
+    return normalizedIds;
   },
 
   /**
