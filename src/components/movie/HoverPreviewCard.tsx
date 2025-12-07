@@ -159,21 +159,30 @@ export function HoverPreviewCard({
               {displayYear}
             </span>
           )}
-          {genreIds &&
-            genreIds.slice(0, 3).map((id, idx) => {
-              const genreName =
-                (genreNames && genreNames[idx]) || genreNames?.find(Boolean);
-              const label = genreName || `Genre ${id}`;
-              return (
-                <Link
-                  key={id}
-                  href={`/browse?genres=${id}&type=${contentType}`}
-                  className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-gray-700 transition-colors"
+          {/* Prefer links when we have IDs; otherwise show names as static badges */}
+          {genreIds && genreIds.length > 0
+            ? genreIds.slice(0, 3).map((id, idx) => {
+                const name = genreNames?.[idx];
+                const label = name || `Genre ${id}`;
+                return (
+                  <Link
+                    key={id}
+                    href={`/browse?genres=${id}&type=${contentType}`}
+                    className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-gray-700 transition-colors"
+                  >
+                    {label}
+                  </Link>
+                );
+              })
+            : genreNames &&
+              genreNames.slice(0, 3).map((name, idx) => (
+                <span
+                  key={`${name}-${idx}`}
+                  className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium"
                 >
-                  {label}
-                </Link>
-              );
-            })}
+                  {name}
+                </span>
+              ))}
         </div>
       </div>
     </div>

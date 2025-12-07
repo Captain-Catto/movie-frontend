@@ -83,6 +83,13 @@ export const favoritesService = {
     );
 
     const data = response.data;
+    console.log("[favoritesService] /favorites meta", {
+      page: data.page,
+      totalPages: data.totalPages,
+      total: data.total,
+      count: data.favorites?.length ?? 0,
+      hasMore: data.hasMore,
+    });
 
     // Map genreIds to genre names for each favorite
     const favoritesWithGenres = data.favorites.map((favorite: Favorite) => {
@@ -112,6 +119,12 @@ export const favoritesService = {
         genres: mappedGenres,
         media_type: favorite.contenttype || "movie",
       };
+    });
+
+    // Log a small sample of the mapped data for debugging
+    console.log("[favoritesService] favorites sample (first 5)", {
+      sample: favoritesWithGenres.slice(0, 5),
+      total: favoritesWithGenres.length,
     });
 
     return {
@@ -195,9 +208,7 @@ export const favoritesService = {
       throw new Error("No authentication token found. Please login again.");
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.debug("[favoritesService] Fetching favorite IDs");
-    }
+    console.log("[favoritesService] Fetching favorite IDs");
 
     type RawFavoriteId = {
       contentId?: string;
@@ -210,9 +221,7 @@ export const favoritesService = {
       "/favorites/ids"
     );
 
-    if (process.env.NODE_ENV === "development") {
-      console.debug("[favoritesService] Favorite IDs response", response.data);
-    }
+    console.log("[favoritesService] Favorite IDs response", response.data);
 
     // Normalize casing from backend (contentid/contenttype vs contentId/contentType)
     const normalizedIds = response.data.ids.reduce<

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   favoritesService,
@@ -14,28 +14,27 @@ import MovieCard from "@/components/movie/MovieCard";
 import { favoriteToMovieCardData } from "./utils/favoriteHelpers";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import { SKELETON_COUNT_MOVIE } from "@/constants/app.constants";
+import { Pagination } from "@/components/ui/Pagination";
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState<ProcessedFavorite[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const { isAuthenticated } = useAuth();
-
-  // Ref for intersection observer
-  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Fetch favorites
   const fetchFavorites = useCallback(
     async (pageNum: number = 1, append: boolean = false) => {
       if (!isAuthenticated) return;
 
+      console.log("[FavoritesPage] fetchFavorites called", { pageNum, append });
+
       if (pageNum === 1) {
         setLoading(true);
-      } else {
-        setLoadingMore(true);
       }
       setError(null);
 
@@ -46,55 +45,37 @@ const FavoritesPage = () => {
         };
 
         const response = await favoritesService.getUserFavorites(queryParams);
-        if (append && pageNum > 1) {
-          setFavorites((prev) => [...prev, ...response.favorites]);
-        } else {
-          setFavorites(response.favorites);
-        }
+        console.log("[FavoritesPage] favorites response", {
+          page: response.page,
+          totalPages: response.totalPages,
+          total: response.total,
+          count: response.favorites.length,
+          hasMore: response.hasMore,
+        });
+        setFavorites(response.favorites);
 
         setHasMore(response.hasMore);
         setPage(pageNum);
+        setTotalPages(response.totalPages);
+        setTotal(response.total);
       } catch (err) {
         console.error("Error fetching favorites:", err);
         setError("Failed to load favorites. Please try again.");
       } finally {
         setLoading(false);
-        setLoadingMore(false);
       }
     },
     [isAuthenticated]
   );
 
-  // Load more when reaching bottom
-  const loadMore = useCallback(() => {
-    if (!loadingMore && hasMore) {
-      fetchFavorites(page + 1, true);
-    }
-  }, [fetchFavorites, page, loadingMore, hasMore]);
-
-  // Intersection observer for infinite scroll
-  useEffect(() => {
-    if (!loadMoreRef.current || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMore();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(loadMoreRef.current);
-
-    return () => observer.disconnect();
-  }, [loadMore, hasMore]);
-
   // Initial load
   useEffect(() => {
     if (isAuthenticated) {
       // Only fetch local favorites data
+      console.log("[FavoritesPage] initial load: authenticated, fetching page 1");
       fetchFavorites(1, false);
+    } else {
+      console.log("[FavoritesPage] initial load: not authenticated, skip fetch");
     }
   }, [isAuthenticated, fetchFavorites]);
 
@@ -177,25 +158,14 @@ const FavoritesPage = () => {
                 })}
               </div>
 
-              {/* Infinite scroll trigger */}
-              {hasMore && (
-                <div
-                  ref={loadMoreRef}
-                  className="flex justify-center mt-12 py-8"
-                >
-                  {loadingMore && (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
-                      <span>Loading more...</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* End message */}
-              {!hasMore && favorites.length > 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  You&apos;ve reached the end of your favorites!
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-10 flex justify-center">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(nextPage) => fetchFavorites(nextPage, false)}
+                  />
                 </div>
               )}
             </>

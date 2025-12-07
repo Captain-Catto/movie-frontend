@@ -4,6 +4,7 @@ import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
   FALLBACK_POSTER,
+  TMDB_BACKDROP_SIZE,
 } from "@/constants/app.constants";
 
 /**
@@ -12,14 +13,21 @@ import {
 export const favoriteToMovieCardData = (
   favorite: ProcessedFavorite
 ): MovieCardData => {
+  const posterPath = favorite.poster_path || favorite.backdrop_path || null;
+  const posterUrl = posterPath
+    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`
+    : FALLBACK_POSTER;
+
   return {
     id: favorite.id.toString(),
     tmdbId: favorite.id,
     title: favorite.title || favorite.name || "",
     aliasTitle: favorite.title || favorite.name || "", // Use same title as alias if no alias available
-    poster: favorite.poster_path
-      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${favorite.poster_path}`
-      : FALLBACK_POSTER,
+    poster: posterUrl,
+    posterImage: posterUrl,
+    backgroundImage: favorite.backdrop_path
+      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${favorite.backdrop_path}`
+      : posterUrl,
     href:
       favorite.media_type === "tv"
         ? `/tv/${favorite.id}`
@@ -31,6 +39,7 @@ export const favoriteToMovieCardData = (
       : undefined,
     rating: favorite.vote_average,
     genres: favorite.genres || [],
+    genreIds: favorite.genre_ids || [],
     description: favorite.overview,
   };
 };
