@@ -186,20 +186,42 @@ export const favoritesService = {
     }
   },
 
+  /**
+   * Get only favorite IDs - lightweight for initial load
+   * Returns array of {contentId, contentType}
+   */
+  async getUserFavoriteIds(): Promise<Array<{ contentId: string; contentType: string }>> {
+    const token = authStorage.getToken();
+    if (!token) {
+      throw new Error("No authentication token found. Please login again.");
+    }
+
+    const response = await axiosInstance.get<{ ids: Array<{ contentId: string; contentType: string }>; total: number }>(
+      "/favorites/ids"
+    );
+
+    return response.data.ids;
+  },
+
+  /**
+   * Check if specific item is favorited - uses dedicated fast endpoint
+   * Much faster than fetching all favorites
+   */
   async checkIsFavorite(
     contentId: string,
     contentType: "movie" | "tv"
   ): Promise<boolean> {
     try {
-      // Use existing getUserFavorites to check if item exists
-      // We'll get all favorites and check if contentId exists
-      const response = await this.getUserFavorites({ page: 1, limit: 1000 });
+      const token = authStorage.getToken();
+      if (!token) {
+        return false;
+      }
 
-      // Check if the contentId exists in favorites list
-      return response.favorites.some(
-        (fav) =>
-          fav.id.toString() === contentId && fav.media_type === contentType
+      const response = await axiosInstance.get<{ isFavorite: boolean }>(
+        `/favorites/check/${contentId}/${contentType}`
       );
+
+      return response.data.isFavorite;
     } catch (error) {
       console.error("Error checking favorite status:", error);
       return false; // Default to false if check fails

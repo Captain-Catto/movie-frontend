@@ -10,6 +10,7 @@ import type { CastMember, CrewMember } from "@/types";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { apiService } from "@/services/api";
+import Container from "@/components/ui/Container";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -72,8 +73,12 @@ const PersonDetailPage = () => {
   const params = useParams();
   const personId = params.id as string;
   const [personData, setPersonData] = useState<PersonDetail | null>(null);
-  const [castCredits, setCastCredits] = useState<PaginatedCastCredits | null>(null);
-  const [crewCredits, setCrewCredits] = useState<PaginatedCrewCredits | null>(null);
+  const [castCredits, setCastCredits] = useState<PaginatedCastCredits | null>(
+    null
+  );
+  const [crewCredits, setCrewCredits] = useState<PaginatedCrewCredits | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"cast" | "crew">("cast");
@@ -82,13 +87,13 @@ const PersonDetailPage = () => {
   const [itemsPerPage] = useState(20);
 
   // Group crew items by movie to combine multiple jobs
-  const groupCrewByMovie = (crewItems: PaginatedCrewCredits['crew']) => {
+  const groupCrewByMovie = (crewItems: PaginatedCrewCredits["crew"]) => {
     const grouped = crewItems.reduce((acc, item) => {
       const key = `${item.id}-${item.media_type}`;
       if (acc[key]) {
         // Combine job titles
-        const existingJob = acc[key].job || '';
-        const newJob = item.job || '';
+        const existingJob = acc[key].job || "";
+        const newJob = item.job || "";
         if (existingJob && newJob && existingJob !== newJob) {
           acc[key].job = `${existingJob}, ${newJob}`;
         } else if (newJob) {
@@ -98,8 +103,8 @@ const PersonDetailPage = () => {
         acc[key] = { ...item };
       }
       return acc;
-    }, {} as Record<string, PaginatedCrewCredits['crew'][0]>);
-    
+    }, {} as Record<string, PaginatedCrewCredits["crew"][0]>);
+
     return Object.values(grouped);
   };
 
@@ -123,7 +128,7 @@ const PersonDetailPage = () => {
             metadata: {
               fromCache: true,
               totalCastItems: response.cast.length,
-            }
+            },
           };
 
           const groupedCrew = groupCrewByMovie(response.crew);
@@ -140,7 +145,7 @@ const PersonDetailPage = () => {
             metadata: {
               fromCache: true,
               totalCrewItems: groupedCrew.length, // Use grouped count
-            }
+            },
           };
 
           setCastCredits(castData);
@@ -156,7 +161,9 @@ const PersonDetailPage = () => {
       try {
         setLoading(true);
 
-        const personResponse = await apiService.getPersonDetails(parseInt(personId));
+        const personResponse = await apiService.getPersonDetails(
+          parseInt(personId)
+        );
 
         if (personResponse) {
           const normalizedPerson: PersonDetail = {
@@ -202,7 +209,7 @@ const PersonDetailPage = () => {
       // Update pagination info for current tab
       const currentData = activeTab === "cast" ? castCredits : crewCredits;
       const totalPages = currentData.pagination.totalPages;
-      
+
       // Reset to page 1 if current page is beyond available pages
       if (currentPage > totalPages && totalPages > 0) {
         setCurrentPage(1);
@@ -210,7 +217,7 @@ const PersonDetailPage = () => {
     }
   }, [activeTab, castCredits, crewCredits, currentPage]);
 
-  // Reset page to 1 when switching tabs  
+  // Reset page to 1 when switching tabs
   const handleTabChange = (tab: "cast" | "crew") => {
     setActiveTab(tab);
     setCurrentPage(1);
@@ -342,101 +349,97 @@ const PersonDetailPage = () => {
     <Layout>
       <div className="min-h-screen bg-gray-900">
         {/* Hero Section */}
-        <div className="relative pt-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-              {/* Profile Image */}
-              <div className="lg:col-span-1">
-                <div className="aspect-[2/3] relative rounded-xl overflow-hidden bg-gray-800">
-                  <Image
-                    src={getProfileImage()}
-                    alt={personData.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                </div>
+        <Container withHeaderOffset>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Profile Image */}
+            <div className="lg:col-span-1">
+              <div className="aspect-[2/3] relative rounded-xl overflow-hidden bg-gray-800">
+                <Image
+                  src={getProfileImage()}
+                  alt={personData.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Person Info */}
+            <div className="lg:col-span-3 space-y-6">
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  {personData.name}
+                </h1>
+                <p className="text-xl text-red-400 mb-4">{getKnownForText()}</p>
               </div>
 
-              {/* Person Info */}
-              <div className="lg:col-span-3 space-y-6">
-                <div>
-                  <h1 className="text-4xl font-bold text-white mb-2">
-                    {personData.name}
-                  </h1>
-                  <p className="text-xl text-red-400 mb-4">
-                    {getKnownForText()}
-                  </p>
-                </div>
-
-                {/* Personal Details */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {personData.birthday && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                        Date of Birth
-                      </h3>
-                      <p className="text-white">
-                        {formatDate(personData.birthday)}
-                      </p>
-                    </div>
-                  )}
-
-                  {personData.place_of_birth && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                        Place of Birth
-                      </h3>
-                      <p className="text-white">{personData.place_of_birth}</p>
-                    </div>
-                  )}
-
-                  {personData.deathday && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                        Date of Death
-                      </h3>
-                      <p className="text-white">
-                        {formatDate(personData.deathday)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Biography */}
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    Biography
-                  </h3>
-                  <div className="text-gray-300 leading-relaxed whitespace-pre-line">
-                    {personData.biography ? (
-                      <>
-                        {showFullBio
-                          ? personData.biography
-                          : truncateBiography(personData.biography)}
-                        {personData.biography.length > 300 && (
-                          <button
-                            onClick={() => setShowFullBio(!showFullBio)}
-                            className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
-                          >
-                            {showFullBio ? "Show less" : "Read more"}
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-gray-400 italic">
-                        Biography hiện chưa có
-                      </p>
-                    )}
+              {/* Personal Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {personData.birthday && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400 mb-1">
+                      Date of Birth
+                    </h3>
+                    <p className="text-white">
+                      {formatDate(personData.birthday)}
+                    </p>
                   </div>
+                )}
+
+                {personData.place_of_birth && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400 mb-1">
+                      Place of Birth
+                    </h3>
+                    <p className="text-white">{personData.place_of_birth}</p>
+                  </div>
+                )}
+
+                {personData.deathday && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-400 mb-1">
+                      Date of Death
+                    </h3>
+                    <p className="text-white">
+                      {formatDate(personData.deathday)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Biography */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  Biography
+                </h3>
+                <div className="text-gray-300 leading-relaxed whitespace-pre-line">
+                  {personData.biography ? (
+                    <>
+                      {showFullBio
+                        ? personData.biography
+                        : truncateBiography(personData.biography)}
+                      {personData.biography.length > 300 && (
+                        <button
+                          onClick={() => setShowFullBio(!showFullBio)}
+                          className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
+                        >
+                          {showFullBio ? "Show less" : "Read more"}
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-gray-400 italic">
+                      Biography hiện chưa có
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </Container>
 
         {/* Filmography Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Container>
           <div className="border-t border-gray-700 pt-8">
             <h2 className="text-2xl font-bold text-white mb-6">Filmography</h2>
 
@@ -484,28 +487,32 @@ const PersonDetailPage = () => {
             </div>
 
             {/* Pagination for cast tab */}
-            {activeTab === "cast" && castCredits?.pagination && castCredits.pagination.totalPages > 1 && (
-              <div className="mt-8 flex justify-center">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={castCredits.pagination.totalPages}
-                  onPageChange={(page) => setCurrentPage(page)}
-                  className="mb-8"
-                />
-              </div>
-            )}
+            {activeTab === "cast" &&
+              castCredits?.pagination &&
+              castCredits.pagination.totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={castCredits.pagination.totalPages}
+                    onPageChange={(page) => setCurrentPage(page)}
+                    className="mb-8"
+                  />
+                </div>
+              )}
 
             {/* Pagination for crew tab */}
-            {activeTab === "crew" && crewCredits?.pagination && crewCredits.pagination.totalPages > 1 && (
-              <div className="mt-8 flex justify-center">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={crewCredits.pagination.totalPages}
-                  onPageChange={(page) => setCurrentPage(page)}
-                  className="mb-8"
-                />
-              </div>
-            )}
+            {activeTab === "crew" &&
+              crewCredits?.pagination &&
+              crewCredits.pagination.totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={crewCredits.pagination.totalPages}
+                    onPageChange={(page) => setCurrentPage(page)}
+                    className="mb-8"
+                  />
+                </div>
+              )}
 
             {/* Empty state */}
             {((activeTab === "cast" && castItems.length === 0) ||
@@ -518,7 +525,7 @@ const PersonDetailPage = () => {
               </div>
             )}
           </div>
-        </div>
+        </Container>
       </div>
     </Layout>
   );

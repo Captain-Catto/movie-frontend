@@ -123,7 +123,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                 />
                 {/* Cover Fade */}
                 <div className="cover-fade absolute inset-0">
-                  <div className="cover-image w-full h-full">
+                  <div className="cover-image relative w-full h-full">
                     <Image
                       className="fade-in visible w-full h-full object-cover"
                       title={movie.title}

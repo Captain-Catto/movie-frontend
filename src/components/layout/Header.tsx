@@ -7,6 +7,7 @@ import AuthModal from "@/components/auth/AuthModal";
 import UserMenu from "@/components/layout/UserMenu";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsHydrated } from "@/hooks/useIsHydrated";
 
 interface HeaderProps {
   hideOnPlay?: boolean;
@@ -22,6 +23,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   const { user, isAuthenticated, logout } = useAuth();
+  const isHydrated = useIsHydrated();
 
   // Handle play state - hide header when playing (unless user has scrolled)
   useEffect(() => {
@@ -83,99 +85,125 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   ];
 
   return (
-    <nav
-      className={`fixed w-full z-[100] transition-all duration-300 ${
-        isScrolled
-          ? "bg-gray-800/95 backdrop-blur-sm shadow-lg"
-          : "bg-transparent"
-      } ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center mr-2">
-                <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
-              </div>
-              <span className="ml-2 text-xl font-bold text-white">
-                MovieStream
-              </span>
-            </Link>
-          </div>
+    <>
+      <nav
+        className={`fixed w-full z-[100] transition-all duration-300 ${
+          isScrolled
+            ? "bg-gray-800/95 backdrop-blur-sm shadow-lg"
+            : "bg-transparent"
+        } ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center">
+                <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center mr-2">
+                  <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                </div>
+                <span className="ml-2 text-xl font-bold text-white">
+                  MovieStream
+                </span>
+              </Link>
+            </div>
 
-          <div className="hidden md:block">
+            <div className="hidden lg:block">
+              <div className="flex items-center space-x-4">
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-white hover:text-red-500 transition-colors font-medium"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center space-x-4">
-              {navigationItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-white hover:text-red-500 transition-colors font-medium"
+              <button
+                className="p-1 hover:text-red-500 transition-colors text-white"
+                onClick={handleSearchClick}
+                title="Search"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-5 h-5"
                 >
-                  {item.label}
-                </Link>
-              ))}
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+              </button>
+
+              {/* Notification Bell - Only show when authenticated and hydrated */}
+              {isHydrated && isAuthenticated && <NotificationDropdown />}
+
+              {/* Auth Section - Wait for hydration to prevent mismatch */}
+              {isHydrated && isAuthenticated ? (
+                <UserMenu user={user} onLogout={logout} />
+              ) : isHydrated ? (
+                <button
+                  onClick={handleAuthModalOpen}
+                  className="text-white hover:text-red-500 transition-colors text-sm px-3 py-2 rounded bg-red-600 hover:bg-red-700"
+                >
+                  Login
+                </button>
+              ) : null}
+
+              {/* Hamburger Menu Button - Tablet & Mobile */}
+              <button
+                className="lg:hidden p-2 hover:text-red-500 transition-colors text-white relative z-50"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isMenuOpen}
+              >
+                <div className="w-6 h-5 flex flex-col justify-center items-center">
+                  <span
+                    className={`w-full h-0.5 bg-current transition-all duration-300 ease-out ${
+                      isMenuOpen
+                        ? "rotate-45 translate-y-[9px]"
+                        : "rotate-0 translate-y-0"
+                    }`}
+                  />
+                  <span
+                    className={`w-full h-0.5 bg-current my-1 transition-all duration-300 ease-out ${
+                      isMenuOpen ? "opacity-0 scale-0" : "opacity-100 scale-100"
+                    }`}
+                  />
+                  <span
+                    className={`w-full h-0.5 bg-current transition-all duration-300 ease-out ${
+                      isMenuOpen
+                        ? "-rotate-45 -translate-y-[9px]"
+                        : "rotate-0 translate-y-0"
+                    }`}
+                  />
+                </div>
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <button
-              className="p-1 hover:text-red-500 transition-colors text-white"
-              onClick={handleSearchClick}
-              title="Search"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-5 h-5"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
-            </button>
-
-            {/* Notification Bell - Only show when authenticated */}
-            {isAuthenticated && <NotificationDropdown />}
-
-            {/* Auth Section */}
-            {isAuthenticated ? (
-              <UserMenu user={user} onLogout={logout} />
-            ) : (
-              <button
-                onClick={handleAuthModalOpen}
-                className="text-white hover:text-red-500 transition-colors text-sm px-3 py-2 rounded bg-red-600 hover:bg-red-700"
-              >
-                Login
-              </button>
-            )}
-
-            <button
-              className="md:hidden p-1 hover:text-red-500 transition-colors text-white"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <div className="w-5 h-5 flex flex-col justify-center space-y-1">
-                <div className="w-full h-0.5 bg-current"></div>
-                <div className="w-full h-0.5 bg-current"></div>
-                <div className="w-full h-0.5 bg-current"></div>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-gray-800/90 rounded-lg mt-2">
+          {/* Mobile Menu Dropdown */}
+          <div
+            className={`lg:hidden transition-all duration-300 ease-out overflow-hidden ${
+              isMenuOpen
+                ? "max-h-[500px] opacity-100"
+                : "max-h-0 opacity-0 pointer-events-none"
+            }`}
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-gray-800/95 backdrop-blur-sm rounded-lg mt-2 shadow-lg">
               {navigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="block px-3 py-2 rounded-md transition-colors text-white hover:text-red-500 hover:bg-gray-700/50"
+                  className="block px-4 py-3 rounded-md transition-all duration-200 text-white hover:text-red-500 hover:bg-gray-700/50 font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.label}
@@ -183,8 +211,17 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      </nav>
+
+      {/* Backdrop Overlay - Click to close menu - Outside nav for proper stacking */}
+      {isMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[90] transition-opacity duration-300"
+          onClick={() => setIsMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Search Modal */}
       <SearchModal
@@ -198,7 +235,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
         onClose={handleAuthModalClose}
         onSuccess={handleAuthSuccess}
       />
-    </nav>
+    </>
   );
 };
 

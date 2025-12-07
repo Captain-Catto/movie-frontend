@@ -483,13 +483,24 @@ class ApiService {
     success: boolean;
     message?: string;
   }> {
+    // console.log("📡 [ApiService] getContentById called with ID:", id);
+
     try {
       // Try movie first (usually faster response)
+      const movieUrl = `${API_BASE_URL}/movies/${id}`;
+      // console.log("📡 [ApiService] Trying movie endpoint:", movieUrl);
+
       const movieResponse = await this.fetchWithErrorHandling<{
         success: boolean;
         message: string;
         data: Movie;
-      }>(`${API_BASE_URL}/movies/${id}`);
+      }>(movieUrl);
+
+      // console.log("📡 [ApiService] Movie response:", {
+      //   success: movieResponse.success,
+      //   hasData: !!movieResponse.data,
+      //   message: movieResponse.message,
+      // });
 
       if (movieResponse.success && movieResponse.data) {
         const content = movieResponse.data;
@@ -498,6 +509,11 @@ class ApiService {
           content.title &&
           (content.releaseDate !== undefined || content.tmdbId !== undefined)
         ) {
+          // console.log("✅ [ApiService] Found as MOVIE:", {
+          //   id: content.id,
+          //   title: content.title,
+          //   tmdbId: content.tmdbId,
+          // });
           return {
             content: movieResponse.data,
             contentType: "movie",
@@ -506,16 +522,26 @@ class ApiService {
         }
       }
     } catch {
+      // console.log("⚠️ [ApiService] Movie endpoint failed:", movieError);
       // Movie failed, try TV
     }
 
     try {
       // Try TV series
+      const tvUrl = `${API_BASE_URL}/tv/${id}`;
+      // console.log("📡 [ApiService] Trying TV endpoint:", tvUrl);
+
       const tvResponse = await this.fetchWithErrorHandling<{
         success: boolean;
         message: string;
         data: TVSeries;
-      }>(`${API_BASE_URL}/tv/${id}`);
+      }>(tvUrl);
+
+      // console.log("📡 [ApiService] TV response:", {
+      //   success: tvResponse.success,
+      //   hasData: !!tvResponse.data,
+      //   message: tvResponse.message,
+      // });
 
       if (tvResponse.success && tvResponse.data) {
         const content = tvResponse.data;
@@ -524,6 +550,11 @@ class ApiService {
           content.title &&
           (content.firstAirDate !== undefined || content.tmdbId !== undefined)
         ) {
+          // console.log("✅ [ApiService] Found as TV SERIES:", {
+          //   id: content.id,
+          //   title: content.title,
+          //   tmdbId: content.tmdbId,
+          // });
           return {
             content: tvResponse.data,
             contentType: "tv",
@@ -531,9 +562,11 @@ class ApiService {
           };
         }
       }
-    } catch {
+    } catch (tvError) {
+      // console.log("⚠️ [ApiService] TV endpoint failed:", tvError);
     }
 
+    console.error("❌ [ApiService] Content not found in both movie and TV databases");
     return {
       content: null,
       contentType: "movie",

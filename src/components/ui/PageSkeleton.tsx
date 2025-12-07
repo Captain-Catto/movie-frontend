@@ -1,6 +1,7 @@
 "use client";
 
 import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
+import Container from "@/components/ui/Container";
 
 type PageSkeletonProps = {
   title?: string;
@@ -20,7 +21,7 @@ export default function PageSkeleton({
 }: PageSkeletonProps) {
   return (
     <div className="min-h-[60vh] bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <Container withHeaderOffset>
         <span className="sr-only">{title}</span>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -42,7 +43,7 @@ export default function PageSkeleton({
             <MovieCardSkeleton key={idx} />
           ))}
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

@@ -1,13 +1,16 @@
 import { useEffect, RefObject, useRef } from "react";
+import { useIsHydrated } from "./useIsHydrated";
 
 /**
  * Hook that alerts clicks outside of the passed ref
+ * Hydration-safe: delays event listener attachment until after hydration
  */
 export function useClickOutside<T extends HTMLElement = HTMLElement>(
   ref: RefObject<T | null>,
   handler: (event: MouseEvent | TouchEvent) => void
 ) {
   const handlerRef = useRef(handler);
+  const isHydrated = useIsHydrated();
 
   // Update handler ref whenever handler changes
   useEffect(() => {
@@ -15,6 +18,11 @@ export function useClickOutside<T extends HTMLElement = HTMLElement>(
   }, [handler]);
 
   useEffect(() => {
+    // Don't attach listeners until after hydration
+    if (!isHydrated) {
+      return;
+    }
+
     const listener = (event: MouseEvent | TouchEvent) => {
       const el = ref?.current;
 
@@ -26,10 +34,14 @@ export function useClickOutside<T extends HTMLElement = HTMLElement>(
       handlerRef.current(event);
     };
 
-    document.addEventListener("click", listener);
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      document.addEventListener("click", listener);
+    }, 0);
 
     return () => {
+      clearTimeout(timer);
       document.removeEventListener("click", listener);
     };
-  }, [ref]); // Only depend on ref, not handler
+  }, [ref, isHydrated]); // Add isHydrated dependency
 }

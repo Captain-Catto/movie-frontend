@@ -104,10 +104,8 @@ function TrendingPageContent() {
   if (loading) {
     return (
       <Layout>
-        <Container withHeaderOffset className="py-8">
-          <h1 className="text-3xl font-bold text-white mb-8">
-            🔥 Trending
-          </h1>
+        <Container withHeaderOffset>
+          <h1 className="text-3xl font-bold text-white mb-8">🔥 Trending</h1>
 
           {/* Filter skeleton */}
           <div className="mb-8">
@@ -145,11 +143,9 @@ function TrendingPageContent() {
 
   return (
     <Layout>
-      <Container withHeaderOffset className="py-8">
+      <Container withHeaderOffset>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-8">
-            🔥 Trending
-          </h1>
+          <h1 className="text-3xl font-bold text-white mb-8">🔥 Trending</h1>
 
           {/* Filter Component */}
           <MovieFilters onFilterChange={handleFilterChange} className="mb-8" />
@@ -177,9 +173,7 @@ function TrendingPageContent() {
 export default function TrendingPage() {
   return (
     <Suspense
-      fallback={
-        <PageSkeleton title="Trending" items={SKELETON_COUNT_BROWSE} />
-      }
+      fallback={<PageSkeleton title="Trending" items={SKELETON_COUNT_BROWSE} />}
     >
       <TrendingPageContent />
     </Suspense>

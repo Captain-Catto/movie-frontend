@@ -18,11 +18,8 @@ export const fetchFavorites = createAsyncThunk(
   "favorites/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await favoritesService.getUserFavorites({
-        page: 1,
-        limit: 1000,
-      });
-      const favoriteIds = response.favorites.map((fav) => fav.id); // Use id (tmdbId) from ProcessedFavorite
+      const ids = await favoritesService.getUserFavoriteIds();
+      const favoriteIds = ids.map((item) => parseInt(item.contentId, 10));
       return favoriteIds;
     } catch (error) {
       return rejectWithValue(

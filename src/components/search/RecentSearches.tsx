@@ -5,6 +5,7 @@ import { Clock, X, Trash2 } from "lucide-react";
 import { RecentSearch } from "@/types/search";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
+import { ClientOnly } from "@/components/hydration/ClientOnly";
 
 interface RecentSearchesProps {
   searches: RecentSearch[];
@@ -97,12 +98,14 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                 </div>
 
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xs text-gray-400">
-                    {formatDistanceToNow(new Date(search.timestamp), {
-                      addSuffix: true,
-                      locale: vi,
-                    })}
-                  </span>
+                  <ClientOnly fallback={<span className="text-xs text-gray-400">Recently</span>}>
+                    <span className="text-xs text-gray-400">
+                      {formatDistanceToNow(new Date(search.timestamp), {
+                        addSuffix: true,
+                        locale: vi,
+                      })}
+                    </span>
+                  </ClientOnly>
 
                   {search.source === "local" && (
                     <span className="text-xs text-gray-500 bg-gray-700 px-1 rounded">

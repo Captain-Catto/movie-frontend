@@ -105,7 +105,7 @@ function MoviesPageContent() {
   if (loading) {
     return (
       <Layout>
-        <Container withHeaderOffset className="py-8">
+        <Container withHeaderOffset>
           <h1 className="text-3xl font-bold text-white mb-8">🎬 Movies</h1>
 
           {/* Filter skeleton */}
@@ -140,7 +140,7 @@ function MoviesPageContent() {
 
   return (
     <Layout>
-      <Container withHeaderOffset className="py-8">
+      <Container withHeaderOffset>
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-white mb-8">🎬 Movies</h1>
 

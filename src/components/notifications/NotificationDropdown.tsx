@@ -7,9 +7,9 @@ import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
 import axiosInstance from "@/lib/axios-instance";
-import { authStorage } from "@/lib/auth-storage";
-import { formatRelativeTime } from "@/utils/dateFormatter";
+import { RelativeTime } from "@/utils/hydration-safe-date";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Notification {
   id: number;
@@ -38,6 +38,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  const { isAuthenticated } = useAuth();
   const {
     unreadCount,
     isConnected,
@@ -52,10 +53,11 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   // Fetch existing notifications on component mount
   useEffect(() => {
     const fetchNotifications = async () => {
-      try {
-        const token = authStorage.getToken();
-        if (!token) return;
+      // Use isAuthenticated from Redux instead of localStorage
+      if (!isAuthenticated) return;
 
+      try {
+        // Token is automatically injected by axios interceptor
         const response = await axiosInstance.get("/notifications", {
           params: { limit: 10 },
         });
@@ -89,7 +91,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     };
 
     fetchNotifications();
-  }, []);
+  }, [isAuthenticated]);
 
   // Add new notification to list when received
   useEffect(() => {
@@ -254,9 +256,10 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                       <p className="text-sm text-gray-300 mt-1">
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {formatRelativeTime(notification.createdAt)}
-                      </p>
+                      <RelativeTime
+                        date={notification.createdAt}
+                        className="text-xs text-gray-400 mt-1 block"
+                      />
                     </div>
                     <div className="flex items-center space-x-1">
                       {!notification.isRead && (
@@ -294,3 +297,5 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     </div>
   );
 }
+
+export default NotificationDropdown;

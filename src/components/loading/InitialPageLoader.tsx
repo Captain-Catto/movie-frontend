@@ -2,24 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useIsHydrated } from "@/hooks/useIsHydrated";
 
 /**
  * Full-screen loader shown only on the first page load of the session.
  */
 export function InitialPageLoader() {
   const pathname = usePathname();
+  const isHydrated = useIsHydrated();
   const isHome =
     typeof window !== "undefined"
       ? window.location.pathname === "/"
       : pathname === "/";
   const [isVisible, setIsVisible] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    // Don't run until hydrated (avoids SSR issues with sessionStorage)
+    if (!isHydrated) return;
+
     if (!isHome) {
       sessionStorage.setItem("initial-loader-dismissed", "true");
       setIsVisible(false);
-      setIsMounted(false);
+      setShouldRender(false);
       return;
     }
 
@@ -27,18 +32,18 @@ export function InitialPageLoader() {
     let removeTimer: number | undefined;
 
     if (hasSeenLoader) {
-      setIsMounted(false);
+      setShouldRender(false);
       return;
     }
 
-    setIsMounted(true);
+    setShouldRender(true);
     setIsVisible(true);
 
     const hideTimer = window.setTimeout(() => {
       sessionStorage.setItem("initial-loader-dismissed", "true");
       setIsVisible(false);
 
-      removeTimer = window.setTimeout(() => setIsMounted(false), 450);
+      removeTimer = window.setTimeout(() => setShouldRender(false), 450);
     }, 1000);
 
     return () => {
@@ -47,13 +52,13 @@ export function InitialPageLoader() {
         window.clearTimeout(removeTimer);
       }
     };
-  }, [isHome]);
+  }, [isHydrated, isHome]);
 
   if (!isHome) {
     return null;
   }
 
-  if (!isMounted) {
+  if (!shouldRender) {
     return null;
   }
 

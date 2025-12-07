@@ -9,7 +9,11 @@ import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { MovieCardData } from "@/components/movie/MovieCard";
 import { Movie } from "@/types/movie";
 import useMovieCategory from "@/hooks/useMovieCategory";
-import { DEFAULT_LANGUAGE, DEFAULT_MOVIE_PAGE_SIZE, SKELETON_COUNT_MOVIE } from "@/constants/app.constants";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_MOVIE_PAGE_SIZE,
+  SKELETON_COUNT_MOVIE,
+} from "@/constants/app.constants";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 
 function PopularPageContent() {
@@ -25,7 +29,7 @@ function PopularPageContent() {
   return (
     <Layout>
       <div className="min-h-screen bg-gray-900">
-        <Container withHeaderOffset className="py-8">
+        <Container withHeaderOffset>
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">

@@ -143,7 +143,7 @@ const FavoritesPage = () => {
   return (
     <Layout>
       <div className="min-h-screen bg-gray-900 text-white">
-        <Container withHeaderOffset className="py-8">
+        <Container withHeaderOffset>
           <div className="flex items-center gap-3 mb-8">
             <Heart className="text-red-500 fill-current" size={32} />
             <h1 className="text-3xl font-bold">My Favorites</h1>

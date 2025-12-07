@@ -24,14 +24,22 @@ interface TvCategoryPageProps {
 
 const fetchers: Record<
   CategoryKey,
-  (query?: { page?: number; limit?: number; language?: string }) => Promise<TVSeriesResponse>
+  (query?: {
+    page?: number;
+    limit?: number;
+    language?: string;
+  }) => Promise<TVSeriesResponse>
 > = {
   "on-the-air": apiService.getOnTheAirTVSeries.bind(apiService),
   popular: apiService.getPopularTVSeries.bind(apiService),
   "top-rated": apiService.getTopRatedTVSeries.bind(apiService),
 };
 
-const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) => {
+const TvCategoryPage = ({
+  category,
+  title,
+  description,
+}: TvCategoryPageProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -65,8 +73,12 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
           throw new Error(response.message || "Failed to fetch TV series.");
         }
 
-        const payload = response.data as Record<string, unknown> | Array<Record<string, unknown>>;
-        const seriesArray: Array<Record<string, unknown>> = Array.isArray(payload)
+        const payload = response.data as
+          | Record<string, unknown>
+          | Array<Record<string, unknown>>;
+        const seriesArray: Array<Record<string, unknown>> = Array.isArray(
+          payload
+        )
           ? payload
           : (payload?.data as Array<Record<string, unknown>>) || [];
 
@@ -109,7 +121,7 @@ const TvCategoryPage = ({ category, title, description }: TvCategoryPageProps) =
 
   return (
     <Layout>
-      <Container withHeaderOffset className="py-8">
+      <Container withHeaderOffset>
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-white mb-2">{title}</h1>
           <p className="text-gray-400 mb-6 max-w-3xl">{description}</p>

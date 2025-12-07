@@ -14,7 +14,7 @@ interface ContainerProps {
   size?: "default" | "narrow" | "wide" | "full";
   /**
    * Padding preset
-   * - default: responsive padding (px-4 sm:px-6 lg:px-8)
+   * - default: wider responsive padding (px-6 sm:px-8 lg:px-12) to match updated page gutters
    * - tight: minimal padding (px-4)
    * - none: no padding
    */
@@ -60,7 +60,7 @@ export const Container = ({
         // Padding
         paddingClasses[padding],
         // Header offset
-        withHeaderOffset && "pt-20 lg:pt-24",
+        withHeaderOffset && "pt-16 lg:pt-18",
         // Custom classes
         className
       )}

@@ -30,7 +30,9 @@ function TVShowsPageContent() {
     basePath: "/tv",
     fetcher: apiService.getTVSeries.bind(apiService),
     mapper: (items) =>
-      mapTVSeriesToFrontendList(items as unknown as TVSeries[]) as MovieCardData[],
+      mapTVSeriesToFrontendList(
+        items as unknown as TVSeries[]
+      ) as MovieCardData[],
     defaultLimit: DEFAULT_TV_PAGE_SIZE,
     defaultLanguage: DEFAULT_LANGUAGE,
   });
@@ -55,10 +57,8 @@ function TVShowsPageContent() {
   if (loading) {
     return (
       <Layout>
-        <Container withHeaderOffset className="py-8">
-          <h1 className="text-3xl font-bold text-white mb-8">
-            📺 TV Series
-          </h1>
+        <Container withHeaderOffset>
+          <h1 className="text-3xl font-bold text-white mb-8">📺 TV Series</h1>
 
           {/* Filter skeleton */}
           <div className="mb-8">
@@ -96,11 +96,9 @@ function TVShowsPageContent() {
 
   return (
     <Layout>
-      <Container withHeaderOffset className="py-8">
+      <Container withHeaderOffset>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-8">
-            📺 TV Series
-          </h1>
+          <h1 className="text-3xl font-bold text-white mb-8">📺 TV Series</h1>
 
           {/* Filter Component */}
           <div className="mb-8">

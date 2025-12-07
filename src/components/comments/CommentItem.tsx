@@ -4,7 +4,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import { BiLike, BiDislike, BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import {
@@ -15,6 +14,7 @@ import {
 import CommentForm from "./CommentForm";
 import { useAppSelector } from "@/store/hooks";
 import { commentService } from "@/services/comment.service";
+import { RelativeTime } from "@/utils/hydration-safe-date";
 
 export function CommentItem({
   comment,
@@ -46,43 +46,6 @@ export function CommentItem({
     setCurrentComment(comment);
     setLocalReplyCount(comment.replyCount);
   }, [comment]);
-
-  // Format timestamp to Vietnamese
-  const formatTimestamp = (dateString: string) => {
-    try {
-      // Parse date - dateString from backend is UTC
-      const date = new Date(dateString);
-      const now = new Date();
-
-      const diffInMs = now.getTime() - date.getTime();
-      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
-      // Handle negative diff (future dates - shouldn't happen but just in case)
-      if (diffInMinutes < 0) {
-        return "just now";
-      }
-
-      if (diffInMinutes < 1) {
-        return "just now";
-      } else if (diffInMinutes < 60) {
-        return `${diffInMinutes} minutes ago`;
-      } else if (diffInHours < 24) {
-        return `${diffInHours} hours ago`;
-      } else if (diffInHours < 48) {
-        return "1 day ago";
-      } else if (diffInHours < 72) {
-        return "2 days ago";
-      } else if (diffInHours < 168) {
-        return `${Math.floor(diffInHours / 24)} days ago`;
-      } else {
-        return formatDistanceToNow(date, { addSuffix: true });
-      }
-    } catch (error) {
-      console.error('❌ [formatTimestamp] Error:', error);
-      return "Unknown time";
-    }
-  };
 
   // Auto-load replies when component mounts if there are replies
   useEffect(() => {
@@ -364,7 +327,10 @@ export function CommentItem({
           </div>
           <div className="ch-logs">
             <div className="c-time text-gray-400 text-xs">
-              {formatTimestamp(currentComment.createdAt)}
+              <RelativeTime
+                date={currentComment.createdAt}
+                className="inline"
+              />
               {currentComment.isEdited && (
                 <span className="text-gray-500 ml-2">(Edited)</span>
               )}

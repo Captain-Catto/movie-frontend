@@ -30,6 +30,10 @@ interface UseNotificationSocketReturn {
 
 export function useNotificationSocket(): UseNotificationSocketReturn {
   const { token, isAuthenticated } = useAuth();
+
+  // Hydration guard - prevent socket operations during SSR/hydration
+  const [isReady, setIsReady] = useState(false);
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -41,6 +45,16 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
   const isAuthenticatedRef = useRef(isAuthenticated);
   const tokenRef = useRef(token);
 
+  // Hydration safety with delay
+  useEffect(() => {
+    // Add small delay to ensure React has fully hydrated
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100); // 100ms delay after mount
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Update refs when values change
   useEffect(() => {
     isAuthenticatedRef.current = isAuthenticated;
@@ -49,8 +63,8 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
 
   // Socket connection management
   useEffect(() => {
-    // Only connect if authenticated and has token
-    if (!isAuthenticated || !token) {
+    // CRITICAL: Block socket connection until fully ready
+    if (!isReady || !isAuthenticated || !token) {
       // Cleanup existing connection
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -101,16 +115,23 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       // Optional: Trigger token refresh or re-login
     });
 
+    // Buffer notification events to prevent hydration issues
     newSocket.on("notification:new", (notification: NotificationData) => {
-      const createdAt =
-        notification?.createdAt instanceof Date
-          ? notification.createdAt
-          : new Date(notification?.createdAt || Date.now());
-      setLatestNotification({ ...notification, createdAt });
+      // Use setTimeout to defer state update to next tick
+      setTimeout(() => {
+        const createdAt =
+          notification?.createdAt instanceof Date
+            ? notification.createdAt
+            : new Date(notification?.createdAt || Date.now());
+        setLatestNotification({ ...notification, createdAt });
+      }, 0);
     });
 
     newSocket.on("notification:unread-count", (data: { count: number }) => {
-      setUnreadCount(data.count);
+      // Defer to next tick
+      setTimeout(() => {
+        setUnreadCount(data.count);
+      }, 0);
     });
 
     // Cleanup function
@@ -120,7 +141,7 @@ export function useNotificationSocket(): UseNotificationSocketReturn {
       setSocket(null);
       setIsConnected(false);
     };
-  }, [isAuthenticated, token]); // Only re-run when auth state or token changes
+  }, [isReady, isAuthenticated, token]); // Update to use isReady
 
   const markAsRead = (notificationId: number) => {
     if (socketRef.current && isConnected) {

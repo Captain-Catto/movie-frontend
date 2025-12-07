@@ -5,12 +5,13 @@ import type { SyntheticEvent } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import Layout from "@/components/layout/Layout";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import GenreBadge from "@/components/ui/GenreBadge";
+import Layout from "@/components/layout/Layout";
+import Container from "@/components/ui/Container";
 import { apiService } from "@/services/api";
 import { normalizeRatingValue } from "@/utils/rating";
 import { MovieDetail, Movie, TVSeries } from "@/types/movie";
@@ -35,6 +36,13 @@ const MovieDetailPageContent = () => {
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contentType, setContentType] = useState<"movie" | "tv" | null>(null);
+
+  // Component mount log (commented for production)
+  // useEffect(() => {
+  //   console.log("🎬 [MovieDetailPage] Component mounted with params:", params);
+  //   console.log("🎬 [MovieDetailPage] Extracted movieId:", movieId);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   // Function to fetch credits after basic movie data is loaded
   const fetchCredits = async (movieId: number) => {
@@ -79,7 +87,6 @@ const MovieDetailPageContent = () => {
             status: credits.status || prevData.status,
           };
         });
-
       }
     } catch (error) {
       console.error("Error fetching credits:", error);
@@ -91,16 +98,27 @@ const MovieDetailPageContent = () => {
 
   useEffect(() => {
     const fetchMovieData = async () => {
+      // console.log("🎬 [MovieDetailPage] Starting fetchMovieData");
+      // console.log("🎬 [MovieDetailPage] movieId from params:", movieId);
+
       try {
         setLoading(true);
         setError(null);
 
+        // console.log("🎬 [MovieDetailPage] Calling apiService.getContentById with ID:", parseInt(movieId));
         const contentResult = await apiService.getContentById(
           parseInt(movieId)
         );
 
+        // console.log("🎬 [MovieDetailPage] API Response:", {
+        //   success: contentResult.success,
+        //   contentType: contentResult.contentType,
+        //   hasContent: !!contentResult.content,
+        //   message: contentResult.message,
+        // });
+
         if (!contentResult.success || !contentResult.content) {
-          console.error("Content not found:", contentResult.message);
+          console.error("❌ [MovieDetailPage] Content not found:", contentResult.message);
           setError(
             `Content not found with ID: ${movieId}. Please try again later or choose different content.`
           );
@@ -109,10 +127,13 @@ const MovieDetailPageContent = () => {
 
         const content = contentResult.content;
         const isMovie = contentResult.contentType === "movie";
+        // console.log("🎬 [MovieDetailPage] Content type:", contentResult.contentType);
+        // console.log("🎬 [MovieDetailPage] Raw content data:", content);
         setContentType(contentResult.contentType);
 
         if (content) {
           if (isMovie) {
+            // console.log("🎥 [MovieDetailPage] Processing MOVIE content");
             const movieContent = content as Movie;
             // Transform Backend Movie API data
             const genreNames =
@@ -120,7 +141,12 @@ const MovieDetailPageContent = () => {
                 ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [];
 
-            setMovieData({
+            // console.log("🎥 [MovieDetailPage] Genre mapping:", {
+            //   genreIds: movieContent.genreIds,
+            //   genreNames,
+            // });
+
+            const transformedMovieData = {
               id: movieContent.id,
               title: movieContent.title,
               aliasTitle: movieContent.title || movieContent.title,
@@ -159,16 +185,21 @@ const MovieDetailPageContent = () => {
                 movieContent.originalLanguage === "vi"
                   ? "Vietsub"
                   : movieContent.originalLanguage?.toUpperCase() || "",
-              contentType: "movie",
+              contentType: "movie" as const,
               tmdbId: movieContent.tmdbId,
               voteCount: movieContent.voteCount,
               popularity: movieContent.popularity,
               scenes: [],
-            });
+            };
+
+            // console.log("🎥 [MovieDetailPage] Transformed movie data:", transformedMovieData);
+            setMovieData(transformedMovieData);
 
             // Fetch credits after setting basic data
+            // console.log("🎥 [MovieDetailPage] Fetching credits for tmdbId:", movieContent.tmdbId || movieContent.id);
             fetchCredits(movieContent.tmdbId || movieContent.id);
           } else {
+            // console.log("📺 [MovieDetailPage] Processing TV SERIES content");
             const tvContent = content as TVSeries;
             // Transform Backend TV Series API data
             const genreNames =
@@ -176,7 +207,12 @@ const MovieDetailPageContent = () => {
                 ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
                 .filter(Boolean) || [];
 
-            setMovieData({
+            // console.log("📺 [MovieDetailPage] Genre mapping:", {
+            //   genreIds: tvContent.genreIds,
+            //   genreNames,
+            // });
+
+            const transformedTVData = {
               id: tvContent.id,
               title: tvContent.title || tvContent.originalTitle || "Untitled",
               aliasTitle:
@@ -201,9 +237,7 @@ const MovieDetailPageContent = () => {
                 tvContent.backdropPath ||
                 FALLBACK_POSTER,
               posterImage:
-                tvContent.posterUrl ||
-                tvContent.posterPath ||
-                FALLBACK_POSTER,
+                tvContent.posterUrl || tvContent.posterPath || FALLBACK_POSTER,
               director: null,
               cast: [],
               country: "Loading...",
@@ -213,25 +247,34 @@ const MovieDetailPageContent = () => {
                 tvContent.originalLanguage === "vi"
                   ? "Vietsub"
                   : tvContent.originalLanguage?.toUpperCase() || "",
-              contentType: "tv",
+              contentType: "tv" as const,
               tmdbId: tvContent.tmdbId,
               voteCount: tvContent.voteCount,
               popularity: tvContent.popularity,
               scenes: [],
-            });
+            };
+
+            // console.log("📺 [MovieDetailPage] Transformed TV data:", transformedTVData);
+            setMovieData(transformedTVData);
 
             // Fetch credits for TV shows (not implemented yet, but structure is ready)
             // fetchTVCredits(content.tmdbId || content.id);
           }
         } else {
+          // console.log("⚠️ [MovieDetailPage] No content data returned");
           throw new Error(
             contentResult.message || "Failed to fetch content data"
           );
         }
       } catch (err) {
-        console.error("Error fetching movie:", err);
+        console.error("❌ [MovieDetailPage] Error in fetchMovieData:", err);
+        console.error("❌ [MovieDetailPage] Error details:", {
+          message: err instanceof Error ? err.message : "Unknown error",
+          stack: err instanceof Error ? err.stack : undefined,
+        });
         setError(err instanceof Error ? err.message : "An error occurred");
 
+        // console.log("🔄 [MovieDetailPage] Using fallback mock data");
         // Fallback to mock data
         setMovieData({
           id: parseInt(movieId),
@@ -286,21 +329,34 @@ const MovieDetailPageContent = () => {
           ],
           tmdbId: parseInt(movieId),
           genreIds: [27, 9648, 53], // Horror, Mystery, Thriller
-          contentType: "movie",
+          contentType: "movie" as const,
           voteCount: 1234,
           popularity: 85.5,
         });
       } finally {
+        // console.log("✅ [MovieDetailPage] fetchMovieData completed");
         setLoading(false);
       }
     };
 
+    // console.log("🚀 [MovieDetailPage] useEffect triggered, movieId:", movieId);
     if (movieId) {
       fetchMovieData();
+    } else {
+      console.warn("⚠️ [MovieDetailPage] No movieId provided");
     }
   }, [movieId]);
 
+  // console.log("🎨 [MovieDetailPage] Render - State:", {
+  //   loading,
+  //   hasMovieData: !!movieData,
+  //   movieDataTitle: movieData?.title,
+  //   error,
+  //   contentType,
+  // });
+
   if (loading) {
+    // console.log("⏳ [MovieDetailPage] Rendering loading skeleton");
     return (
       <Layout>
         <DetailPageSkeleton />
@@ -309,6 +365,7 @@ const MovieDetailPageContent = () => {
   }
 
   if (!movieData) {
+    // console.log("❌ [MovieDetailPage] Rendering error: No movie data");
     return (
       <Layout>
         <div className="min-h-screen">
@@ -322,6 +379,12 @@ const MovieDetailPageContent = () => {
     );
   }
 
+  // console.log("✨ [MovieDetailPage] Rendering movie detail page with data:", {
+  //   id: movieData.id,
+  //   title: movieData.title,
+  //   contentType: movieData.contentType,
+  // });
+
   return (
     <Layout>
       <div className="min-h-screen">
@@ -332,7 +395,7 @@ const MovieDetailPageContent = () => {
         )}
 
         {/* Hero Section */}
-        <div className="relative h-[70vh] lg:pt-16 md:pt-36 pt-32">
+        <div className="relative min-h-[70vh]">
           {/* Background Image */}
           <div className="absolute inset-0">
             <Image
@@ -346,7 +409,11 @@ const MovieDetailPageContent = () => {
           </div>
           <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
 
-          <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+          <Container
+            withHeaderOffset
+            padding="tight"
+            className="relative z-10 flex items-center min-h-[70vh] pt-10 pb-12 lg:pt-14"
+          >
             <div className="flex gap-8 w-full">
               {/* Poster */}
               <div className="hidden md:block flex-shrink-0">
@@ -468,11 +535,11 @@ const MovieDetailPageContent = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Container>
         </div>
 
         {/* Movie Details Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Container padding="tight" className="py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
@@ -511,7 +578,9 @@ const MovieDetailPageContent = () => {
                                 className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
                                 loading="lazy"
                                 sizes="(max-width: 768px) 50vw, 25vw"
-                                onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                                onError={(
+                                  e: SyntheticEvent<HTMLImageElement>
+                                ) => {
                                   e.currentTarget.src = "/images/no-avatar.svg";
                                 }}
                               />
@@ -627,7 +696,7 @@ const MovieDetailPageContent = () => {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
 
         {/* Recommendations Section */}
         {movieData.tmdbId && (

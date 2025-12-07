@@ -145,7 +145,8 @@ function BrowsePageContent() {
               .filter((n) => Number.isFinite(n));
             if (genreFilterIds.length) {
               frontendMovies = frontendMovies.filter((movie) => {
-                if (!movie.genreIds || movie.genreIds.length === 0) return false;
+                if (!movie.genreIds || movie.genreIds.length === 0)
+                  return false;
                 return movie.genreIds.some((id) => genreFilterIds.includes(id));
               });
             }
@@ -158,8 +159,9 @@ function BrowsePageContent() {
             responseRecord = response as unknown as Record<string, unknown>;
           }
           const topLevelPagination =
-            (responseRecord.pagination as Record<string, unknown> | undefined) ??
-            undefined;
+            (responseRecord.pagination as
+              | Record<string, unknown>
+              | undefined) ?? undefined;
 
           const metaRecord =
             responseRecord.meta && typeof responseRecord.meta === "object"
@@ -304,8 +306,7 @@ function BrowsePageContent() {
   }, [fetchMovies, searchParams]);
 
   const handlePageChange = (page: number) => {
-    const type =
-      currentFilters.movieType || searchParams.get("type") || "";
+    const type = currentFilters.movieType || searchParams.get("type") || "";
     setPaginationInfo((prev) => ({
       ...prev,
       currentPage: page,
@@ -315,7 +316,7 @@ function BrowsePageContent() {
 
   return (
     <Layout>
-      <Container withHeaderOffset className="py-8">
+      <Container withHeaderOffset>
         <h1 className="text-3xl font-bold text-white mb-8">{pageTitle}</h1>
 
         {/* Filter Component */}
