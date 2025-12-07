@@ -8,6 +8,7 @@ import { NotificationDropdown } from "@/components/notifications/NotificationDro
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import UserMenu from "@/components/layout/UserMenu";
+import { HeartIcon, Search } from "lucide-react";
 
 interface HeaderProps {
   hideOnPlay?: boolean;
@@ -80,7 +81,6 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
     { href: "/browse", label: "Browse" },
     { href: "/tv", label: "TV Series" },
     { href: "/people", label: "Actors" },
-    { href: "/favorites", label: "Favorites" },
   ];
 
   return (
@@ -227,11 +227,11 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
             </button>
 
             {/* Mobile profile & actions */}
-            <div className="flex flex-col gap-3 bg-gray-900/80 rounded-lg px-4 py-3">
+            <div className="flex flex-col items-end gap-3 bg-gray-900/80 rounded-lg px-4 py-3 w-full">
               <Link
                 href={isAuthenticated ? "/account" : "#"}
                 onClick={() => isAuthenticated && setIsMenuOpen(false)}
-                className="flex items-center gap-3"
+                className="flex flex-row-reverse items-center gap-3 w-full"
                 aria-label="Go to account"
               >
                 <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
@@ -250,7 +250,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                     </span>
                   )}
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col items-end text-right">
                   <span className="text-white text-sm font-semibold">
                     {isHydrated && isAuthenticated
                       ? user?.name || "User"
@@ -264,12 +264,21 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                 </div>
               </Link>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap justify-end w-full">
                 {isHydrated && isAuthenticated && (
                   <div className="flex-shrink-0">
                     <NotificationDropdown />
                   </div>
                 )}
+                {/* Favorites as heart icon (mobile) */}
+                <Link
+                  href="/favorites"
+                  className="p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
+                  aria-label="Favorites"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <HeartIcon size={16}></HeartIcon>
+                </Link>
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
@@ -278,20 +287,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   className="p-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition-colors"
                   aria-label="Search"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </svg>
+                  <Search size={16} />
                 </button>
               </div>
             </div>
@@ -312,7 +308,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
               <Link
                 key={item.href}
                 href={item.href}
-                className="block px-4 py-3 rounded-md transition-all duration-200 text-white hover:text-red-500 hover:bg-gray-700/50 font-medium"
+                className="block w-full px-4 py-3 rounded-md transition-all duration-200 text-white hover:text-red-500 hover:bg-gray-700/50 font-medium text-right"
                 onClick={() => setIsMenuOpen(false)}
               >
                 {item.label}
