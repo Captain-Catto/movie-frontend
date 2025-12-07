@@ -118,7 +118,10 @@ const MovieDetailPageContent = () => {
         // });
 
         if (!contentResult.success || !contentResult.content) {
-          console.error("❌ [MovieDetailPage] Content not found:", contentResult.message);
+          console.error(
+            "❌ [MovieDetailPage] Content not found:",
+            contentResult.message
+          );
           setError(
             `Content not found with ID: ${movieId}. Please try again later or choose different content.`
           );
@@ -412,7 +415,7 @@ const MovieDetailPageContent = () => {
           <Container
             withHeaderOffset
             padding="tight"
-            className="relative z-10 flex items-center min-h-[70vh] pt-10 pb-12 lg:pt-14"
+            className="relative z-10 flex items-center min-h-[70vh] pt-18 pb-12 lg:pt-14"
           >
             <div className="flex gap-8 w-full">
               {/* Poster */}

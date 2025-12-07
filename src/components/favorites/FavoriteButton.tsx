@@ -22,6 +22,8 @@ interface FavoriteButtonProps {
   className?: string;
   iconOnly?: boolean;
   size?: "default" | "compact";
+  stopPropagation?: boolean; // chặn click lên cha
+  preventDefault?: boolean;
 }
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({
@@ -29,6 +31,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   className = "",
   iconOnly = false,
   size = "default",
+  stopPropagation = true,
+  preventDefault = true,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastToggleAt, setLastToggleAt] = useState<number | null>(null);
@@ -70,7 +74,12 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     return null;
   }
 
-  const handleToggleFavorite = async () => {
+  const handleToggleFavorite = async (
+    e?: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (stopPropagation) e?.stopPropagation();
+    if (preventDefault) e?.preventDefault();
+
     // Prevent rapid double-clicks/spam
     if (isProcessing) return;
     const now = Date.now();
@@ -129,7 +138,9 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         className={`
           ${iconOnly ? "p-3" : size === "compact" ? "px-3 py-2" : "px-8 py-4"}
           bg-gray-400 text-white font-semibold rounded-lg
-          flex items-center ${iconOnly ? "justify-center" : ""} ${size === "compact" ? "gap-1.5 text-xs" : "gap-2"}
+          flex items-center ${iconOnly ? "justify-center" : ""} ${
+          size === "compact" ? "gap-1.5 text-xs" : "gap-2"
+        }
           opacity-50 cursor-not-allowed transition-colors
           ${className}
         `}
@@ -153,7 +164,9 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       onClick={handleToggleFavorite}
       className={`
         font-semibold rounded-lg
-        flex items-center ${iconOnly ? "justify-center" : ""} transition-colors cursor-pointer
+        flex items-center ${
+          iconOnly ? "justify-center" : ""
+        } transition-colors cursor-pointer
         ${
           isFavorite
             ? "bg-red-500 hover:bg-red-600 text-white"
