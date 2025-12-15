@@ -4,7 +4,7 @@ import MovieGrid from "@/components/movie/MovieGrid";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import { DEFAULT_LANGUAGE } from "@/constants/app.constants";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 

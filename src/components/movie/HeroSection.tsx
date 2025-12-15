@@ -9,7 +9,7 @@ import type { Swiper as SwiperType } from "swiper";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import HeroSkeleton from "@/components/ui/HeroSkeleton";
 import { useLoading } from "@/hooks/useLoading";
-import type { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import GenreBadge from "@/components/ui/GenreBadge";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";

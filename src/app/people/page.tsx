@@ -52,12 +52,12 @@ const PeoplePage = () => {
           setPeople((prev) => [...prev, ...data.results]);
         }
 
-        setHasMore(pageNum < data.total_pages && pageNum < 10); // Limit to 10 pages
+        setHasMore(pageNum < data.total_pages && pageNum < 10);
         setError(null);
       }
     } catch (err) {
       console.error("Error fetching people:", err);
-      setError("Không thể tải danh sách diễn viên");
+      setError("Failed to load people. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -80,9 +80,11 @@ const PeoplePage = () => {
       <div className="min-h-screen bg-gray-900">
         <Container withHeaderOffset>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">Diễn viên</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Actors & Directors
+            </h1>
             <p className="text-gray-400">
-              Khám phá các diễn viên và nhà làm phim nổi tiếng
+              Explore a whole world of actors and filmmakers
             </p>
           </div>
 

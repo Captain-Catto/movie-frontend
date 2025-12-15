@@ -6,30 +6,7 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
-
-export interface MovieCardData {
-  id: string;
-  tmdbId: number;
-  title: string;
-  aliasTitle: string;
-  poster: string;
-  href: string;
-  episodeNumber?: number;
-  totalEpisodes?: number;
-  isComplete?: boolean;
-  hasSubtitle?: boolean;
-  isDubbed?: boolean;
-  year?: number;
-  rating?: number;
-  genre?: string;
-  genres?: string[];
-  genreIds?: number[];
-  duration?: string;
-  description?: string;
-  backgroundImage?: string;
-  posterImage?: string;
-  scenes?: string[];
-}
+import type { MovieCardData } from "@/types/movie";
 
 interface MovieCardProps {
   movie: MovieCardData;

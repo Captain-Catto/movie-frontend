@@ -5,7 +5,7 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import { apiService } from "@/services/api";
 import {
   DEFAULT_LANGUAGE,

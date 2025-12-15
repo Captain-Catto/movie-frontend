@@ -23,15 +23,15 @@ const PersonCard = ({ person }: PersonCardProps) => {
   const getKnownForText = () => {
     switch (person.known_for_department) {
       case "Acting":
-        return "Diễn viên";
+        return "Actor";
       case "Directing":
-        return "Đạo diễn";
+        return "Director";
       case "Writing":
-        return "Biên kịch";
+        return "Writer";
       case "Production":
-        return "Sản xuất";
+        return "Production";
       default:
-        return person.known_for_department || "Nghệ sĩ";
+        return person.known_for_department || "Artist";
     }
   };
 

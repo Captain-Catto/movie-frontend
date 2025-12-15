@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
 import type { TVSeriesResponse } from "@/types";

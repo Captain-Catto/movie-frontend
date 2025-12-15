@@ -8,7 +8,7 @@ import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 

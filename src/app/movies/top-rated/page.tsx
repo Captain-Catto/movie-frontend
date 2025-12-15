@@ -6,7 +6,7 @@ import MovieGrid from "@/components/movie/MovieGrid";
 import LinkPagination from "@/components/ui/LinkPagination";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import { Movie } from "@/types/movie";
 import useMovieCategory from "@/hooks/useMovieCategory";
 import {

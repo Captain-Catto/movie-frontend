@@ -1,5 +1,5 @@
 import { ProcessedFavorite } from "@/services/favorites.service";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,

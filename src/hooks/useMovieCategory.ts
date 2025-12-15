@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MovieQuery } from "@/types/movie";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_MOVIE_PAGE_SIZE,

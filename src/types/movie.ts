@@ -280,3 +280,64 @@ export interface CreditsResponse {
   status?: string;
   created_by?: Array<{ id: number; name: string }>;
 }
+
+/**
+ * Universal card data type for displaying movie/TV content in grids and carousels
+ * Used across all components that display content cards
+ */
+export interface MovieCardData {
+  id: string;
+  tmdbId: number;
+  title: string;
+  aliasTitle: string;
+  poster: string;
+  href: string;
+  episodeNumber?: number;
+  totalEpisodes?: number;
+  isComplete?: boolean;
+  hasSubtitle?: boolean;
+  isDubbed?: boolean;
+  year?: number;
+  rating?: number;
+  genre?: string;
+  genres?: string[];
+  genreIds?: number[];
+  duration?: string;
+  description?: string;
+  backgroundImage?: string;
+  posterImage?: string;
+  scenes?: string[];
+}
+
+/**
+ * Input type for movie/TV data mapping from API responses
+ * Handles both snake_case (TMDB API) and camelCase (backend) formats
+ */
+export interface MovieInput {
+  id?: number; // TMDB ID from API responses (may be optional in some endpoints)
+  tmdbId?: number; // TMDB ID from backend (may be optional in some endpoints)
+  title?: string;
+  original_title?: string; // snake_case from TMDB API
+  originalTitle?: string; // camelCase from backend
+  name?: string; // for TV series
+  original_name?: string; // for TV series snake_case
+  originalName?: string; // for TV series camelCase
+  overview?: string;
+  posterPath?: string | null;
+  poster_path?: string | null; // snake_case from TMDB API
+  posterUrl?: string | null; // from backend API
+  backdropPath?: string | null;
+  backdrop_path?: string | null; // snake_case from TMDB API
+  backdropUrl?: string | null; // from backend API
+  releaseDate?: string | Date | null;
+  release_date?: string | null; // snake_case from TMDB API
+  first_air_date?: string | null; // for TV series (snake_case)
+  firstAirDate?: string | Date | null; // for TV series (camelCase from backend)
+  voteAverage?: number;
+  vote_average?: number; // snake_case from TMDB API
+  genreIds?: (string | number)[] | null;
+  genre_ids?: (string | number)[] | null; // snake_case from TMDB API
+  media_type?: string; // "movie" or "tv"
+  mediaType?: string; // camelCase version
+  [key: string]: unknown; // Allow for additional properties
+}

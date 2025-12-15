@@ -1,4 +1,4 @@
-import { Movie, FrontendMovie } from "@/types/movie";
+import { Movie, FrontendMovie, MovieInput } from "@/types/movie";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -7,35 +7,6 @@ import {
 } from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { detectContentType } from "@/utils/contentType";
-
-interface MovieInput {
-  id?: number; // TMDB ID from API responses (may be optional in some endpoints)
-  tmdbId?: number; // TMDB ID from backend (may be optional in some endpoints)
-  title?: string;
-  original_title?: string; // snake_case from TMDB API
-  originalTitle?: string; // camelCase from backend
-  name?: string; // for TV series
-  original_name?: string; // for TV series snake_case
-  originalName?: string; // for TV series camelCase
-  overview?: string;
-  posterPath?: string | null;
-  poster_path?: string | null; // snake_case from TMDB API
-  posterUrl?: string; // from backend API
-  backdropPath?: string | null;
-  backdrop_path?: string | null; // snake_case from TMDB API
-  backdropUrl?: string; // from backend API
-  releaseDate?: string | Date | null;
-  release_date?: string | null; // snake_case from TMDB API
-  first_air_date?: string | null; // for TV series (snake_case)
-  firstAirDate?: string | Date | null; // for TV series (camelCase from backend)
-  voteAverage?: number;
-  vote_average?: number; // snake_case from TMDB API
-  genreIds?: (string | number)[] | null;
-  genre_ids?: (string | number)[] | null; // snake_case from TMDB API
-  media_type?: string; // "movie" or "tv"
-  mediaType?: string; // camelCase version
-  [key: string]: unknown; // Allow for additional properties
-}
 
 export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // TMDB ID is REQUIRED since all data comes from TMDB

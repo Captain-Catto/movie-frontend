@@ -55,7 +55,7 @@ const PeopleGrid = ({
             <h3 className="text-lg font-medium text-white mb-2">
               No actors found
             </h3>
-            <p>Danh sách diễn viên hiện tại trống</p>
+            <p>Actors list is currently empty</p>
           </div>
         </div>
       )}
@@ -67,7 +67,7 @@ const PeopleGrid = ({
             onClick={onLoadMore}
             className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
           >
-            Xem thêm
+            Load More
           </button>
         </div>
       )}

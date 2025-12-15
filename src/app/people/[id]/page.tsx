@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import MovieCard from "@/components/movie/MovieCard";
-import { MovieCardData } from "@/components/movie/MovieCard";
+import type { MovieCardData } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
