@@ -438,7 +438,7 @@ const TVDetailPageContent = () => {
                     alt={tvData.title}
                     fill
                     className="object-cover rounded-lg shadow-2xl"
-                    loading="lazy"
+                    priority
                     sizes="(max-width: 768px) 192px, (max-width: 1024px) 256px, 288px"
                   />
                 </div>

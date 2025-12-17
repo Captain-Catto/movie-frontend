@@ -426,7 +426,7 @@ const MovieDetailPageContent = () => {
                     alt={movieData.title}
                     fill
                     className="object-cover rounded-lg shadow-2xl"
-                    loading="lazy"
+                    priority
                     sizes="256px"
                   />
                 </div>
