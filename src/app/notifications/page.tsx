@@ -215,7 +215,7 @@ export default function NotificationsPage() {
                             if (!isClickable) return;
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              targetUrl && router.push(targetUrl);
+                              if (targetUrl) router.push(targetUrl);
                             }
                           }}
                         >

@@ -6,6 +6,8 @@
 const AUTH_TOKEN_KEY = "authToken";
 const USER_DATA_KEY = "userData";
 const REFRESH_TOKEN_KEY = "refreshToken";
+const hasStorage = () =>
+  typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 
 export interface StoredUser {
   id: number;
@@ -25,6 +27,7 @@ export const authStorage = {
    */
   setToken(token: string): void {
     try {
+      if (!hasStorage()) return;
       localStorage.setItem(AUTH_TOKEN_KEY, token);
     } catch (error) {
       console.error("Failed to save token:", error);
@@ -36,6 +39,7 @@ export const authStorage = {
    */
   getToken(): string | null {
     try {
+      if (!hasStorage()) return null;
       return localStorage.getItem(AUTH_TOKEN_KEY);
     } catch (error) {
       console.error("Failed to get token:", error);
@@ -48,6 +52,7 @@ export const authStorage = {
    */
   removeToken(): void {
     try {
+      if (!hasStorage()) return;
       localStorage.removeItem(AUTH_TOKEN_KEY);
     } catch (error) {
       console.error("Failed to remove token:", error);
@@ -59,6 +64,7 @@ export const authStorage = {
    */
   setRefreshToken(token: string): void {
     try {
+      if (!hasStorage()) return;
       localStorage.setItem(REFRESH_TOKEN_KEY, token);
     } catch (error) {
       console.error("Failed to save refresh token:", error);
@@ -70,6 +76,7 @@ export const authStorage = {
    */
   getRefreshToken(): string | null {
     try {
+      if (!hasStorage()) return null;
       return localStorage.getItem(REFRESH_TOKEN_KEY);
     } catch (error) {
       console.error("Failed to get refresh token:", error);
@@ -82,6 +89,7 @@ export const authStorage = {
    */
   removeRefreshToken(): void {
     try {
+      if (!hasStorage()) return;
       localStorage.removeItem(REFRESH_TOKEN_KEY);
     } catch (error) {
       console.error("Failed to remove refresh token:", error);
@@ -93,6 +101,7 @@ export const authStorage = {
    */
   setUser(user: StoredUser): void {
     try {
+      if (!hasStorage()) return;
       localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
     } catch (error) {
       console.error("Failed to save user data:", error);
@@ -104,6 +113,7 @@ export const authStorage = {
    */
   getUser(): StoredUser | null {
     try {
+      if (!hasStorage()) return null;
       const userData = localStorage.getItem(USER_DATA_KEY);
       return userData ? JSON.parse(userData) : null;
     } catch (error) {
@@ -117,6 +127,7 @@ export const authStorage = {
    */
   removeUser(): void {
     try {
+      if (!hasStorage()) return;
       localStorage.removeItem(USER_DATA_KEY);
     } catch (error) {
       console.error("Failed to remove user data:", error);
@@ -127,6 +138,7 @@ export const authStorage = {
    * Clear all authentication data
    */
   clearAuth(): void {
+    if (!hasStorage()) return;
     this.removeToken();
     this.removeRefreshToken();
     this.removeUser();

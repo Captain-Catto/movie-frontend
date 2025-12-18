@@ -22,8 +22,8 @@ const FavoritesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [, setTotal] = useState(0);
+  const [, setHasMore] = useState(true);
   const { isAuthenticated } = useAuth();
 
   // Fetch favorites

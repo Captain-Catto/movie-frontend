@@ -28,6 +28,11 @@ export function openOAuthPopup(
   url: string,
   options: PopupOptions = {}
 ): Window | null {
+  if (typeof window === "undefined") {
+    console.warn("openOAuthPopup should only be called in the browser");
+    return null;
+  }
+
   const { width = 500, height = 600, title = "oauth-popup" } = options;
 
   // Calculate center position
@@ -67,6 +72,12 @@ export function waitForOAuthCallback(
   popup: Window | null,
   timeoutMs: number = 300000 // 5 minutes
 ): Promise<OAuthCallbackData> {
+  if (typeof window === "undefined") {
+    return Promise.reject(
+      new Error("OAuth callback listener must run in the browser")
+    );
+  }
+
   return new Promise((resolve, reject) => {
     // Timeout timer
     const timeoutId = setTimeout(() => {
@@ -132,6 +143,11 @@ export function sendOAuthCallbackToParent(
   data: OAuthCallbackData | null,
   error?: string
 ): void {
+  if (typeof window === "undefined") {
+    console.error("Cannot send OAuth callback without a browser window");
+    return;
+  }
+
   if (window.opener) {
     const message = {
       type: "oauth-callback",

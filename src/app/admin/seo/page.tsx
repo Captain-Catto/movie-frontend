@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
 import { useToastRedux } from "@/hooks/useToastRedux";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const PAGE_TYPE_OPTIONS = [
   "home",
@@ -58,15 +59,11 @@ export default function AdminSeoPage() {
 
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const { token } = useAuth();
 
-  useEffect(() => {
-    fetchSeoData();
-    fetchStats();
-  }, []);
-
-  const fetchSeoData = async () => {
+  const fetchSeoData = useCallback(async () => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/admin/seo`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -139,11 +136,11 @@ export default function AdminSeoPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/admin/seo/stats/overview`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -157,11 +154,19 @@ export default function AdminSeoPage() {
     } catch (error) {
       console.error("Error fetching SEO stats:", error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchSeoData();
+    fetchStats();
+  }, [fetchSeoData, fetchStats]);
 
   const handleSubmit = async () => {
+    if (!token) {
+      setErrorMessage("Missing authentication token");
+      return;
+    }
     try {
-      const token = localStorage.getItem("authToken");
       setErrorMessage(null);
 
       if (!PAGE_TYPE_OPTIONS.includes(formData.pageType)) {
@@ -233,10 +238,13 @@ export default function AdminSeoPage() {
   };
 
   const handleDelete = async (id: number) => {
+    if (!token) {
+      showError("Delete failed", "Missing authentication token");
+      return;
+    }
     if (!confirm("Are you sure you want to delete this SEO metadata?")) return;
 
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/admin/seo/${id}`, {
         method: "DELETE",
         headers: {
@@ -264,8 +272,11 @@ export default function AdminSeoPage() {
   };
 
   const handleToggleActive = async (id: number) => {
+    if (!token) {
+      showError("Toggle failed", "Missing authentication token");
+      return;
+    }
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/admin/seo/${id}/toggle`, {
         method: "POST",
         headers: {
@@ -293,8 +304,11 @@ export default function AdminSeoPage() {
   };
 
   const setupDefaults = async () => {
+    if (!token) {
+      showError("Setup failed", "Missing authentication token");
+      return;
+    }
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(`${API_BASE_URL}/admin/seo/setup/defaults`, {
         method: "POST",
         headers: {

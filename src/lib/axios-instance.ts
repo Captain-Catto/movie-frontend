@@ -95,8 +95,10 @@ axiosInstance.interceptors.response.use(
 
       // Clear tokens and redirect to login
       authStorage.clearAuth();
-      window.dispatchEvent(new Event('auth:logout'));
-      window.location.href = '/';
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event('auth:logout'));
+        window.location.href = '/';
+      }
 
       return Promise.reject(error);
     }
@@ -113,11 +115,13 @@ axiosInstance.interceptors.response.use(
         // Save new tokens
         authStorage.setToken(token);
         authStorage.setRefreshToken(newRefreshToken);
-        window.dispatchEvent(
-          new CustomEvent("auth:token-refreshed", {
-            detail: { token, refreshToken: newRefreshToken },
-          })
-        );
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("auth:token-refreshed", {
+              detail: { token, refreshToken: newRefreshToken },
+            })
+          );
+        }
 
         // Update authorization header
         if (originalRequest.headers) {
@@ -142,7 +146,9 @@ axiosInstance.interceptors.response.use(
       authStorage.clearAuth();
 
       // Dispatch logout event
-      window.dispatchEvent(new Event('auth:logout'));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event('auth:logout'));
+      }
 
       return Promise.reject(refreshError);
     }

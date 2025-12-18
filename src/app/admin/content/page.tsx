@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Pagination } from "@/components/ui/Pagination";
 import { API_BASE_URL } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 type TabKey = "movies" | "tv" | "trending";
 type ContentStatusFilter = "all" | "active" | "blocked";
@@ -92,6 +93,7 @@ export default function AdminContentPage() {
     content: ContentItem | null;
   }>({ open: false, content: null });
   const [blockReason, setBlockReason] = useState("");
+  const { token } = useAuth();
 
   const PAGE_SIZE = 20;
 
@@ -135,9 +137,12 @@ export default function AdminContentPage() {
 
   const fetchMovies = useCallback(
     async (pageToLoad: number) => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
-        const token = localStorage.getItem("authToken");
         const params = new URLSearchParams({
           page: pageToLoad.toString(),
           limit: PAGE_SIZE.toString(),
@@ -181,14 +186,17 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent]
+    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, token]
   );
 
   const fetchTVSeries = useCallback(
     async (pageToLoad: number) => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
-        const token = localStorage.getItem("authToken");
         const params = new URLSearchParams({
           page: pageToLoad.toString(),
           limit: PAGE_SIZE.toString(),
@@ -232,14 +240,17 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent]
+    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, token]
   );
 
   const fetchTrending = useCallback(
     async (pageToLoad: number) => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
-        const token = localStorage.getItem("authToken");
         const params = new URLSearchParams({
           page: pageToLoad.toString(),
           limit: PAGE_SIZE.toString(),
@@ -281,7 +292,7 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, normalizeContent]
+    [PAGE_SIZE, normalizeContent, token]
   );
 
   const refreshCurrentTab = useCallback(() => {
@@ -334,10 +345,9 @@ export default function AdminContentPage() {
   };
 
   const handleBlockContent = async () => {
-    if (!blockModal.content || !blockReason) return;
+    if (!blockModal.content || !blockReason || !token) return;
 
     try {
-      const token = localStorage.getItem("authToken");
       const endpoint = isTrendingTab
         ? `${API_BASE_URL}/admin/content/trending/block`
         : `${API_BASE_URL}/admin/content/block`;
@@ -376,8 +386,8 @@ export default function AdminContentPage() {
   };
 
   const handleUnblockContent = async (content: ContentItem) => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
       const endpoint = isTrendingTab
         ? `${API_BASE_URL}/admin/content/trending/unblock`
         : `${API_BASE_URL}/admin/content/unblock`;

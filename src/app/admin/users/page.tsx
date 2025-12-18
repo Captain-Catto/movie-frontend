@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { API_BASE_URL } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface User {
   id: number;
@@ -24,11 +25,12 @@ export default function AdminUsersPage() {
     user: User | null;
   }>({ open: false, user: null });
   const [banReason, setBanReason] = useState("");
+  const { token } = useAuth();
 
   const fetchUsers = useCallback(async () => {
+    if (!token) return;
     setLoading(true);
     try {
-      const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken" not "token"
       const response = await fetch(
         `${API_BASE_URL}/admin/users/list?status=${filter}`,
         {
@@ -47,17 +49,16 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [filter]);
+  }, [filter, token]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
   const handleBanUser = async () => {
-    if (!banModal.user || !banReason) return;
+    if (!banModal.user || !banReason || !token) return;
 
     try {
-      const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken"
       const response = await fetch(`${API_BASE_URL}/admin/users/ban`, {
         method: "POST",
         headers: {
@@ -82,8 +83,8 @@ export default function AdminUsersPage() {
   };
 
   const handleUnbanUser = async (userId: number) => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken"); // ✅ Fix: use "authToken"
       const response = await fetch(
         `${API_BASE_URL}/admin/users/unban/${userId}`,
         {

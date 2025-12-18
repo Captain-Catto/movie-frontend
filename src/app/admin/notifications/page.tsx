@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { API_BASE_URL } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NotificationAnalyticsSummary {
   totalTargetedUsers: number;
@@ -73,6 +74,7 @@ export default function AdminNotificationsPage() {
     maintenanceStartTime: "",
     maintenanceEndTime: "",
   });
+  const { token } = useAuth();
 
   const resetForm = () => {
     setFormData({
@@ -94,9 +96,8 @@ export default function AdminNotificationsPage() {
   };
 
   const fetchNotifications = useCallback(async () => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
-
       // Build query params
       const params = new URLSearchParams({
         page: pagination.page.toString(),
@@ -178,16 +179,11 @@ export default function AdminNotificationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, filters]);
+  }, [pagination.page, pagination.limit, filters, token]);
 
-  useEffect(() => {
-    fetchNotifications();
-    fetchStats();
-  }, [fetchNotifications]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(
         "${API_BASE_URL}/admin/notifications/stats",
         {
@@ -213,11 +209,18 @@ export default function AdminNotificationsPage() {
     } catch (error) {
       console.error("Error fetching notification stats:", error);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    if (token) {
+      fetchNotifications();
+      fetchStats();
+    }
+  }, [fetchNotifications, fetchStats, token]);
 
   const handleSendNotification = async () => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
       let url = `${API_BASE_URL}/admin/notifications/`;
       const payload: {
         title: string;
@@ -282,8 +285,8 @@ export default function AdminNotificationsPage() {
   };
 
   const handleDeleteNotification = async (id: number) => {
+    if (!token) return;
     try {
-      const token = localStorage.getItem("authToken");
       const response = await fetch(
         `${API_BASE_URL}/admin/notifications/${id}`,
         {

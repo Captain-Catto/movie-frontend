@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
 import { API_BASE_URL } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardStats {
   totalMovies: number;
@@ -53,18 +54,14 @@ export default function AdminSyncDataPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [customDate, setCustomDate] = useState<string>("");
+  const { token } = useAuth();
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
+    if (!token) {
+      setErrorMessage("Missing authentication token");
+      return;
+    }
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Missing authentication token");
-      }
-
       const response = await fetch(
         `${API_BASE_URL}/admin/dashboard/stats`,
         {
@@ -84,7 +81,11 @@ export default function AdminSyncDataPage() {
       console.error("Error loading dashboard stats:", error);
       setErrorMessage(error instanceof Error ? error.message : "Failed to load dashboard stats.");
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const handleSync = async (target: SyncTarget) => {
     if (syncing) return;
@@ -94,7 +95,6 @@ export default function AdminSyncDataPage() {
     setSyncing(target);
 
     try {
-      const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("Missing authentication token");
       }

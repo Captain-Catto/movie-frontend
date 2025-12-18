@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface CheckerResult {
   total: number;
@@ -22,62 +23,66 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
 }) => {
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState<CheckerResult | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
-    if (checking) {
-      const token = localStorage.getItem("authToken");
-      fetch(`${API_BASE_URL}/admin/seo`, {
-        headers: {
-          Authorization: `Bearer ${token || ""}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          const entries: SeoMetadata[] = Array.isArray(data.data)
-            ? data.data
-            : Array.isArray(data)
-            ? data
-            : [];
-
-          const check: CheckerResult = {
-            total: entries.length,
-            active: entries.filter((entry) => entry.isActive).length,
-            missingTitle: entries.filter((entry) => !entry.title?.trim()).length,
-            missingDescription: entries.filter((entry) => !entry.description?.trim()).length,
-            longTitle: entries.filter((entry) => entry.title?.length > 60).length,
-            longDescription: entries.filter((entry) => entry.description?.length > 160).length,
-            keywordsMissing: entries.filter((entry) => !entry.keywords || entry.keywords.length === 0)
-              .length,
-            ogMissing: entries.filter(
-              (entry) => !entry.ogTitle || !entry.ogDescription || !entry.ogImage
-            ).length,
-            twitterMissing: entries.filter(
-              (entry) =>
-                !entry.twitterTitle || !entry.twitterDescription || !entry.twitterImage
-            ).length,
-            duplicates: [],
-          };
-
-          const titleMap = new Map<string, string[]>();
-          entries.forEach((entry) => {
-            if (!entry.title) return;
-            const key = entry.title.trim().toLowerCase();
-            if (!titleMap.has(key)) {
-              titleMap.set(key, []);
-            }
-            titleMap.get(key)?.push(entry.path);
-          });
-
-          check.duplicates = Array.from(titleMap.entries())
-            .filter(([, paths]) => paths.length > 1)
-            .map(([title, paths]) => ({ title, paths }));
-
-          setResult(check);
-          onComplete?.(check);
-        })
-        .finally(() => setChecking(false));
+    if (!checking) return;
+    if (!token) {
+      setChecking(false);
+      return;
     }
-  }, [checking, onComplete]);
+
+    fetch(`${API_BASE_URL}/admin/seo`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const entries: SeoMetadata[] = Array.isArray(data.data)
+          ? data.data
+          : Array.isArray(data)
+          ? data
+          : [];
+
+        const check: CheckerResult = {
+          total: entries.length,
+          active: entries.filter((entry) => entry.isActive).length,
+          missingTitle: entries.filter((entry) => !entry.title?.trim()).length,
+          missingDescription: entries.filter((entry) => !entry.description?.trim()).length,
+          longTitle: entries.filter((entry) => entry.title?.length > 60).length,
+          longDescription: entries.filter((entry) => entry.description?.length > 160).length,
+          keywordsMissing: entries.filter((entry) => !entry.keywords || entry.keywords.length === 0)
+            .length,
+          ogMissing: entries.filter(
+            (entry) => !entry.ogTitle || !entry.ogDescription || !entry.ogImage
+          ).length,
+          twitterMissing: entries.filter(
+            (entry) =>
+              !entry.twitterTitle || !entry.twitterDescription || !entry.twitterImage
+          ).length,
+          duplicates: [],
+        };
+
+        const titleMap = new Map<string, string[]>();
+        entries.forEach((entry) => {
+          if (!entry.title) return;
+          const key = entry.title.trim().toLowerCase();
+          if (!titleMap.has(key)) {
+            titleMap.set(key, []);
+          }
+          titleMap.get(key)?.push(entry.path);
+        });
+
+        check.duplicates = Array.from(titleMap.entries())
+          .filter(([, paths]) => paths.length > 1)
+          .map(([title, paths]) => ({ title, paths }));
+
+        setResult(check);
+        onComplete?.(check);
+      })
+      .finally(() => setChecking(false));
+  }, [checking, onComplete, token]);
 
   return (
     <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg space-y-4">

@@ -10,6 +10,7 @@ import {
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import AnalyticsSkeleton from "@/components/ui/AnalyticsSkeleton";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AnalyticsOverview {
   totalUsers: number;
@@ -65,6 +66,7 @@ export default function AdminAnalyticsPage() {
     const numeric = typeof value === "number" && Number.isFinite(value) ? value : 0;
     return numeric.toLocaleString();
   };
+  const { token } = useAuth();
 
   const formatPercentageValue = (value?: number | null) => {
     const numeric = typeof value === "number" && Number.isFinite(value) ? value : 0;
@@ -73,8 +75,8 @@ export default function AdminAnalyticsPage() {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
+      if (!token) return;
       try {
-        const token = localStorage.getItem("authToken");
         const headers = {
           Authorization: `Bearer ${token}`,
         };
@@ -240,7 +242,7 @@ export default function AdminAnalyticsPage() {
     };
 
     fetchAnalytics();
-  }, [dateRange, contentType]);
+  }, [dateRange, contentType, token]);
 
   const maxViewCount =
     viewStats.length > 0 ? Math.max(...viewStats.map((stat) => stat.views)) : 0;

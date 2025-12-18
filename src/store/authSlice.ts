@@ -205,7 +205,9 @@ const authSlice = createSlice({
     logout: (state) => {
       // Clear localStorage
       authStorage.clearAuth();
-      localStorage.removeItem("recentSearches");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("recentSearches");
+      }
 
       // Clear state
       state.user = null;

@@ -310,5 +310,6 @@ export const useRecentSearches = (
 
 // Utility function to clear localStorage on logout
 export const clearSearchStorage = () => {
+  if (typeof window === "undefined") return;
   localStorage.removeItem(LOCAL_STORAGE_KEY);
 };

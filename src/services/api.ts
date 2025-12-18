@@ -20,6 +20,14 @@ export const API_BASE_URL =
     ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`
     : "http://localhost:8080/api";
 
+type CacheEntry<T> = {
+  timestamp: number;
+  data: T;
+};
+
+const responseCache = new Map<string, CacheEntry<unknown>>();
+const DEFAULT_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+
 class ApiService {
   /**
    * Build query string from a params object.
@@ -79,6 +87,34 @@ class ApiService {
     }
   }
 
+  /**
+   * Lightweight in-memory cache for GET requests.
+   * Uses full URL (with query params) as the cache key.
+   */
+  private async fetchWithCache<T>(
+    url: string,
+    options?: RequestInit,
+    cacheTtlMs: number = DEFAULT_CACHE_TTL
+  ): Promise<T> {
+    const method = (options?.method || "GET").toUpperCase();
+    const isCacheable = method === "GET" && cacheTtlMs > 0;
+
+    if (isCacheable) {
+      const cached = responseCache.get(url) as CacheEntry<T> | undefined;
+      if (cached && Date.now() - cached.timestamp < cacheTtlMs) {
+        return cached.data;
+      }
+    }
+
+    const data = await this.fetchWithErrorHandling<T>(url, options);
+
+    if (isCacheable) {
+      responseCache.set(url, { timestamp: Date.now(), data });
+    }
+
+    return data;
+  }
+
   async getMovies(query: MovieQuery = {}): Promise<MovieResponse> {
     const params = this.buildQueryParams({
       page: query.page,
@@ -91,7 +127,7 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/movies${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithCache<MovieResponse>(url);
   }
 
   // New category-specific movie endpoints
@@ -108,7 +144,7 @@ class ApiService {
     const url = `${API_BASE_URL}/movies/now-playing${
       params ? `?${params}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithCache<MovieResponse>(url);
   }
 
   async getPopularMovies(query: MovieQuery = {}): Promise<MovieResponse> {
@@ -122,7 +158,7 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/movies/popular${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithCache<MovieResponse>(url);
   }
 
   async getTopRatedMovies(query: MovieQuery = {}): Promise<MovieResponse> {
@@ -138,7 +174,7 @@ class ApiService {
     const url = `${API_BASE_URL}/movies/top-rated${
       params ? `?${params}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithCache<MovieResponse>(url);
   }
 
   async getUpcomingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
@@ -154,7 +190,7 @@ class ApiService {
     const url = `${API_BASE_URL}/movies/upcoming${
       params ? `?${params}` : ""
     }`;
-    return this.fetchWithErrorHandling<MovieResponse>(url);
+    return this.fetchWithCache<MovieResponse>(url);
   }
 
   async getMovieById(id: number): Promise<{
@@ -164,7 +200,7 @@ class ApiService {
     error?: string;
   }> {
     const url = `${API_BASE_URL}/movies/${id}`;
-    return this.fetchWithErrorHandling<{
+    return this.fetchWithCache<{
       success: boolean;
       message: string;
       data: TVSeries;
@@ -256,7 +292,7 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/trending${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling<TrendingResponse>(url);
+    return this.fetchWithCache<TrendingResponse>(url);
   }
 
   async getTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
@@ -271,7 +307,7 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/tv${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
+    return this.fetchWithCache<TVSeriesResponse>(url);
   }
 
   async getTVSeriesById(id: number): Promise<{
@@ -759,7 +795,7 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/tv/on-the-air${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
+    return this.fetchWithCache<TVSeriesResponse>(url);
   }
 
   async getPopularTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
@@ -770,7 +806,7 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/tv/popular-tv${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
+    return this.fetchWithCache<TVSeriesResponse>(url);
   }
 
   async getTopRatedTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
@@ -783,7 +819,7 @@ class ApiService {
     const url = `${API_BASE_URL}/tv/top-rated-tv${
       params ? `?${params}` : ""
     }`;
-    return this.fetchWithErrorHandling<TVSeriesResponse>(url);
+    return this.fetchWithCache<TVSeriesResponse>(url);
   }
 }
 

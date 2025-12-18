@@ -1,34 +1,30 @@
 # MovieStream - Movie Website Frontend
 
-Trang web xem phim trực tuyến được xây dựng bằng React, Next.js 14, và shadcn/ui.
+Trang web xem phim trực tuyến được xây dựng bằng React, Next.js và shadcn/ui.
 
-## 🚀 Công nghệ sử dụng
+## Công nghệ sử dụng
 
-- **Next.js 14** - React framework với App Router
+- **Next.js** - React framework với App Router
 - **TypeScript** - Type safety và development experience tốt hơn
 - **Tailwind CSS** - Utility-first CSS framework
 - **shadcn/ui** - High-quality React components
 - **Custom Fonts** - Inter và Roboto từ Google Fonts
 
-## 🎨 Tính năng
+## Tính năng
 
-- ✅ Dark theme với màu sắc giống Netflix
-- ✅ Responsive design cho mobile và desktop
-- ✅ Header navigation với menu hamburger
-- ✅ Hero section với background image và gradient overlay
-- ✅ Movie information display (rating, year, duration, season, episode)
-- ✅ Genre tags
-- ✅ Action buttons (Xem Phim, Chi Tiết)
-- ✅ Scene thumbnails preview
-- ✅ Popular categories grid
-- ✅ Hover effects và smooth transitions
+- Dark theme với màu sắc giống Netflix
+- Responsive design cho mobile và desktop
+- Header navigation và menu
+- Hero section với background image và gradient overlay
+- Movie information display (rating, year, duration, season, episode)
+- Favorites, comments, notifications (realtime)
 
-## 📦 Cài đặt
+## Cài đặt
 
 ```bash
 # Clone repository
 git clone <your-repo-url>
-cd movie-app
+cd movie-frontend/movie-app
 
 # Cài đặt dependencies
 npm install
@@ -39,7 +35,7 @@ npm run dev
 
 Mở [http://localhost:3000](http://localhost:3000) để xem kết quả.
 
-## 📁 Cấu trúc thư mục
+## Cấu trúc thư mục
 
 ```
 src/
@@ -62,7 +58,7 @@ src/
     └── utils.ts             # Utility functions
 ```
 
-## 🎨 Design System
+## Design System
 
 ### Colors
 
@@ -78,13 +74,13 @@ src/
 - **Secondary font**: Roboto
 - **Responsive font sizes**
 
-## 📱 Responsive Design
+## Responsive Design
 
 - **Mobile**: Hamburger menu, stacked layout
 - **Tablet**: 2-column category grid
 - **Desktop**: Full navigation, 4-column category grid
 
-## 🚀 Deployment
+## Deployment
 
 ```bash
 # Build cho production
@@ -101,14 +97,13 @@ npm start
 - `npm run start` - Chạy production server
 - `npm run lint` - Check code quality
 
-## 🛠️ Development Notes
+## Development Notes
 
 - Dự án sử dụng Tailwind CSS v4 với CSS variables
-- Không sử dụng icons, thay thế bằng CSS shapes
 - Components được viết theo functional style với TypeScript
 - Sử dụng Next.js App Router
 - shadcn/ui components được tùy chỉnh theo theme
 
 ---
 
-Made with ❤️ using Next.js và shadcn/ui
+Built with Next.js và shadcn/ui

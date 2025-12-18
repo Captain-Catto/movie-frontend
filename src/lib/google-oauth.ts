@@ -6,6 +6,21 @@
 const GOOGLE_OAUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
+const GOOGLE_REDIRECT_PATH = "/auth/google/callback";
+const isBrowser = typeof window !== "undefined";
+
+function resolveAppOrigin(): string | null {
+  if (isBrowser && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  return null;
+}
+
 export interface GoogleOAuthParams {
   clientId?: string;
   redirectUri?: string;
@@ -17,16 +32,24 @@ export interface GoogleOAuthParams {
  * Generate Google OAuth authorization URL
  */
 export function getGoogleOAuthUrl(params?: GoogleOAuthParams): string {
-  const {
-    clientId = GOOGLE_CLIENT_ID,
-    redirectUri = `${window.location.origin}/auth/google/callback`,
-    scope = ["openid", "email", "profile"],
-    state = generateRandomState(),
-  } = params || {};
+  const clientId = params?.clientId ?? GOOGLE_CLIENT_ID;
+  const scope = params?.scope ?? ["openid", "email", "profile"];
+  const state = params?.state ?? generateRandomState();
+
+  const origin = resolveAppOrigin();
+  const redirectUri =
+    params?.redirectUri ??
+    (origin ? `${origin}${GOOGLE_REDIRECT_PATH}` : null);
 
   if (!clientId) {
     throw new Error(
       "Google Client ID is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env"
+    );
+  }
+
+  if (!redirectUri) {
+    throw new Error(
+      "Google OAuth redirect URI is not available. Provide redirectUri or set NEXT_PUBLIC_APP_URL."
     );
   }
 
@@ -47,11 +70,20 @@ export function getGoogleOAuthUrl(params?: GoogleOAuthParams): string {
  * Generate random state for OAuth security
  */
 function generateRandomState(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
-    ""
-  );
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return Array.from(array, (byte) =>
+      byte.toString(16).padStart(2, "0")
+    ).join("");
+  }
+
+  // Fallback for non-browser environments without Web Crypto
+  return Array.from({ length: 32 }, () =>
+    Math.floor(Math.random() * 256)
+      .toString(16)
+      .padStart(2, "0")
+  ).join("");
 }
 
 /**
@@ -80,9 +112,30 @@ export function parseOAuthCallback(
 export function decodeJWT(token: string): Record<string, unknown> | null {
   try {
     const base64Url = token.split(".")[1];
+    if (!base64Url) {
+      return null;
+    }
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const globalWithBuffer = globalThis as unknown as {
+      Buffer?: {
+        from: (data: string, encoding: string) => {
+          toString: (encoding: string) => string;
+        };
+      };
+    };
+
+    const decodeBase64 =
+      typeof atob === "function"
+        ? atob(base64)
+        : globalWithBuffer.Buffer
+        ? globalWithBuffer.Buffer.from(base64, "base64").toString("binary")
+        : "";
+
+    if (!decodeBase64) {
+      return null;
+    }
     const jsonPayload = decodeURIComponent(
-      atob(base64)
+      decodeBase64
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
         .join("")

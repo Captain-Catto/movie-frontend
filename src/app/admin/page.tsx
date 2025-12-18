@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
 import { API_BASE_URL } from "@/services/api";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardStats {
   totalMovies: number;
@@ -24,33 +25,35 @@ export default function AdminDashboard() {
   );
   const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const { token } = useAuth();
+
+  const fetchDashboardStats = useCallback(
+    async (authToken: string) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/admin/dashboard/stats`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          setStats(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    fetchDashboardStats();
-  }, []);
-
-  const fetchDashboardStats = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch(
-        `${API_BASE_URL}/admin/dashboard/stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching dashboard stats:", error);
-    } finally {
-      setLoading(false);
+    if (token) {
+      fetchDashboardStats(token);
     }
-  };
+  }, [token, fetchDashboardStats]);
 
   const triggerSync = async (target: "all" | "popular") => {
     setSyncError(null);
@@ -58,7 +61,6 @@ export default function AdminDashboard() {
     setSyncingTarget(target);
 
     try {
-      const token = localStorage.getItem("authToken");
       if (!token) {
         throw new Error("Missing admin authentication token");
       }
@@ -80,7 +82,7 @@ export default function AdminDashboard() {
 
       const label = target === "all" ? "Full daily export" : "Popular refresh";
       setSyncSuccess(data.message || `${label} sync started successfully.`);
-      await fetchDashboardStats();
+      await fetchDashboardStats(token);
     } catch (error) {
       console.error("Error triggering sync:", error);
       setSyncError(

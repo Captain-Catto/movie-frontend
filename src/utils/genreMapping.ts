@@ -62,7 +62,7 @@ export const ALL_GENRES = TMDB_ENGLISH_GENRE_MAP;
  * Map genre IDs to genre names
  */
 export function mapGenreIdsToNames(
-  genreIds: Array<number | string>
+  genreIds: Array<number | string> | null | undefined
 ): string[] {
   if (!genreIds || !Array.isArray(genreIds)) return [];
 
