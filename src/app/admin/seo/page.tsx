@@ -1,12 +1,24 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
 import { useToastRedux } from "@/hooks/useToastRedux";
 import { Eye, EyeOff } from "lucide-react";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import {
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+} from "recharts";
 
 const PAGE_TYPE_OPTIONS = [
   "home",
@@ -26,6 +38,10 @@ interface SeoStats {
   avgTitleLength: number;
   avgDescriptionLength: number;
 }
+
+const REFRESH_INTERVAL_MS = 30_000;
+const STATUS_COLORS = ["#22c55e", "#ef4444"];
+const LENGTH_COLORS = ["#a855f7", "#fb923c"];
 
 export default function AdminSeoPage() {
   const [seoData, setSeoData] = useState<SeoMetadata[]>([]);
@@ -60,10 +76,15 @@ export default function AdminSeoPage() {
 
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const fetchSeoData = useCallback(async () => {
-    if (!adminApi.isAuthenticated) return;
+    if (!adminApi.isAuthenticated) {
+      setLoading(false);
+      return;
+    }
     try {
+      setLoading(true);
       const response = await adminApi.get<
         SeoMetadata[] | { data: SeoMetadata[] }
       >("/admin/seo");
@@ -157,6 +178,15 @@ export default function AdminSeoPage() {
       fetchStats();
     }
   }, [adminApi.isAuthenticated, fetchSeoData, fetchStats]);
+
+  useEffect(() => {
+    if (!autoRefresh || !adminApi.isAuthenticated) return;
+    const id = window.setInterval(() => {
+      fetchSeoData();
+      fetchStats();
+    }, REFRESH_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [autoRefresh, adminApi.isAuthenticated, fetchSeoData, fetchStats]);
 
   const handleSubmit = async () => {
     if (!adminApi.isAuthenticated) {
@@ -332,6 +362,104 @@ export default function AdminSeoPage() {
     });
   };
 
+  const handleRefresh = useCallback(() => {
+    fetchSeoData();
+    fetchStats();
+  }, [fetchSeoData, fetchStats]);
+
+  const exportSeoData = (format: "csv" | "excel") => {
+    if (!seoData.length) {
+      const message = "No SEO data to export";
+      setErrorMessage(message);
+      showError("Export failed", message);
+      return;
+    }
+
+    const escapeValue = (value: unknown) => {
+      if (value === null || value === undefined) return '""';
+      const str = String(value).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const headers = [
+      "Page Type",
+      "Path",
+      "Title",
+      "Description",
+      "Keywords",
+      "Active",
+      "OG Title",
+      "OG Description",
+      "OG Image",
+      "Twitter Title",
+      "Twitter Description",
+      "Twitter Image",
+      "Updated At",
+    ];
+
+    const rows = seoData.map((item) => [
+      escapeValue(item.pageType),
+      escapeValue(item.path),
+      escapeValue(item.title),
+      escapeValue(item.description),
+      escapeValue(Array.isArray(item.keywords) ? item.keywords.join(", ") : ""),
+      escapeValue(item.isActive ? "Yes" : "No"),
+      escapeValue(item.ogTitle || ""),
+      escapeValue(item.ogDescription || ""),
+      escapeValue(item.ogImage || ""),
+      escapeValue(item.twitterTitle || ""),
+      escapeValue(item.twitterDescription || ""),
+      escapeValue(item.twitterImage || ""),
+      escapeValue(item.updatedAt || ""),
+    ]);
+
+    const csvString = [headers.map(escapeValue).join(","), ...rows.map((r) => r.join(","))].join(
+      "\n"
+    );
+
+    const isExcel = format === "excel";
+    const blob = new Blob(
+      [isExcel ? `sep=,\n${csvString}` : csvString],
+      {
+        type: isExcel
+          ? "application/vnd.ms-excel;charset=utf-8;"
+          : "text/csv;charset=utf-8;",
+      }
+    );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `seo-metadata-${new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")}.${isExcel ? "xls" : "csv"}`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    showSuccess("Export ready", `Downloaded SEO data as ${isExcel ? "Excel" : "CSV"}`);
+  };
+
+  const statusChartData = useMemo(
+    () =>
+      stats
+        ? [
+            { name: "Active", value: stats.activePages },
+            { name: "Inactive", value: stats.inactivePages },
+          ]
+        : [],
+    [stats]
+  );
+
+  const lengthChartData = useMemo(
+    () =>
+      stats
+        ? [
+            { name: "Title length", value: stats.avgTitleLength },
+            { name: "Description length", value: stats.avgDescriptionLength },
+          ]
+        : [],
+    [stats]
+  );
+
   const filteredSeoData = Array.isArray(seoData)
     ? seoData.filter((seo) => {
         const matchesFilter =
@@ -381,42 +509,135 @@ export default function AdminSeoPage() {
 
           {/* Stats Cards */}
           {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-              <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">
-                  Total Pages
-                </h3>
-                <p className="text-2xl font-bold text-blue-600">
-                  {stats.totalPages}
-                </p>
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+                  <h3 className="text-lg font-semibold text-white">
+                    Total Pages
+                  </h3>
+                  <p className="text-3xl font-bold text-blue-400">
+                    {stats.totalPages}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    All tracked SEO entries
+                  </p>
+                </div>
+                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+                  <h3 className="text-lg font-semibold text-white">Active</h3>
+                  <p className="text-3xl font-bold text-green-400">
+                    {stats.activePages}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Currently enabled entries
+                  </p>
+                </div>
+                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+                  <h3 className="text-lg font-semibold text-white">Inactive</h3>
+                  <p className="text-3xl font-bold text-red-400">
+                    {stats.inactivePages}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Disabled or draft entries
+                  </p>
+                </div>
+                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+                  <h3 className="text-lg font-semibold text-white">
+                    Avg Title Length
+                  </h3>
+                  <p className="text-3xl font-bold text-purple-400">
+                    {stats.avgTitleLength}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Ideal: 50–60 chars
+                  </p>
+                </div>
+                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+                  <h3 className="text-lg font-semibold text-white">
+                    Avg Description Length
+                  </h3>
+                  <p className="text-3xl font-bold text-amber-400">
+                    {stats.avgDescriptionLength}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Ideal: 150–160 chars
+                  </p>
+                </div>
               </div>
-              <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">Active</h3>
-                <p className="text-2xl font-bold text-green-600">
-                  {stats.activePages}
-                </p>
-              </div>
-              <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">Inactive</h3>
-                <p className="text-2xl font-bold text-red-600">
-                  {stats.inactivePages}
-                </p>
-              </div>
-              <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">
-                  Avg Title Length
-                </h3>
-                <p className="text-2xl font-bold text-purple-600">
-                  {stats.avgTitleLength}
-                </p>
-              </div>
-              <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold text-white">
-                  Avg Description Length
-                </h3>
-                <p className="text-2xl font-bold text-orange-600">
-                  {stats.avgDescriptionLength}
-                </p>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">
+                        Status mix
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        Active vs inactive coverage
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={statusChartData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={80}
+                          paddingAngle={2}
+                        >
+                          {statusChartData.map((entry, index) => (
+                            <Cell
+                              key={entry.name}
+                              fill={STATUS_COLORS[index % STATUS_COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{ backgroundColor: "#111827", border: "1px solid #374151" }}
+                          itemStyle={{ color: "#e5e7eb" }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">
+                        Copy length health
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        Average characters vs recommendations
+                      </p>
+                    </div>
+                  </div>
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={lengthChartData} barSize={32}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                        <XAxis dataKey="name" stroke="#9ca3af" />
+                        <YAxis stroke="#9ca3af" />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: "#111827", border: "1px solid #374151" }}
+                          itemStyle={{ color: "#e5e7eb" }}
+                        />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                          {lengthChartData.map((entry, index) => (
+                            <Cell
+                              key={entry.name}
+                              fill={LENGTH_COLORS[index % LENGTH_COLORS.length]}
+                            />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -435,6 +656,24 @@ export default function AdminSeoPage() {
             >
               Setup Defaults
             </button>
+            <button
+              onClick={handleRefresh}
+              className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500"
+            >
+              Refresh now
+            </button>
+            <div className="flex items-center gap-2">
+              <input
+                id="auto-refresh"
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+                className="h-4 w-4 accent-red-500"
+              />
+              <label htmlFor="auto-refresh" className="text-sm text-gray-300">
+                Auto refresh (30s)
+              </label>
+            </div>
 
             <select
               value={filter}
@@ -455,6 +694,20 @@ export default function AdminSeoPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 max-w-xs"
             />
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => exportSeoData("csv")}
+                className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600"
+              >
+                Export CSV
+              </button>
+              <button
+                onClick={() => exportSeoData("excel")}
+                className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+              >
+                Export Excel
+              </button>
+            </div>
           </div>
         </div>
 
