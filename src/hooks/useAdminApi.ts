@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import axiosInstance from "@/lib/axios-instance";
 import { useAuth } from "./useAuth";
 
@@ -150,14 +150,17 @@ export function useAdminApi() {
     [request]
   );
 
-  return {
-    request,
-    get,
-    post,
-    put,
-    patch,
-    delete: del,
-    isAuthenticated,
-    token,
-  };
+  return useMemo(
+    () => ({
+      request,
+      get,
+      post,
+      put,
+      patch,
+      delete: del,
+      isAuthenticated,
+      token,
+    }),
+    [request, get, post, put, patch, del, isAuthenticated, token]
+  );
 }
