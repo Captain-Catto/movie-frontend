@@ -74,7 +74,6 @@ export default function AdminSyncDataPage() {
 
   const fetchStats = useCallback(async () => {
     if (!adminApi.isAuthenticated) {
-      setErrorMessage("Missing authentication token");
       return;
     }
     try {
