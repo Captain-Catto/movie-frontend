@@ -16,6 +16,14 @@ interface DashboardStats {
   syncStatus: string;
 }
 
+interface SyncSettings {
+  id: number;
+  movieCatalogLimit: number;
+  tvCatalogLimit: number;
+  trendingCatalogLimit: number;
+  updatedAt?: string;
+}
+
 type SyncTarget = "all" | "movies" | "tv" | "today" | "popular";
 
 const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string }> =
@@ -53,6 +61,15 @@ export default function AdminSyncDataPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [customDate, setCustomDate] = useState<string>("");
+  const [settings, setSettings] = useState<SyncSettings | null>(null);
+  const [settingsForm, setSettingsForm] = useState({
+    movieCatalogLimit: 500000,
+    tvCatalogLimit: 200000,
+    trendingCatalogLimit: 100,
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
   const adminApi = useAdminApi();
 
   const fetchStats = useCallback(async () => {
@@ -74,9 +91,27 @@ export default function AdminSyncDataPage() {
     }
   }, [adminApi]);
 
+  const fetchSettings = useCallback(async () => {
+    if (!adminApi.isAuthenticated) return;
+    try {
+      const response = await adminApi.get<SyncSettings>("/admin/sync/settings");
+      if (response.success && response.data) {
+        setSettings(response.data);
+        setSettingsForm({
+          movieCatalogLimit: response.data.movieCatalogLimit,
+          tvCatalogLimit: response.data.tvCatalogLimit,
+          trendingCatalogLimit: response.data.trendingCatalogLimit,
+        });
+      }
+    } catch (error) {
+      console.error("Error loading sync settings:", error);
+    }
+  }, [adminApi]);
+
   useEffect(() => {
     fetchStats();
-  }, [fetchStats]);
+    fetchSettings();
+  }, [fetchStats, fetchSettings]);
 
   const handleSync = async (target: SyncTarget) => {
     if (syncing) return;
@@ -104,6 +139,30 @@ export default function AdminSyncDataPage() {
       setErrorMessage(error instanceof Error ? error.message : "Failed to trigger sync.");
     } finally {
       setSyncing(null);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    if (savingSettings) return;
+
+    setSettingsSuccess(null);
+    setSettingsError(null);
+    setSavingSettings(true);
+
+    try {
+      const response = await adminApi.patch("/admin/sync/settings", settingsForm);
+
+      if (!response.success) {
+        throw new Error(response.error || response.message || "Failed to save settings");
+      }
+
+      setSettingsSuccess("Catalog limits updated successfully");
+      await fetchSettings();
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      setSettingsError(error instanceof Error ? error.message : "Failed to save settings");
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -273,6 +332,114 @@ export default function AdminSyncDataPage() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-white">
+                Catalog Size Settings
+              </h2>
+              <p className="text-gray-400 mt-1 max-w-xl text-sm">
+                Configure maximum number of items to keep in the database for each content type.
+                Cleanup runs after &quot;Sync Popular Content&quot; to trim excess items based on popularity.
+              </p>
+            </div>
+          </div>
+
+          {settingsSuccess && (
+            <div className="mb-4 rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-green-200">
+              {settingsSuccess}
+            </div>
+          )}
+
+          {settingsError && (
+            <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
+              {settingsError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Movie Catalog Limit
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1000"
+                value={settingsForm.movieCatalogLimit}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    movieCatalogLimit: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+              <p className="mt-1 text-xs text-gray-400">
+                Current: {settings?.movieCatalogLimit.toLocaleString() || "Loading..."}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                TV Series Catalog Limit
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1000"
+                value={settingsForm.tvCatalogLimit}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    tvCatalogLimit: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+              <p className="mt-1 text-xs text-gray-400">
+                Current: {settings?.tvCatalogLimit.toLocaleString() || "Loading..."}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Trending Catalog Limit
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="10"
+                value={settingsForm.trendingCatalogLimit}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    trendingCatalogLimit: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+              <p className="mt-1 text-xs text-gray-400">
+                Current: {settings?.trendingCatalogLimit.toLocaleString() || "Loading..."}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={handleSaveSettings}
+              disabled={savingSettings}
+              className={`rounded-md px-6 py-2 text-sm font-medium transition-colors ${
+                savingSettings
+                  ? "cursor-not-allowed bg-red-900 text-red-300"
+                  : "bg-red-600 text-white hover:bg-red-700"
+              }`}
+            >
+              {savingSettings ? "Saving..." : "Save Settings"}
+            </button>
           </div>
         </section>
 
