@@ -233,8 +233,10 @@ export default function AdminAnalyticsPage() {
         adminApi.get<CountryStats[]>(`/admin/analytics/countries?${viewParams}`),
       ]);
 
+      console.log("[Analytics] View response:", viewRes);
       if (viewRes.success && viewRes.data) {
         const data = viewRes.data;
+        console.log("[Analytics] View data:", data);
         setViewSummary({
           total: Number(data.total ?? 0),
           byType: data.byType,
@@ -245,6 +247,9 @@ export default function AdminAnalyticsPage() {
           views: Number(item.views ?? item.count ?? 0),
         }));
         setViewStats(normalizedViewStats);
+        console.log("[Analytics] Normalized view stats:", normalizedViewStats);
+      } else {
+        console.warn("[Analytics] View response failed or no data:", viewRes);
       }
 
       if (clickRes.success && clickRes.data) {
@@ -277,8 +282,10 @@ export default function AdminAnalyticsPage() {
         setMostViewedContent(normalized);
       }
 
+      console.log("[Analytics] Popular response:", popularRes);
       if (popularRes.success) {
         const rawPopular = popularRes.data;
+        console.log("[Analytics] Raw popular data:", rawPopular);
         const popularArray: unknown = Array.isArray(rawPopular)
           ? rawPopular
           : rawPopular
@@ -288,6 +295,7 @@ export default function AdminAnalyticsPage() {
             ]
           : [];
 
+        console.log("[Analytics] Popular array after normalization:", popularArray);
         const normalizedPopular: PopularContent[] = Array.isArray(popularArray)
           ? popularArray.map((item) => {
               const record = item as Record<string, unknown>;
@@ -312,7 +320,10 @@ export default function AdminAnalyticsPage() {
             })
           : [];
 
+        console.log("[Analytics] Final normalized popular content:", normalizedPopular);
         setPopularContent(normalizedPopular);
+      } else {
+        console.warn("[Analytics] Popular response failed:", popularRes);
       }
 
       if (deviceRes.success) {
@@ -361,7 +372,11 @@ export default function AdminAnalyticsPage() {
         setCountryStats(normalizedCountries);
       }
     } catch (error) {
-      console.error("Error fetching analytics:", error);
+      console.error("[Analytics] Error fetching analytics:", error);
+      console.error("[Analytics] Error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       setViewStats([]);
       setPopularContent([]);
       setMostViewedContent([]);
