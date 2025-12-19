@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { API_BASE_URL } from "@/services/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 interface User {
   id: number;
@@ -25,54 +24,40 @@ export default function AdminUsersPage() {
     user: User | null;
   }>({ open: false, user: null });
   const [banReason, setBanReason] = useState("");
-  const { token } = useAuth();
+  const adminApi = useAdminApi();
 
   const fetchUsers = useCallback(async () => {
-    if (!token) return;
+    if (!adminApi.isAuthenticated) return;
     setLoading(true);
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/users/list?status=${filter}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await adminApi.get<{ items: User[] }>(
+        `/admin/users/list?status=${filter}`
       );
 
-      const data = await response.json();
-      if (data.success) {
-        setUsers(data.data.items);
+      if (response.success && response.data) {
+        setUsers(response.data.items);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
     }
-  }, [filter, token]);
+  }, [filter, adminApi]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
   const handleBanUser = async () => {
-    if (!banModal.user || !banReason || !token) return;
+    if (!banModal.user || !banReason) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/users/ban`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          userId: banModal.user.id,
-          reason: banReason,
-        }),
+      const response = await adminApi.post("/admin/users/ban", {
+        userId: banModal.user.id,
+        reason: banReason,
       });
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.success) {
         setBanModal({ open: false, user: null });
         setBanReason("");
         fetchUsers();
@@ -83,20 +68,10 @@ export default function AdminUsersPage() {
   };
 
   const handleUnbanUser = async (userId: number) => {
-    if (!token) return;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/users/unban/${userId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await adminApi.post(`/admin/users/unban/${userId}`);
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.success) {
         fetchUsers();
       }
     } catch (error) {

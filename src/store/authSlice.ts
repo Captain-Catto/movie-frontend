@@ -33,11 +33,19 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
   const storedRefreshToken = authStorage.getRefreshToken();
   let storedUser = authStorage.getUser();
 
-  // If we have a token but no user data, try to decode it from JWT
-  if (storedToken && !storedUser) {
+  // If we have a token, validate it first
+  if (storedToken) {
     const decoded = decodeJWT(storedToken);
 
-    if (decoded) {
+    // Token is invalid or expired
+    if (!decoded) {
+      console.warn("Token is invalid or expired, clearing auth data");
+      authStorage.clearAuth();
+      return { token: null, refreshToken: null, user: null };
+    }
+
+    // If no user data, extract from token
+    if (!storedUser) {
       storedUser = {
         id: decoded.sub || decoded.id,
         email: decoded.email,
@@ -49,9 +57,7 @@ export const checkAuth = createAsyncThunk("auth/checkAuth", async () => {
       // Save it for next time
       authStorage.setUser(storedUser);
     }
-  }
 
-  if (storedToken && storedUser) {
     return { token: storedToken, refreshToken: storedRefreshToken, user: storedUser };
   }
 

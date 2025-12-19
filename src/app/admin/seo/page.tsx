@@ -4,10 +4,9 @@ import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
-import { API_BASE_URL } from "@/services/api";
 import { useToastRedux } from "@/hooks/useToastRedux";
 import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 const PAGE_TYPE_OPTIONS = [
   "home",
@@ -36,6 +35,8 @@ export default function AdminSeoPage() {
   const [lastCheckSummary, setLastCheckSummary] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { showSuccess, showError } = useToastRedux();
+  const adminApi = useAdminApi();
+
   const [editModal, setEditModal] = useState<{
     open: boolean;
     seo: SeoMetadata | null;
@@ -59,39 +60,35 @@ export default function AdminSeoPage() {
 
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const { token } = useAuth();
 
   const fetchSeoData = useCallback(async () => {
-    if (!token) return;
+    if (!adminApi.isAuthenticated) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/seo`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await adminApi.get<
+        SeoMetadata[] | { data: SeoMetadata[] }
+      >("/admin/seo");
 
-      if (response.ok) {
-        const data = await response.json();
-
+      if (response.success) {
         // Unwrap common shapes: ApiResponse { data: { data: [...] } } or plain array
-        const payload = data?.data ?? data;
-        const items = Array.isArray(payload)
+        const payload = response.data;
+        const rawItems = Array.isArray(payload)
           ? payload
-          : Array.isArray(payload?.data)
-          ? payload.data
+          : Array.isArray((payload as { data?: unknown })?.data)
+          ? ((payload as { data: unknown[] }).data as unknown[])
           : [];
 
-        const normalized = items.map((item: Record<string, unknown>) => {
+        const normalized = rawItems.map((item: unknown) => {
+          const record = item as Record<string, unknown>;
           const getString = (key: string, fallback = "") => {
-            const value = item[key];
+            const value = record[key];
             return typeof value === "string" ? value : fallback;
           };
           const getBoolean = (key: string): boolean | undefined => {
-            const value = item[key];
+            const value = record[key];
             return typeof value === "boolean" ? value : undefined;
           };
 
-          const rawKeywords = item["keywords"];
+          const rawKeywords = record["keywords"];
           const keywordsArray = Array.isArray(rawKeywords)
             ? rawKeywords
             : typeof rawKeywords === "string"
@@ -103,7 +100,7 @@ export default function AdminSeoPage() {
             : [];
 
           return {
-            id: item["id"] as number,
+            id: record["id"] as number,
             pageType: getString("pageType") || getString("page_type"),
             path:
               getString("pageSlug") ||
@@ -136,33 +133,33 @@ export default function AdminSeoPage() {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, [adminApi]);
 
   const fetchStats = useCallback(async () => {
-    if (!token) return;
+    if (!adminApi.isAuthenticated) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/seo/stats/overview`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await adminApi.get<SeoStats | { data: SeoStats }>(
+        "/admin/seo/stats/overview"
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data || null);
+      if (response.success && response.data) {
+        const stats = (response.data as { data?: SeoStats })?.data || response.data;
+        setStats(stats as SeoStats);
       }
     } catch (error) {
       console.error("Error fetching SEO stats:", error);
     }
-  }, [token]);
+  }, [adminApi]);
 
   useEffect(() => {
-    fetchSeoData();
-    fetchStats();
-  }, [fetchSeoData, fetchStats]);
+    if (adminApi.isAuthenticated) {
+      fetchSeoData();
+      fetchStats();
+    }
+  }, [adminApi.isAuthenticated, fetchSeoData, fetchStats]);
 
   const handleSubmit = async () => {
-    if (!token) {
+    if (!adminApi.isAuthenticated) {
       setErrorMessage("Missing authentication token");
       return;
     }
@@ -188,30 +185,12 @@ export default function AdminSeoPage() {
         keywords: normalizedKeywords,
       };
 
-      const url = editModal.isNew
-        ? `${API_BASE_URL}/admin/seo`
-        : `${API_BASE_URL}/admin/seo/${editModal.seo?.id}`;
+      const response = editModal.isNew
+        ? await adminApi.post("/admin/seo", payload)
+        : await adminApi.put(`/admin/seo/${editModal.seo?.id}`, payload);
 
-      const method = editModal.isNew ? "POST" : "PUT";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        // Bubble up server error (e.g., duplicate pageType/pageSlug)
-        let message = `Failed to save (HTTP ${response.status})`;
-        try {
-          const body = await response.json();
-          message = body?.message || body?.error || message;
-        } catch {
-          // ignore parse error, keep default message
-        }
+      if (!response.success) {
+        const message = response.error || "Failed to save SEO metadata";
         setErrorMessage(message);
         showError("Save failed", message);
         return;
@@ -238,28 +217,21 @@ export default function AdminSeoPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!token) {
+    if (!adminApi.isAuthenticated) {
       showError("Delete failed", "Missing authentication token");
       return;
     }
     if (!confirm("Are you sure you want to delete this SEO metadata?")) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/seo/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await adminApi.delete(`/admin/seo/${id}`);
 
-      if (response.ok) {
+      if (response.success) {
         fetchSeoData();
         fetchStats();
         showSuccess("Deleted", "SEO metadata removed");
       } else {
-        const body = await response.json().catch(() => null);
-        const msg =
-          body?.message || body?.error || "Failed to delete SEO metadata";
+        const msg = response.error || "Failed to delete SEO metadata";
         showError("Delete failed", msg);
       }
     } catch (error) {
@@ -272,26 +244,19 @@ export default function AdminSeoPage() {
   };
 
   const handleToggleActive = async (id: number) => {
-    if (!token) {
+    if (!adminApi.isAuthenticated) {
       showError("Toggle failed", "Missing authentication token");
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/seo/${id}/toggle`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await adminApi.post(`/admin/seo/${id}/toggle`);
 
-      if (response.ok) {
+      if (response.success) {
         fetchSeoData();
         fetchStats();
         showSuccess("Toggled", "SEO status updated");
       } else {
-        const body = await response.json().catch(() => null);
-        const msg =
-          body?.message || body?.error || "Failed to toggle SEO status";
+        const msg = response.error || "Failed to toggle SEO status";
         showError("Toggle failed", msg);
       }
     } catch (error) {
@@ -304,25 +269,19 @@ export default function AdminSeoPage() {
   };
 
   const setupDefaults = async () => {
-    if (!token) {
+    if (!adminApi.isAuthenticated) {
       showError("Setup failed", "Missing authentication token");
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/seo/setup/defaults`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await adminApi.post("/admin/seo/setup/defaults");
 
-      if (response.ok) {
+      if (response.success) {
         fetchSeoData();
         fetchStats();
         showSuccess("Defaults created", "Default SEO entries set up");
       } else {
-        const body = await response.json().catch(() => null);
-        const msg = body?.message || body?.error || "Failed to setup defaults";
+        const msg = response.error || "Failed to setup defaults";
         showError("Setup failed", msg);
       }
     } catch (error) {
@@ -652,7 +611,7 @@ export default function AdminSeoPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, path: e.target.value })
                       }
-                      className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                       placeholder="e.g., /movie/:id"
                     />
                   </div>
@@ -668,7 +627,7 @@ export default function AdminSeoPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
                     }
-                    className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2"
+                    className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                   />
                   <p className="text-xs text-gray-400 mt-1">
                     {formData.title.length} characters
@@ -684,7 +643,7 @@ export default function AdminSeoPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2"
+                    className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     rows={3}
                   />
                   <p className="text-xs text-gray-400 mt-1">
@@ -702,13 +661,15 @@ export default function AdminSeoPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, keywords: e.target.value })
                     }
-                    className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2"
+                    className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                   />
                 </div>
 
                 {/* Open Graph */}
-                <div className="border-t pt-4">
-                  <h3 className="text-md font-medium mb-2">Open Graph</h3>
+                <div className="border-t border-gray-700 pt-4">
+                  <h3 className="text-md font-medium mb-2 text-white">
+                    Open Graph
+                  </h3>
                   <div className="space-y-3">
                     <input
                       type="text"
@@ -717,7 +678,7 @@ export default function AdminSeoPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, ogTitle: e.target.value })
                       }
-                      className="block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
                     <textarea
                       placeholder="OG Description"
@@ -728,7 +689,7 @@ export default function AdminSeoPage() {
                           ogDescription: e.target.value,
                         })
                       }
-                      className="block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                       rows={2}
                     />
                     <input
@@ -738,14 +699,16 @@ export default function AdminSeoPage() {
                       onChange={(e) =>
                         setFormData({ ...formData, ogImage: e.target.value })
                       }
-                      className="block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
                   </div>
                 </div>
 
                 {/* Twitter */}
-                <div className="border-t pt-4">
-                  <h3 className="text-md font-medium mb-2">Twitter</h3>
+                <div className="border-t border-gray-700 pt-4">
+                  <h3 className="text-md font-medium mb-2 text-white">
+                    Twitter
+                  </h3>
                   <div className="space-y-3">
                     <input
                       type="text"
@@ -757,7 +720,7 @@ export default function AdminSeoPage() {
                           twitterTitle: e.target.value,
                         })
                       }
-                      className="block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
                     <textarea
                       placeholder="Twitter Description"
@@ -768,7 +731,7 @@ export default function AdminSeoPage() {
                           twitterDescription: e.target.value,
                         })
                       }
-                      className="block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                       rows={2}
                     />
                     <input
@@ -781,7 +744,7 @@ export default function AdminSeoPage() {
                           twitterImage: e.target.value,
                         })
                       }
-                      className="block w-full border border-gray-700 rounded-md px-3 py-2"
+                      className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
                   </div>
                 </div>
@@ -810,13 +773,13 @@ export default function AdminSeoPage() {
                   onClick={() =>
                     setEditModal({ open: false, seo: null, isNew: false })
                   }
-                  className="px-4 py-2 text-sm font-medium text-white bg-gray-800 border border-gray-600 rounded-md hover:bg-gray-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
                 >
                   {editModal.isNew ? "Create" : "Update"}
                 </button>

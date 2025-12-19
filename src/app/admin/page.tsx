@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
-import { API_BASE_URL } from "@/services/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 interface DashboardStats {
   totalMovies: number;
@@ -25,35 +24,29 @@ export default function AdminDashboard() {
   );
   const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
-  const { token } = useAuth();
+  const adminApi = useAdminApi();
 
-  const fetchDashboardStats = useCallback(
-    async (authToken: string) => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/admin/dashboard/stats`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
+  const fetchDashboardStats = useCallback(async () => {
+    try {
+      const response = await adminApi.get<DashboardStats>(
+        "/admin/dashboard/stats"
+      );
 
-        const data = await response.json();
-        if (data.success) {
-          setStats(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-      } finally {
-        setLoading(false);
+      if (response.success && response.data) {
+        setStats(response.data);
       }
-    },
-    []
-  );
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [adminApi]);
 
   useEffect(() => {
-    if (token) {
-      fetchDashboardStats(token);
+    if (adminApi.isAuthenticated) {
+      fetchDashboardStats();
     }
-  }, [token, fetchDashboardStats]);
+  }, [adminApi.isAuthenticated, fetchDashboardStats]);
 
   const triggerSync = async (target: "all" | "popular") => {
     setSyncError(null);
@@ -61,28 +54,20 @@ export default function AdminDashboard() {
     setSyncingTarget(target);
 
     try {
-      if (!token) {
-        throw new Error("Missing admin authentication token");
-      }
+      const response = await adminApi.post<{ message: string }>(
+        "/admin/sync",
+        { target }
+      );
 
-      const response = await fetch(`${API_BASE_URL}/admin/sync`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ target }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to trigger sync");
+      if (!response.success) {
+        throw new Error(response.error || "Failed to trigger sync");
       }
 
       const label = target === "all" ? "Full daily export" : "Popular refresh";
-      setSyncSuccess(data.message || `${label} sync started successfully.`);
-      await fetchDashboardStats(token);
+      setSyncSuccess(
+        response.data?.message || `${label} sync started successfully.`
+      );
+      await fetchDashboardStats();
     } catch (error) {
       console.error("Error triggering sync:", error);
       setSyncError(

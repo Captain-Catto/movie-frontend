@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { API_BASE_URL } from "@/services/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 interface NotificationAnalyticsSummary {
   totalTargetedUsers: number;
@@ -74,7 +73,7 @@ export default function AdminNotificationsPage() {
     maintenanceStartTime: "",
     maintenanceEndTime: "",
   });
-  const { token } = useAuth();
+  const adminApi = useAdminApi();
 
   const resetForm = () => {
     setFormData({
@@ -96,7 +95,7 @@ export default function AdminNotificationsPage() {
   };
 
   const fetchNotifications = useCallback(async () => {
-    if (!token) return;
+    if (!adminApi.isAuthenticated) return;
     try {
       // Build query params
       const params = new URLSearchParams({
@@ -114,27 +113,18 @@ export default function AdminNotificationsPage() {
         params.append("endDate", filters.endDate);
       }
 
-      const response = await fetch(
-        `${API_BASE_URL}/admin/notifications?${params.toString()}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await adminApi.get<{ notifications?: unknown[]; meta?: unknown; pagination?: unknown }>(
+        `/admin/notifications?${params.toString()}`
       );
 
-      if (response.ok) {
-        const data = await response.json();
-
+      if (response.success && response.data) {
         // Ensure data is always an array
         const notificationsArray: unknown[] = Array.isArray(
-          data.data?.notifications
+          response.data.notifications
         )
-          ? data.data.notifications
-          : Array.isArray(data.data)
-          ? data.data
-          : Array.isArray(data)
-          ? data
+          ? response.data.notifications
+          : Array.isArray(response.data)
+          ? response.data as unknown[]
           : [];
 
         const normalizedNotifications: Notification[] = notificationsArray.map(
@@ -158,19 +148,20 @@ export default function AdminNotificationsPage() {
         setNotifications(normalizedNotifications);
 
         // Update pagination meta if available
-        if (data.meta || data.pagination) {
-          const meta = data.meta || data.pagination;
+        if (response.data.meta || response.data.pagination) {
+          const meta = response.data.meta || response.data.pagination;
+          const metaObj = meta as Record<string, unknown>;
           setPagination({
-            total: meta.total || 0,
-            page: meta.page || pagination.page,
-            limit: meta.limit || pagination.limit,
+            total: metaObj.total as number || 0,
+            page: metaObj.page as number || pagination.page,
+            limit: metaObj.limit as number || pagination.limit,
             totalPages:
-              meta.totalPages ||
-              Math.ceil((meta.total || 0) / (meta.limit || 10)),
+              metaObj.totalPages as number ||
+              Math.ceil((metaObj.total as number || 0) / (metaObj.limit as number || 10)),
           });
         }
       } else {
-        console.error("❌ Failed to fetch notifications:", response.status);
+        console.error("❌ Failed to fetch notifications");
         setNotifications([]);
       }
     } catch (error) {
@@ -179,49 +170,40 @@ export default function AdminNotificationsPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, filters, token]);
+  }, [pagination.page, pagination.limit, filters, adminApi]);
 
   const fetchStats = useCallback(async () => {
-    if (!token) return;
+    if (!adminApi.isAuthenticated) return;
     try {
-      const response = await fetch(
-        "${API_BASE_URL}/admin/notifications/stats",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await adminApi.get<NotificationStats>(
+        "/admin/notifications/stats"
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.data) {
-          setStats({
-            totalSent: data.data.totalSent ?? 0,
-            totalUsers: data.data.totalUsers ?? 0,
-            totalRead: data.data.totalRead ?? 0,
-            totalUnread: data.data.totalUnread ?? 0,
-          });
-        } else {
-          setStats(null);
-        }
+      if (response.success && response.data) {
+        setStats({
+          totalSent: response.data.totalSent ?? 0,
+          totalUsers: response.data.totalUsers ?? 0,
+          totalRead: response.data.totalRead ?? 0,
+          totalUnread: response.data.totalUnread ?? 0,
+        });
+      } else {
+        setStats(null);
       }
     } catch (error) {
       console.error("Error fetching notification stats:", error);
     }
-  }, [token]);
+  }, [adminApi]);
 
   useEffect(() => {
-    if (token) {
+    if (adminApi.isAuthenticated) {
       fetchNotifications();
       fetchStats();
     }
-  }, [fetchNotifications, fetchStats, token]);
+  }, [fetchNotifications, fetchStats, adminApi.isAuthenticated]);
 
   const handleSendNotification = async () => {
-    if (!token) return;
     try {
-      let url = `${API_BASE_URL}/admin/notifications/`;
+      let url = "/admin/notifications/";
       const payload: {
         title: string;
         message: string;
@@ -265,16 +247,9 @@ export default function AdminNotificationsPage() {
           break;
       }
 
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminApi.post(url, payload);
 
-      if (response.ok) {
+      if (response.success) {
         handleCloseModal();
         fetchNotifications();
         fetchStats();
@@ -285,19 +260,10 @@ export default function AdminNotificationsPage() {
   };
 
   const handleDeleteNotification = async (id: number) => {
-    if (!token) return;
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/notifications/${id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await adminApi.delete(`/admin/notifications/${id}`);
 
-      if (response.ok) {
+      if (response.success) {
         fetchNotifications();
         fetchStats();
       }

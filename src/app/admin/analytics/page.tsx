@@ -3,14 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { API_BASE_URL } from "@/services/api";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import AnalyticsSkeleton from "@/components/ui/AnalyticsSkeleton";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 interface AnalyticsOverview {
   totalUsers: number;
@@ -66,7 +65,7 @@ export default function AdminAnalyticsPage() {
     const numeric = typeof value === "number" && Number.isFinite(value) ? value : 0;
     return numeric.toLocaleString();
   };
-  const { token } = useAuth();
+  const adminApi = useAdminApi();
 
   const formatPercentageValue = (value?: number | null) => {
     const numeric = typeof value === "number" && Number.isFinite(value) ? value : 0;
@@ -75,39 +74,27 @@ export default function AdminAnalyticsPage() {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      if (!token) return;
+      if (!adminApi.isAuthenticated) return;
       try {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
-
         const viewParams = new URLSearchParams({
           startDate: dateRange.startDate,
           endDate: dateRange.endDate,
           ...(contentType !== "all" && { contentType }),
         });
 
-        const overviewResponse = await fetch(
-          `${API_BASE_URL}/admin/analytics/overview`,
-          { headers }
+        const overviewResponse = await adminApi.get<AnalyticsOverview>(
+          "/admin/analytics/overview"
         );
-        if (overviewResponse.ok) {
-          const overviewData = await overviewResponse.json();
-          setOverview(
-            overviewData?.data && typeof overviewData.data === "object"
-              ? (overviewData.data as AnalyticsOverview)
-              : null
-          );
+        if (overviewResponse.success && overviewResponse.data) {
+          setOverview(overviewResponse.data);
         }
 
-        const viewResponse = await fetch(
-          `${API_BASE_URL}/admin/analytics/views?${viewParams}`,
-          { headers }
+        const viewResponse = await adminApi.get<ViewStats[]>(
+          `/admin/analytics/views?${viewParams}`
         );
-        if (viewResponse.ok) {
-          const viewData = await viewResponse.json();
-          const rawViewStats: unknown[] = Array.isArray(viewData?.data)
-            ? viewData.data
+        if (viewResponse.success) {
+          const rawViewStats: unknown[] = Array.isArray(viewResponse.data)
+            ? viewResponse.data
             : [];
           const normalizedViewStats: ViewStats[] = rawViewStats.map((item) => {
             const record = item as Record<string, unknown>;
@@ -120,20 +107,18 @@ export default function AdminAnalyticsPage() {
           setViewStats(normalizedViewStats);
         }
 
-        const popularResponse = await fetch(
-          `${API_BASE_URL}/admin/analytics/popular?${viewParams}`,
-          { headers }
+        const popularResponse = await adminApi.get<unknown>(
+          `/admin/analytics/popular?${viewParams}`
         );
-        if (popularResponse.ok) {
-          const popularData = await popularResponse.json();
-          const rawPopular = popularData?.data;
+        if (popularResponse.success) {
+          const rawPopular = popularResponse.data;
           const popularArray: unknown =
             Array.isArray(rawPopular)
               ? rawPopular
               : rawPopular
               ? [
-                  ...((rawPopular.movies as unknown[]) ?? []),
-                  ...((rawPopular.tvSeries as unknown[]) ?? []),
+                  ...((rawPopular as Record<string, unknown>).movies as unknown[]) ?? [],
+                  ...((rawPopular as Record<string, unknown>).tvSeries as unknown[]) ?? [],
                 ]
               : [];
 
@@ -164,14 +149,12 @@ export default function AdminAnalyticsPage() {
           setPopularContent(normalizedPopular);
         }
 
-        const deviceResponse = await fetch(
-          `${API_BASE_URL}/admin/analytics/devices?${viewParams}`,
-          { headers }
+        const deviceResponse = await adminApi.get<DeviceStats[]>(
+          `/admin/analytics/devices?${viewParams}`
         );
-        if (deviceResponse.ok) {
-          const deviceData = await deviceResponse.json();
-          const rawDevices: unknown[] = Array.isArray(deviceData?.data)
-            ? deviceData.data
+        if (deviceResponse.success) {
+          const rawDevices: unknown[] = Array.isArray(deviceResponse.data)
+            ? deviceResponse.data
             : [];
           const totalDevices = rawDevices.reduce<number>((sum, item) => {
             const count = Number(
@@ -196,14 +179,12 @@ export default function AdminAnalyticsPage() {
           setDeviceStats(normalizedDevices);
         }
 
-        const countryResponse = await fetch(
-          `${API_BASE_URL}/admin/analytics/countries?${viewParams}`,
-          { headers }
+        const countryResponse = await adminApi.get<CountryStats[]>(
+          `/admin/analytics/countries?${viewParams}`
         );
-        if (countryResponse.ok) {
-          const countryData = await countryResponse.json();
-          const rawCountries: unknown[] = Array.isArray(countryData?.data)
-            ? countryData.data
+        if (countryResponse.success) {
+          const rawCountries: unknown[] = Array.isArray(countryResponse.data)
+            ? countryResponse.data
             : [];
           const totalCountries = rawCountries.reduce<number>((sum, item) => {
             const count = Number(
@@ -242,7 +223,7 @@ export default function AdminAnalyticsPage() {
     };
 
     fetchAnalytics();
-  }, [dateRange, contentType, token]);
+  }, [dateRange, contentType, adminApi]);
 
   const maxViewCount =
     viewStats.length > 0 ? Math.max(...viewStats.map((stat) => stat.views)) : 0;

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Pagination } from "@/components/ui/Pagination";
-import { API_BASE_URL } from "@/services/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 type TabKey = "movies" | "tv" | "trending";
 type ContentStatusFilter = "all" | "active" | "blocked";
@@ -93,7 +92,7 @@ export default function AdminContentPage() {
     content: ContentItem | null;
   }>({ open: false, content: null });
   const [blockReason, setBlockReason] = useState("");
-  const { token } = useAuth();
+  const adminApi = useAdminApi();
 
   const PAGE_SIZE = 20;
 
@@ -137,7 +136,7 @@ export default function AdminContentPage() {
 
   const fetchMovies = useCallback(
     async (pageToLoad: number) => {
-      if (!token) {
+      if (!adminApi.isAuthenticated) {
         setLoading(false);
         return;
       }
@@ -154,24 +153,18 @@ export default function AdminContentPage() {
           params.append("search", appliedSearchTerm);
         }
 
-        const response = await fetch(
-          `${API_BASE_URL}/admin/content/list?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await adminApi.get<{ items: RawContentItem[]; total: number; totalPages: number; page: number }>(
+          `/admin/content/list?${params.toString()}`
         );
 
-        const data = await response.json();
-        if (response.ok && data.success) {
-          const normalized: ContentItem[] = (data.data.items || []).map(
+        if (response.success && response.data) {
+          const normalized: ContentItem[] = (response.data.items || []).map(
             (item: RawContentItem) => normalizeContent(item, "movie")
           );
           setContents(normalized);
-          setTotalItems(data.data.total || 0);
-          setTotalPages(Math.max(1, data.data.totalPages || 1));
-          setPage(data.data.page || pageToLoad);
+          setTotalItems(response.data.total || 0);
+          setTotalPages(Math.max(1, response.data.totalPages || 1));
+          setPage(response.data.page || pageToLoad);
         } else {
           setContents([]);
           setTotalItems(0);
@@ -186,12 +179,12 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, token]
+    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, adminApi]
   );
 
   const fetchTVSeries = useCallback(
     async (pageToLoad: number) => {
-      if (!token) {
+      if (!adminApi.isAuthenticated) {
         setLoading(false);
         return;
       }
@@ -208,24 +201,18 @@ export default function AdminContentPage() {
           params.append("search", appliedSearchTerm);
         }
 
-        const response = await fetch(
-          `${API_BASE_URL}/admin/content/list?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await adminApi.get<{ items: RawContentItem[]; total: number; totalPages: number; page: number }>(
+          `/admin/content/list?${params.toString()}`
         );
 
-        const data = await response.json();
-        if (response.ok && data.success) {
-          const normalized: ContentItem[] = (data.data.items || []).map(
+        if (response.success && response.data) {
+          const normalized: ContentItem[] = (response.data.items || []).map(
             (item: RawContentItem) => normalizeContent(item, "tv_series")
           );
           setContents(normalized);
-          setTotalItems(data.data.total || 0);
-          setTotalPages(Math.max(1, data.data.totalPages || 1));
-          setPage(data.data.page || pageToLoad);
+          setTotalItems(response.data.total || 0);
+          setTotalPages(Math.max(1, response.data.totalPages || 1));
+          setPage(response.data.page || pageToLoad);
         } else {
           setContents([]);
           setTotalItems(0);
@@ -240,12 +227,12 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, token]
+    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, adminApi]
   );
 
   const fetchTrending = useCallback(
     async (pageToLoad: number) => {
-      if (!token) {
+      if (!adminApi.isAuthenticated) {
         setLoading(false);
         return;
       }
@@ -256,18 +243,12 @@ export default function AdminContentPage() {
           limit: PAGE_SIZE.toString(),
         });
 
-        const response = await fetch(
-          `${API_BASE_URL}/admin/content/trending?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const response = await adminApi.get<{ items: RawContentItem[]; total: number; totalPages: number; page: number }>(
+          `/admin/content/trending?${params.toString()}`
         );
 
-        const data = await response.json();
-        if (response.ok && data.success) {
-          const normalized: ContentItem[] = (data.data.items || []).map(
+        if (response.success && response.data) {
+          const normalized: ContentItem[] = (response.data.items || []).map(
             (item: RawContentItem) =>
               normalizeContent(
                 item,
@@ -275,9 +256,9 @@ export default function AdminContentPage() {
               )
           );
           setContents(normalized);
-          setTotalItems(data.data.total || 0);
-          setTotalPages(Math.max(1, data.data.totalPages || 1));
-          setPage(data.data.page || pageToLoad);
+          setTotalItems(response.data.total || 0);
+          setTotalPages(Math.max(1, response.data.totalPages || 1));
+          setPage(response.data.page || pageToLoad);
         } else {
           setContents([]);
           setTotalItems(0);
@@ -292,7 +273,7 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, normalizeContent, token]
+    [PAGE_SIZE, normalizeContent, adminApi]
   );
 
   const refreshCurrentTab = useCallback(() => {
@@ -345,12 +326,12 @@ export default function AdminContentPage() {
   };
 
   const handleBlockContent = async () => {
-    if (!blockModal.content || !blockReason || !token) return;
+    if (!blockModal.content || !blockReason) return;
 
     try {
       const endpoint = isTrendingTab
-        ? `${API_BASE_URL}/admin/content/trending/block`
-        : `${API_BASE_URL}/admin/content/block`;
+        ? "/admin/content/trending/block"
+        : "/admin/content/block";
       const payload = isTrendingTab
         ? {
             tmdbId: blockModal.content.tmdbId,
@@ -365,17 +346,9 @@ export default function AdminContentPage() {
             reason: blockReason,
           };
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminApi.post(endpoint, payload);
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.success) {
         setBlockModal({ open: false, content: null });
         setBlockReason("");
         refreshCurrentTab();
@@ -386,11 +359,10 @@ export default function AdminContentPage() {
   };
 
   const handleUnblockContent = async (content: ContentItem) => {
-    if (!token) return;
     try {
       const endpoint = isTrendingTab
-        ? `${API_BASE_URL}/admin/content/trending/unblock`
-        : `${API_BASE_URL}/admin/content/unblock`;
+        ? "/admin/content/trending/unblock"
+        : "/admin/content/unblock";
       const payload = isTrendingTab
         ? {
             tmdbId: content.tmdbId,
@@ -403,17 +375,9 @@ export default function AdminContentPage() {
             contentType: content.contentType,
           };
 
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminApi.post(endpoint, payload);
 
-      const data = await response.json();
-      if (data.success) {
+      if (response.success) {
         refreshCurrentTab();
       }
     } catch (error) {

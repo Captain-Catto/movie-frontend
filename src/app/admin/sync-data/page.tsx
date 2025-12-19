@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
-import { API_BASE_URL } from "@/services/api";
-import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
 
 interface DashboardStats {
   totalMovies: number;
@@ -54,34 +53,26 @@ export default function AdminSyncDataPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [customDate, setCustomDate] = useState<string>("");
-  const { token } = useAuth();
+  const adminApi = useAdminApi();
 
   const fetchStats = useCallback(async () => {
-    if (!token) {
+    if (!adminApi.isAuthenticated) {
       setErrorMessage("Missing authentication token");
       return;
     }
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/admin/dashboard/stats`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await adminApi.get<DashboardStats>("/admin/dashboard/stats");
 
-      const data = await response.json();
-      if (data.success) {
-        setStats(data.data);
+      if (response.success && response.data) {
+        setStats(response.data);
       } else {
-        throw new Error(data.message || "Failed to load dashboard stats");
+        throw new Error(response.message || "Failed to load dashboard stats");
       }
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
       setErrorMessage(error instanceof Error ? error.message : "Failed to load dashboard stats.");
     }
-  }, [token]);
+  }, [adminApi]);
 
   useEffect(() => {
     fetchStats();
@@ -95,30 +86,18 @@ export default function AdminSyncDataPage() {
     setSyncing(target);
 
     try {
-      if (!token) {
-        throw new Error("Missing authentication token");
-      }
-
       const payload = {
         target,
         date: customDate || undefined,
       };
 
-      const response = await fetch(`${API_BASE_URL}/admin/sync`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await adminApi.post("/admin/sync", payload);
 
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || data.message || "Sync failed");
+      if (!response.success) {
+        throw new Error(response.error || response.message || "Sync failed");
       }
 
-      setSuccessMessage(data.message || `Sync "${target}" triggered successfully.`);
+      setSuccessMessage(response.message || `Sync "${target}" triggered successfully.`);
       await fetchStats();
     } catch (error) {
       console.error("Error triggering sync:", error);

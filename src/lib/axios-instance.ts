@@ -93,11 +93,11 @@ axiosInstance.interceptors.response.use(
       isRefreshing = false;
       processQueue(new Error('No refresh token'), null);
 
-      // Clear tokens and redirect to login
+      // Clear tokens and trigger logout event
       authStorage.clearAuth();
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event('auth:logout'));
-        window.location.href = '/';
+        // Don't redirect - let the app handle it via AuthLoader
       }
 
       return Promise.reject(error);
