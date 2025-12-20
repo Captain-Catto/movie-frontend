@@ -23,7 +23,10 @@ class AnalyticsService {
    */
   async trackEvent(params: TrackEventParams): Promise<void> {
     // Prevent duplicate tracking
-    if (this.isTracking) return;
+    if (this.isTracking) {
+      console.log("[Analytics] Skipping duplicate tracking");
+      return;
+    }
 
     try {
       this.isTracking = true;
@@ -37,11 +40,21 @@ class AnalyticsService {
         metadata: params.metadata || {},
       };
 
+      console.log("[Analytics] Tracking event:", payload);
+
       // Send to backend (non-blocking, don't await)
       axiosInstance
         .post("/analytics/track", payload)
+        .then((response) => {
+          console.log("[Analytics] Event tracked successfully:", response.data);
+        })
         .catch((error) => {
           console.error("[Analytics] Failed to track event:", error);
+          console.error("[Analytics] Error details:", {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+          });
         });
     } finally {
       // Reset tracking flag after a short delay
