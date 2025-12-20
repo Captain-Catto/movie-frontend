@@ -3,6 +3,7 @@ import Image from "next/image";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { analyticsService } from "@/services/analytics.service";
 
 interface HoverPreviewCardProps {
   title: string;
@@ -14,6 +15,7 @@ interface HoverPreviewCardProps {
   year?: string | number | null;
   overview?: string | null;
   contentType?: "movie" | "tv";
+  contentId?: number | string; // tmdbId for analytics
   genreIds?: number[];
   genreNames?: string[];
   favoriteButton?: {
@@ -46,6 +48,7 @@ export function HoverPreviewCard({
   year,
   overview,
   contentType = "movie",
+  contentId,
   genreIds,
   genreNames,
   favoriteButton,
@@ -72,6 +75,20 @@ export function HoverPreviewCard({
       : placement === "right"
       ? "right-0 translate-x-0"
       : "left-1/2 -translate-x-1/2";
+
+  const handleWatchClick = () => {
+    if (contentId) {
+      const analyticsContentType = contentType === "tv" ? "tv_series" : "movie";
+      analyticsService.trackPlay(String(contentId), analyticsContentType, title);
+    }
+  };
+
+  const handleDetailsClick = () => {
+    if (contentId) {
+      const analyticsContentType = contentType === "tv" ? "tv_series" : "movie";
+      analyticsService.trackClick(String(contentId), analyticsContentType, title);
+    }
+  };
 
   return (
     <div
@@ -109,6 +126,7 @@ export function HoverPreviewCard({
           <Link
             href={watchHref}
             className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            onClick={handleWatchClick}
           >
             <Play className="w-4 h-4 fill-white" />
             Watch
@@ -141,6 +159,7 @@ export function HoverPreviewCard({
           <Link
             href={detailHref}
             className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded font-semibold text-xs transition-colors flex items-center gap-2 cursor-pointer"
+            onClick={handleDetailsClick}
           >
             <Info className="w-4 h-4" />
             Details

@@ -7,6 +7,7 @@ import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 import type { MovieCardData } from "@/types/movie";
+import { analyticsService } from "@/services/analytics.service";
 
 interface MovieCardProps {
   movie: MovieCardData;
@@ -53,6 +54,16 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     }
   };
 
+  const handleCardClick = () => {
+    // Track CLICK event when user clicks on card
+    const contentType = isTVSeries ? "tv_series" : "movie";
+    analyticsService.trackClick(
+      String(movie.tmdbId),
+      contentType,
+      movie.title
+    );
+  };
+
   const handleWatchMovie = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -62,6 +73,14 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     if (movie.href?.includes("/tv/")) {
       contentType = "tv";
     }
+
+    // Track PLAY event
+    const analyticsContentType = contentType === "tv" ? "tv_series" : "movie";
+    analyticsService.trackPlay(
+      String(movie.tmdbId),
+      analyticsContentType,
+      movie.title
+    );
 
     // Create proper watch URL - tmdbId is guaranteed to exist since all data comes from TMDB
     const watchUrl = `/watch/${contentType}-${movie.tmdbId}`;
@@ -75,7 +94,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       onMouseEnter={handleHoverPosition}
     >
       {/* Main Card */}
-      <Link href={detailHref} className="v-thumbnail block">
+      <Link href={detailHref} className="v-thumbnail block" onClick={handleCardClick}>
         <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 lg:group-hover:z-20">
           {/* Favorite Button - Top Right Corner */}
           <FavoriteButton
@@ -154,6 +173,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
         year={movie.year}
         overview={movie.description}
         contentType={contentTypePrefix === "tv" ? "tv" : "movie"}
+        contentId={movie.tmdbId}
         placement={hoverPosition}
         genreIds={movie.genreIds}
         genreNames={movie.genres}
@@ -176,6 +196,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             href={detailHref}
             title={movie.title}
             className="text-sm text-center font-semibold hover:text-red-500 transition-colors line-clamp-3"
+            onClick={handleCardClick}
           >
             {movie.title}
           </Link>

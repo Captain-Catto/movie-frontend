@@ -64,6 +64,10 @@ interface ClickStats {
   total: number;
 }
 
+interface PlayStats {
+  total: number;
+}
+
 interface FavoriteStats {
   total: number;
   byType?: {
@@ -112,6 +116,7 @@ export default function AdminAnalyticsPage() {
   const [viewStats, setViewStats] = useState<ViewStats[]>([]);
   const [viewSummary, setViewSummary] = useState<ViewSummary | null>(null);
   const [clickStats, setClickStats] = useState<ClickStats | null>(null);
+  const [playStats, setPlayStats] = useState<PlayStats | null>(null);
   const [favoriteStats, setFavoriteStats] = useState<FavoriteStats | null>(
     null
   );
@@ -224,6 +229,7 @@ export default function AdminAnalyticsPage() {
       const [
         viewRes,
         clickRes,
+        playRes,
         favoriteRes,
         mostViewedRes,
         popularRes,
@@ -236,6 +242,7 @@ export default function AdminAnalyticsPage() {
           trend?: Array<{ date: string; views?: number; count?: number }>;
         }>(`/admin/analytics/views?${viewParams}`),
         adminApi.get<ClickStats>(`/admin/analytics/clicks?${viewParams}`),
+        adminApi.get<PlayStats>(`/admin/analytics/plays?${viewParams}`),
         adminApi.get<FavoriteStats>(`/admin/analytics/favorites`),
         adminApi.get<MostViewedItem[]>(`/admin/analytics/most-viewed?limit=10`),
         adminApi.get<unknown>(`/admin/analytics/popular?${viewParams}`),
@@ -267,6 +274,12 @@ export default function AdminAnalyticsPage() {
       if (clickRes.success && clickRes.data) {
         setClickStats({
           total: Number((clickRes.data as ClickStats).total ?? 0),
+        });
+      }
+
+      if (playRes.success && playRes.data) {
+        setPlayStats({
+          total: Number((playRes.data as PlayStats).total ?? 0),
         });
       }
 
@@ -410,6 +423,7 @@ export default function AdminAnalyticsPage() {
       setCountryStats([]);
       setViewSummary(null);
       setClickStats(null);
+      setPlayStats(null);
       setFavoriteStats(null);
     } finally {
       setLoading(false);
@@ -422,6 +436,7 @@ export default function AdminAnalyticsPage() {
 
   const totalViews = viewSummary?.total ?? 0;
   const totalClicks = clickStats?.total ?? 0;
+  const totalPlays = playStats?.total ?? 0;
   const totalFavorites = favoriteStats?.total ?? 0;
   const ctr = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
   const favRate = totalViews > 0 ? (totalFavorites / totalViews) * 100 : 0;
@@ -638,9 +653,33 @@ export default function AdminAnalyticsPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 6v6l4 2"
+                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
                   />
-                  <circle cx="12" cy="12" r="9" strokeWidth={2} />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm font-medium">
+                  Total Plays
+                </p>
+                <p className="text-3xl font-bold mt-2">
+                  {formatCompactNumber(totalPlays)}
+                </p>
+                <p className="text-xs text-purple-100/80 mt-1">
+                  Events tracked (PLAY)
+                </p>
+              </div>
+              <div className="bg-purple-500 bg-opacity-30 p-3 rounded-full">
+                <svg
+                  className="w-8 h-8"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
                 </svg>
               </div>
             </div>

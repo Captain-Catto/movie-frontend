@@ -13,6 +13,7 @@ import type { MovieCardData } from "@/types/movie";
 import GenreBadge from "@/components/ui/GenreBadge";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
+import { analyticsService } from "@/services/analytics.service";
 
 // Import Swiper styles
 import "swiper/css";
@@ -109,12 +110,30 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
             ? `/watch/${contentType}-${watchTargetId}`
             : movie.href;
 
+          // Analytics tracking handlers
+          const analyticsContentType = contentType === "tv" ? "tv_series" : "movie";
+          const handleDetailClick = () => {
+            analyticsService.trackClick(
+              String(movie.tmdbId),
+              analyticsContentType,
+              movie.title
+            );
+          };
+          const handleWatchClick = () => {
+            analyticsService.trackPlay(
+              String(movie.tmdbId),
+              analyticsContentType,
+              movie.title
+            );
+          };
+
           return (
             <SwiperSlide key={movie.id} className="relative">
               <div className="slide-elements relative h-full">
                 <Link
                   href={movie.href}
                   className="slide-url absolute inset-0 z-10"
+                  onClick={handleDetailClick}
                 />
                 {/* Background Fade */}
                 <div
@@ -145,7 +164,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                   <div className="media-item max-w-2xl space-y-6">
                     {/* Main Title */}
                     <h1 className="text-5xl font-bold text-white">
-                      <Link title={movie.title} href={movie.href}>
+                      <Link title={movie.title} href={movie.href} onClick={handleDetailClick}>
                         {movie.title}
                       </Link>
                     </h1>
@@ -156,6 +175,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                         title={movie.aliasTitle || movie.title}
                         href={movie.href}
                         className="text-gray-300 text-xl"
+                        onClick={handleDetailClick}
                       >
                         {movie.aliasTitle || movie.title}
                       </Link>
@@ -214,7 +234,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
 
                     {/* Touch/Action Buttons */}
                     <div className="touch flex items-center space-x-4">
-                      <Link href={watchHref} className="button-play">
+                      <Link href={watchHref} className="button-play" onClick={handleWatchClick}>
                         <button className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors">
                           <svg
                             className="w-5 h-5"
@@ -246,7 +266,7 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
                           iconOnly={true}
                           className="!p-3"
                         />
-                        <Link href={movie.href} className="item">
+                        <Link href={movie.href} className="item" onClick={handleDetailClick}>
                           <Info className="w-6 h-6 text-gray-400" />
                         </Link>
                       </div>
