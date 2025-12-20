@@ -13,6 +13,7 @@ import GenreBadge from "@/components/ui/GenreBadge";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import { apiService } from "@/services/api";
+import { analyticsService } from "@/services/analytics.service";
 import { normalizeRatingValue } from "@/utils/rating";
 import { MovieDetail, Movie, TVSeries } from "@/types/movie";
 import type { CastMember, CrewMember } from "@/types";
@@ -198,6 +199,13 @@ const MovieDetailPageContent = () => {
             // console.log("🎥 [MovieDetailPage] Transformed movie data:", transformedMovieData);
             setMovieData(transformedMovieData);
 
+            // Track VIEW analytics
+            analyticsService.trackView(
+              String(movieContent.tmdbId),
+              "movie",
+              movieContent.title
+            );
+
             // Fetch credits after setting basic data
             // console.log("🎥 [MovieDetailPage] Fetching credits for tmdbId:", movieContent.tmdbId || movieContent.id);
             fetchCredits(movieContent.tmdbId || movieContent.id);
@@ -259,6 +267,13 @@ const MovieDetailPageContent = () => {
 
             // console.log("📺 [MovieDetailPage] Transformed TV data:", transformedTVData);
             setMovieData(transformedTVData);
+
+            // Track VIEW analytics
+            analyticsService.trackView(
+              String(tvContent.tmdbId),
+              "tv_series",
+              (tvContent.title || tvContent.originalTitle) ?? undefined
+            );
 
             // Fetch credits for TV shows (not implemented yet, but structure is ready)
             // fetchTVCredits(content.tmdbId || content.id);
