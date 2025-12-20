@@ -22,7 +22,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  type PieProps,
 } from "recharts";
 
 interface ViewStats {
@@ -845,15 +844,16 @@ export default function AdminAnalyticsPage() {
                 <ResponsiveContainer width="50%" height={300}>
                   <PieChart>
                     <Pie
-                      data={deviceStats as unknown as PieProps["data"]}
+                      data={deviceStats as unknown as Array<Record<string, unknown>>}
                       dataKey="count"
                       nameKey="device"
                       cx="50%"
                       cy="50%"
                       outerRadius={100}
-                      label={(entry: DeviceStats) =>
-                        `${entry.device}: ${entry.percentage.toFixed(1)}%`
-                      }
+                      label={(props: { index: number }) => {
+                        const entry = deviceStats[props.index];
+                        return `${entry.device}: ${entry.percentage.toFixed(1)}%`;
+                      }}
                     >
                       {deviceStats.map((entry: DeviceStats, index) => (
                         <Cell key={`cell-${index}`} fill={DEVICE_COLORS[index % DEVICE_COLORS.length]} />
