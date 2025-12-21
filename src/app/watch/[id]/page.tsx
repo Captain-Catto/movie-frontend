@@ -13,6 +13,7 @@ import {
   WatchContentData,
 } from "@/utils/watchContentMapper";
 import type { CastMember } from "@/types";
+import { analyticsService } from "@/services/analytics.service";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -55,6 +56,7 @@ const WatchPage = () => {
   );
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [recommendationsLoading, setRecommendationsLoading] = useState(false);
+  const [hasTrackedPlay, setHasTrackedPlay] = useState(false);
 
   // Parse prefixed ID (movie-123 or tv-456 or plain 123)
   const parseContentId = (
@@ -181,6 +183,16 @@ const WatchPage = () => {
   }, [movieId]);
 
   const handlePlayMovie = () => {
+    if (!hasTrackedPlay && movieData) {
+      const contentType =
+        movieData.contentType === "tv" ? "tv_series" : "movie";
+      analyticsService.trackPlay(
+        String(movieData.tmdbId),
+        contentType,
+        movieData.title
+      );
+      setHasTrackedPlay(true);
+    }
     setIsPlaying(true);
   };
 

@@ -514,6 +514,13 @@ const MovieDetailPageContent = () => {
                 <div className="flex flex-wrap gap-4">
                   <Link
                     href={`/watch/movie-${movieData.tmdbId || movieId}`}
+                    onClick={() =>
+                      analyticsService.trackClick(
+                        String(movieData.tmdbId || movieId),
+                        movieData.contentType === "tv" ? "tv_series" : "movie",
+                        movieData.title
+                      )
+                    }
                     className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <svg
