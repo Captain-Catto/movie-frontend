@@ -443,11 +443,11 @@ export default function AdminAnalyticsPage() {
   useEffect(() => {
     fetchAnalytics();
 
-    // Auto-refresh every 30 seconds
+    // Auto-refresh every 2 seconds
     const interval = setInterval(() => {
       console.log("[Analytics] Auto-refreshing data...");
       fetchAnalytics();
-    }, 30000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [fetchAnalytics]);

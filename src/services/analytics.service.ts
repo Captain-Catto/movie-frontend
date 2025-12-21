@@ -16,20 +16,28 @@ interface TrackEventParams {
  * Analytics Service - Track user interactions
  */
 class AnalyticsService {
-  private isTracking = false;
+  // Track events by unique key (contentId + actionType) to prevent true duplicates
+  private trackingMap = new Map<string, number>();
+  private readonly DEBOUNCE_MS = 2000; // 2 seconds debounce per unique event
 
   /**
    * Track an analytics event
    */
   async trackEvent(params: TrackEventParams): Promise<void> {
-    // Prevent duplicate tracking
-    if (this.isTracking) {
-      console.log("[Analytics] Skipping duplicate tracking");
+    // Create unique key for this event
+    const eventKey = `${params.contentId}-${params.actionType}`;
+    const now = Date.now();
+    const lastTracked = this.trackingMap.get(eventKey);
+
+    // Prevent duplicate tracking of same event within debounce period
+    if (lastTracked && now - lastTracked < this.DEBOUNCE_MS) {
+      console.log("[Analytics] Skipping duplicate event:", eventKey);
       return;
     }
 
     try {
-      this.isTracking = true;
+      // Mark this event as tracked
+      this.trackingMap.set(eventKey, now);
 
       const payload = {
         contentId: params.contentId,
@@ -56,11 +64,23 @@ class AnalyticsService {
             data: error.response?.data,
           });
         });
-    } finally {
-      // Reset tracking flag after a short delay
-      setTimeout(() => {
-        this.isTracking = false;
-      }, 1000);
+
+      // Clean up old entries from map (prevent memory leak)
+      this.cleanupTrackingMap();
+    } catch (error) {
+      console.error("[Analytics] Error in trackEvent:", error);
+    }
+  }
+
+  /**
+   * Clean up old entries from tracking map
+   */
+  private cleanupTrackingMap(): void {
+    const now = Date.now();
+    for (const [key, timestamp] of this.trackingMap.entries()) {
+      if (now - timestamp > this.DEBOUNCE_MS) {
+        this.trackingMap.delete(key);
+      }
     }
   }
 
