@@ -68,6 +68,7 @@ interface ClickStats {
 
 interface PlayStats {
   total: number;
+  bySource?: Record<string, number>;
 }
 
 interface FavoriteStats {
@@ -119,6 +120,9 @@ export default function AdminAnalyticsPage() {
   const [viewSummary, setViewSummary] = useState<ViewSummary | null>(null);
   const [clickStats, setClickStats] = useState<ClickStats | null>(null);
   const [playStats, setPlayStats] = useState<PlayStats | null>(null);
+  const [playSourceBreakdown, setPlaySourceBreakdown] = useState<
+    Record<string, number>
+  >({});
   const [favoriteStats, setFavoriteStats] = useState<FavoriteStats | null>(
     null
   );
@@ -128,7 +132,8 @@ export default function AdminAnalyticsPage() {
   );
   const [deviceStats, setDeviceStats] = useState<DeviceStats[]>([]);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // full-page skeleton (initial only)
+  const [cardsLoading, setCardsLoading] = useState(true); // stats card skeletons
   const [datePreset, setDatePreset] = useState<DatePreset>("7d");
   const [customDateRange, setCustomDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
@@ -140,8 +145,11 @@ export default function AdminAnalyticsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const adminApi = useAdminApi();
-  const { snapshot: liveSnapshot, isConnected: isLiveConnected, lastUpdateAt: liveUpdatedAt } =
-    useAdminAnalyticsSocket();
+  const {
+    snapshot: liveSnapshot,
+    isConnected: isLiveConnected,
+    lastUpdateAt: liveUpdatedAt,
+  } = useAdminAnalyticsSocket();
 
   const dateRange = useMemo(() => {
     const end = new Date();
@@ -221,235 +229,254 @@ export default function AdminAnalyticsPage() {
     []
   );
 
-  const fetchAnalytics = useCallback(async (showLoading = true) => {
-    if (!adminApi.isAuthenticated) return;
+  const fetchAnalytics = useCallback(
+    async (options: { showSkeleton?: boolean } = {}) => {
+      const { showSkeleton = true } = options;
+      if (!adminApi.isAuthenticated) return;
 
-    if (showLoading) {
-      setLoading(true);
-    }
-    setIsRefreshing(true);
-    try {
-      const viewParams = new URLSearchParams({
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-        ...(contentType !== "all" && { contentType }),
-      });
-
-      const [
-        viewRes,
-        clickRes,
-        playRes,
-        favoriteRes,
-        mostViewedRes,
-        popularRes,
-        deviceRes,
-        countryRes,
-      ] = await Promise.all([
-        adminApi.get<{
-          total: number;
-          byType?: { movies?: number; tvSeries?: number };
-          trend?: Array<{ date: string; views?: number; count?: number }>;
-        }>(`/admin/analytics/views?${viewParams}`),
-        adminApi.get<ClickStats>(`/admin/analytics/clicks?${viewParams}`),
-        adminApi.get<PlayStats>(`/admin/analytics/plays?${viewParams}`),
-        adminApi.get<FavoriteStats>(`/admin/analytics/favorites`),
-        adminApi.get<MostViewedItem[]>(`/admin/analytics/most-viewed?limit=10`),
-        adminApi.get<unknown>(`/admin/analytics/popular?${viewParams}`),
-        adminApi.get<DeviceStats[]>(`/admin/analytics/devices?${viewParams}`),
-        adminApi.get<CountryStats[]>(
-          `/admin/analytics/countries?${viewParams}`
-        ),
-      ]);
-
-      console.log("[Analytics] View response:", viewRes);
-      if (viewRes.success && viewRes.data) {
-        const data = viewRes.data;
-        console.log("[Analytics] View data:", data);
-        setViewSummary({
-          total: Number(data.total ?? 0),
-          byType: data.byType,
-        });
-        const trendArray = Array.isArray(data.trend) ? data.trend : [];
-        const normalizedViewStats: ViewStats[] = trendArray.map((item) => ({
-          date: (item.date as string) ?? "",
-          views: Number(item.views ?? item.count ?? 0),
-        }));
-        setViewStats(normalizedViewStats);
-        console.log("[Analytics] Normalized view stats:", normalizedViewStats);
-      } else {
-        console.warn("[Analytics] View response failed or no data:", viewRes);
+      if (showSkeleton) {
+        setLoading(true);
       }
-
-      if (clickRes.success && clickRes.data) {
-        setClickStats({
-          total: Number((clickRes.data as ClickStats).total ?? 0),
+      setCardsLoading(true);
+      setIsRefreshing(true);
+      setPlaySourceBreakdown({});
+      setIsRefreshing(true);
+      try {
+        const viewParams = new URLSearchParams({
+          startDate: dateRange.startDate,
+          endDate: dateRange.endDate,
+          ...(contentType !== "all" && { contentType }),
         });
-      }
 
-      if (playRes.success && playRes.data) {
-        setPlayStats({
-          total: Number((playRes.data as PlayStats).total ?? 0),
-        });
-      }
+        const [
+          viewRes,
+          clickRes,
+          playRes,
+          favoriteRes,
+          mostViewedRes,
+          popularRes,
+          deviceRes,
+          countryRes,
+        ] = await Promise.all([
+          adminApi.get<{
+            total: number;
+            byType?: { movies?: number; tvSeries?: number };
+            trend?: Array<{ date: string; views?: number; count?: number }>;
+          }>(`/admin/analytics/views?${viewParams}`),
+          adminApi.get<ClickStats>(`/admin/analytics/clicks?${viewParams}`),
+          adminApi.get<PlayStats>(`/admin/analytics/plays?${viewParams}`),
+          adminApi.get<FavoriteStats>(`/admin/analytics/favorites`),
+          adminApi.get<MostViewedItem[]>(
+            `/admin/analytics/most-viewed?limit=10`
+          ),
+          adminApi.get<unknown>(`/admin/analytics/popular?${viewParams}`),
+          adminApi.get<DeviceStats[]>(`/admin/analytics/devices?${viewParams}`),
+          adminApi.get<CountryStats[]>(
+            `/admin/analytics/countries?${viewParams}`
+          ),
+        ]);
 
-      if (favoriteRes.success && favoriteRes.data) {
-        const favData = favoriteRes.data as FavoriteStats;
-        setFavoriteStats({
-          total: Number(favData.total ?? 0),
-          byType: favData.byType,
-          mostFavorited: favData.mostFavorited ?? [],
-          trend: favData.trend ?? [],
-        });
-      }
+        console.log("[Analytics] View response:", viewRes);
+        if (viewRes.success && viewRes.data) {
+          const data = viewRes.data;
+          console.log("[Analytics] View data:", data);
+          setViewSummary({
+            total: Number(data.total ?? 0),
+            byType: data.byType,
+          });
+          const trendArray = Array.isArray(data.trend) ? data.trend : [];
+          const normalizedViewStats: ViewStats[] = trendArray.map((item) => ({
+            date: (item.date as string) ?? "",
+            views: Number(item.views ?? item.count ?? 0),
+          }));
+          setViewStats(normalizedViewStats);
+          console.log(
+            "[Analytics] Normalized view stats:",
+            normalizedViewStats
+          );
+        } else {
+          console.warn("[Analytics] View response failed or no data:", viewRes);
+        }
 
-      if (mostViewedRes.success) {
-        const rawMostViewed = Array.isArray(mostViewedRes.data)
-          ? mostViewedRes.data
-          : [];
-        const normalized: MostViewedItem[] = rawMostViewed.map((item) => {
-          const record = item as unknown as Record<string, unknown>;
-          return {
-            contentId: Number(record.contentId ?? record.id ?? 0),
-            contentType: (record.contentType as string) ?? "movie",
-            title: (record.title as string) ?? "Unknown title",
-            viewCount: Number(record.viewCount ?? record.count ?? 0),
-          };
-        });
-        setMostViewedContent(normalized);
-      }
+        if (clickRes.success && clickRes.data) {
+          setClickStats({
+            total: Number((clickRes.data as ClickStats).total ?? 0),
+          });
+        }
 
-      console.log("[Analytics] Popular response:", popularRes);
-      if (popularRes.success) {
-        const rawPopular = popularRes.data;
-        console.log("[Analytics] Raw popular data:", rawPopular);
-        const popularArray: unknown = Array.isArray(rawPopular)
-          ? rawPopular
-          : rawPopular
-          ? [
-              ...(((rawPopular as Record<string, unknown>)
-                .movies as unknown[]) ?? []),
-              ...(((rawPopular as Record<string, unknown>)
-                .tvSeries as unknown[]) ?? []),
-            ]
-          : [];
+        if (playRes.success && playRes.data) {
+          setPlayStats({
+            total: Number((playRes.data as PlayStats).total ?? 0),
+            bySource: (playRes.data as PlayStats).bySource ?? {},
+          });
+          setPlaySourceBreakdown((playRes.data as PlayStats).bySource ?? {});
+        }
 
-        console.log(
-          "[Analytics] Popular array after normalization:",
-          popularArray
-        );
-        const normalizedPopular: PopularContent[] = Array.isArray(popularArray)
-          ? popularArray.map((item) => {
+        if (favoriteRes.success && favoriteRes.data) {
+          const favData = favoriteRes.data as FavoriteStats;
+          setFavoriteStats({
+            total: Number(favData.total ?? 0),
+            byType: favData.byType,
+            mostFavorited: favData.mostFavorited ?? [],
+            trend: favData.trend ?? [],
+          });
+        }
+
+        if (mostViewedRes.success) {
+          const rawMostViewed = Array.isArray(mostViewedRes.data)
+            ? mostViewedRes.data
+            : [];
+          const normalized: MostViewedItem[] = rawMostViewed.map((item) => {
+            const record = item as unknown as Record<string, unknown>;
+            return {
+              contentId: Number(record.contentId ?? record.id ?? 0),
+              contentType: (record.contentType as string) ?? "movie",
+              title: (record.title as string) ?? "Unknown title",
+              viewCount: Number(record.viewCount ?? record.count ?? 0),
+            };
+          });
+          setMostViewedContent(normalized);
+        }
+
+        console.log("[Analytics] Popular response:", popularRes);
+        if (popularRes.success) {
+          const rawPopular = popularRes.data;
+          console.log("[Analytics] Raw popular data:", rawPopular);
+          const popularArray: unknown = Array.isArray(rawPopular)
+            ? rawPopular
+            : rawPopular
+            ? [
+                ...(((rawPopular as Record<string, unknown>)
+                  .movies as unknown[]) ?? []),
+                ...(((rawPopular as Record<string, unknown>)
+                  .tvSeries as unknown[]) ?? []),
+              ]
+            : [];
+
+          console.log(
+            "[Analytics] Popular array after normalization:",
+            popularArray
+          );
+          const normalizedPopular: PopularContent[] = Array.isArray(
+            popularArray
+          )
+            ? popularArray.map((item) => {
+                const record = item as Record<string, unknown>;
+                const tmdbId = Number(record.tmdbId ?? record.id ?? 0);
+                const typeValue = (record.contentType ?? record.type) as
+                  | "movie"
+                  | "tv"
+                  | string
+                  | undefined;
+                const poster =
+                  (record.posterPath as string | undefined) ??
+                  (record.posterUrl as string | undefined);
+                return {
+                  tmdbId,
+                  title: (record.title as string) ?? "Unknown title",
+                  contentType: typeValue === "tv" ? "tv" : "movie",
+                  viewCount: Number(record.viewCount ?? 0),
+                  clickCount: Number(record.clickCount ?? 0),
+                  favoriteCount: Number(record.favoriteCount ?? 0),
+                  posterPath: poster ?? undefined,
+                };
+              })
+            : [];
+
+          console.log(
+            "[Analytics] Final normalized popular content:",
+            normalizedPopular
+          );
+          setPopularContent(normalizedPopular);
+        } else {
+          console.warn("[Analytics] Popular response failed:", popularRes);
+        }
+
+        if (deviceRes.success) {
+          const rawDevices: unknown[] = Array.isArray(deviceRes.data)
+            ? deviceRes.data
+            : [];
+          const totalDevices = rawDevices.reduce<number>((sum, item) => {
+            const count = Number((item as Record<string, unknown>).count ?? 0);
+            return sum + (Number.isFinite(count) ? count : 0);
+          }, 0);
+
+          const normalizedDevices: DeviceStats[] = rawDevices.map((item) => {
+            const record = item as Record<string, unknown>;
+            const count = Number(record.count ?? 0);
+            const safeCount = Number.isFinite(count) ? count : 0;
+            const percentage =
+              totalDevices > 0 ? (safeCount / totalDevices) * 100 : 0;
+            return {
+              device: (record.device as string) ?? "Unknown",
+              count: safeCount,
+              percentage,
+            };
+          });
+
+          setDeviceStats(normalizedDevices);
+        }
+
+        if (countryRes.success) {
+          const rawCountries: unknown[] = Array.isArray(countryRes.data)
+            ? countryRes.data
+            : [];
+          const totalCountries = rawCountries.reduce<number>((sum, item) => {
+            const count = Number((item as Record<string, unknown>).count ?? 0);
+            return sum + (Number.isFinite(count) ? count : 0);
+          }, 0);
+
+          const normalizedCountries: CountryStats[] = rawCountries.map(
+            (item) => {
               const record = item as Record<string, unknown>;
-              const tmdbId = Number(record.tmdbId ?? record.id ?? 0);
-              const typeValue = (record.contentType ?? record.type) as
-                | "movie"
-                | "tv"
-                | string
-                | undefined;
-              const poster =
-                (record.posterPath as string | undefined) ??
-                (record.posterUrl as string | undefined);
+              const count = Number(record.count ?? 0);
+              const safeCount = Number.isFinite(count) ? count : 0;
+              const percentage =
+                totalCountries > 0 ? (safeCount / totalCountries) * 100 : 0;
               return {
-                tmdbId,
-                title: (record.title as string) ?? "Unknown title",
-                contentType: typeValue === "tv" ? "tv" : "movie",
-                viewCount: Number(record.viewCount ?? 0),
-                clickCount: Number(record.clickCount ?? 0),
-                favoriteCount: Number(record.favoriteCount ?? 0),
-                posterPath: poster ?? undefined,
+                country: (record.country as string) ?? "Unknown",
+                count: safeCount,
+                percentage,
               };
-            })
-          : [];
+            }
+          );
 
-        console.log(
-          "[Analytics] Final normalized popular content:",
-          normalizedPopular
-        );
-        setPopularContent(normalizedPopular);
-      } else {
-        console.warn("[Analytics] Popular response failed:", popularRes);
-      }
-
-      if (deviceRes.success) {
-        const rawDevices: unknown[] = Array.isArray(deviceRes.data)
-          ? deviceRes.data
-          : [];
-        const totalDevices = rawDevices.reduce<number>((sum, item) => {
-          const count = Number((item as Record<string, unknown>).count ?? 0);
-          return sum + (Number.isFinite(count) ? count : 0);
-        }, 0);
-
-        const normalizedDevices: DeviceStats[] = rawDevices.map((item) => {
-          const record = item as Record<string, unknown>;
-          const count = Number(record.count ?? 0);
-          const safeCount = Number.isFinite(count) ? count : 0;
-          const percentage =
-            totalDevices > 0 ? (safeCount / totalDevices) * 100 : 0;
-          return {
-            device: (record.device as string) ?? "Unknown",
-            count: safeCount,
-            percentage,
-          };
+          setCountryStats(normalizedCountries);
+        }
+      } catch (error) {
+        console.error("[Analytics] Error fetching analytics:", error);
+        console.error("[Analytics] Error details:", {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
         });
-
-        setDeviceStats(normalizedDevices);
+        setViewStats([]);
+        setPopularContent([]);
+        setMostViewedContent([]);
+        setDeviceStats([]);
+        setCountryStats([]);
+        setViewSummary(null);
+        setClickStats(null);
+        setPlayStats(null);
+        setFavoriteStats(null);
+      } finally {
+        setCardsLoading(false);
+        setLoading(false);
+        setIsRefreshing(false);
+        setLastRefreshed(new Date());
       }
-
-      if (countryRes.success) {
-        const rawCountries: unknown[] = Array.isArray(countryRes.data)
-          ? countryRes.data
-          : [];
-        const totalCountries = rawCountries.reduce<number>((sum, item) => {
-          const count = Number((item as Record<string, unknown>).count ?? 0);
-          return sum + (Number.isFinite(count) ? count : 0);
-        }, 0);
-
-        const normalizedCountries: CountryStats[] = rawCountries.map((item) => {
-          const record = item as Record<string, unknown>;
-          const count = Number(record.count ?? 0);
-          const safeCount = Number.isFinite(count) ? count : 0;
-          const percentage =
-            totalCountries > 0 ? (safeCount / totalCountries) * 100 : 0;
-          return {
-            country: (record.country as string) ?? "Unknown",
-            count: safeCount,
-            percentage,
-          };
-        });
-
-        setCountryStats(normalizedCountries);
-      }
-    } catch (error) {
-      console.error("[Analytics] Error fetching analytics:", error);
-      console.error("[Analytics] Error details:", {
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
-      setViewStats([]);
-      setPopularContent([]);
-      setMostViewedContent([]);
-      setDeviceStats([]);
-      setCountryStats([]);
-      setViewSummary(null);
-      setClickStats(null);
-      setPlayStats(null);
-      setFavoriteStats(null);
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
-      setLastRefreshed(new Date());
-    }
-  }, [dateRange, contentType, adminApi]);
+    },
+    [dateRange, contentType, adminApi]
+  );
 
   const handleManualRefresh = () => {
     if (isRefreshing) return; // avoid duplicate requests without disabling button
     console.log("[Analytics] Manual refresh triggered");
-    fetchAnalytics(false); // Refresh data silently without page skeleton
+    fetchAnalytics({ showSkeleton: false }); // Refresh data silently without page skeleton
   };
 
   useEffect(() => {
     // Initial fetch only; no polling needed for top content/most viewed/favorited
-    fetchAnalytics(true);
+    fetchAnalytics({ showSkeleton: true });
   }, [fetchAnalytics]);
 
   useEffect(() => {
@@ -485,15 +512,31 @@ export default function AdminAnalyticsPage() {
   const animCtr = useCountUp(ctr, { duration: 650, decimals: 1 });
   const animFavRate = useCountUp(favRate, { duration: 650, decimals: 1 });
 
-  if (loading) {
-    return (
-      <AdminLayout>
-        <div className="p-6">
-          <AnalyticsSkeleton />
+  const showFullSkeleton = loading && !lastRefreshed;
+
+  const playSourceLabels: Record<string, string> = {
+    card_watch_button: "Card Watch",
+    card_hover: "Hover Watch",
+    hover_preview_watch: "Hover Watch",
+    hero_watch_button: "Hero Watch",
+    watch_page_play_button: "Watch Page Play",
+    unknown: "Unknown",
+  };
+
+  const renderCardSkeletons = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+      {Array.from({ length: 5 }).map((_, idx) => (
+        <div
+          key={idx}
+          className="rounded-lg p-6 bg-gray-800/80 border border-gray-700 animate-pulse space-y-3 min-h-[150px]"
+        >
+          <div className="h-4 w-24 bg-gray-700 rounded" />
+          <div className="h-8 w-20 bg-gray-600 rounded" />
+          <div className="h-3 w-28 bg-gray-700 rounded" />
         </div>
-      </AdminLayout>
-    );
-  }
+      ))}
+    </div>
+  );
 
   return (
     <AdminLayout>
@@ -532,7 +575,11 @@ export default function AdminAnalyticsPage() {
               onClick={handleManualRefresh}
               aria-label="Refresh analytics data"
               className="h-10 w-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center"
-              title={lastRefreshed ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}` : "Refresh data"}
+              title={
+                lastRefreshed
+                  ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}`
+                  : "Refresh data"
+              }
             >
               <svg
                 className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}
@@ -677,592 +724,642 @@ export default function AdminAnalyticsPage() {
         </div>
 
         {/* Engagement Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-          <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-100 text-sm font-medium">Total Views</p>
-                <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(animViews)}
-                </p>
-                <p className="text-xs text-red-100/80 mt-1">
-                  Events tracked (VIEW)
-                </p>
-              </div>
-              <div className="bg-red-500 bg-opacity-30 p-3 rounded-full">
-                <svg
-                  className="w-8 h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm font-medium">
-                  Total Clicks
-                </p>
-                <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(animClicks)}
-                </p>
-                <p className="text-xs text-blue-100/80 mt-1">
-                  Events tracked (CLICK)
-                </p>
-              </div>
-              <div className="bg-blue-500 bg-opacity-30 p-3 rounded-full">
-                <svg
-                  className="w-8 h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100 text-sm font-medium">
-                  Total Plays
-                </p>
-                <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(animPlays)}
-                </p>
-                <p className="text-xs text-purple-100/80 mt-1">
-                  Events tracked (PLAY)
-                </p>
-              </div>
-              <div className="bg-purple-500 bg-opacity-30 p-3 rounded-full">
-                <svg
-                  className="w-8 h-8"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-indigo-100 text-sm font-medium">CTR</p>
-                <p className="text-3xl font-bold mt-2">{animCtr.toFixed(1)}%</p>
-                <p className="text-xs text-indigo-100/80 mt-1">
-                  Clicks / Views
-                </p>
-              </div>
-              <div className="bg-indigo-500 bg-opacity-30 p-3 rounded-full">
-                <svg
-                  className="w-8 h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 10h18M3 14h18M9 6l2-2 2 2m-4 12l2 2 2-2"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100 text-sm font-medium">Favorites</p>
-                <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(animFavorites)}
-                </p>
-                <p className="text-xs text-green-100/80 mt-1">Saved items</p>
-              </div>
-              <div className="bg-green-500 bg-opacity-30 p-3 rounded-full">
-                <svg
-                  className="w-8 h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-amber-100 text-sm font-medium">
-                  Favorite Rate
-                </p>
-                <p className="text-3xl font-bold mt-2">
-                  {animFavRate.toFixed(1)}%
-                </p>
-                <p className="text-xs text-amber-100/80 mt-1">
-                  Favorites / Views
-                </p>
-              </div>
-              <div className="bg-amber-500 bg-opacity-30 p-3 rounded-full">
-                <svg
-                  className="w-8 h-8"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v8m-4-4h8M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Views Over Time Chart */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-white mb-2">
-              Views Over Time
-            </h2>
-            <p className="text-sm text-gray-400 mb-4">
-              Trend is limited to the last 30 days (backend constraint)
-            </p>
-            {viewStats.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={viewStats}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#9CA3AF"
-                    tickFormatter={(value: string | number) =>
-                      new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    }
-                  />
-                  <YAxis stroke="#9CA3AF" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1F2937",
-                      border: "1px solid #374151",
-                      borderRadius: "0.5rem",
-                      color: "#F3F4F6",
-                    }}
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString()
-                    }
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="views"
-                    stroke={CHART_COLORS.primary}
-                    strokeWidth={2}
-                    dot={{ fill: CHART_COLORS.primary }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-400">
-                No data available for the selected period
-              </div>
-            )}
-          </div>
-
-          {/* Favorites Over Time */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-white mb-2">
-              Favorites Over Time
-            </h2>
-            <p className="text-sm text-gray-400 mb-4">
-              Trend is limited to the last 30 days (backend constraint)
-            </p>
-            {favoriteStats?.trend && favoriteStats.trend.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart
-                  data={favoriteStats.trend.map((item) => ({
-                    date: item.date,
-                    favorites: Number(item.count ?? 0),
-                  }))}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#9CA3AF"
-                    tickFormatter={(value: string | number) =>
-                      new Date(value).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })
-                    }
-                  />
-                  <YAxis stroke="#9CA3AF" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#1F2937",
-                      border: "1px solid #374151",
-                      borderRadius: "0.5rem",
-                      color: "#F3F4F6",
-                    }}
-                    labelFormatter={(value) =>
-                      new Date(value).toLocaleDateString()
-                    }
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="favorites"
-                    stroke={CHART_COLORS.success}
-                    strokeWidth={2}
-                    dot={{ fill: CHART_COLORS.success }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-400">
-                No favorites data available
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Popular Content */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">
-                Top Content (viewCount)
-              </h2>
-              <button
-                onClick={() => exportToCSV(popularContent, "popular-content")}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                Export
-              </button>
-            </div>
-            {popularContent.length > 0 ? (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {popularContent.slice(0, 10).map((content, index) => (
-                  <div
-                    key={content.tmdbId}
-                    className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors"
+        {cardsLoading ? (
+          renderCardSkeletons()
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+            <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-red-100 text-sm font-medium">
+                    Total Views
+                  </p>
+                  <p className="text-3xl font-bold mt-2">
+                    {formatCompactNumber(animViews)}
+                  </p>
+                  <p className="text-xs text-red-100/80 mt-1">
+                    Events tracked (VIEW)
+                  </p>
+                </div>
+                <div className="bg-red-500 bg-opacity-30 p-3 rounded-full">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <span className="text-2xl font-bold text-gray-500 w-8">
-                      #{index + 1}
-                    </span>
-                    {content.posterPath && (
-                      <div className="relative w-12 h-18 flex-shrink-0">
-                        <Image
-                          src={
-                            content.posterPath
-                              ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${content.posterPath}`
-                              : FALLBACK_POSTER
-                          }
-                          alt={content.title}
-                          fill
-                          className="object-cover rounded"
-                          sizes="48px"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-white truncate">
-                        {content.title}
-                      </h3>
-                      <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
-                        <span className="capitalize">
-                          {content.contentType}
-                        </span>
-                        <span>{formatNumber(content.viewCount)} views</span>
-                        <span>
-                          {formatNumber(content.favoriteCount)} favorites
-                        </span>
-                      </div>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-blue-100 text-sm font-medium">
+                    Total Clicks
+                  </p>
+                  <p className="text-3xl font-bold mt-2">
+                    {formatCompactNumber(animClicks)}
+                  </p>
+                  <p className="text-xs text-blue-100/80 mt-1">
+                    Events tracked (CLICK)
+                  </p>
+                </div>
+                <div className="bg-blue-500 bg-opacity-30 p-3 rounded-full">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-purple-100 text-sm font-medium">
+                    Total Plays
+                  </p>
+                  <p className="text-3xl font-bold mt-2">
+                    {formatCompactNumber(animPlays)}
+                  </p>
+                  <p className="text-xs text-purple-100/80 mt-1">
+                    Events tracked (PLAY)
+                  </p>
+                </div>
+                <div className="bg-purple-500 bg-opacity-30 p-3 rounded-full">
+                  <svg
+                    className="w-8 h-8"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-indigo-100 text-sm font-medium">CTR</p>
+                  <p className="text-3xl font-bold mt-2">
+                    {animCtr.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-indigo-100/80 mt-1">
+                    Clicks / Views
+                  </p>
+                </div>
+                <div className="bg-indigo-500 bg-opacity-30 p-3 rounded-full">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M3 14h18M9 6l2-2 2 2m-4 12l2 2 2-2"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-green-100 text-sm font-medium">
+                    Favorites
+                  </p>
+                  <p className="text-3xl font-bold mt-2">
+                    {formatCompactNumber(animFavorites)}
+                  </p>
+                  <p className="text-xs text-green-100/80 mt-1">Saved items</p>
+                </div>
+                <div className="bg-green-500 bg-opacity-30 p-3 rounded-full">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-amber-100 text-sm font-medium">
+                    Favorite Rate
+                  </p>
+                  <p className="text-3xl font-bold mt-2">
+                    {animFavRate.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-amber-100/80 mt-1">
+                    Favorites / Views
+                  </p>
+                </div>
+                <div className="bg-amber-500 bg-opacity-30 p-3 rounded-full">
+                  <svg
+                    className="w-8 h-8"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v8m-4-4h8M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Play source breakdown */}
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-semibold text-white">
+            Play Buttons Breakdown
+          </h3>
+          <span className="text-xs text-gray-400">
+            Source metadata from play events
+          </span>
+        </div>
+        {cardsLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="bg-gray-800 rounded-lg p-4 border border-gray-700 animate-pulse space-y-2"
+              >
+                <div className="h-3 w-24 bg-gray-700 rounded" />
+                <div className="h-6 w-16 bg-gray-600 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : Object.keys(playSourceBreakdown || {}).length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {Object.entries(playSourceBreakdown)
+              .sort((a, b) => (b[1] || 0) - (a[1] || 0))
+              .map(([key, value]) => (
+                <div
+                  key={key}
+                  className="bg-gray-800 rounded-lg p-4 border border-gray-700"
+                >
+                  <p className="text-sm text-gray-300">
+                    {playSourceLabels[key] || key}
+                  </p>
+                  <p className="text-2xl font-bold text-white mt-1">
+                    {formatCompactNumber(value)}
+                  </p>
+                </div>
+              ))}
+          </div>
+        ) : (
+          <div className="text-sm text-gray-400">
+            No play source data available yet.
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Views Over Time Chart */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-white mb-2">Views Over Time</h2>
+          <p className="text-sm text-gray-400 mb-4">
+            Trend is limited to the last 30 days (backend constraint)
+          </p>
+          {viewStats.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={viewStats}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#9CA3AF"
+                  tickFormatter={(value: string | number) =>
+                    new Date(value).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
+                <YAxis stroke="#9CA3AF" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1F2937",
+                    border: "1px solid #374151",
+                    borderRadius: "0.5rem",
+                    color: "#F3F4F6",
+                  }}
+                  labelFormatter={(value) =>
+                    new Date(value).toLocaleDateString()
+                  }
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="views"
+                  stroke={CHART_COLORS.primary}
+                  strokeWidth={2}
+                  dot={{ fill: CHART_COLORS.primary }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-400">
+              No data available for the selected period
+            </div>
+          )}
+        </div>
+
+        {/* Favorites Over Time */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-white mb-2">
+            Favorites Over Time
+          </h2>
+          <p className="text-sm text-gray-400 mb-4">
+            Trend is limited to the last 30 days (backend constraint)
+          </p>
+          {favoriteStats?.trend && favoriteStats.trend.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart
+                data={favoriteStats.trend.map((item) => ({
+                  date: item.date,
+                  favorites: Number(item.count ?? 0),
+                }))}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#9CA3AF"
+                  tickFormatter={(value: string | number) =>
+                    new Date(value).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  }
+                />
+                <YAxis stroke="#9CA3AF" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#1F2937",
+                    border: "1px solid #374151",
+                    borderRadius: "0.5rem",
+                    color: "#F3F4F6",
+                  }}
+                  labelFormatter={(value) =>
+                    new Date(value).toLocaleDateString()
+                  }
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="favorites"
+                  stroke={CHART_COLORS.success}
+                  strokeWidth={2}
+                  dot={{ fill: CHART_COLORS.success }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-400">
+              No favorites data available
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Popular Content */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">
+              Top Content (viewCount)
+            </h2>
+            <button
+              onClick={() => exportToCSV(popularContent, "popular-content")}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Export
+            </button>
+          </div>
+          {popularContent.length > 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {popularContent.slice(0, 10).map((content, index) => (
+                <div
+                  key={content.tmdbId}
+                  className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors"
+                >
+                  <span className="text-2xl font-bold text-gray-500 w-8">
+                    #{index + 1}
+                  </span>
+                  {content.posterPath && (
+                    <div className="relative w-12 h-18 flex-shrink-0">
+                      <Image
+                        src={
+                          content.posterPath
+                            ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${content.posterPath}`
+                            : FALLBACK_POSTER
+                        }
+                        alt={content.title}
+                        fill
+                        className="object-cover rounded"
+                        sizes="48px"
+                      />
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center text-gray-400">
-                No popular content data available
-              </div>
-            )}
-          </div>
-
-          {/* Most viewed events */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">
-                Most Viewed (events)
-              </h2>
-              <button
-                onClick={() =>
-                  exportToCSV(mostViewedContent, "most-viewed-events")
-                }
-                className="text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                Export
-              </button>
-            </div>
-            {mostViewedContent.length > 0 ? (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {mostViewedContent.map((item, index) => (
-                  <div
-                    key={`${item.contentType}-${item.contentId}-${index}`}
-                    className="flex items-center justify-between bg-gray-700 bg-opacity-50 rounded-lg p-3 hover:bg-opacity-70 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="text-2xl font-bold text-gray-500 w-8">
-                        #{index + 1}
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-white truncate">
+                      {content.title}
+                    </h3>
+                    <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
+                      <span className="capitalize">{content.contentType}</span>
+                      <span>{formatNumber(content.viewCount)} views</span>
+                      <span>
+                        {formatNumber(content.favoriteCount)} favorites
                       </span>
-                      <div className="min-w-0">
-                        <p className="text-white font-medium truncate">
-                          {item.title ?? "Unknown title"}
-                        </p>
-                        <p className="text-xs text-gray-400 capitalize">
-                          {item.contentType}
-                        </p>
-                      </div>
                     </div>
-                    <span className="text-sm text-gray-200 font-semibold">
-                      {formatNumber(item.viewCount)} views
-                    </span>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center text-gray-400">
-                No view events data available
-              </div>
-            )}
-          </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-gray-400">
+              No popular content data available
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Most Favorited */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Most Favorited</h2>
-              <button
-                onClick={() =>
-                  exportToCSV(
-                    favoriteStats?.mostFavorited ?? [],
-                    "most-favorited"
-                  )
-                }
-                className="text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                Export
-              </button>
-            </div>
-            {favoriteStats?.mostFavorited &&
-            favoriteStats.mostFavorited.length > 0 ? (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {favoriteStats.mostFavorited.slice(0, 15).map((item, index) => (
-                  <Link
-                    key={`${item.contentType}-${item.contentId}-${index}`}
-                    href={`/${item.contentType === 'tv_series' ? 'tv' : 'movie'}/${item.contentId}`}
-                    className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
-                  >
+        {/* Most viewed events */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">
+              Most Viewed (events)
+            </h2>
+            <button
+              onClick={() =>
+                exportToCSV(mostViewedContent, "most-viewed-events")
+              }
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Export
+            </button>
+          </div>
+          {mostViewedContent.length > 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {mostViewedContent.map((item, index) => (
+                <div
+                  key={`${item.contentType}-${item.contentId}-${index}`}
+                  className="flex items-center justify-between bg-gray-700 bg-opacity-50 rounded-lg p-3 hover:bg-opacity-70 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
                     <span className="text-2xl font-bold text-gray-500 w-8">
                       #{index + 1}
                     </span>
-                    {item.posterPath && (
-                      <div className="relative w-12 h-18 flex-shrink-0">
-                        <Image
-                          src={`${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.posterPath}`}
-                          alt={item.title || "Movie poster"}
-                          fill
-                          className="object-cover rounded"
-                          sizes="48px"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0">
                       <p className="text-white font-medium truncate">
-                        {item.title || `${item.contentType} #${item.contentId}`}
+                        {item.title ?? "Unknown title"}
                       </p>
                       <p className="text-xs text-gray-400 capitalize">
                         {item.contentType}
                       </p>
                     </div>
-                    <span className="text-sm text-gray-200 font-semibold">
-                      {formatNumber(item.count)} favorites
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center text-gray-400">
-                No favorite data available
-              </div>
-            )}
-          </div>
-
-          {/* Device Distribution */}
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-white mb-4">
-              Device Distribution
-            </h2>
-            {deviceStats.length > 0 ? (
-              <div className="flex flex-col lg:flex-row items-center gap-6">
-                <ResponsiveContainer width="50%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={
-                        deviceStats as unknown as Array<Record<string, unknown>>
-                      }
-                      dataKey="count"
-                      nameKey="device"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      label={(props: { index: number }) => {
-                        const entry = deviceStats[props.index];
-                        return `${entry.device}: ${entry.percentage.toFixed(
-                          1
-                        )}%`;
-                      }}
-                    >
-                      {deviceStats.map((entry: DeviceStats, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={DEVICE_COLORS[index % DEVICE_COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#1F2937",
-                        border: "1px solid #374151",
-                        borderRadius: "0.5rem",
-                        color: "#F3F4F6",
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex-1 space-y-3 w-full">
-                  {deviceStats.map((device, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded"
-                          style={{
-                            backgroundColor:
-                              DEVICE_COLORS[index % DEVICE_COLORS.length],
-                          }}
-                        />
-                        <span className="text-white font-medium">
-                          {device.device}
-                        </span>
-                      </div>
-                      <span className="text-gray-400">
-                        {formatNumber(device.count)}
-                      </span>
-                    </div>
-                  ))}
+                  </div>
+                  <span className="text-sm text-gray-200 font-semibold">
+                    {formatNumber(item.viewCount)} views
+                  </span>
                 </div>
-              </div>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-400">
-                No device data available
-              </div>
-            )}
+              ))}
+            </div>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-gray-400">
+              No view events data available
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Most Favorited */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">Most Favorited</h2>
+            <button
+              onClick={() =>
+                exportToCSV(
+                  favoriteStats?.mostFavorited ?? [],
+                  "most-favorited"
+                )
+              }
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Export
+            </button>
           </div>
+          {favoriteStats?.mostFavorited &&
+          favoriteStats.mostFavorited.length > 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {favoriteStats.mostFavorited.slice(0, 15).map((item, index) => (
+                <Link
+                  key={`${item.contentType}-${item.contentId}-${index}`}
+                  href={`/${
+                    item.contentType === "tv_series" ? "tv" : "movie"
+                  }/${item.contentId}`}
+                  className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
+                >
+                  <span className="text-2xl font-bold text-gray-500 w-8">
+                    #{index + 1}
+                  </span>
+                  {item.posterPath && (
+                    <div className="relative w-12 h-18 flex-shrink-0">
+                      <Image
+                        src={`${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.posterPath}`}
+                        alt={item.title || "Movie poster"}
+                        fill
+                        className="object-cover rounded"
+                        sizes="48px"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">
+                      {item.title || `${item.contentType} #${item.contentId}`}
+                    </p>
+                    <p className="text-xs text-gray-400 capitalize">
+                      {item.contentType}
+                    </p>
+                  </div>
+                  <span className="text-sm text-gray-200 font-semibold">
+                    {formatNumber(item.count)} favorites
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-gray-400">
+              No favorite data available
+            </div>
+          )}
         </div>
 
-        {/* Geographic Distribution */}
-        <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
-          <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-white">Top Countries</h2>
-              <button
-                onClick={() => exportToCSV(countryStats, "country-stats")}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
-              >
-                Export
-              </button>
-            </div>
-            {countryStats.length > 0 ? (
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {countryStats.slice(0, 15).map((country, index) => (
+        {/* Device Distribution */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-white mb-4">
+            Device Distribution
+          </h2>
+          {deviceStats.length > 0 ? (
+            <div className="flex flex-col lg:flex-row items-center gap-6">
+              <ResponsiveContainer width="50%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={
+                      deviceStats as unknown as Array<Record<string, unknown>>
+                    }
+                    dataKey="count"
+                    nameKey="device"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    label={(props: { index: number }) => {
+                      const entry = deviceStats[props.index];
+                      return `${entry.device}: ${entry.percentage.toFixed(1)}%`;
+                    }}
+                  >
+                    {deviceStats.map((entry: DeviceStats, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={DEVICE_COLORS[index % DEVICE_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      border: "1px solid #374151",
+                      borderRadius: "0.5rem",
+                      color: "#F3F4F6",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex-1 space-y-3 w-full">
+                {deviceStats.map((device, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-3 flex-1">
-                      <span className="text-gray-500 font-medium w-6">
-                        {index + 1}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-4 h-4 rounded"
+                        style={{
+                          backgroundColor:
+                            DEVICE_COLORS[index % DEVICE_COLORS.length],
+                        }}
+                      />
                       <span className="text-white font-medium">
-                        {country.country}
+                        {device.device}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-32 bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-green-500 h-2 rounded-full transition-all"
-                          style={{
-                            width: `${Math.min(country.percentage, 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <span className="text-gray-400 text-sm w-20 text-right">
-                        {formatNumber(country.count)}
-                      </span>
-                    </div>
+                    <span className="text-gray-400">
+                      {formatNumber(device.count)}
+                    </span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="h-[400px] flex items-center justify-center text-gray-400">
-                No geographic data available
-              </div>
-            )}
+            </div>
+          ) : (
+            <div className="h-[300px] flex items-center justify-center text-gray-400">
+              No device data available
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Geographic Distribution */}
+      <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-white">Top Countries</h2>
+            <button
+              onClick={() => exportToCSV(countryStats, "country-stats")}
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Export
+            </button>
           </div>
+          {countryStats.length > 0 ? (
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {countryStats.slice(0, 15).map((country, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <span className="text-gray-500 font-medium w-6">
+                      {index + 1}
+                    </span>
+                    <span className="text-white font-medium">
+                      {country.country}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-32 bg-gray-700 rounded-full h-2">
+                      <div
+                        className="bg-green-500 h-2 rounded-full transition-all"
+                        style={{
+                          width: `${Math.min(country.percentage, 100)}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-gray-400 text-sm w-20 text-right">
+                      {formatNumber(country.count)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="h-[400px] flex items-center justify-center text-gray-400">
+              No geographic data available
+            </div>
+          )}
         </div>
       </div>
     </AdminLayout>
