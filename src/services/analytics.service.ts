@@ -122,13 +122,15 @@ class AnalyticsService {
   trackPlay(
     contentId: string,
     contentType: AnalyticsContentType,
-    contentTitle?: string
+    contentTitle?: string,
+    metadata?: Record<string, unknown>
   ): void {
     this.trackEvent({
       contentId,
       contentType,
       actionType: "play",
       contentTitle,
+      metadata,
     });
   }
 

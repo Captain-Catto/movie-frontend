@@ -123,7 +123,8 @@ const HeroSection = ({ movies }: HeroSectionProps) => {
             analyticsService.trackPlay(
               String(movie.tmdbId),
               analyticsContentType,
-              movie.title
+              movie.title,
+              { source: "hero_watch_button", context: "hero_banner" }
             );
           };
 

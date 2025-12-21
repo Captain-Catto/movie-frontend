@@ -206,7 +206,8 @@ const WatchPage = () => {
       analyticsService.trackPlay(
         String(movieData.tmdbId),
         contentType,
-        movieData.title
+        movieData.title,
+        { source: "watch_page_play_button", context: "watch_page" }
       );
       setHasTrackedPlay(true);
     }

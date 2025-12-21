@@ -79,7 +79,8 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     analyticsService.trackPlay(
       String(movie.tmdbId),
       analyticsContentType,
-      movie.title
+      movie.title,
+      { source: "card_watch_button", context: "card" }
     );
 
     // Create proper watch URL - tmdbId is guaranteed to exist since all data comes from TMDB

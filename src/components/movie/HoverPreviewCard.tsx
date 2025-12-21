@@ -79,7 +79,10 @@ export function HoverPreviewCard({
   const handleWatchClick = () => {
     if (contentId) {
       const analyticsContentType = contentType === "tv" ? "tv_series" : "movie";
-      analyticsService.trackPlay(String(contentId), analyticsContentType, title);
+      analyticsService.trackPlay(String(contentId), analyticsContentType, title, {
+        source: "hover_preview_watch",
+        context: "card_hover",
+      });
     }
   };
 
