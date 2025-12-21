@@ -135,6 +135,8 @@ export default function AdminAnalyticsPage() {
     endDate: new Date().toISOString().split("T")[0],
   });
   const [contentType, setContentType] = useState<"all" | "movie" | "tv">("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const adminApi = useAdminApi();
 
   const dateRange = useMemo(() => {
@@ -219,6 +221,7 @@ export default function AdminAnalyticsPage() {
     if (!adminApi.isAuthenticated) return;
 
     setLoading(true);
+    setIsRefreshing(true);
     try {
       const viewParams = new URLSearchParams({
         startDate: dateRange.startDate,
@@ -427,11 +430,26 @@ export default function AdminAnalyticsPage() {
       setFavoriteStats(null);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
+      setLastRefreshed(new Date());
     }
   }, [dateRange, contentType, adminApi]);
 
+  const handleManualRefresh = () => {
+    console.log("[Analytics] Manual refresh triggered");
+    fetchAnalytics();
+  };
+
   useEffect(() => {
     fetchAnalytics();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      console.log("[Analytics] Auto-refreshing data...");
+      fetchAnalytics();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [fetchAnalytics]);
 
   const totalViews = viewSummary?.total ?? 0;
@@ -465,6 +483,27 @@ export default function AdminAnalyticsPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              title={lastRefreshed ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}` : "Refresh data"}
+            >
+              <svg
+                className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              {isRefreshing ? "Refreshing..." : "Refresh"}
+            </button>
             <button
               onClick={() => exportToCSV(viewStats, "analytics-views")}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
