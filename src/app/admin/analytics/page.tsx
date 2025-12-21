@@ -438,20 +438,14 @@ export default function AdminAnalyticsPage() {
   }, [dateRange, contentType, adminApi]);
 
   const handleManualRefresh = () => {
+    if (isRefreshing) return; // avoid duplicate requests without disabling button
     console.log("[Analytics] Manual refresh triggered");
     fetchAnalytics(true); // Show loading on manual refresh
   };
 
   useEffect(() => {
-    fetchAnalytics(true); // Show loading on initial fetch
-
-    // Auto-refresh every 2 seconds (without loading spinner)
-    const interval = setInterval(() => {
-      console.log("[Analytics] Auto-refreshing data...");
-      fetchAnalytics(false); // Silent refresh
-    }, 2000);
-
-    return () => clearInterval(interval);
+    // Initial fetch only; no polling needed for top content/most viewed/favorited
+    fetchAnalytics(true);
   }, [fetchAnalytics]);
 
   const totalViews = viewSummary?.total ?? 0;
@@ -487,8 +481,7 @@ export default function AdminAnalyticsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={handleManualRefresh}
-              disabled={isRefreshing}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
               title={lastRefreshed ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}` : "Refresh data"}
             >
               <svg
@@ -504,7 +497,7 @@ export default function AdminAnalyticsPage() {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              {isRefreshing ? "Refreshing..." : "Refresh"}
+              Refresh
             </button>
             <button
               onClick={() => exportToCSV(viewStats, "analytics-views")}
