@@ -217,10 +217,12 @@ export default function AdminAnalyticsPage() {
     []
   );
 
-  const fetchAnalytics = useCallback(async () => {
+  const fetchAnalytics = useCallback(async (showLoading = true) => {
     if (!adminApi.isAuthenticated) return;
 
-    setLoading(true);
+    if (showLoading) {
+      setLoading(true);
+    }
     setIsRefreshing(true);
     try {
       const viewParams = new URLSearchParams({
@@ -437,16 +439,16 @@ export default function AdminAnalyticsPage() {
 
   const handleManualRefresh = () => {
     console.log("[Analytics] Manual refresh triggered");
-    fetchAnalytics();
+    fetchAnalytics(true); // Show loading on manual refresh
   };
 
   useEffect(() => {
-    fetchAnalytics();
+    fetchAnalytics(true); // Show loading on initial fetch
 
-    // Auto-refresh every 2 seconds
+    // Auto-refresh every 2 seconds (without loading spinner)
     const interval = setInterval(() => {
       console.log("[Analytics] Auto-refreshing data...");
-      fetchAnalytics();
+      fetchAnalytics(false); // Silent refresh
     }, 2000);
 
     return () => clearInterval(interval);
