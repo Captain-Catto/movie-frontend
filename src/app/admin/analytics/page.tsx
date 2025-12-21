@@ -127,7 +127,7 @@ export default function AdminAnalyticsPage() {
   const [deviceStats, setDeviceStats] = useState<DeviceStats[]>([]);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
   const [loading, setLoading] = useState(true);
-  const [datePreset, setDatePreset] = useState<DatePreset>("30d");
+  const [datePreset, setDatePreset] = useState<DatePreset>("7d");
   const [customDateRange, setCustomDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       .toISOString()
