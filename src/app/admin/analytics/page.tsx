@@ -1015,7 +1015,7 @@ export default function AdminAnalyticsPage() {
                 {favoriteStats.mostFavorited.slice(0, 15).map((item, index) => (
                   <Link
                     key={`${item.contentType}-${item.contentId}-${index}`}
-                    href={`/movie/${item.contentId}`}
+                    href={`/${item.contentType === 'tv_series' ? 'tv' : 'movie'}/${item.contentId}`}
                     className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
                   >
                     <span className="text-2xl font-bold text-gray-500 w-8">

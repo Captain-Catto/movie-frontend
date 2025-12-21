@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios-instance";
 
-export type AnalyticsActionType = "VIEW" | "CLICK" | "PLAY" | "COMPLETE";
+export type AnalyticsActionType = "view" | "click" | "play" | "complete";
 export type AnalyticsContentType = "movie" | "tv_series";
 
 interface TrackEventParams {
@@ -75,7 +75,7 @@ class AnalyticsService {
     this.trackEvent({
       contentId,
       contentType,
-      actionType: "VIEW",
+      actionType: "view",
       contentTitle,
     });
   }
@@ -91,7 +91,7 @@ class AnalyticsService {
     this.trackEvent({
       contentId,
       contentType,
-      actionType: "CLICK",
+      actionType: "click",
       contentTitle,
     });
   }
@@ -107,7 +107,7 @@ class AnalyticsService {
     this.trackEvent({
       contentId,
       contentType,
-      actionType: "PLAY",
+      actionType: "play",
       contentTitle,
     });
   }
@@ -124,7 +124,7 @@ class AnalyticsService {
     this.trackEvent({
       contentId,
       contentType,
-      actionType: "COMPLETE",
+      actionType: "complete",
       contentTitle,
       duration,
     });
