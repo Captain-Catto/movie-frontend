@@ -12,6 +12,7 @@ import Link from "next/link";
 import AnalyticsSkeleton from "@/components/ui/AnalyticsSkeleton";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
+import { useCountUp } from "@/hooks/useCountUp";
 import {
   LineChart,
   Line,
@@ -476,6 +477,14 @@ export default function AdminAnalyticsPage() {
   const ctr = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
   const favRate = totalViews > 0 ? (totalFavorites / totalViews) * 100 : 0;
 
+  // Animated counters for quick visual feedback when data changes
+  const animViews = useCountUp(totalViews, { duration: 650 });
+  const animClicks = useCountUp(totalClicks, { duration: 650 });
+  const animPlays = useCountUp(totalPlays, { duration: 650 });
+  const animFavorites = useCountUp(totalFavorites, { duration: 650 });
+  const animCtr = useCountUp(ctr, { duration: 650, decimals: 1 });
+  const animFavRate = useCountUp(favRate, { duration: 650, decimals: 1 });
+
   if (loading) {
     return (
       <AdminLayout>
@@ -674,7 +683,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-red-100 text-sm font-medium">Total Views</p>
                 <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(totalViews)}
+                  {formatCompactNumber(animViews)}
                 </p>
                 <p className="text-xs text-red-100/80 mt-1">
                   Events tracked (VIEW)
@@ -711,7 +720,7 @@ export default function AdminAnalyticsPage() {
                   Total Clicks
                 </p>
                 <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(totalClicks)}
+                  {formatCompactNumber(animClicks)}
                 </p>
                 <p className="text-xs text-blue-100/80 mt-1">
                   Events tracked (CLICK)
@@ -742,7 +751,7 @@ export default function AdminAnalyticsPage() {
                   Total Plays
                 </p>
                 <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(totalPlays)}
+                  {formatCompactNumber(animPlays)}
                 </p>
                 <p className="text-xs text-purple-100/80 mt-1">
                   Events tracked (PLAY)
@@ -764,7 +773,7 @@ export default function AdminAnalyticsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-indigo-100 text-sm font-medium">CTR</p>
-                <p className="text-3xl font-bold mt-2">{ctr.toFixed(1)}%</p>
+                <p className="text-3xl font-bold mt-2">{animCtr.toFixed(1)}%</p>
                 <p className="text-xs text-indigo-100/80 mt-1">
                   Clicks / Views
                 </p>
@@ -792,7 +801,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-green-100 text-sm font-medium">Favorites</p>
                 <p className="text-3xl font-bold mt-2">
-                  {formatCompactNumber(totalFavorites)}
+                  {formatCompactNumber(animFavorites)}
                 </p>
                 <p className="text-xs text-green-100/80 mt-1">Saved items</p>
               </div>
@@ -820,7 +829,9 @@ export default function AdminAnalyticsPage() {
                 <p className="text-amber-100 text-sm font-medium">
                   Favorite Rate
                 </p>
-                <p className="text-3xl font-bold mt-2">{favRate.toFixed(1)}%</p>
+                <p className="text-3xl font-bold mt-2">
+                  {animFavRate.toFixed(1)}%
+                </p>
                 <p className="text-xs text-amber-100/80 mt-1">
                   Favorites / Views
                 </p>

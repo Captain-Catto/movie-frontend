@@ -57,6 +57,7 @@ const WatchPage = () => {
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const [hasTrackedPlay, setHasTrackedPlay] = useState(false);
+  const [hasTrackedView, setHasTrackedView] = useState(false);
 
   // Parse prefixed ID (movie-123 or tv-456 or plain 123)
   const parseContentId = (
@@ -179,8 +180,24 @@ const WatchPage = () => {
 
     if (movieId) {
       fetchMovieData();
+      setHasTrackedPlay(false);
+      setHasTrackedView(false);
     }
   }, [movieId]);
+
+  useEffect(() => {
+    if (!movieData || hasTrackedView) return;
+
+    const contentType =
+      movieData.contentType === "tv" ? "tv_series" : "movie";
+
+    analyticsService.trackView(
+      String(movieData.tmdbId),
+      contentType,
+      movieData.title
+    );
+    setHasTrackedView(true);
+  }, [movieData, hasTrackedView]);
 
   const handlePlayMovie = () => {
     if (!hasTrackedPlay && movieData) {
