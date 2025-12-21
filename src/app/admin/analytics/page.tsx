@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import AnalyticsSkeleton from "@/components/ui/AnalyticsSkeleton";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
 import {
   LineChart,
   Line,
@@ -138,6 +139,8 @@ export default function AdminAnalyticsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const adminApi = useAdminApi();
+  const { snapshot: liveSnapshot, isConnected: isLiveConnected, lastUpdateAt: liveUpdatedAt } =
+    useAdminAnalyticsSocket();
 
   const dateRange = useMemo(() => {
     const end = new Date();
@@ -448,6 +451,24 @@ export default function AdminAnalyticsPage() {
     fetchAnalytics(true);
   }, [fetchAnalytics]);
 
+  useEffect(() => {
+    if (!liveSnapshot) return;
+
+    setViewSummary((prev) => ({
+      total: Number(liveSnapshot.views ?? 0),
+      byType: prev?.byType,
+    }));
+    setClickStats({ total: Number(liveSnapshot.clicks ?? 0) });
+    setPlayStats({ total: Number(liveSnapshot.plays ?? 0) });
+    setFavoriteStats((prev) => ({
+      total: Number(liveSnapshot.favorites ?? 0),
+      byType: prev?.byType,
+      mostFavorited: prev?.mostFavorited ?? [],
+      trend: prev?.trend ?? [],
+    }));
+    setLastRefreshed(liveUpdatedAt || new Date());
+  }, [liveSnapshot, liveUpdatedAt]);
+
   const totalViews = viewSummary?.total ?? 0;
   const totalClicks = clickStats?.total ?? 0;
   const totalPlays = playStats?.total ?? 0;
@@ -479,6 +500,25 @@ export default function AdminAnalyticsPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <div
+              className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium ${
+                isLiveConnected
+                  ? "bg-green-600/80 text-white"
+                  : "bg-gray-700 text-gray-300"
+              }`}
+              title={
+                isLiveConnected
+                  ? "Realtime updates active"
+                  : "Realtime updates offline"
+              }
+            >
+              <span
+                className={`h-2.5 w-2.5 rounded-full ${
+                  isLiveConnected ? "bg-green-200 animate-pulse" : "bg-gray-500"
+                }`}
+              />
+              <span>{isLiveConnected ? "Live" : "Live paused"}</span>
+            </div>
             <button
               onClick={handleManualRefresh}
               aria-label="Refresh analytics data"
