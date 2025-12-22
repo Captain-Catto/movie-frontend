@@ -128,6 +128,11 @@ export default function AdminUsersPage() {
     }
   };
 
+  const countryFlagUrl = (code?: string | null) => {
+    if (!code || code.length !== 2) return null;
+    return `https://flagcdn.com/24x18/${code.toLowerCase()}.png`;
+  };
+
   const renderSignupAccess = (user: User) => {
     return (
       <div className="flex flex-col space-y-2">
@@ -356,12 +361,27 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {user.lastLoginCountry ? (
-                          <span
-                            className="text-xl"
-                            title={countryCodeToName(user.lastLoginCountry)}
-                          >
-                            {countryCodeToFlag(user.lastLoginCountry)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {countryFlagUrl(user.lastLoginCountry) ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img
+                                src={countryFlagUrl(user.lastLoginCountry) as string}
+                                alt={countryCodeToName(user.lastLoginCountry)}
+                                title={countryCodeToName(user.lastLoginCountry)}
+                                className="w-6 h-4 rounded border border-gray-600"
+                                onError={(e) => {
+                                  // Hide broken image, fallback to emoji
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                            ) : null}
+                            <span
+                              className="text-xl"
+                              title={countryCodeToName(user.lastLoginCountry)}
+                            >
+                              {countryCodeToFlag(user.lastLoginCountry)}
+                            </span>
+                          </div>
                         ) : (
                           <span className="text-xs text-gray-400">Unknown</span>
                         )}
