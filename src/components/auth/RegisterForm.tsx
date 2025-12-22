@@ -1,17 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import axiosInstance from "@/lib/axios-instance";
-
-type MinMax = { min: number; max: number };
-type RegistrationSettings = {
-  id: MinMax;
-  nickname: MinMax;
-  password: MinMax;
-};
 interface RegisterFormProps {
   onSuccess: (name: string, email: string, password: string) => void;
   onError: (message: string) => void;
@@ -29,42 +21,12 @@ export default function RegisterForm({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [limits, setLimits] = useState<RegistrationSettings>({
-    id: { min: 6, max: 16 },
-    nickname: { min: 3, max: 16 },
-    password: { min: 8, max: 16 },
-  });
-  const [loadingLimits, setLoadingLimits] = useState(false);
-
-  useEffect(() => {
-    const fetchLimits = async () => {
-      setLoadingLimits(true);
-      try {
-        const res = await axiosInstance.get("/settings/registration");
-        if (res.data?.success && res.data.data) {
-          setLimits(res.data.data as RegistrationSettings);
-        }
-      } catch (error) {
-        console.error("Failed to load registration settings", error);
-      } finally {
-        setLoadingLimits(false);
-      }
-    };
-
-    fetchLimits();
-  }, []);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       newErrors.name = "Vui lòng nhập tên người dùng";
-    } else if (
-      (formData.name.length < limits.nickname.min ||
-        formData.name.length > limits.nickname.max) &&
-      !loadingLimits
-    ) {
-      newErrors.name = `Tên phải từ ${limits.nickname.min}-${limits.nickname.max} ký tự`;
     }
 
     if (!formData.email.trim()) {
@@ -75,12 +37,6 @@ export default function RegisterForm({
 
     if (!formData.password) {
       newErrors.password = "Vui lòng nhập mật khẩu";
-    } else if (
-      (formData.password.length < limits.password.min ||
-        formData.password.length > limits.password.max) &&
-      !loadingLimits
-    ) {
-      newErrors.password = `Mật khẩu phải từ ${limits.password.min}-${limits.password.max} ký tự`;
     }
 
     if (formData.password !== formData.confirmPassword) {

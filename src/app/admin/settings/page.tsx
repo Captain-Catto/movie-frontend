@@ -22,7 +22,7 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<RegistrationSettings>({
     id: { min: 6, max: 16 },
     nickname: { min: 3, max: 16 },
-    password: { min: 8, max: 16 },
+    password: { min: 6, max: 16 },
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
