@@ -13,6 +13,7 @@ interface User {
   role: UserRole;
   isActive: boolean;
   createdAt: string;
+  provider?: string;
   bannedReason?: string;
   totalWatchTime?: number;
   lastLoginAt?: string;
@@ -105,6 +106,29 @@ export default function AdminUsersPage() {
     if (!value) return "N/A";
     const date = new Date(value);
     return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
+  };
+
+  const renderSignupAccess = (user: User) => {
+    return (
+      <div className="flex flex-col space-y-2">
+        <div className="flex items-center space-x-2">
+          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-600 text-white">
+            Register
+          </span>
+          <span className="text-sm text-gray-200">
+            {formatDateTime(user.createdAt)}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-600 text-white">
+            Login
+          </span>
+          <span className="text-sm text-gray-200">
+            {formatDateTime(user.lastLoginAt)}
+          </span>
+        </div>
+      </div>
+    );
   };
 
   const openEditModal = (user: User) => {
@@ -214,16 +238,13 @@ export default function AdminUsersPage() {
                     User
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Role
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Last Login
+                    Sign Up / Access
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Device / IP
@@ -240,7 +261,7 @@ export default function AdminUsersPage() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={7}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       Loading...
@@ -249,7 +270,7 @@ export default function AdminUsersPage() {
                 ) : users.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={7}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       No users found
@@ -271,17 +292,21 @@ export default function AdminUsersPage() {
                             className="ml-3 text-left"
                             title="Edit user"
                           >
-                            <div className="text-sm font-medium text-white hover:text-red-300 transition-colors">
-                              {user.name || "No name"}
+                            <div className="flex items-center space-x-2">
+                              <div className="text-sm font-medium text-white hover:text-red-300 transition-colors">
+                                {user.name || "No name"}
+                              </div>
+                              {user.provider && (
+                                <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-700 text-gray-200 capitalize">
+                                  {user.provider}
+                                </span>
+                              )}
                             </div>
                             <div className="text-xs text-gray-400">
-                              Click to edit
+                              {user.email}
                             </div>
                           </button>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-300">
-                        {user.email}
                       </td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-purple-600 text-white capitalize">
@@ -307,19 +332,19 @@ export default function AdminUsersPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
-                        <div className="flex flex-col">
-                          <span>{formatDateTime(user.lastLoginAt)}</span>
+                        {renderSignupAccess(user)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        <div className="flex flex-col space-y-1">
+                          <span className="capitalize">
+                            {user.lastLoginDevice || "N/A"}
+                          </span>
                           {user.lastLoginIp && (
                             <span className="text-xs text-gray-400">
                               IP: {user.lastLoginIp}
                             </span>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-300">
-                        <span className="capitalize">
-                          {user.lastLoginDevice || "N/A"}
-                        </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {new Date(user.createdAt).toLocaleDateString()}
