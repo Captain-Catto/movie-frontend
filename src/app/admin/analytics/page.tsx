@@ -9,7 +9,6 @@ import {
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import Link from "next/link";
-import AnalyticsSkeleton from "@/components/ui/AnalyticsSkeleton";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
 import { useCountUp } from "@/hooks/useCountUp";
@@ -95,6 +94,7 @@ interface MostViewedItem {
   contentType: string;
   title?: string;
   viewCount: number;
+  posterPath?: string | null;
 }
 
 type DatePreset = "7d" | "30d" | "90d" | "1y" | "custom";
@@ -1086,9 +1086,10 @@ export default function AdminAnalyticsPage() {
           {popularContent.length > 0 ? (
             <div className="space-y-3 max-h-[400px] overflow-y-auto">
               {popularContent.slice(0, 10).map((content, index) => (
-                <div
+                <Link
                   key={content.tmdbId}
-                  className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors"
+                  href={`/${content.contentType === "tv" ? "tv" : "movie"}/${content.tmdbId}`}
+                  className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
                 >
                   <span className="text-2xl font-bold text-gray-500 w-8">
                     #{index + 1}
@@ -1120,7 +1121,7 @@ export default function AdminAnalyticsPage() {
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -1148,27 +1149,37 @@ export default function AdminAnalyticsPage() {
           {mostViewedContent.length > 0 ? (
             <div className="space-y-3 max-h-[400px] overflow-y-auto">
               {mostViewedContent.map((item, index) => (
-                <div
+                <Link
                   key={`${item.contentType}-${item.contentId}-${index}`}
-                  className="flex items-center justify-between bg-gray-700 bg-opacity-50 rounded-lg p-3 hover:bg-opacity-70 transition-colors"
+                  href={`/${item.contentType === "tv_series" || item.contentType === "tv" ? "tv" : "movie"}/${item.contentId}`}
+                  className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-2xl font-bold text-gray-500 w-8">
-                      #{index + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-white font-medium truncate">
-                        {item.title ?? "Unknown title"}
-                      </p>
-                      <p className="text-xs text-gray-400 capitalize">
-                        {item.contentType}
-                      </p>
+                  <span className="text-2xl font-bold text-gray-500 w-8">
+                    #{index + 1}
+                  </span>
+                  {item.posterPath && (
+                    <div className="relative w-12 h-18 flex-shrink-0">
+                      <Image
+                        src={`${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.posterPath}`}
+                        alt={item.title || "Movie poster"}
+                        fill
+                        className="object-cover rounded"
+                        sizes="48px"
+                      />
                     </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-medium truncate">
+                      {item.title ?? "Unknown title"}
+                    </p>
+                    <p className="text-xs text-gray-400 capitalize">
+                      {item.contentType}
+                    </p>
                   </div>
                   <span className="text-sm text-gray-200 font-semibold">
                     {formatNumber(item.viewCount)} views
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -1203,7 +1214,7 @@ export default function AdminAnalyticsPage() {
                 <Link
                   key={`${item.contentType}-${item.contentId}-${index}`}
                   href={`/${
-                    item.contentType === "tv_series" ? "tv" : "movie"
+                    item.contentType === "tv_series" || item.contentType === "tv" ? "tv" : "movie"
                   }/${item.contentId}`}
                   className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
                 >
