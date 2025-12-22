@@ -8,9 +8,11 @@ import Image from "next/image";
 import type { SyntheticEvent } from "react";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 import AccountSkeleton from "@/components/ui/AccountSkeleton";
+import { useRouter } from "next/navigation";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
 
   if (isLoading) {
     return <AccountSkeleton />;
@@ -93,7 +95,10 @@ export default function AccountPage() {
             </h3>
 
             <div className="space-y-4">
-              <button className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white">
+              <button
+                className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white"
+                onClick={() => router.push("/account/change-password")}
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium mb-1">Change Password</p>
@@ -105,7 +110,10 @@ export default function AccountPage() {
                 </div>
               </button>
 
-              <button className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white">
+              <button
+                className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white"
+                onClick={() => router.push("/notifications")}
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium mb-1">Notifications</p>
@@ -117,29 +125,6 @@ export default function AccountPage() {
                 </div>
               </button>
 
-              <button className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium mb-1">Privacy</p>
-                    <p className="text-sm text-gray-400">
-                      Privacy and security settings
-                    </p>
-                  </div>
-                  <span className="text-gray-400">→</span>
-                </div>
-              </button>
-
-              <button className="w-full text-left px-6 py-4 bg-red-600/20 hover:bg-red-600/30 border border-red-600/50 rounded-lg transition-colors text-red-400">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium mb-1">Delete Account</p>
-                    <p className="text-sm text-red-300/70">
-                      Permanently delete your account
-                    </p>
-                  </div>
-                  <span className="text-red-400">⚠</span>
-                </div>
-              </button>
             </div>
           </div>
         </Container>
