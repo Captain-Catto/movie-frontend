@@ -119,7 +119,7 @@ export default function AdminUsersPage() {
   };
 
   const countryCodeToName = (code?: string | null) => {
-    if (!code) return "Unknown";
+    if (!code) return "N/A";
     try {
       const formatter = new Intl.DisplayNames(["en"], { type: "region" });
       return formatter.of(code.toUpperCase()) || code.toUpperCase();
@@ -365,7 +365,11 @@ export default function AdminUsersPage() {
                             {countryFlagUrl(user.lastLoginCountry) ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
                               <img
-                                src={countryFlagUrl(user.lastLoginCountry) as string}
+                                src={
+                                  countryFlagUrl(
+                                    user.lastLoginCountry
+                                  ) as string
+                                }
                                 alt={countryCodeToName(user.lastLoginCountry)}
                                 title={countryCodeToName(user.lastLoginCountry)}
                                 className="w-6 h-4 rounded border border-gray-600"
@@ -384,7 +388,7 @@ export default function AdminUsersPage() {
                             )}
                           </>
                         ) : (
-                          <span className="text-xs text-gray-400">Unknown</span>
+                          <span className="text-xs text-gray-400">N/A</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
@@ -446,7 +450,9 @@ export default function AdminUsersPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Display name</label>
+                  <label className="block text-sm text-gray-400 mb-1">
+                    Display name
+                  </label>
                   <input
                     value={editForm.name}
                     onChange={(e) =>
@@ -457,13 +463,17 @@ export default function AdminUsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Email (read-only)</label>
+                  <label className="block text-sm text-gray-400 mb-1">
+                    Email (read-only)
+                  </label>
                   <div className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300">
                     {editModal.user.email}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Role</label>
+                  <label className="block text-sm text-gray-400 mb-1">
+                    Role
+                  </label>
                   <select
                     value={editForm.role}
                     onChange={(e) =>
@@ -475,14 +485,20 @@ export default function AdminUsersPage() {
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                   >
                     {roleOptions.map((role) => (
-                      <option key={role} value={role} className="bg-gray-800 text-white">
+                      <option
+                        key={role}
+                        value={role}
+                        className="bg-gray-800 text-white"
+                      >
                         {role.replace("_", " ")}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Status</label>
+                  <label className="block text-sm text-gray-400 mb-1">
+                    Status
+                  </label>
                   <div className="flex flex-col space-y-1">
                     {editModal.user.isActive ? (
                       <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white w-fit">
@@ -504,24 +520,32 @@ export default function AdminUsersPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">New password</label>
+                  <label className="block text-sm text-gray-400 mb-1">
+                    New password
+                  </label>
                   <input
                     type="password"
                     value={editForm.password}
                     onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, password: e.target.value }))
+                      setEditForm((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
                     }
                     placeholder="Leave blank to keep current password"
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
                   />
                   <p className="text-xs text-gray-400 mt-1">
-                    Admins cannot change email. Set a new password only if needed (min 6 characters).
+                    Admins cannot change email. Set a new password only if
+                    needed (min 6 characters).
                   </p>
                 </div>
               </div>
 
               <div className="mt-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                <div className="text-sm text-gray-400 mb-2">Last login details</div>
+                <div className="text-sm text-gray-400 mb-2">
+                  Last login details
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-white">
                   <div>
                     <div className="text-gray-400 text-xs">Last seen</div>
@@ -569,7 +593,8 @@ export default function AdminUsersPage() {
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
               <h3 className="text-xl font-bold text-white mb-4">Ban User</h3>
               <p className="text-gray-400 mb-4">
-                Ban user &quot;{banModal.user?.name}&quot; ({banModal.user?.email})
+                Ban user &quot;{banModal.user?.name}&quot; (
+                {banModal.user?.email})
               </p>
               <textarea
                 value={banReason}
