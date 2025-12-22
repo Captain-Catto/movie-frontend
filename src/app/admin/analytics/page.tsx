@@ -342,6 +342,11 @@ export default function AdminAnalyticsPage() {
               contentType: (record.contentType as string) ?? "movie",
               title: (record.title as string) ?? "Unknown title",
               viewCount: Number(record.viewCount ?? record.count ?? 0),
+              posterPath:
+                (record.posterPath as string | undefined) ??
+                (record.poster_path as string | undefined) ??
+                (record.posterUrl as string | undefined) ??
+                null,
             };
           });
           setMostViewedContent(normalized);
