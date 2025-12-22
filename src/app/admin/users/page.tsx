@@ -249,9 +249,6 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Device / IP
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Joined
-                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Actions
                   </th>
@@ -261,7 +258,7 @@ export default function AdminUsersPage() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={6}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       Loading...
@@ -270,7 +267,7 @@ export default function AdminUsersPage() {
                 ) : users.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={6}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       No users found
@@ -345,9 +342,6 @@ export default function AdminUsersPage() {
                             </span>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-300">
-                        {new Date(user.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         {user.isActive ? (

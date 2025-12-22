@@ -31,6 +31,26 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
       ),
     },
     {
+      title: "Settings",
+      href: "/admin/settings",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9.75 3a1.5 1.5 0 00-1.48 1.23l-.26 1.3a1.5 1.5 0 01-1.02 1.14l-1.24.41a1.5 1.5 0 00-.92 1.9l.45 1.23a1.5 1.5 0 010 1l-.45 1.23a1.5 1.5 0 00.92 1.9l1.24.41a1.5 1.5 0 011.02 1.14l.26 1.3A1.5 1.5 0 009.75 21h4.5a1.5 1.5 0 001.48-1.23l.26-1.3a1.5 1.5 0 011.02-1.14l1.24-.41a1.5 1.5 0 00.92-1.9l-.45-1.23a1.5 1.5 0 010-1l.45-1.23a1.5 1.5 0 00-.92-1.9l-1.24-.41a1.5 1.5 0 01-1.02-1.14l-.26-1.3A1.5 1.5 0 0014.25 3h-4.5z"
+          />
+          <circle cx="12" cy="12" r="2" />
+        </svg>
+      ),
+    },
+    {
       title: "Content",
       href: "/admin/content",
       icon: (
