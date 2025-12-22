@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,14 +42,14 @@ export default function AuthModal({
       const result = await registerUser(name, email, password);
 
       if (result.success) {
-        setSuccess("Đăng ký thành công! Chào mừng bạn đến với MovieStream.");
+        setSuccess("Register success! Welcome to MovieStream.");
+        setTimeout(() => setSuccess(""), 5000);
         setTimeout(() => {
           onClose();
           onSuccess?.();
-          // Auth state automatically updated via context
         }, 1500);
       } else {
-        handleError(result.error || "Đăng ký thất bại");
+        handleError(result.error || "Register failed");
       }
     } catch (error: unknown) {
       console.error("Registration error:", error);
@@ -74,21 +74,22 @@ export default function AuthModal({
       const result = await loginWithGoogle();
 
       if (result.success) {
-        setSuccess("Đăng nhập Google thành công!");
+        setSuccess("Login with Google succeeded!");
+        setTimeout(() => setSuccess(""), 5000);
         setTimeout(() => {
           onClose();
           onSuccess?.();
           // Auth state automatically updated via context
         }, 1000);
       } else {
-        handleError(result.error || "Đăng nhập Google thất bại");
+        handleError(result.error || "Login with Google failed");
       }
     } catch (error: unknown) {
       console.error("Google login error:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Đăng nhập Google thất bại. Vui lòng thử lại.";
+          : "Login with Google failed. Pls try again.";
       handleError(errorMessage);
     } finally {
       setIsGoogleLoading(false);
@@ -101,17 +102,22 @@ export default function AuthModal({
     setSuccess("");
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      setError("");
+      setSuccess("");
+    }
+  }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[450px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white text-center">
-            {activeTab === "login" ? "Đăng nhập" : "Đăng ký"}
+            {activeTab === "login" ? "Login" : "Register"}
           </DialogTitle>
           <DialogDescription className="text-gray-300 text-center">
-            {activeTab === "login"
-              ? "Đăng nhập để truy cập đầy đủ tính năng"
-              : "Tạo tài khoản mới để bắt đầu"}
+            {activeTab === "login" ? "Login to explore" : "Create an account"}
           </DialogDescription>
         </DialogHeader>
 
@@ -152,7 +158,8 @@ export default function AuthModal({
               onSubmit={async (email, password) => {
                 const result = await loginWithEmail(email, password);
                 if (result.success) {
-                  setSuccess("Đăng nhập thành công!");
+                  setSuccess("Login succeeded!");
+                  setTimeout(() => setSuccess(""), 5000);
                   setTimeout(() => {
                     onClose();
                     onSuccess?.();
@@ -170,7 +177,7 @@ export default function AuthModal({
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">
-                  Hoặc tiếp tục với
+                  Or continue with
                 </span>
               </div>
             </div>
@@ -183,7 +190,7 @@ export default function AuthModal({
               disabled={isGoogleLoading}
             >
               <FcGoogle className="w-5 h-5 mr-2" />
-              {isGoogleLoading ? "Đang xử lý..." : "Đăng nhập với Google"}
+              {isGoogleLoading ? "Processing..." : "Login with Google"}
             </Button>
           </TabsContent>
 
@@ -199,7 +206,7 @@ export default function AuthModal({
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">
-                  Hoặc đăng ký với
+                  Or register with
                 </span>
               </div>
             </div>
