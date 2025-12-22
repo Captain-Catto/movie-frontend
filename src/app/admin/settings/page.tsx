@@ -9,14 +9,12 @@ type RegistrationSettings = {
   id: MinMax;
   nickname: MinMax;
   password: MinMax;
-  exchangePassword: MinMax;
 };
 
 const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
   { key: "id", label: "ID" },
   { key: "nickname", label: "Nickname" },
   { key: "password", label: "Password" },
-  { key: "exchangePassword", label: "Exchange Password" },
 ];
 
 export default function AdminSettingsPage() {
@@ -25,7 +23,6 @@ export default function AdminSettingsPage() {
     id: { min: 6, max: 16 },
     nickname: { min: 3, max: 16 },
     password: { min: 8, max: 16 },
-    exchangePassword: { min: 8, max: 16 },
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
