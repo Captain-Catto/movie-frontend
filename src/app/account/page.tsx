@@ -11,9 +11,10 @@ import AccountSkeleton from "@/components/ui/AccountSkeleton";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
+import { authStorage } from "@/lib/auth-storage";
 
 export default function AccountPage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, checkAuth } = useAuth();
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
@@ -74,6 +75,11 @@ export default function AccountPage() {
       if (res.data?.success) {
         setFormSuccess("Cập nhật thành công");
         setForm({ name: "", password: "", confirmPassword: "" });
+        if (user) {
+          const updatedUser = { ...user, ...(payload.name ? { name: payload.name } : {}) };
+          authStorage.setUser(updatedUser);
+          checkAuth();
+        }
       } else {
         setFormError(res.data?.message || "Cập nhật thất bại");
       }
