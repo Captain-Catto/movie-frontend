@@ -18,7 +18,6 @@ interface User {
   lastLoginAt?: string;
   lastLoginIp?: string;
   lastLoginDevice?: string;
-  lastLoginUserAgent?: string;
 }
 
 export default function AdminUsersPage() {
@@ -425,14 +424,6 @@ export default function AdminUsersPage() {
                     </div>
                   </div>
                 </div>
-                {editModal.user.lastLoginUserAgent && (
-                  <div className="mt-3">
-                    <div className="text-gray-400 text-xs">User Agent</div>
-                    <div className="text-xs text-gray-300 break-words">
-                      {editModal.user.lastLoginUserAgent}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {editError && (
