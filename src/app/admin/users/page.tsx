@@ -361,7 +361,7 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {user.lastLoginCountry ? (
-                          <div className="flex items-center gap-2">
+                          <>
                             {countryFlagUrl(user.lastLoginCountry) ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
                               <img
@@ -374,14 +374,15 @@ export default function AdminUsersPage() {
                                   e.currentTarget.style.display = "none";
                                 }}
                               />
-                            ) : null}
-                            <span
-                              className="text-xl"
-                              title={countryCodeToName(user.lastLoginCountry)}
-                            >
-                              {countryCodeToFlag(user.lastLoginCountry)}
-                            </span>
-                          </div>
+                            ) : (
+                              <span
+                                className="text-xl"
+                                title={countryCodeToName(user.lastLoginCountry)}
+                              >
+                                {countryCodeToFlag(user.lastLoginCountry)}
+                              </span>
+                            )}
+                          </>
                         ) : (
                           <span className="text-xs text-gray-400">Unknown</span>
                         )}
