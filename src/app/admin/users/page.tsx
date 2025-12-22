@@ -19,6 +19,7 @@ interface User {
   lastLoginAt?: string;
   lastLoginIp?: string;
   lastLoginDevice?: string;
+  lastLoginCountry?: string | null;
 }
 
 export default function AdminUsersPage() {
@@ -106,6 +107,25 @@ export default function AdminUsersPage() {
     if (!value) return "N/A";
     const date = new Date(value);
     return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
+  };
+
+  const countryCodeToFlag = (code?: string | null) => {
+    if (!code || code.length !== 2) return "🏳️";
+    const upper = code.toUpperCase();
+    return upper
+      .split("")
+      .map((char) => String.fromCodePoint(char.charCodeAt(0) + 127397))
+      .join("");
+  };
+
+  const countryCodeToName = (code?: string | null) => {
+    if (!code) return "Unknown";
+    try {
+      const formatter = new Intl.DisplayNames(["en"], { type: "region" });
+      return formatter.of(code.toUpperCase()) || code.toUpperCase();
+    } catch {
+      return code.toUpperCase();
+    }
   };
 
   const renderSignupAccess = (user: User) => {
@@ -247,6 +267,9 @@ export default function AdminUsersPage() {
                     Sign Up / Access
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Country
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Device / IP
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -258,7 +281,7 @@ export default function AdminUsersPage() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       Loading...
@@ -267,7 +290,7 @@ export default function AdminUsersPage() {
                 ) : users.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       No users found
@@ -330,6 +353,23 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {renderSignupAccess(user)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        {user.lastLoginCountry ? (
+                          <div
+                            className="flex items-center gap-2"
+                            title={countryCodeToName(user.lastLoginCountry)}
+                          >
+                            <span className="text-xl">
+                              {countryCodeToFlag(user.lastLoginCountry)}
+                            </span>
+                            <span className="text-xs text-gray-300 uppercase">
+                              {user.lastLoginCountry}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400">Unknown</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         <div className="flex flex-col space-y-1">
