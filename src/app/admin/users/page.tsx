@@ -4,15 +4,21 @@ import { useEffect, useState, useCallback } from "react";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
+type UserRole = "user" | "admin" | "super_admin";
+
 interface User {
   id: number;
   email: string;
   name: string;
-  role: string;
+  role: UserRole;
   isActive: boolean;
   createdAt: string;
   bannedReason?: string;
   totalWatchTime?: number;
+  lastLoginAt?: string;
+  lastLoginIp?: string;
+  lastLoginDevice?: string;
+  lastLoginUserAgent?: string;
 }
 
 export default function AdminUsersPage() {
@@ -24,6 +30,21 @@ export default function AdminUsersPage() {
     user: User | null;
   }>({ open: false, user: null });
   const [banReason, setBanReason] = useState("");
+  const [editModal, setEditModal] = useState<{
+    open: boolean;
+    user: User | null;
+  }>({ open: false, user: null });
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    email: string;
+    role: UserRole;
+  }>({
+    name: "",
+    email: "",
+    role: "user",
+  });
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState("");
   const adminApi = useAdminApi();
 
   const fetchUsers = useCallback(async () => {
@@ -76,6 +97,73 @@ export default function AdminUsersPage() {
       }
     } catch (error) {
       console.error("Error unbanning user:", error);
+    }
+  };
+
+  const roleOptions: UserRole[] = ["user", "admin", "super_admin"];
+
+  const formatDateTime = (value?: string) => {
+    if (!value) return "N/A";
+    const date = new Date(value);
+    return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
+  };
+
+  const openEditModal = (user: User) => {
+    setEditModal({ open: true, user });
+    setEditForm({
+      name: user.name || "",
+      email: user.email,
+      role: user.role,
+    });
+    setEditError("");
+  };
+
+  const closeEditModal = () => {
+    setEditModal({ open: false, user: null });
+    setEditError("");
+    setEditSaving(false);
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editModal.user) return;
+    if (!editForm.email.trim()) {
+      setEditError("Email is required");
+      return;
+    }
+
+    setEditSaving(true);
+    setEditError("");
+
+    try {
+      const payload = {
+        name: editForm.name.trim(),
+        email: editForm.email.trim(),
+        role: editForm.role,
+      };
+
+      const response = await adminApi.put<User>(
+        `/admin/users/${editModal.user.id}`,
+        payload
+      );
+
+      if (response.success && response.data) {
+        const updatedUser = response.data as User;
+
+        setUsers((prevUsers) =>
+          prevUsers.map((u) =>
+            u.id === updatedUser.id ? { ...u, ...updatedUser } : u
+          )
+        );
+        closeEditModal();
+        fetchUsers();
+      } else {
+        setEditError(response.error || "Failed to update user");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setEditError("Failed to update user");
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -166,11 +254,19 @@ export default function AdminUsersPage() {
                               {user.name?.charAt(0)?.toUpperCase() || "U"}
                             </span>
                           </div>
-                          <div className="ml-3">
-                            <div className="text-sm font-medium text-white">
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(user)}
+                            className="ml-3 text-left"
+                            title="Edit user"
+                          >
+                            <div className="text-sm font-medium text-white hover:text-red-300 transition-colors">
                               {user.name || "No name"}
                             </div>
-                          </div>
+                            <div className="text-xs text-gray-400">
+                              Click to edit
+                            </div>
+                          </button>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
@@ -226,6 +322,141 @@ export default function AdminUsersPage() {
             </table>
           </div>
         </div>
+
+        {/* Edit Modal */}
+        {editModal.open && editModal.user && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl border border-gray-700 shadow-2xl">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-xl font-bold text-white">Edit user</h3>
+                  <p className="text-gray-400 text-sm">
+                    Update profile and role for {editModal.user.email}
+                  </p>
+                </div>
+                <button
+                  onClick={closeEditModal}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close"
+                >
+                  X
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Display name</label>
+                  <input
+                    value={editForm.name}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    placeholder="Display name"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    placeholder="Email"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Role</label>
+                  <select
+                    value={editForm.role}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        role: e.target.value as UserRole,
+                      }))
+                    }
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+                  >
+                    {roleOptions.map((role) => (
+                      <option key={role} value={role} className="bg-gray-800 text-white">
+                        {role.replace("_", " ")}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Status</label>
+                  <div className="flex flex-col space-y-1">
+                    {editModal.user.isActive ? (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white w-fit">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-600 text-white w-fit">
+                        Banned
+                      </span>
+                    )}
+                    {editModal.user.bannedReason && (
+                      <span className="text-xs text-gray-400">
+                        {editModal.user.bannedReason}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <div className="text-sm text-gray-400 mb-2">Last login details</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-white">
+                  <div>
+                    <div className="text-gray-400 text-xs">Last seen</div>
+                    <div>{formatDateTime(editModal.user.lastLoginAt)}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-400 text-xs">IP</div>
+                    <div>{editModal.user.lastLoginIp || "N/A"}</div>
+                  </div>
+                  <div>
+                    <div className="text-gray-400 text-xs">Device</div>
+                    <div className="capitalize">
+                      {editModal.user.lastLoginDevice || "N/A"}
+                    </div>
+                  </div>
+                </div>
+                {editModal.user.lastLoginUserAgent && (
+                  <div className="mt-3">
+                    <div className="text-gray-400 text-xs">User Agent</div>
+                    <div className="text-xs text-gray-300 break-words">
+                      {editModal.user.lastLoginUserAgent}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {editError && (
+                <div className="mt-3 text-sm text-red-400">{editError}</div>
+              )}
+
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={closeEditModal}
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateUser}
+                  disabled={editSaving || !editForm.email.trim()}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {editSaving ? "Saving..." : "Save changes"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Ban Modal */}
         {banModal.open && (
