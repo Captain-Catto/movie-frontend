@@ -356,17 +356,12 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {user.lastLoginCountry ? (
-                          <div
-                            className="flex items-center gap-2"
+                          <span
+                            className="text-xl"
                             title={countryCodeToName(user.lastLoginCountry)}
                           >
-                            <span className="text-xl">
-                              {countryCodeToFlag(user.lastLoginCountry)}
-                            </span>
-                            <span className="text-xs text-gray-300 uppercase">
-                              {user.lastLoginCountry}
-                            </span>
-                          </div>
+                            {countryCodeToFlag(user.lastLoginCountry)}
+                          </span>
                         ) : (
                           <span className="text-xs text-gray-400">Unknown</span>
                         )}
