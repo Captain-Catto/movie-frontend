@@ -9,10 +9,20 @@ import type { SyntheticEvent } from "react";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 import AccountSkeleton from "@/components/ui/AccountSkeleton";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import axiosInstance from "@/lib/axios-instance";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const [form, setForm] = useState({
+    name: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+  const [formSuccess, setFormSuccess] = useState("");
 
   if (isLoading) {
     return <AccountSkeleton />;
@@ -39,6 +49,52 @@ export default function AccountPage() {
 
   const avatarSrc = user?.image || FALLBACK_PROFILE;
   const displayName = user?.name || "User";
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError("");
+    setFormSuccess("");
+
+    if (form.password && form.password !== form.confirmPassword) {
+      setFormError("Mật khẩu xác nhận không khớp");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload: Record<string, string> = {};
+      if (form.name.trim()) payload.name = form.name.trim();
+      if (form.password.trim()) payload.password = form.password.trim();
+
+      if (Object.keys(payload).length === 0) {
+        setFormError("Vui lòng nhập tên hoặc mật khẩu mới");
+        return;
+      }
+
+      const res = await axiosInstance.put("/auth/profile", payload);
+      if (res.data?.success) {
+        setFormSuccess("Cập nhật thành công");
+        setForm({ name: "", password: "", confirmPassword: "" });
+      } else {
+        setFormError(res.data?.message || "Cập nhật thất bại");
+      }
+    } catch (error: unknown) {
+      const backendMessage =
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        (error as { response?: { data?: { message?: string | string[] } } })
+          .response?.data?.message;
+      const msg =
+        typeof backendMessage === "string"
+          ? backendMessage
+          : Array.isArray(backendMessage)
+          ? backendMessage.join(", ")
+          : undefined;
+      setFormError(msg || "Cập nhật thất bại");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
@@ -93,6 +149,83 @@ export default function AccountPage() {
             <h3 className="text-xl font-bold text-white mb-6">
               Account Settings
             </h3>
+
+            <form onSubmit={handleUpdateProfile} className="space-y-4 mb-6">
+              {formError && (
+                <div className="px-4 py-3 rounded-lg bg-red-900/40 border border-red-700 text-red-200">
+                  {formError}
+                </div>
+              )}
+              {formSuccess && (
+                <div className="px-4 py-3 rounded-lg bg-green-900/40 border border-green-700 text-green-200">
+                  {formSuccess}
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-300">Display name</label>
+                  <input
+                    type="text"
+                    value={form.name}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    placeholder={displayName}
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    disabled={saving}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-300">Email</label>
+                  <input
+                    type="text"
+                    value={user?.email || ""}
+                    disabled
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-300">New password</label>
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, password: e.target.value }))
+                    }
+                    placeholder="Leave blank to keep current"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    disabled={saving}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-300">Confirm password</label>
+                  <input
+                    type="password"
+                    value={form.confirmPassword}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        confirmPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Repeat new password"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                    disabled={saving}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+              >
+                {saving ? "Saving..." : "Save changes"}
+              </button>
+            </form>
 
             <div className="space-y-4">
               <button
