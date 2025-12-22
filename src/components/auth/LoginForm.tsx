@@ -5,17 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 interface LoginFormProps {
-  onSuccess: (email: string, password: string) => void;
-  onError: (message: string) => void;
+  onSubmit: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; error?: string }>;
 }
 
-export default function LoginForm({ onSuccess, onError }: LoginFormProps) {
+export default function LoginForm({ onSubmit }: LoginFormProps) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState("");
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -44,10 +47,15 @@ export default function LoginForm({ onSuccess, onError }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      await onSuccess(formData.email, formData.password);
+      const result = await onSubmit(formData.email, formData.password);
+      if (!result.success) {
+        setSubmitError(result.error || "Đăng nhập thất bại");
+      } else {
+        setSubmitError("");
+      }
     } catch (error) {
       console.error("Login error:", error);
-      onError("Đã xảy ra lỗi. Vui lòng thử lại.");
+      setSubmitError("Đã xảy ra lỗi. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -64,6 +72,11 @@ export default function LoginForm({ onSuccess, onError }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {submitError && (
+        <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-md text-sm">
+          {submitError}
+        </div>
+      )}
       <div className="space-y-2">
         <Label htmlFor="login-email" className="text-white">
           Email

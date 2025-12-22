@@ -33,30 +33,6 @@ export default function AuthModal({
 
   const { loginWithEmail, register: registerUser, loginWithGoogle } = useAuth();
 
-  const handleLoginSuccess = async (email: string, password: string) => {
-    try {
-      const result = await loginWithEmail(email, password);
-
-      if (result.success) {
-        setSuccess("Đăng nhập thành công!");
-        setTimeout(() => {
-          onClose();
-          onSuccess?.();
-          // Auth state automatically updated via context
-        }, 1000);
-      } else {
-        handleError(result.error || "Đăng nhập thất bại");
-      }
-    } catch (error: unknown) {
-      console.error("Login error:", error);
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Đã xảy ra lỗi. Vui lòng thử lại.";
-      handleError(errorMessage);
-    }
-  };
-
   const handleRegisterSuccess = async (
     name: string,
     email: string,
@@ -172,7 +148,21 @@ export default function AuthModal({
           </TabsList>
 
           <TabsContent value="login" className="mt-6">
-            <LoginForm onSuccess={handleLoginSuccess} onError={handleError} />
+            <LoginForm
+              onSubmit={async (email, password) => {
+                const result = await loginWithEmail(email, password);
+                if (result.success) {
+                  setSuccess("Đăng nhập thành công!");
+                  setTimeout(() => {
+                    onClose();
+                    onSuccess?.();
+                  }, 1000);
+                } else if (result.error) {
+                  setError(result.error);
+                }
+                return result;
+              }}
+            />
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">

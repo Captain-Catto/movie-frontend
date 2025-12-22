@@ -1,4 +1,5 @@
 import axiosInstance from "@/lib/axios-instance";
+import axios from "axios";
 
 export interface LoginCredentials {
   email: string;
@@ -37,13 +38,7 @@ class AuthApiService {
       const response = await axiosInstance.post("/auth/login", credentials);
       return response.data;
     } catch (error) {
-      console.error("Login error:", error);
-      return {
-        success: false,
-        message: "Network error. Please try again.",
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      };
+      return this.handleAxiosError(error);
     }
   }
 
@@ -55,13 +50,7 @@ class AuthApiService {
       const response = await axiosInstance.post("/auth/register", userData);
       return response.data;
     } catch (error) {
-      console.error("Registration error:", error);
-      return {
-        success: false,
-        message: "Network error. Please try again.",
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      };
+      return this.handleAxiosError(error);
     }
   }
 
@@ -78,13 +67,7 @@ class AuthApiService {
       const response = await axiosInstance.post("/auth/google", googleData);
       return response.data;
     } catch (error) {
-      console.error("Google auth error:", error);
-      return {
-        success: false,
-        message: "Network error. Please try again.",
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      };
+      return this.handleAxiosError(error);
     }
   }
 
@@ -100,13 +83,7 @@ class AuthApiService {
       });
       return response.data;
     } catch (error) {
-      console.error("Get profile error:", error);
-      return {
-        success: false,
-        message: "Network error. Please try again.",
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      };
+      return this.handleAxiosError(error);
     }
   }
 
@@ -115,14 +92,32 @@ class AuthApiService {
       const response = await axiosInstance.post("/auth/logout", { refreshToken });
       return response.data;
     } catch (error) {
-      console.error("Logout error:", error);
+      return this.handleAxiosError(error);
+    }
+  }
+
+  private handleAxiosError(error: unknown): AuthResponse {
+    if (axios.isAxiosError(error)) {
+      const data = error.response?.data as {
+        message?: string | string[];
+        error?: string;
+      };
+      const msgArray = Array.isArray(data?.message)
+        ? data?.message.join(", ")
+        : data?.message;
+
       return {
         success: false,
-        message: "Network error. Please try again.",
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
+        message: msgArray || "API request failed",
+        error: data?.error || msgArray || error.message,
       };
     }
+
+    return {
+      success: false,
+      message: "Network error. Please try again.",
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    };
   }
 }
 
