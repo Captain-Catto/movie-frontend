@@ -35,12 +35,12 @@ export default function AdminUsersPage() {
   }>({ open: false, user: null });
   const [editForm, setEditForm] = useState<{
     name: string;
-    email: string;
     role: UserRole;
+    password: string;
   }>({
     name: "",
-    email: "",
     role: "user",
+    password: "",
   });
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
@@ -111,8 +111,8 @@ export default function AdminUsersPage() {
     setEditModal({ open: true, user });
     setEditForm({
       name: user.name || "",
-      email: user.email,
       role: user.role,
+      password: "",
     });
     setEditError("");
   };
@@ -125,20 +125,26 @@ export default function AdminUsersPage() {
 
   const handleUpdateUser = async () => {
     if (!editModal.user) return;
-    if (!editForm.email.trim()) {
-      setEditError("Email is required");
-      return;
-    }
 
     setEditSaving(true);
     setEditError("");
 
     try {
-      const payload = {
-        name: editForm.name.trim(),
-        email: editForm.email.trim(),
-        role: editForm.role,
-      };
+      const payload: {
+        name?: string;
+        role?: UserRole;
+        password?: string;
+      } = {};
+
+      if (editForm.name.trim()) {
+        payload.name = editForm.name.trim();
+      }
+
+      payload.role = editForm.role;
+
+      if (editForm.password.trim()) {
+        payload.password = editForm.password.trim();
+      }
 
       const response = await adminApi.put<User>(
         `/admin/users/${editModal.user.id}`,
@@ -217,6 +223,12 @@ export default function AdminUsersPage() {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Last Login
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Device / IP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                     Joined
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -228,7 +240,7 @@ export default function AdminUsersPage() {
                 {loading ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={8}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       Loading...
@@ -237,7 +249,7 @@ export default function AdminUsersPage() {
                 ) : users.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={8}
                       className="px-6 py-8 text-center text-gray-400"
                     >
                       No users found
@@ -293,6 +305,21 @@ export default function AdminUsersPage() {
                             )}
                           </div>
                         )}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        <div className="flex flex-col">
+                          <span>{formatDateTime(user.lastLoginAt)}</span>
+                          {user.lastLoginIp && (
+                            <span className="text-xs text-gray-400">
+                              IP: {user.lastLoginIp}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-300">
+                        <span className="capitalize">
+                          {user.lastLoginDevice || "N/A"}
+                        </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {new Date(user.createdAt).toLocaleDateString()}
@@ -355,16 +382,10 @@ export default function AdminUsersPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={editForm.email}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, email: e.target.value }))
-                    }
-                    placeholder="Email"
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
-                  />
+                  <label className="block text-sm text-gray-400 mb-1">Email (read-only)</label>
+                  <div className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300">
+                    {editModal.user.email}
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm text-gray-400 mb-1">Role</label>
@@ -406,6 +427,24 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">New password</label>
+                  <input
+                    type="password"
+                    value={editForm.password}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, password: e.target.value }))
+                    }
+                    placeholder="Leave blank to keep current password"
+                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Admins cannot change email. Set a new password only if needed (min 6 characters).
+                  </p>
+                </div>
+              </div>
+
               <div className="mt-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                 <div className="text-sm text-gray-400 mb-2">Last login details</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-white">
@@ -439,7 +478,7 @@ export default function AdminUsersPage() {
                 </button>
                 <button
                   onClick={handleUpdateUser}
-                  disabled={editSaving || !editForm.email.trim()}
+                  disabled={editSaving}
                   className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editSaving ? "Saving..." : "Save changes"}
