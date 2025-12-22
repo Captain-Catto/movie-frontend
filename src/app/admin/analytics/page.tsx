@@ -247,6 +247,13 @@ export default function AdminAnalyticsPage() {
           endDate: dateRange.endDate,
           ...(contentType !== "all" && { contentType }),
         });
+        const mostViewedParams = new URLSearchParams({
+          limit: "10",
+          ...(contentType !== "all" && { contentType }),
+        });
+        const favoriteParams = new URLSearchParams({
+          ...(contentType !== "all" && { contentType }),
+        });
 
         const [
           viewRes,
@@ -265,9 +272,11 @@ export default function AdminAnalyticsPage() {
           }>(`/admin/analytics/views?${viewParams}`),
           adminApi.get<ClickStats>(`/admin/analytics/clicks?${viewParams}`),
           adminApi.get<PlayStats>(`/admin/analytics/plays?${viewParams}`),
-          adminApi.get<FavoriteStats>(`/admin/analytics/favorites`),
+          adminApi.get<FavoriteStats>(
+            `/admin/analytics/favorites?${favoriteParams}`
+          ),
           adminApi.get<MostViewedItem[]>(
-            `/admin/analytics/most-viewed?limit=10`
+            `/admin/analytics/most-viewed?${mostViewedParams}`
           ),
           adminApi.get<unknown>(`/admin/analytics/popular?${viewParams}`),
           adminApi.get<DeviceStats[]>(`/admin/analytics/devices?${viewParams}`),
