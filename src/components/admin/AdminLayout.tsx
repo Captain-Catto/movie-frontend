@@ -50,7 +50,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         user={user}
       />
 
-      <div className="flex pt-16">
+      <div className="flex pt-28">
         <AdminSidebar isOpen={sidebarOpen} />
 
         <main
