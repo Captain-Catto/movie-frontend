@@ -2,13 +2,58 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useAdminApi } from "@/hooks/useAdminApi";
+import { ChevronDown, LogOut, User } from "lucide-react";
 
 interface AdminSidebarProps {
   isOpen: boolean;
+  user?: {
+    id?: number | null;
+    name?: string | null;
+    role?: string | null;
+    email?: string | null;
+  } | null;
 }
 
-export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
+export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { logout } = useAuth();
+  const adminApi = useAdminApi();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState("");
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name ?? "",
+    password: "",
+  });
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    setProfileForm({ name: user?.name ?? "", password: "" });
+  }, [user?.name]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!menuOpen) return;
+      const target = event.target as Node;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
   const menuItems = [
     {
@@ -169,7 +214,63 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
   if (!isOpen) return null;
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">
+    <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 border-r border-gray-800 overflow-y-auto">
+      <div className="p-4 border-b border-gray-800 bg-gray-900 relative">
+        <button
+          ref={menuButtonRef}
+          onClick={() => setMenuOpen((prev) => !prev)}
+          className="flex w-full items-center gap-3 text-left "
+        >
+          <div className="w-12 h-12 rounded-full bg-red-600 text-white font-bold flex items-center justify-center cursor-pointer">
+            {(user?.name || "A").charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1  cursor-pointer">
+            <p className="text-white font-semibold truncate">
+              {user?.name || "Admin"}
+            </p>
+            <p className="text-xs text-gray-400 capitalize">
+              {user?.role || "admin"}
+            </p>
+            {user?.email && (
+              <p className="text-[11px] text-gray-500 truncate">{user.email}</p>
+            )}
+          </div>
+          <ChevronDown
+            className={`w-4 h-4 text-gray-400 transition-transform  cursor-pointer ${
+              menuOpen ? "rotate-180" : ""
+            }`}
+          />
+        </button>
+
+        {menuOpen && (
+          <div
+            ref={menuRef}
+            className="absolute left-4 right-4 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 divide-y divide-gray-700"
+          >
+            <button
+              onClick={() => {
+                setProfileOpen(true);
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors cursor-pointer"
+            >
+              <User className="w-4 h-4" />
+              <span>Profile</span>
+            </button>
+            <button
+              onClick={() => {
+                logout();
+                setMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-200 hover:bg-red-600/20 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        )}
+      </div>
+
       <nav className="p-4 space-y-1">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
@@ -191,7 +292,7 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 mt-auto border-t border-gray-700">
+      <div className="p-4 mt-auto border-t border-gray-800 bg-gray-900">
         <Link
           href="/"
           className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
@@ -212,6 +313,144 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
           <span className="font-medium">Back to Site</span>
         </Link>
       </div>
+
+      {profileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+          onClick={() => {
+            setProfileOpen(false);
+            setProfileForm({ name: user?.name ?? "", password: "" });
+            setProfileError("");
+          }}
+        >
+          <div
+            className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white">Edit Profile</h3>
+                <p className="text-sm text-gray-400">
+                  Cập nhật thông tin của bạn
+                </p>
+              </div>
+              <button
+                onClick={() => setProfileOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors"
+                aria-label="Close profile modal"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Tên hiển thị
+                </label>
+                <input
+                  value={profileForm.name}
+                  onChange={(e) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      name: e.target.value,
+                    }))
+                  }
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  placeholder="Tên của bạn"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Email
+                </label>
+                <div className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400">
+                  {user?.email || "Chưa có email"}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-300 mb-1">
+                  Mật khẩu (để trống nếu không đổi)
+                </label>
+                <input
+                  type="password"
+                  value={profileForm.password}
+                  onChange={(e) =>
+                    setProfileForm((prev) => ({
+                      ...prev,
+                      password: e.target.value,
+                    }))
+                  }
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              {profileError && (
+                <div className="text-sm text-red-400">{profileError}</div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setProfileOpen(false);
+                  setProfileForm({ name: user?.name ?? "", password: "" });
+                  setProfileError("");
+                }}
+                className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={async () => {
+                  if (!user?.id) {
+                    setProfileError("Không tìm thấy thông tin người dùng");
+                    return;
+                  }
+
+                  setProfileSaving(true);
+                  setProfileError("");
+                  try {
+                    const payload: { name?: string; password?: string } = {};
+                    if (profileForm.name.trim()) {
+                      payload.name = profileForm.name.trim();
+                    }
+                    if (profileForm.password.trim()) {
+                      payload.password = profileForm.password.trim();
+                    }
+
+                    const res = await adminApi.put(
+                      `/admin/users/${user.id}`,
+                      payload
+                    );
+                    if (!res.success) {
+                      setProfileError(res.error || "Cập nhật thất bại");
+                      return;
+                    }
+                    setProfileOpen(false);
+                    setProfileForm({
+                      name: payload.name ?? user.name ?? "",
+                      password: "",
+                    });
+                  } catch (err) {
+                    console.error("Update profile error:", err);
+                    setProfileError("Không thể cập nhật");
+                  } finally {
+                    setProfileSaving(false);
+                  }
+                }}
+                disabled={profileSaving}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60"
+              >
+                {profileSaving ? "Đang lưu..." : "Lưu"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

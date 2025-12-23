@@ -132,7 +132,6 @@ export default function AdminAnalyticsPage() {
   );
   const [deviceStats, setDeviceStats] = useState<DeviceStats[]>([]);
   const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
-  const [loading, setLoading] = useState(true); // full-page skeleton (initial only)
   const [cardsLoading, setCardsLoading] = useState(true); // stats card skeletons
   const [datePreset, setDatePreset] = useState<DatePreset>("7d");
   const [customDateRange, setCustomDateRange] = useState({
@@ -229,268 +228,248 @@ export default function AdminAnalyticsPage() {
     []
   );
 
-  const fetchAnalytics = useCallback(
-    async (options: { showSkeleton?: boolean } = {}) => {
-      const { showSkeleton = true } = options;
-      if (!adminApi.isAuthenticated) return;
+  const fetchAnalytics = useCallback(async () => {
+    if (!adminApi.isAuthenticated) return;
 
-      if (showSkeleton) {
-        setLoading(true);
+    setCardsLoading(true);
+    setIsRefreshing(true);
+    setPlaySourceBreakdown({});
+    setIsRefreshing(true);
+    try {
+      const viewParams = new URLSearchParams({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
+        ...(contentType !== "all" && { contentType }),
+      });
+      const mostViewedParams = new URLSearchParams({
+        limit: "10",
+        ...(contentType !== "all" && { contentType }),
+      });
+      const favoriteParams = new URLSearchParams({
+        ...(contentType !== "all" && { contentType }),
+      });
+
+      const [
+        viewRes,
+        clickRes,
+        playRes,
+        favoriteRes,
+        mostViewedRes,
+        popularRes,
+        deviceRes,
+        countryRes,
+      ] = await Promise.all([
+        adminApi.get<{
+          total: number;
+          byType?: { movies?: number; tvSeries?: number };
+          trend?: Array<{ date: string; views?: number; count?: number }>;
+        }>(`/admin/analytics/views?${viewParams}`),
+        adminApi.get<ClickStats>(`/admin/analytics/clicks?${viewParams}`),
+        adminApi.get<PlayStats>(`/admin/analytics/plays?${viewParams}`),
+        adminApi.get<FavoriteStats>(
+          `/admin/analytics/favorites?${favoriteParams}`
+        ),
+        adminApi.get<MostViewedItem[]>(
+          `/admin/analytics/most-viewed?${mostViewedParams}`
+        ),
+        adminApi.get<unknown>(`/admin/analytics/popular?${viewParams}`),
+        adminApi.get<DeviceStats[]>(`/admin/analytics/devices?${viewParams}`),
+        adminApi.get<CountryStats[]>(`/admin/analytics/countries?${viewParams}`),
+      ]);
+
+      console.log("[Analytics] View response:", viewRes);
+      if (viewRes.success && viewRes.data) {
+        const data = viewRes.data;
+        console.log("[Analytics] View data:", data);
+        setViewSummary({
+          total: Number(data.total ?? 0),
+          byType: data.byType,
+        });
+        const trendArray = Array.isArray(data.trend) ? data.trend : [];
+        const normalizedViewStats: ViewStats[] = trendArray.map((item) => ({
+          date: (item.date as string) ?? "",
+          views: Number(item.views ?? item.count ?? 0),
+        }));
+        setViewStats(normalizedViewStats);
+        console.log("[Analytics] Normalized view stats:", normalizedViewStats);
+      } else {
+        console.warn("[Analytics] View response failed or no data:", viewRes);
       }
-      setCardsLoading(true);
-      setIsRefreshing(true);
-      setPlaySourceBreakdown({});
-      setIsRefreshing(true);
-      try {
-        const viewParams = new URLSearchParams({
-          startDate: dateRange.startDate,
-          endDate: dateRange.endDate,
-          ...(contentType !== "all" && { contentType }),
+
+      if (clickRes.success && clickRes.data) {
+        setClickStats({
+          total: Number((clickRes.data as ClickStats).total ?? 0),
         });
-        const mostViewedParams = new URLSearchParams({
-          limit: "10",
-          ...(contentType !== "all" && { contentType }),
+      }
+
+      if (playRes.success && playRes.data) {
+        setPlayStats({
+          total: Number((playRes.data as PlayStats).total ?? 0),
+          bySource: (playRes.data as PlayStats).bySource ?? {},
         });
-        const favoriteParams = new URLSearchParams({
-          ...(contentType !== "all" && { contentType }),
+        setPlaySourceBreakdown((playRes.data as PlayStats).bySource ?? {});
+      }
+
+      if (favoriteRes.success && favoriteRes.data) {
+        const favData = favoriteRes.data as FavoriteStats;
+        setFavoriteStats({
+          total: Number(favData.total ?? 0),
+          byType: favData.byType,
+          mostFavorited: favData.mostFavorited ?? [],
+          trend: favData.trend ?? [],
         });
+      }
 
-        const [
-          viewRes,
-          clickRes,
-          playRes,
-          favoriteRes,
-          mostViewedRes,
-          popularRes,
-          deviceRes,
-          countryRes,
-        ] = await Promise.all([
-          adminApi.get<{
-            total: number;
-            byType?: { movies?: number; tvSeries?: number };
-            trend?: Array<{ date: string; views?: number; count?: number }>;
-          }>(`/admin/analytics/views?${viewParams}`),
-          adminApi.get<ClickStats>(`/admin/analytics/clicks?${viewParams}`),
-          adminApi.get<PlayStats>(`/admin/analytics/plays?${viewParams}`),
-          adminApi.get<FavoriteStats>(
-            `/admin/analytics/favorites?${favoriteParams}`
-          ),
-          adminApi.get<MostViewedItem[]>(
-            `/admin/analytics/most-viewed?${mostViewedParams}`
-          ),
-          adminApi.get<unknown>(`/admin/analytics/popular?${viewParams}`),
-          adminApi.get<DeviceStats[]>(`/admin/analytics/devices?${viewParams}`),
-          adminApi.get<CountryStats[]>(
-            `/admin/analytics/countries?${viewParams}`
-          ),
-        ]);
+      if (mostViewedRes.success) {
+        const rawMostViewed = Array.isArray(mostViewedRes.data)
+          ? mostViewedRes.data
+          : [];
+        const normalized: MostViewedItem[] = rawMostViewed.map((item) => {
+          const record = item as unknown as Record<string, unknown>;
+          return {
+            contentId: Number(record.contentId ?? record.id ?? 0),
+            contentType: (record.contentType as string) ?? "movie",
+            title: (record.title as string) ?? "Unknown title",
+            viewCount: Number(record.viewCount ?? record.count ?? 0),
+            posterPath:
+              (record.posterPath as string | undefined) ??
+              (record.poster_path as string | undefined) ??
+              (record.posterUrl as string | undefined) ??
+              null,
+          };
+        });
+        setMostViewedContent(normalized);
+      }
 
-        console.log("[Analytics] View response:", viewRes);
-        if (viewRes.success && viewRes.data) {
-          const data = viewRes.data;
-          console.log("[Analytics] View data:", data);
-          setViewSummary({
-            total: Number(data.total ?? 0),
-            byType: data.byType,
-          });
-          const trendArray = Array.isArray(data.trend) ? data.trend : [];
-          const normalizedViewStats: ViewStats[] = trendArray.map((item) => ({
-            date: (item.date as string) ?? "",
-            views: Number(item.views ?? item.count ?? 0),
-          }));
-          setViewStats(normalizedViewStats);
-          console.log(
-            "[Analytics] Normalized view stats:",
-            normalizedViewStats
-          );
-        } else {
-          console.warn("[Analytics] View response failed or no data:", viewRes);
-        }
+      console.log("[Analytics] Popular response:", popularRes);
+      if (popularRes.success) {
+        const rawPopular = popularRes.data;
+        console.log("[Analytics] Raw popular data:", rawPopular);
+        const popularArray: unknown = Array.isArray(rawPopular)
+          ? rawPopular
+          : rawPopular
+          ? [
+              ...(((rawPopular as Record<string, unknown>).movies as unknown[]) ??
+                []),
+              ...(((rawPopular as Record<string, unknown>)
+                .tvSeries as unknown[]) ?? []),
+            ]
+          : [];
 
-        if (clickRes.success && clickRes.data) {
-          setClickStats({
-            total: Number((clickRes.data as ClickStats).total ?? 0),
-          });
-        }
-
-        if (playRes.success && playRes.data) {
-          setPlayStats({
-            total: Number((playRes.data as PlayStats).total ?? 0),
-            bySource: (playRes.data as PlayStats).bySource ?? {},
-          });
-          setPlaySourceBreakdown((playRes.data as PlayStats).bySource ?? {});
-        }
-
-        if (favoriteRes.success && favoriteRes.data) {
-          const favData = favoriteRes.data as FavoriteStats;
-          setFavoriteStats({
-            total: Number(favData.total ?? 0),
-            byType: favData.byType,
-            mostFavorited: favData.mostFavorited ?? [],
-            trend: favData.trend ?? [],
-          });
-        }
-
-        if (mostViewedRes.success) {
-          const rawMostViewed = Array.isArray(mostViewedRes.data)
-            ? mostViewedRes.data
-            : [];
-          const normalized: MostViewedItem[] = rawMostViewed.map((item) => {
-            const record = item as unknown as Record<string, unknown>;
-            return {
-              contentId: Number(record.contentId ?? record.id ?? 0),
-              contentType: (record.contentType as string) ?? "movie",
-              title: (record.title as string) ?? "Unknown title",
-              viewCount: Number(record.viewCount ?? record.count ?? 0),
-              posterPath:
-                (record.posterPath as string | undefined) ??
-                (record.poster_path as string | undefined) ??
-                (record.posterUrl as string | undefined) ??
-                null,
-            };
-          });
-          setMostViewedContent(normalized);
-        }
-
-        console.log("[Analytics] Popular response:", popularRes);
-        if (popularRes.success) {
-          const rawPopular = popularRes.data;
-          console.log("[Analytics] Raw popular data:", rawPopular);
-          const popularArray: unknown = Array.isArray(rawPopular)
-            ? rawPopular
-            : rawPopular
-            ? [
-                ...(((rawPopular as Record<string, unknown>)
-                  .movies as unknown[]) ?? []),
-                ...(((rawPopular as Record<string, unknown>)
-                  .tvSeries as unknown[]) ?? []),
-              ]
-            : [];
-
-          console.log(
-            "[Analytics] Popular array after normalization:",
-            popularArray
-          );
-          const normalizedPopular: PopularContent[] = Array.isArray(
-            popularArray
-          )
-            ? popularArray.map((item) => {
-                const record = item as Record<string, unknown>;
-                const tmdbId = Number(record.tmdbId ?? record.id ?? 0);
-                const typeValue = (record.contentType ?? record.type) as
-                  | "movie"
-                  | "tv"
-                  | string
-                  | undefined;
-                const poster =
-                  (record.posterPath as string | undefined) ??
-                  (record.posterUrl as string | undefined);
-                return {
-                  tmdbId,
-                  title: (record.title as string) ?? "Unknown title",
-                  contentType: typeValue === "tv" ? "tv" : "movie",
-                  viewCount: Number(record.viewCount ?? 0),
-                  clickCount: Number(record.clickCount ?? 0),
-                  favoriteCount: Number(record.favoriteCount ?? 0),
-                  posterPath: poster ?? undefined,
-                };
-              })
-            : [];
-
-          console.log(
-            "[Analytics] Final normalized popular content:",
-            normalizedPopular
-          );
-          setPopularContent(normalizedPopular);
-        } else {
-          console.warn("[Analytics] Popular response failed:", popularRes);
-        }
-
-        if (deviceRes.success) {
-          const rawDevices: unknown[] = Array.isArray(deviceRes.data)
-            ? deviceRes.data
-            : [];
-          const totalDevices = rawDevices.reduce<number>((sum, item) => {
-            const count = Number((item as Record<string, unknown>).count ?? 0);
-            return sum + (Number.isFinite(count) ? count : 0);
-          }, 0);
-
-          const normalizedDevices: DeviceStats[] = rawDevices.map((item) => {
-            const record = item as Record<string, unknown>;
-            const count = Number(record.count ?? 0);
-            const safeCount = Number.isFinite(count) ? count : 0;
-            const percentage =
-              totalDevices > 0 ? (safeCount / totalDevices) * 100 : 0;
-            return {
-              device: (record.device as string) ?? "Unknown",
-              count: safeCount,
-              percentage,
-            };
-          });
-
-          setDeviceStats(normalizedDevices);
-        }
-
-        if (countryRes.success) {
-          const rawCountries: unknown[] = Array.isArray(countryRes.data)
-            ? countryRes.data
-            : [];
-          const totalCountries = rawCountries.reduce<number>((sum, item) => {
-            const count = Number((item as Record<string, unknown>).count ?? 0);
-            return sum + (Number.isFinite(count) ? count : 0);
-          }, 0);
-
-          const normalizedCountries: CountryStats[] = rawCountries.map(
-            (item) => {
+        console.log("[Analytics] Popular array after normalization:", popularArray);
+        const normalizedPopular: PopularContent[] = Array.isArray(popularArray)
+          ? popularArray.map((item) => {
               const record = item as Record<string, unknown>;
-              const count = Number(record.count ?? 0);
-              const safeCount = Number.isFinite(count) ? count : 0;
-              const percentage =
-                totalCountries > 0 ? (safeCount / totalCountries) * 100 : 0;
+              const tmdbId = Number(record.tmdbId ?? record.id ?? 0);
+              const typeValue = (record.contentType ?? record.type) as
+                | "movie"
+                | "tv"
+                | string
+                | undefined;
+              const poster =
+                (record.posterPath as string | undefined) ??
+                (record.posterUrl as string | undefined);
               return {
-                country: (record.country as string) ?? "Unknown",
-                count: safeCount,
-                percentage,
+                tmdbId,
+                title: (record.title as string) ?? "Unknown title",
+                contentType: typeValue === "tv" ? "tv" : "movie",
+                viewCount: Number(record.viewCount ?? 0),
+                clickCount: Number(record.clickCount ?? 0),
+                favoriteCount: Number(record.favoriteCount ?? 0),
+                posterPath: poster ?? undefined,
               };
-            }
-          );
+            })
+          : [];
 
-          setCountryStats(normalizedCountries);
-        }
-      } catch (error) {
-        console.error("[Analytics] Error fetching analytics:", error);
-        console.error("[Analytics] Error details:", {
-          message: error instanceof Error ? error.message : String(error),
-          stack: error instanceof Error ? error.stack : undefined,
-        });
-        setViewStats([]);
-        setPopularContent([]);
-        setMostViewedContent([]);
-        setDeviceStats([]);
-        setCountryStats([]);
-        setViewSummary(null);
-        setClickStats(null);
-        setPlayStats(null);
-        setFavoriteStats(null);
-      } finally {
-        setCardsLoading(false);
-        setLoading(false);
-        setIsRefreshing(false);
-        setLastRefreshed(new Date());
+        console.log(
+          "[Analytics] Final normalized popular content:",
+          normalizedPopular
+        );
+        setPopularContent(normalizedPopular);
+      } else {
+        console.warn("[Analytics] Popular response failed:", popularRes);
       }
-    },
-    [dateRange, contentType, adminApi]
-  );
+
+      if (deviceRes.success) {
+        const rawDevices: unknown[] = Array.isArray(deviceRes.data)
+          ? deviceRes.data
+          : [];
+        const totalDevices = rawDevices.reduce<number>((sum, item) => {
+          const count = Number((item as Record<string, unknown>).count ?? 0);
+          return sum + (Number.isFinite(count) ? count : 0);
+        }, 0);
+
+        const normalizedDevices: DeviceStats[] = rawDevices.map((item) => {
+          const record = item as Record<string, unknown>;
+          const count = Number(record.count ?? 0);
+          const safeCount = Number.isFinite(count) ? count : 0;
+          const percentage =
+            totalDevices > 0 ? (safeCount / totalDevices) * 100 : 0;
+          return {
+            device: (record.device as string) ?? "Unknown",
+            count: safeCount,
+            percentage,
+          };
+        });
+
+        setDeviceStats(normalizedDevices);
+      }
+
+      if (countryRes.success) {
+        const rawCountries: unknown[] = Array.isArray(countryRes.data)
+          ? countryRes.data
+          : [];
+        const totalCountries = rawCountries.reduce<number>((sum, item) => {
+          const count = Number((item as Record<string, unknown>).count ?? 0);
+          return sum + (Number.isFinite(count) ? count : 0);
+        }, 0);
+
+        const normalizedCountries: CountryStats[] = rawCountries.map((item) => {
+          const record = item as Record<string, unknown>;
+          const count = Number(record.count ?? 0);
+          const safeCount = Number.isFinite(count) ? count : 0;
+          const percentage =
+            totalCountries > 0 ? (safeCount / totalCountries) * 100 : 0;
+          return {
+            country: (record.country as string) ?? "Unknown",
+            count: safeCount,
+            percentage,
+          };
+        });
+
+        setCountryStats(normalizedCountries);
+      }
+    } catch (error) {
+      console.error("[Analytics] Error fetching analytics:", error);
+      console.error("[Analytics] Error details:", {
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      setViewStats([]);
+      setPopularContent([]);
+      setMostViewedContent([]);
+      setDeviceStats([]);
+      setCountryStats([]);
+      setViewSummary(null);
+      setClickStats(null);
+      setPlayStats(null);
+      setFavoriteStats(null);
+    } finally {
+      setCardsLoading(false);
+      setIsRefreshing(false);
+      setLastRefreshed(new Date());
+    }
+  }, [dateRange, contentType, adminApi]);
 
   const handleManualRefresh = () => {
     if (isRefreshing) return; // avoid duplicate requests without disabling button
     console.log("[Analytics] Manual refresh triggered");
-    fetchAnalytics({ showSkeleton: false }); // Refresh data silently without page skeleton
+    fetchAnalytics(); // Refresh data silently without page skeleton
   };
 
   useEffect(() => {
     // Initial fetch only; no polling needed for top content/most viewed/favorited
-    fetchAnalytics({ showSkeleton: true });
+    fetchAnalytics();
   }, [fetchAnalytics]);
 
   useEffect(() => {
@@ -525,8 +504,6 @@ export default function AdminAnalyticsPage() {
   const animFavorites = useCountUp(totalFavorites, { duration: 650 });
   const animCtr = useCountUp(ctr, { duration: 650, decimals: 1 });
   const animFavRate = useCountUp(favRate, { duration: 650, decimals: 1 });
-
-  const showFullSkeleton = loading && !lastRefreshed;
 
   const playSourceLabels: Record<string, string> = {
     card_watch_button: "Card Watch",
