@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
@@ -79,8 +78,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">
@@ -392,6 +390,5 @@ export default function AdminDashboard() {
           </a>
         </div>
       </div>
-    </AdminLayout>
   );
 }

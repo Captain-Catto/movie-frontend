@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
 interface NotificationAnalyticsSummary {
@@ -274,8 +273,7 @@ export default function AdminNotificationsPage() {
 
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-white mb-2">
             Notification Management
@@ -929,6 +927,5 @@ export default function AdminNotificationsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

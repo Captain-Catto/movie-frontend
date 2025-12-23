@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
@@ -171,8 +170,7 @@ export default function AdminSyncDataPage() {
   }, [stats]);
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <header>
           <h1 className="text-3xl font-bold text-white">Data Synchronization</h1>
           <p className="text-gray-400 mt-2 max-w-2xl">
@@ -462,6 +460,5 @@ export default function AdminSyncDataPage() {
           </ul>
         </section>
       </div>
-    </AdminLayout>
   );
 }

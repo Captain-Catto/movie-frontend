@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import AdminLayout from "@/components/admin/AdminLayout";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -530,8 +529,7 @@ export default function AdminAnalyticsPage() {
   );
 
   return (
-    <AdminLayout>
-      <div className="space-y-8">
+    <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -1237,7 +1235,6 @@ export default function AdminAnalyticsPage() {
           )}
         </div>
       </div>
-      </div>
-    </AdminLayout>
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { Pagination } from "@/components/ui/Pagination";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
@@ -391,8 +390,7 @@ export default function AdminContentPage() {
   );
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -658,6 +656,5 @@ export default function AdminContentPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

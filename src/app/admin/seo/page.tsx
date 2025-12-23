@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
 import { useToastRedux } from "@/hooks/useToastRedux";
@@ -478,8 +477,7 @@ export default function AdminSeoPage() {
     : [];
 
   return (
-    <AdminLayout>
-      <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6">
         <div className="mb-6 space-y-4">
           <h1 className="text-2xl font-bold text-white mb-2">SEO Management</h1>
           <p className="text-gray-400">
@@ -1041,6 +1039,5 @@ export default function AdminSeoPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }

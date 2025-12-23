@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
 type MinMax = { min: number; max: number };
@@ -92,8 +91,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">Site Settings</h1>
@@ -197,6 +195,5 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

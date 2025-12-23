@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import AdminLayout from "@/components/admin/AdminLayout";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
 type UserRole = "user" | "admin" | "super_admin";
@@ -222,8 +221,7 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -624,6 +622,5 @@ export default function AdminUsersPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
   );
 }
