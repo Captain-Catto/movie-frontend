@@ -259,15 +259,6 @@ export function useAnalyticsData({
     fetchAnalytics();
   }, [fetchAnalytics]);
 
-  // Auto-refresh every 2 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAnalytics();
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [fetchAnalytics]);
-
   return {
     viewStats,
     viewSummary,

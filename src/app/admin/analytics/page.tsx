@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
+import { useAdminAnalyticsContext } from "@/context/AdminAnalyticsContext";
 import { useAnalyticsDateRange } from "@/hooks/useAnalyticsDateRange";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
 import AnalyticsHeader from "@/components/analytics/AnalyticsHeader";
@@ -41,13 +41,14 @@ export default function AdminAnalyticsPage() {
     refetch,
   } = useAnalyticsData({ dateRange, contentType });
 
-  const { isConnected: isLiveConnected } = useAdminAnalyticsSocket();
+  const { snapshot: liveSnapshot, isConnected: isLiveConnected, lastUpdateAt } =
+    useAdminAnalyticsContext();
 
   // Calculate stats
-  const totalViews = viewSummary?.total ?? 0;
-  const totalClicks = clickStats?.total ?? 0;
-  const totalPlays = playStats?.total ?? 0;
-  const totalFavorites = favoriteStats?.total ?? 0;
+  const totalViews = liveSnapshot?.views ?? viewSummary?.total ?? 0;
+  const totalClicks = liveSnapshot?.clicks ?? clickStats?.total ?? 0;
+  const totalPlays = liveSnapshot?.plays ?? playStats?.total ?? 0;
+  const totalFavorites = liveSnapshot?.favorites ?? favoriteStats?.total ?? 0;
   const ctr = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
   const favRate = totalViews > 0 ? (totalFavorites / totalViews) * 100 : 0;
 
@@ -78,13 +79,15 @@ export default function AdminAnalyticsPage() {
       count: item.count,
     })) ?? [];
 
+  const headerLastRefreshed = lastUpdateAt || lastRefreshed;
+
   return (
     <div className="space-y-8">
       {/* Header with filters */}
       <AnalyticsHeader
         isLiveConnected={isLiveConnected}
         isRefreshing={isRefreshing}
-        lastRefreshed={lastRefreshed}
+        lastRefreshed={headerLastRefreshed}
         datePreset={datePreset}
         contentType={contentType}
         customDateRange={customDateRange}
