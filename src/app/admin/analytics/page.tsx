@@ -538,11 +538,11 @@ export default function AdminAnalyticsPage() {
   };
 
   const renderCardSkeletons = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-      {Array.from({ length: 5 }).map((_, idx) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {Array.from({ length: 6 }).map((_, idx) => (
         <div
           key={idx}
-          className="rounded-lg p-6 bg-gray-800/80 border border-gray-700 animate-pulse space-y-3 min-h-[150px]"
+          className="rounded-lg p-4 bg-gray-800/80 border border-gray-700 animate-pulse space-y-3 min-h-[120px]"
         >
           <div className="h-4 w-24 bg-gray-700 rounded" />
           <div className="h-8 w-20 bg-gray-600 rounded" />
@@ -554,7 +554,7 @@ export default function AdminAnalyticsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -741,194 +741,67 @@ export default function AdminAnalyticsPage() {
         {cardsLoading ? (
           renderCardSkeletons()
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-            <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-red-100 text-sm font-medium">
-                    Total Views
-                  </p>
-                  <p className="text-3xl font-bold mt-2">
-                    {formatCompactNumber(animViews)}
-                  </p>
-                  <p className="text-xs text-red-100/80 mt-1">
-                    Events tracked (VIEW)
-                  </p>
-                </div>
-                <div className="bg-red-500 bg-opacity-30 p-3 rounded-full">
-                  <svg
-                    className="w-8 h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
+              <p className="text-xs text-gray-300">Total Views</p>
+              <p className="text-2xl font-bold mt-2">
+                {formatCompactNumber(animViews)}
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Events tracked (VIEW)
+              </p>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 text-sm font-medium">
-                    Total Clicks
-                  </p>
-                  <p className="text-3xl font-bold mt-2">
-                    {formatCompactNumber(animClicks)}
-                  </p>
-                  <p className="text-xs text-blue-100/80 mt-1">
-                    Events tracked (CLICK)
-                  </p>
-                </div>
-                <div className="bg-blue-500 bg-opacity-30 p-3 rounded-full">
-                  <svg
-                    className="w-8 h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                    />
-                  </svg>
-                </div>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
+              <p className="text-xs text-gray-300">Total Clicks</p>
+              <p className="text-2xl font-bold mt-2">
+                {formatCompactNumber(animClicks)}
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Events tracked (CLICK)
+              </p>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100 text-sm font-medium">
-                    Total Plays
-                  </p>
-                  <p className="text-3xl font-bold mt-2">
-                    {formatCompactNumber(animPlays)}
-                  </p>
-                  <p className="text-xs text-purple-100/80 mt-1">
-                    Events tracked (PLAY)
-                  </p>
-                </div>
-                <div className="bg-purple-500 bg-opacity-30 p-3 rounded-full">
-                  <svg
-                    className="w-8 h-8"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
+              <p className="text-xs text-gray-300">Total Plays</p>
+              <p className="text-2xl font-bold mt-2">
+                {formatCompactNumber(animPlays)}
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Events tracked (PLAY)
+              </p>
             </div>
 
-            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-indigo-100 text-sm font-medium">CTR</p>
-                  <p className="text-3xl font-bold mt-2">
-                    {animCtr.toFixed(1)}%
-                  </p>
-                  <p className="text-xs text-indigo-100/80 mt-1">
-                    Clicks / Views
-                  </p>
-                </div>
-                <div className="bg-indigo-500 bg-opacity-30 p-3 rounded-full">
-                  <svg
-                    className="w-8 h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 10h18M3 14h18M9 6l2-2 2 2m-4 12l2 2 2-2"
-                    />
-                  </svg>
-                </div>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
+              <p className="text-xs text-gray-300">CTR</p>
+              <p className="text-2xl font-bold mt-2">
+                {animCtr.toFixed(1)}%
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">Clicks / Views</p>
             </div>
 
-            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100 text-sm font-medium">
-                    Favorites
-                  </p>
-                  <p className="text-3xl font-bold mt-2">
-                    {formatCompactNumber(animFavorites)}
-                  </p>
-                  <p className="text-xs text-green-100/80 mt-1">Saved items</p>
-                </div>
-                <div className="bg-green-500 bg-opacity-30 p-3 rounded-full">
-                  <svg
-                    className="w-8 h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    />
-                  </svg>
-                </div>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
+              <p className="text-xs text-gray-300">Favorites</p>
+              <p className="text-2xl font-bold mt-2">
+                {formatCompactNumber(animFavorites)}
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">Saved items</p>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-600 to-amber-700 rounded-lg p-6 text-white shadow-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-amber-100 text-sm font-medium">
-                    Favorite Rate
-                  </p>
-                  <p className="text-3xl font-bold mt-2">
-                    {animFavRate.toFixed(1)}%
-                  </p>
-                  <p className="text-xs text-amber-100/80 mt-1">
-                    Favorites / Views
-                  </p>
-                </div>
-                <div className="bg-amber-500 bg-opacity-30 p-3 rounded-full">
-                  <svg
-                    className="w-8 h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8v8m-4-4h8M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
-                    />
-                  </svg>
-                </div>
-              </div>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
+              <p className="text-xs text-gray-300">Favorite Rate</p>
+              <p className="text-2xl font-bold mt-2">
+                {animFavRate.toFixed(1)}%
+              </p>
+              <p className="text-[11px] text-gray-400 mt-1">
+                Favorites / Views
+              </p>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Play source breakdown */}
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
+        {/* Play source breakdown */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold text-white">
             Play Buttons Breakdown
@@ -1386,6 +1259,7 @@ export default function AdminAnalyticsPage() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </AdminLayout>
   );
