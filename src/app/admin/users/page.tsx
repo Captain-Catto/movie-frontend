@@ -223,31 +223,34 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white">User Management</h1>
-            <p className="text-gray-400 mt-1">
-              Manage users, ban or unban accounts
-            </p>
-          </div>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold text-white">User Management</h1>
+          <p className="text-gray-400">
+            Manage users, ban or unban accounts
+          </p>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center space-x-4">
-          <div className="flex space-x-2">
-            {(["all", "active", "banned"] as const).map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  filter === status
-                    ? "bg-red-600 text-white"
-                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                }`}
-              >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </button>
-            ))}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-gray-300">
+              Filter by status to quickly review active and banned accounts.
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(["all", "active", "banned"] as const).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setFilter(status)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    filter === status
+                      ? "bg-red-600 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

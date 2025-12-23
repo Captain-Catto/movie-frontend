@@ -6,8 +6,14 @@ import { useAnalyticsDateRange } from "@/hooks/useAnalyticsDateRange";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
 import AnalyticsHeader from "@/components/analytics/AnalyticsHeader";
 import AnalyticsStatsCards from "@/components/analytics/AnalyticsStatsCards";
+import AnalyticsPlaySourceBreakdown from "@/components/analytics/AnalyticsPlaySourceBreakdown";
+import AnalyticsViewChart from "@/components/analytics/AnalyticsViewChart";
+import AnalyticsFavoritesChart from "@/components/analytics/AnalyticsFavoritesChart";
+import AnalyticsContentList from "@/components/analytics/AnalyticsContentList";
+import AnalyticsDeviceStats from "@/components/analytics/AnalyticsDeviceStats";
+import AnalyticsCountryStats from "@/components/analytics/AnalyticsCountryStats";
 
-export default function AdminAnalyticsPageRefactored() {
+export default function AdminAnalyticsPage() {
   const [contentType, setContentType] = useState<"all" | "movie" | "tv">("all");
 
   const {
@@ -19,21 +25,23 @@ export default function AdminAnalyticsPageRefactored() {
   } = useAnalyticsDateRange();
 
   const {
+    viewStats,
     viewSummary,
     clickStats,
     playStats,
+    playSourceBreakdown,
     favoriteStats,
-    viewStats,
+    popularContent,
     mostViewedContent,
+    deviceStats,
+    countryStats,
     loading,
     isRefreshing,
     lastRefreshed,
     refetch,
   } = useAnalyticsData({ dateRange, contentType });
 
-  const {
-    isConnected: isLiveConnected,
-  } = useAdminAnalyticsSocket();
+  const { isConnected: isLiveConnected } = useAdminAnalyticsSocket();
 
   // Calculate stats
   const totalViews = viewSummary?.total ?? 0;
@@ -43,8 +51,36 @@ export default function AdminAnalyticsPageRefactored() {
   const ctr = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
   const favRate = totalViews > 0 ? (totalFavorites / totalViews) * 100 : 0;
 
+  // Transform data for content lists
+  const popularContentData = popularContent.map((item) => ({
+    id: item.tmdbId,
+    title: item.title,
+    contentType: item.contentType,
+    posterPath: item.posterPath,
+    viewCount: item.viewCount,
+    favoriteCount: item.favoriteCount,
+  }));
+
+  const mostViewedData = mostViewedContent.map((item) => ({
+    id: item.contentId,
+    title: item.title || "Unknown title",
+    contentType: item.contentType,
+    posterPath: item.posterPath,
+    count: item.viewCount,
+  }));
+
+  const mostFavoritedData =
+    favoriteStats?.mostFavorited?.map((item) => ({
+      id: item.contentId,
+      title: item.title || `${item.contentType} #${item.contentId}`,
+      contentType: item.contentType,
+      posterPath: item.posterPath,
+      count: item.count,
+    })) ?? [];
+
   return (
     <div className="space-y-8">
+      {/* Header with filters */}
       <AnalyticsHeader
         isLiveConnected={isLiveConnected}
         isRefreshing={isRefreshing}
@@ -60,6 +96,7 @@ export default function AdminAnalyticsPageRefactored() {
         onCustomDateRangeChange={setCustomDateRange}
       />
 
+      {/* Stats Cards */}
       <AnalyticsStatsCards
         totalViews={totalViews}
         totalClicks={totalClicks}
@@ -70,17 +107,47 @@ export default function AdminAnalyticsPageRefactored() {
         loading={loading}
       />
 
-      {/* TODO: Add more sections - charts, popular content, etc. */}
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-        <p className="text-gray-400">
-          🚧 Additional analytics sections (charts, popular content, device stats, etc.)
-          can be refactored into separate components following the same pattern.
-        </p>
-        <p className="text-gray-500 text-sm mt-2">
-          Current page structure: Header (120 lines) + StatsCards (90 lines) +
-          Data Hook (300 lines) = Much cleaner than 1240 lines monolith!
-        </p>
+      {/* Play Source Breakdown */}
+      <AnalyticsPlaySourceBreakdown
+        playSourceBreakdown={playSourceBreakdown}
+        loading={loading}
+      />
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <AnalyticsViewChart viewStats={viewStats} />
+        <AnalyticsFavoritesChart favoriteStats={favoriteStats} />
       </div>
+
+      {/* Content Lists Row 1 */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <AnalyticsContentList
+          title="Top Content (viewCount)"
+          data={popularContentData.slice(0, 10)}
+          exportFilename="popular-content"
+          emptyMessage="No popular content data available"
+        />
+        <AnalyticsContentList
+          title="Most Viewed (events)"
+          data={mostViewedData}
+          exportFilename="most-viewed-events"
+          emptyMessage="No view events data available"
+        />
+      </div>
+
+      {/* Content Lists Row 2 */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <AnalyticsContentList
+          title="Most Favorited"
+          data={mostFavoritedData.slice(0, 15)}
+          exportFilename="most-favorited"
+          emptyMessage="No favorite data available"
+        />
+        <AnalyticsDeviceStats deviceStats={deviceStats} />
+      </div>
+
+      {/* Country Stats */}
+      <AnalyticsCountryStats countryStats={countryStats} />
     </div>
   );
 }

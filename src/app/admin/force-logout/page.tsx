@@ -25,11 +25,24 @@ export default function ForceLogoutPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
-        <h1 className="text-2xl font-bold text-white mb-2">Logging out...</h1>
-        <p className="text-gray-400">Clearing authentication data</p>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold text-white">Force Logout</h1>
+        <p className="text-gray-400">
+          Clearing authentication data and redirecting you to the home page.
+        </p>
+      </div>
+
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center gap-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600" />
+        <div>
+          <h2 className="text-xl font-semibold text-white mb-1">
+            Đang đăng xuất...
+          </h2>
+          <p className="text-gray-400 text-sm">
+            Vui lòng đợi, chúng tôi đang dọn sạch phiên đăng nhập của bạn.
+          </p>
+        </div>
       </div>
     </div>
   );

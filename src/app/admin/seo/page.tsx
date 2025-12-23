@@ -477,240 +477,246 @@ export default function AdminSeoPage() {
     : [];
 
   return (
-    <div className="space-y-6 p-6">
-        <div className="mb-6 space-y-4">
-          <h1 className="text-2xl font-bold text-white mb-2">SEO Management</h1>
-          <p className="text-gray-400">
-            Monitor and tune metadata so search crawlers pick up the latest
-            updates.
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold text-white">SEO Management</h1>
+        <p className="text-gray-400">
+          Monitor and tune metadata so search crawlers pick up the latest
+          updates.
+        </p>
+      </div>
+
+      {errorMessage && (
+        <div className="rounded-md border border-red-500 bg-red-900/50 px-4 py-3 text-sm text-red-200">
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 space-y-3">
+        <CheckSeoHealth
+          onComplete={(res) => {
+            setLastCheckedAt(new Date().toLocaleString());
+            setLastCheckSummary(
+              `Checked ${res.total} entries · Missing titles: ${res.missingTitle}, descriptions: ${res.missingDescription}, duplicates: ${res.duplicates.length}`
+            );
+          }}
+        />
+        {lastCheckedAt && lastCheckSummary && (
+          <p className="text-sm text-gray-500">
+            Last checker run: {lastCheckedAt} — {lastCheckSummary}
           </p>
+        )}
+      </div>
 
-          {errorMessage && (
-            <div className="rounded-md border border-red-500 bg-red-900/50 px-4 py-3 text-sm text-red-200">
-              {errorMessage}
+      {stats && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-white">Total Pages</h3>
+              <p className="text-3xl font-bold text-blue-400">
+                {stats.totalPages}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                All tracked SEO entries
+              </p>
             </div>
-          )}
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-white">Active</h3>
+              <p className="text-3xl font-bold text-green-400">
+                {stats.activePages}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Currently enabled entries
+              </p>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-white">Inactive</h3>
+              <p className="text-3xl font-bold text-red-400">
+                {stats.inactivePages}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Disabled or draft entries
+              </p>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-white">
+                Avg Title Length
+              </h3>
+              <p className="text-3xl font-bold text-purple-400">
+                {stats.avgTitleLength}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">Ideal: 50–60 chars</p>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-white">
+                Avg Description Length
+              </h3>
+              <p className="text-3xl font-bold text-amber-400">
+                {stats.avgDescriptionLength}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Ideal: 150–160 chars
+              </p>
+            </div>
+          </div>
 
-          <CheckSeoHealth
-            onComplete={(res) => {
-              setLastCheckedAt(new Date().toLocaleString());
-              setLastCheckSummary(
-                `Checked ${res.total} entries · Missing titles: ${res.missingTitle}, descriptions: ${res.missingDescription}, duplicates: ${res.duplicates.length}`
-              );
-            }}
-          />
-          {lastCheckedAt && lastCheckSummary && (
-            <p className="text-sm text-gray-500">
-              Last checker run: {lastCheckedAt} — {lastCheckSummary}
-            </p>
-          )}
-
-          {/* Stats Cards */}
-          {stats && (
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
                   <h3 className="text-lg font-semibold text-white">
-                    Total Pages
+                    Status mix
                   </h3>
-                  <p className="text-3xl font-bold text-blue-400">
-                    {stats.totalPages}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    All tracked SEO entries
-                  </p>
-                </div>
-                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-white">Active</h3>
-                  <p className="text-3xl font-bold text-green-400">
-                    {stats.activePages}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Currently enabled entries
-                  </p>
-                </div>
-                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-white">Inactive</h3>
-                  <p className="text-3xl font-bold text-red-400">
-                    {stats.inactivePages}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Disabled or draft entries
-                  </p>
-                </div>
-                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-white">
-                    Avg Title Length
-                  </h3>
-                  <p className="text-3xl font-bold text-purple-400">
-                    {stats.avgTitleLength}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Ideal: 50–60 chars
-                  </p>
-                </div>
-                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-                  <h3 className="text-lg font-semibold text-white">
-                    Avg Description Length
-                  </h3>
-                  <p className="text-3xl font-bold text-amber-400">
-                    {stats.avgDescriptionLength}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Ideal: 150–160 chars
+                  <p className="text-sm text-gray-400">
+                    Active vs inactive coverage
                   </p>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">
-                        Status mix
-                      </h3>
-                      <p className="text-sm text-gray-400">
-                        Active vs inactive coverage
-                      </p>
-                    </div>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusChartData}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={80}
-                          paddingAngle={2}
-                        >
-                          {statusChartData.map((entry, index) => (
-                            <Cell
-                              key={entry.name}
-                              fill={STATUS_COLORS[index % STATUS_COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={{ backgroundColor: "#111827", border: "1px solid #374151" }}
-                          itemStyle={{ color: "#e5e7eb" }}
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={statusChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      paddingAngle={2}
+                    >
+                      {statusChartData.map((entry, index) => (
+                        <Cell
+                          key={entry.name}
+                          fill={STATUS_COLORS[index % STATUS_COLORS.length]}
                         />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">
-                        Copy length health
-                      </h3>
-                      <p className="text-sm text-gray-400">
-                        Average characters vs recommendations
-                      </p>
-                    </div>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={lengthChartData} barSize={32}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-                        <XAxis dataKey="name" stroke="#9ca3af" />
-                        <YAxis stroke="#9ca3af" />
-                        <Tooltip
-                          contentStyle={{ backgroundColor: "#111827", border: "1px solid #374151" }}
-                          itemStyle={{ color: "#e5e7eb" }}
-                        />
-                        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                          {lengthChartData.map((entry, index) => (
-                            <Cell
-                              key={entry.name}
-                              fill={LENGTH_COLORS[index % LENGTH_COLORS.length]}
-                            />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#111827",
+                        border: "1px solid #374151",
+                      }}
+                      itemStyle={{ color: "#e5e7eb" }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          )}
 
-          {/* Controls */}
-          <div className="flex flex-wrap gap-4 mb-4 items-center">
-            <button
-              onClick={() => openEditModal(null, true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Add SEO Metadata
-            </button>
-            <button
-              onClick={setupDefaults}
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
-              Setup Defaults
-            </button>
-            <button
-              onClick={handleRefresh}
-              className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500"
-            >
-              Refresh now
-            </button>
-            <div className="flex items-center gap-2">
-              <input
-                id="auto-refresh"
-                type="checkbox"
-                checked={autoRefresh}
-                onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="h-4 w-4 accent-red-500"
-              />
-              <label htmlFor="auto-refresh" className="text-sm text-gray-300">
-                Auto refresh (30s)
-              </label>
-            </div>
-
-            <select
-              value={filter}
-              onChange={(e) =>
-                setFilter(e.target.value as "all" | "active" | "inactive")
-              }
-              className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2"
-            >
-              <option value="all">All</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-
-            <input
-              type="text"
-              placeholder="Search pages..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 max-w-xs"
-            />
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => exportSeoData("csv")}
-                className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600"
-              >
-                Export CSV
-              </button>
-              <button
-                onClick={() => exportSeoData("excel")}
-                className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
-              >
-                Export Excel
-              </button>
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    Copy length health
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Average characters vs recommendations
+                  </p>
+                </div>
+              </div>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={lengthChartData} barSize={32}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                    <XAxis dataKey="name" stroke="#9ca3af" />
+                    <YAxis stroke="#9ca3af" />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#111827",
+                        border: "1px solid #374151",
+                      }}
+                      itemStyle={{ color: "#e5e7eb" }}
+                    />
+                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                      {lengthChartData.map((entry, index) => (
+                        <Cell
+                          key={entry.name}
+                          fill={LENGTH_COLORS[index % LENGTH_COLORS.length]}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* SEO Data Table */}
-        <div className="bg-gray-800 border border-gray-700 rounded-lg shadow overflow-hidden">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-4">
+        <div className="flex flex-wrap gap-3 items-center">
+          <button
+            onClick={() => openEditModal(null, true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Add SEO Metadata
+          </button>
+          <button
+            onClick={setupDefaults}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            Setup Defaults
+          </button>
+          <button
+            onClick={handleRefresh}
+            className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500"
+          >
+            Refresh now
+          </button>
+          <div className="flex items-center gap-2">
+            <input
+              id="auto-refresh"
+              type="checkbox"
+              checked={autoRefresh}
+              onChange={(e) => setAutoRefresh(e.target.checked)}
+              className="h-4 w-4 accent-red-500"
+            />
+            <label htmlFor="auto-refresh" className="text-sm text-gray-300">
+              Auto refresh (30s)
+            </label>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3 items-center">
+          <select
+            value={filter}
+            onChange={(e) =>
+              setFilter(e.target.value as "all" | "active" | "inactive")
+            }
+            className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2"
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Search pages..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 min-w-[220px] max-w-xs"
+          />
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => exportSeoData("csv")}
+              className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600"
+            >
+              Export CSV
+            </button>
+            <button
+              onClick={() => exportSeoData("excel")}
+              className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+            >
+              Export Excel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* SEO Data Table */}
+      <div className="bg-gray-800 border border-gray-700 rounded-lg shadow overflow-hidden">
           <table className="min-w-full">
             <thead className="bg-gray-900">
               <tr>
