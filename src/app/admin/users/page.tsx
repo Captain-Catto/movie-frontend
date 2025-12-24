@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
 
-type UserRole = "user" | "admin" | "super_admin";
+type UserRole = "user" | "admin" | "super_admin" | "viewer";
 
 interface User {
   id: number;
@@ -100,7 +100,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const roleOptions: UserRole[] = ["user", "admin", "super_admin"];
+  const roleOptions: UserRole[] = ["user", "admin", "super_admin", "viewer"];
 
   const formatDateTime = (value?: string) => {
     if (!value) return "N/A";
