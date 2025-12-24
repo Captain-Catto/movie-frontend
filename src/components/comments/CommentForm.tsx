@@ -11,6 +11,8 @@ import { useContentFilter } from "@/hooks/use-comments";
 import { useAppSelector } from "@/store/hooks";
 import { commentService } from "@/services/comment.service";
 
+const NO_AVATAR = "/images/no-avatar.svg";
+
 export function CommentForm({
   movieId,
   tvSeriesId,
@@ -35,6 +37,12 @@ export function CommentForm({
 
   const { checkContent, checking } = useContentFilter();
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+  const avatarSrc = user?.image || NO_AVATAR;
+
+  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = NO_AVATAR;
+  };
 
   // Focus on mount
   useEffect(() => {
@@ -194,11 +202,12 @@ export function CommentForm({
       <div className="ma-user flex items-center gap-3 mb-3">
         <div className="user-avatar">
           <Image
-            src={user?.image || "/images/avatars/pack5/02.jpg"}
+            src={avatarSrc}
             alt={user?.name || "User"}
             width={40}
             height={40}
             className="w-10 h-10 rounded-full object-cover"
+            onError={handleAvatarError}
           />
         </div>
         <div className="info">
@@ -242,11 +251,12 @@ export function CommentForm({
                       onClick={() => insertMention(user.name)}
                     >
                       <Image
-                        src={user.image || "/images/avatars/pack2/03.jpg"}
+                        src={user.image || NO_AVATAR}
                         alt={user.name}
                         width={24}
                         height={24}
                         className="w-6 h-6 rounded-full object-cover"
+                        onError={handleAvatarError}
                       />
                       <span className="text-white text-sm">{user.name}</span>
                     </li>

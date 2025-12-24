@@ -16,6 +16,8 @@ import { useAppSelector } from "@/store/hooks";
 import { commentService } from "@/services/comment.service";
 import { RelativeTime } from "@/utils/hydration-safe-date";
 
+const NO_AVATAR = "/images/no-avatar.svg";
+
 export function CommentItem({
   comment,
   depth = 0,
@@ -41,6 +43,12 @@ export function CommentItem({
   const isOwner = user?.id === currentComment.userId;
   const isAdmin = user?.role === "admin" || user?.role === "super_admin";
   const canModerate = isAdmin;
+  const avatarSrc = currentComment.user?.image || NO_AVATAR;
+
+  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = NO_AVATAR;
+  };
 
   useEffect(() => {
     setCurrentComment(comment);
@@ -306,11 +314,12 @@ export function CommentItem({
     <div className="d-item flex gap-3 py-4" id={`cm-${currentComment.id}`}>
       <div className="user-avatar flex-shrink-0">
         <Image
-          src={currentComment.user?.image || "/images/avatars/pack2/03.jpg"}
+          src={avatarSrc}
           alt={currentComment.user?.name || "User"}
           width={40}
           height={40}
           className="rounded-full object-cover"
+          onError={handleAvatarError}
         />
       </div>
 
