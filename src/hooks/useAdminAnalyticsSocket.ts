@@ -20,7 +20,7 @@ interface UseAdminAnalyticsSocketReturn {
   socket: Socket | null;
 }
 
-const ADMIN_ROLES = new Set(["admin", "super_admin"]);
+const ADMIN_ROLES = new Set(["admin", "super_admin", "viewer"]);
 
 export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
   const { token, isAuthenticated, user } = useAuth();
@@ -41,8 +41,7 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
   }, []);
 
   useEffect(() => {
-    const isAdmin =
-      !!user?.role && (ADMIN_ROLES.has(user.role) || user.role === "super_admin");
+    const isAdmin = !!user?.role && ADMIN_ROLES.has(user.role);
 
     if (!isReady || !isAuthenticated || !token || !isAdmin) {
       if (socketRef.current) {

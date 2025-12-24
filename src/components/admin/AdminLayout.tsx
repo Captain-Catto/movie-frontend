@@ -69,11 +69,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Redirect non-admin users
   useEffect(() => {
-    if (
-      !isLoading &&
-      (!isAuthenticated ||
-        (user?.role !== "admin" && user?.role !== "super_admin"))
-    ) {
+    const isAdminRole =
+      user?.role === "admin" ||
+      user?.role === "super_admin" ||
+      user?.role === "viewer";
+
+    if (!isLoading && (!isAuthenticated || !isAdminRole)) {
       router.push("/");
     }
   }, [isAuthenticated, isLoading, user?.role, router]);
@@ -88,10 +89,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   // Don't render admin content for non-admin users
-  if (
-    !isAuthenticated ||
-    (user?.role !== "admin" && user?.role !== "super_admin")
-  ) {
+  const isAdminRole =
+    user?.role === "admin" ||
+    user?.role === "super_admin" ||
+    user?.role === "viewer";
+
+  if (!isAuthenticated || !isAdminRole) {
     return null;
   }
 
@@ -113,6 +116,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             <div className="p-6 space-y-6">
               <AdminMetricsBar metrics={metrics} />
+              {user?.role === "viewer" && (
+                <div className="p-3 bg-yellow-900/30 border border-yellow-600 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <svg
+                      className="w-5 h-5 text-yellow-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    <span className="text-yellow-200 text-sm font-medium">
+                      Read-Only Mode - Changes will not be saved
+                    </span>
+                  </div>
+                </div>
+              )}
               {children}
             </div>
           </main>
