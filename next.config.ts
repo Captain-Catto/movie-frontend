@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
       "images.unsplash.com",
       "static.nutscdn.com",
       "lh3.googleusercontent.com",
+      "datlqt-movie-stream.s3.ap-southeast-1.amazonaws.com",
     ],
   },
 };
