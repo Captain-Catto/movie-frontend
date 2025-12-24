@@ -98,6 +98,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
             width={40}
             height={40}
             className="object-cover"
+            unoptimized
             onError={(e: SyntheticEvent<HTMLImageElement>) => {
               e.currentTarget.src = FALLBACK_PROFILE;
             }}
@@ -121,6 +122,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
                   width={48}
                   height={48}
                   className="object-cover"
+                  unoptimized
                   onError={(e: SyntheticEvent<HTMLImageElement>) => {
                     e.currentTarget.src = FALLBACK_PROFILE;
                   }}

@@ -203,6 +203,7 @@ export default function AccountPage() {
                   width={96}
                   height={96}
                   className="object-cover"
+                  unoptimized
                   onError={(e: SyntheticEvent<HTMLImageElement>) => {
                     e.currentTarget.src = FALLBACK_PROFILE;
                   }}
