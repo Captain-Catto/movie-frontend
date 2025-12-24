@@ -6,7 +6,7 @@ export const TMDB_ORIGINAL_SIZE = "original";
 
 export const FALLBACK_POSTER = "/images/no-poster.svg";
 export const FALLBACK_BACKDROP = FALLBACK_POSTER;
-export const FALLBACK_PROFILE = FALLBACK_POSTER;
+export const FALLBACK_PROFILE = "/images/no-avatar.svg";
 
 export const DEFAULT_LANGUAGE = "en-US";
 

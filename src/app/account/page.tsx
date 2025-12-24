@@ -5,11 +5,11 @@ import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
-import type { SyntheticEvent } from "react";
+import type { SyntheticEvent, ChangeEvent } from "react";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 import AccountSkeleton from "@/components/ui/AccountSkeleton";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
 
@@ -24,6 +24,10 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   if (isLoading) {
     return <AccountSkeleton />;
@@ -48,8 +52,72 @@ export default function AccountPage() {
     );
   }
 
-  const avatarSrc = user?.image || FALLBACK_PROFILE;
+  const avatarSrc = avatarUrl || user?.image || FALLBACK_PROFILE;
   const displayName = user?.name || "User";
+
+  useEffect(() => {
+    setAvatarUrl(user?.image || null);
+  }, [user?.image]);
+
+  const handleAvatarClick = () => {
+    setAvatarError("");
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError("Ảnh phải nhỏ hơn 5MB");
+      e.target.value = "";
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setAvatarError("");
+    setFormSuccess("");
+
+    try {
+      const formData = new FormData();
+      formData.append("avatar", file);
+
+      const uploadRes = await axiosInstance.post("/upload/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const uploadUrl = uploadRes.data?.url;
+      if (!uploadRes.data?.success || !uploadUrl) {
+        throw new Error(uploadRes.data?.message || "Tải ảnh thất bại");
+      }
+
+      const profileRes = await axiosInstance.put("/auth/profile", {
+        image: uploadUrl,
+      });
+
+      if (!profileRes.data?.success) {
+        throw new Error(profileRes.data?.message || "Cập nhật ảnh thất bại");
+      }
+
+      const updatedUser = {
+        ...(user || {}),
+        image: uploadUrl,
+      };
+      authStorage.setUser(updatedUser);
+      setAvatarUrl(uploadUrl);
+      setFormSuccess("Ảnh đại diện đã được cập nhật");
+      checkAuth();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Không thể tải ảnh. Vui lòng thử lại";
+      setAvatarError(message);
+    } finally {
+      setUploadingAvatar(false);
+      e.target.value = "";
+    }
+  };
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
@@ -115,7 +183,11 @@ export default function AccountPage() {
           {/* Profile Card */}
           <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 mb-6">
             <div className="flex items-start space-x-6">
-              <div className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-gray-600">
+              <div
+                className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-gray-600 cursor-pointer group"
+                onClick={handleAvatarClick}
+                title="Thay đổi ảnh đại diện"
+              >
                 <Image
                   src={avatarSrc}
                   alt={displayName}
@@ -126,13 +198,31 @@ export default function AccountPage() {
                     e.currentTarget.src = FALLBACK_PROFILE;
                   }}
                 />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white">
+                  {uploadingAvatar ? "Đang tải..." : "Đổi ảnh"}
+                </div>
+                {uploadingAvatar && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white text-xs">Uploading...</span>
+                  </div>
+                )}
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
 
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-white mb-2">
                   {displayName}
                 </h2>
                 <p className="text-gray-400 mb-4">{user?.email}</p>
+                {avatarError && (
+                  <p className="text-red-400 text-sm">{avatarError}</p>
+                )}
 
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="bg-gray-700/50 rounded-lg p-4">
