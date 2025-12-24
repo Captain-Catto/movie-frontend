@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
+import type { StoredUser } from "@/lib/auth-storage";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading, checkAuth } = useAuth();
@@ -28,6 +29,13 @@ export default function AccountPage() {
   const [avatarError, setAvatarError] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setAvatarUrl(user?.image || null);
+  }, [user?.image]);
+
+  const avatarSrc = avatarUrl || user?.image || FALLBACK_PROFILE;
+  const displayName = user?.name || "User";
 
   if (isLoading) {
     return <AccountSkeleton />;
@@ -51,13 +59,6 @@ export default function AccountPage() {
       </div>
     );
   }
-
-  const avatarSrc = avatarUrl || user?.image || FALLBACK_PROFILE;
-  const displayName = user?.name || "User";
-
-  useEffect(() => {
-    setAvatarUrl(user?.image || null);
-  }, [user?.image]);
 
   const handleAvatarClick = () => {
     setAvatarError("");
@@ -99,8 +100,16 @@ export default function AccountPage() {
         throw new Error(profileRes.data?.message || "Cập nhật ảnh thất bại");
       }
 
-      const updatedUser = {
-        ...(user || {}),
+      if (!user?.id || !user.email) {
+        throw new Error("User info not available. Vui lòng tải lại trang");
+      }
+
+      const updatedUser: StoredUser = {
+        id: user.id,
+        email: user.email,
+        name: user.name || "User",
+        role: user.role,
+        googleId: user.googleId,
         image: uploadUrl,
       };
       authStorage.setUser(updatedUser);
