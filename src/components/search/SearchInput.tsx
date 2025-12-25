@@ -39,7 +39,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           <input
             ref={ref}
             type="text"
-            placeholder="Tìm kiếm phim, TV shows..."
+            placeholder="Search movies, TV shows..."
             value={query}
             onChange={handleInputChange}
             className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
@@ -65,7 +65,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
         {query.length > 0 && query.length < 2 && (
           <p className="text-xs text-gray-400 mt-2">
-            Nhập ít nhất 2 ký tự để tìm kiếm
+            Enter at least 2 characters to search
           </p>
         )}
       </form>

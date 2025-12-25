@@ -4,7 +4,7 @@ import React from "react";
 import { Clock, X, Trash2 } from "lucide-react";
 import { RecentSearch } from "@/types/search";
 import { formatDistanceToNow } from "date-fns";
-import { vi } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { ClientOnly } from "@/components/hydration/ClientOnly";
 
 interface RecentSearchesProps {
@@ -28,7 +28,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
           No recent searches
         </h3>
         <p className="text-gray-500 text-sm">
-          Các tìm kiếm của bạn sẽ xuất hiện ở đây
+          Your searches will appear here
         </p>
       </div>
     );
@@ -41,7 +41,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
       case "tv":
         return "TV Series";
       default:
-        return "Tất cả";
+        return "All";
     }
   };
 
@@ -62,16 +62,16 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-medium flex items-center space-x-2">
             <Clock className="w-4 h-4" />
-            <span>Tìm kiếm gần đây</span>
+            <span>Recent Searches</span>
           </h3>
 
           {searches.length > 0 && (
             <button
               onClick={onClearAll}
-              className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center space-x-1"
+              className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center space-x-1 cursor-pointer"
             >
               <Trash2 className="w-3 h-3" />
-              <span>Xóa tất cả</span>
+              <span>Clear all</span>
             </button>
           )}
         </div>
@@ -102,7 +102,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                     <span className="text-xs text-gray-400">
                       {formatDistanceToNow(new Date(search.timestamp), {
                         addSuffix: true,
-                        locale: vi,
+                        locale: enUS,
                       })}
                     </span>
                   </ClientOnly>

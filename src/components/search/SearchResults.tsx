@@ -40,15 +40,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     </div>
   );
 
-  // Empty state
+  // Empty state - Fixed height to prevent layout shift
   if (!isLoading && safeResults.length === 0) {
     return (
-      <div className="p-6 text-center">
-        <Search className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-        <h3 className="text-gray-400 font-medium mb-1">
-          Không tìm thấy kết quả
-        </h3>
-        <p className="text-gray-500 text-sm">Thử tìm kiếm với từ khóa khác</p>
+      <div className="h-full flex items-center justify-center p-6">
+        <div className="text-center">
+          <Search className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+          <h3 className="text-gray-400 font-medium mb-1">
+            No results found
+          </h3>
+          <p className="text-gray-500 text-sm">Try searching with different keywords</p>
+        </div>
       </div>
     );
   }
@@ -60,7 +62,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         {safeResults.length > 0 && (
           <div className="mb-4">
             <p className="text-sm text-gray-400">
-              Tìm thấy {safeResults.length} kết quả
+              Found {safeResults.length} result{safeResults.length !== 1 ? 's' : ''}
             </p>
           </div>
         )}
@@ -89,9 +91,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           <div className="mt-4 text-center">
             <button
               onClick={onLoadMore}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer"
             >
-              Xem thêm
+              Load more
             </button>
           </div>
         )}
