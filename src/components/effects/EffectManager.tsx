@@ -19,7 +19,7 @@ const RedEnvelopeEffect = dynamic(() => import('./RedEnvelopeEffect'), {
 export default function EffectManager() {
   const dispatch = useDispatch<AppDispatch>();
   const pathname = usePathname();
-  const { enabled, activeEffects, intensity } = useSelector(
+  const { enabled, activeEffects, intensity, advancedSettings } = useSelector(
     (state: RootState) => state.effectSettings
   );
 
@@ -38,7 +38,12 @@ export default function EffectManager() {
   return (
     <>
       {activeEffects.includes('snow') && <SnowEffect intensity={intensity} />}
-      {activeEffects.includes('redEnvelope') && <RedEnvelopeEffect intensity={intensity} />}
+      {activeEffects.includes('redEnvelope') && (
+        <RedEnvelopeEffect
+          intensity={intensity}
+          advancedSettings={advancedSettings}
+        />
+      )}
     </>
   );
 }

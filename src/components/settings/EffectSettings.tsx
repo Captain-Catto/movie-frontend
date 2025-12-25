@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import {
@@ -8,9 +8,11 @@ import {
   toggleEffect,
   setIntensity,
   updateEffectSettings,
+  setAdvancedSettings,
+  resetAdvancedSettings,
   EffectType,
 } from '@/store/effectSettingsSlice';
-import { Snowflake, Gift, Settings, Loader2 } from 'lucide-react';
+import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders } from 'lucide-react';
 
 const EFFECTS = [
   {
@@ -31,11 +33,12 @@ const EFFECTS = [
 
 export default function EffectSettings() {
   const dispatch = useDispatch<AppDispatch>();
-  const { enabled, activeEffects, intensity, isLoading, error } = useSelector(
+  const { enabled, activeEffects, intensity, advancedSettings, isLoading, error } = useSelector(
     (state: RootState) => state.effectSettings
   );
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialMount = useRef(true);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // Debounced save function
   const debouncedSave = useCallback(() => {
@@ -44,9 +47,9 @@ export default function EffectSettings() {
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      dispatch(updateEffectSettings({ enabled, activeEffects, intensity }));
+      dispatch(updateEffectSettings({ enabled, activeEffects, intensity, advancedSettings }));
     }, 1000); // Save after 1 second of no changes
-  }, [dispatch, enabled, activeEffects, intensity]);
+  }, [dispatch, enabled, activeEffects, intensity, advancedSettings]);
 
   // Auto-save when settings change (except on initial mount)
   useEffect(() => {
@@ -62,7 +65,7 @@ export default function EffectSettings() {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [enabled, activeEffects, intensity, debouncedSave]);
+  }, [enabled, activeEffects, intensity, advancedSettings, debouncedSave]);
 
   const handleToggleEffects = () => {
     dispatch(toggleEffects());
@@ -74,6 +77,17 @@ export default function EffectSettings() {
 
   const handleSetIntensity = (newIntensity: 'low' | 'medium' | 'high') => {
     dispatch(setIntensity(newIntensity));
+  };
+
+  const handleAdvancedSettingChange = (
+    key: 'fallSpeed' | 'rotationSpeed' | 'windStrength' | 'sparkleFrequency',
+    value: number
+  ) => {
+    dispatch(setAdvancedSettings({ [key]: value }));
+  };
+
+  const handleResetAdvancedSettings = () => {
+    dispatch(resetAdvancedSettings());
   };
 
   return (
@@ -171,6 +185,143 @@ export default function EffectSettings() {
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Advanced Settings */}
+        {enabled && activeEffects.includes('redEnvelope') && (
+          <div className="space-y-4 pt-4 border-t border-gray-700">
+            <button
+              onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+              className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4" />
+                Cài Đặt Nâng Cao
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  isAdvancedOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isAdvancedOpen && advancedSettings && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs text-gray-400">
+                    Điều chỉnh chi tiết hiệu ứng phong bao lì xì
+                  </p>
+                  <button
+                    onClick={handleResetAdvancedSettings}
+                    className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset
+                  </button>
+                </div>
+
+                {/* Fall Speed */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Tốc Độ Rơi</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {advancedSettings.fallSpeed.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="3"
+                    step="0.1"
+                    value={advancedSettings.fallSpeed}
+                    onChange={(e) =>
+                      handleAdvancedSettingChange('fallSpeed', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Chậm (0.1)</span>
+                    <span>Nhanh (3.0)</span>
+                  </div>
+                </div>
+
+                {/* Rotation Speed */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Tốc Độ Xoay</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {advancedSettings.rotationSpeed.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="5"
+                    step="0.1"
+                    value={advancedSettings.rotationSpeed}
+                    onChange={(e) =>
+                      handleAdvancedSettingChange('rotationSpeed', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Chậm (0.1)</span>
+                    <span>Nhanh (5.0)</span>
+                  </div>
+                </div>
+
+                {/* Wind Strength */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Độ Mạnh Gió</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {advancedSettings.windStrength.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={advancedSettings.windStrength}
+                    onChange={(e) =>
+                      handleAdvancedSettingChange('windStrength', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Không gió (0)</span>
+                    <span>Gió mạnh (1.0)</span>
+                  </div>
+                </div>
+
+                {/* Sparkle Frequency */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Tần Suất Lấp Lánh</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {advancedSettings.sparkleFrequency.toFixed(3)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.1"
+                    step="0.005"
+                    value={advancedSettings.sparkleFrequency}
+                    onChange={(e) =>
+                      handleAdvancedSettingChange('sparkleFrequency', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Ít (0)</span>
+                    <span>Nhiều (0.1)</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -2,8 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 
+interface AdvancedEffectSettings {
+  fallSpeed: number;
+  rotationSpeed: number;
+  windStrength: number;
+  sparkleFrequency: number;
+}
+
 interface RedEnvelopeEffectProps {
   intensity?: 'low' | 'medium' | 'high';
+  advancedSettings?: AdvancedEffectSettings;
 }
 
 interface RedEnvelope {
@@ -29,11 +37,22 @@ interface Sparkle {
   decay: number;
 }
 
-export default function RedEnvelopeEffect({ intensity = 'medium' }: RedEnvelopeEffectProps) {
+export default function RedEnvelopeEffect({
+  intensity = 'medium',
+  advancedSettings,
+}: RedEnvelopeEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const envelopesRef = useRef<RedEnvelope[]>([]);
   const sparklesRef = useRef<Sparkle[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+
+  // Default advanced settings if not provided
+  const settings = advancedSettings || {
+    fallSpeed: 0.8,
+    rotationSpeed: 1.0,
+    windStrength: 0.3,
+    sparkleFrequency: 0.02,
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -57,18 +76,18 @@ export default function RedEnvelopeEffect({ intensity = 'medium' }: RedEnvelopeE
       high: 40,
     }[intensity];
 
-    // Initialize red envelopes with enhanced properties
+    // Initialize red envelopes with enhanced properties using advanced settings
     envelopesRef.current = Array.from({ length: envelopeCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height - canvas.height,
       rotation: Math.random() * 360,
-      rotationSpeed: (Math.random() - 0.5) * 2,
+      rotationSpeed: (Math.random() - 0.5) * 2 * settings.rotationSpeed,
       speed: Math.random() * 1.5 + 0.5,
-      wind: Math.random() * 0.3 - 0.15,
+      wind: (Math.random() * 0.3 - 0.15) * settings.windStrength,
       size: Math.random() * 15 + 20,
       flip: Math.random() * 2 - 1, // -1 to 1
       flipSpeed: (Math.random() - 0.5) * 0.05,
-      velocityY: Math.random() * 1.5 + 0.5,
+      velocityY: (Math.random() * 1.5 + 0.5) * settings.fallSpeed,
       hue: Math.random() * 20, // 0-20 for red color variations
     }));
 
@@ -150,8 +169,8 @@ export default function RedEnvelopeEffect({ intensity = 'medium' }: RedEnvelopeE
 
       ctx.restore();
 
-      // Generate sparkles occasionally (based on intensity)
-      if (Math.random() < 0.02 && sparklesRef.current.length < 100) {
+      // Generate sparkles occasionally (based on advanced settings)
+      if (Math.random() < settings.sparkleFrequency && sparklesRef.current.length < 100) {
         sparklesRef.current.push({
           x: envelope.x + (Math.random() - 0.5) * width,
           y: envelope.y + (Math.random() - 0.5) * height,
@@ -249,7 +268,7 @@ export default function RedEnvelopeEffect({ intensity = 'medium' }: RedEnvelopeE
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [intensity]);
+  }, [intensity, settings.fallSpeed, settings.rotationSpeed, settings.windStrength, settings.sparkleFrequency]);
 
   return (
     <canvas

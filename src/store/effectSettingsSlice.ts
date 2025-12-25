@@ -1,13 +1,18 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { settingsApiService } from '@/services/settings-api';
-import type { EffectType as ApiEffectType } from '@/services/settings-api';
+import type {
+  EffectType as ApiEffectType,
+  AdvancedEffectSettings as ApiAdvancedEffectSettings
+} from '@/services/settings-api';
 
 export type EffectType = ApiEffectType;
+export type AdvancedEffectSettings = ApiAdvancedEffectSettings;
 
 export interface EffectSettings {
   enabled: boolean;
   activeEffects: EffectType[];
   intensity: 'low' | 'medium' | 'high';
+  advancedSettings?: AdvancedEffectSettings;
 }
 
 interface EffectSettingsState extends EffectSettings {
@@ -15,10 +20,18 @@ interface EffectSettingsState extends EffectSettings {
   error: string | null;
 }
 
+const DEFAULT_ADVANCED_SETTINGS: AdvancedEffectSettings = {
+  fallSpeed: 0.8,
+  rotationSpeed: 1.0,
+  windStrength: 0.3,
+  sparkleFrequency: 0.02,
+};
+
 const initialState: EffectSettingsState = {
   enabled: false,
   activeEffects: [],
   intensity: 'medium',
+  advancedSettings: DEFAULT_ADVANCED_SETTINGS,
   isLoading: false,
   error: null,
 };
@@ -82,6 +95,18 @@ const effectSettingsSlice = createSlice({
     clearAllEffects: (state) => {
       state.activeEffects = [];
     },
+
+    setAdvancedSettings: (state, action: PayloadAction<Partial<AdvancedEffectSettings>>) => {
+      state.advancedSettings = {
+        ...DEFAULT_ADVANCED_SETTINGS,
+        ...state.advancedSettings,
+        ...action.payload,
+      };
+    },
+
+    resetAdvancedSettings: (state) => {
+      state.advancedSettings = DEFAULT_ADVANCED_SETTINGS;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -95,6 +120,10 @@ const effectSettingsSlice = createSlice({
         state.enabled = action.payload.enabled;
         state.activeEffects = action.payload.activeEffects;
         state.intensity = action.payload.intensity;
+        state.advancedSettings = {
+          ...DEFAULT_ADVANCED_SETTINGS,
+          ...action.payload.advancedSettings,
+        };
       })
       .addCase(fetchEffectSettings.rejected, (state, action) => {
         state.isLoading = false;
@@ -110,6 +139,10 @@ const effectSettingsSlice = createSlice({
         state.enabled = action.payload.enabled;
         state.activeEffects = action.payload.activeEffects;
         state.intensity = action.payload.intensity;
+        state.advancedSettings = {
+          ...DEFAULT_ADVANCED_SETTINGS,
+          ...action.payload.advancedSettings,
+        };
       })
       .addCase(updateEffectSettings.rejected, (state, action) => {
         state.isLoading = false;
@@ -125,6 +158,8 @@ export const {
   setActiveEffects,
   setIntensity,
   clearAllEffects,
+  setAdvancedSettings,
+  resetAdvancedSettings,
 } = effectSettingsSlice.actions;
 
 export default effectSettingsSlice.reducer;
