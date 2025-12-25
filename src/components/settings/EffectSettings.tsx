@@ -6,7 +6,6 @@ import { RootState, AppDispatch } from '@/store';
 import {
   toggleEffects,
   toggleEffect,
-  setIntensity,
   updateEffectSettings,
   setRedEnvelopeSettings,
   resetRedEnvelopeSettings,
@@ -36,7 +35,7 @@ const EFFECTS = [
 
 export default function EffectSettings() {
   const dispatch = useDispatch<AppDispatch>();
-  const { enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, isLoading, error } = useSelector(
+  const { enabled, activeEffects, redEnvelopeSettings, snowSettings, isLoading, error } = useSelector(
     (state: RootState) => state.effectSettings
   );
   const { showSuccess, showError } = useToastRedux();
@@ -48,16 +47,16 @@ export default function EffectSettings() {
 
   // Snapshot on mount
   useEffect(() => {
-    const snapshot = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
+    const snapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
     setInitialSettings(snapshot);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Track changes
   useEffect(() => {
-    const current = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
+    const current = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
     setIsDirty(current !== initialSettings);
-  }, [enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, initialSettings]);
+  }, [enabled, activeEffects, redEnvelopeSettings, snowSettings, initialSettings]);
 
   const handleToggleEffects = () => {
     dispatch(toggleEffects());
@@ -65,10 +64,6 @@ export default function EffectSettings() {
 
   const handleToggleEffect = (effectType: EffectType) => {
     dispatch(toggleEffect(effectType));
-  };
-
-  const handleSetIntensity = (newIntensity: 'low' | 'medium' | 'high') => {
-    dispatch(setIntensity(newIntensity));
   };
 
   const handleRedEnvelopeSettingChange = (
@@ -96,10 +91,10 @@ export default function EffectSettings() {
   const handleSaveSettings = async () => {
     try {
       await dispatch(updateEffectSettings({
-        enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings
+        enabled, activeEffects, intensity: 'medium', redEnvelopeSettings, snowSettings
       })).unwrap();
 
-      const newSnapshot = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
+      const newSnapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
       setInitialSettings(newSnapshot);
       setIsDirty(false);
 
@@ -179,32 +174,6 @@ export default function EffectSettings() {
             </div>
           ))}
         </div>
-
-        {/* Intensity Settings */}
-        {enabled && activeEffects.length > 0 && (
-          <div className="space-y-4 pt-4 border-t border-gray-700">
-            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-              Effect Intensity
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              {(['low', 'medium', 'high'] as const).map((level) => (
-                <button
-                  key={level}
-                  onClick={() => handleSetIntensity(level)}
-                  className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
-                    intensity === level
-                      ? 'bg-red-600 border-red-500 text-white'
-                      : 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  {level === 'low' && 'Low'}
-                  {level === 'medium' && 'Medium'}
-                  {level === 'high' && 'High'}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Red Envelope Advanced Settings */}
         {enabled && activeEffects.includes('redEnvelope') && (
