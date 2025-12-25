@@ -259,7 +259,7 @@ export default function AdminUsersPage() {
                 <button
                   key={status}
                   onClick={() => setFilter(status)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
                     filter === status
                       ? "bg-red-600 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -333,7 +333,7 @@ export default function AdminUsersPage() {
                           <button
                             type="button"
                             onClick={() => openEditModal(user)}
-                            className="ml-3 text-left"
+                            className="cursor-pointer ml-3 text-left"
                             title="Edit user"
                           >
                             <div className="flex items-center space-x-2">
@@ -426,14 +426,14 @@ export default function AdminUsersPage() {
                         {user.isActive ? (
                           <button
                             onClick={() => setBanModal({ open: true, user })}
-                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
                           >
                             Ban
                           </button>
                         ) : (
                           <button
                             onClick={() => handleUnbanUser(user.id)}
-                            className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                            className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                           >
                             Unban
                           </button>
@@ -460,7 +460,7 @@ export default function AdminUsersPage() {
                 </div>
                 <button
                   onClick={closeEditModal}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="cursor-pointer text-gray-400 hover:text-white transition-colors"
                   aria-label="Close"
                 >
                   X
@@ -590,14 +590,14 @@ export default function AdminUsersPage() {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={closeEditModal}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                  className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleUpdateUser}
                   disabled={editSaving}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {editSaving ? "Saving..." : "Save changes"}
                 </button>
@@ -627,14 +627,14 @@ export default function AdminUsersPage() {
                     setBanModal({ open: false, user: null });
                     setBanReason("");
                   }}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                  className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBanUser}
                   disabled={!banReason}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Ban User
                 </button>

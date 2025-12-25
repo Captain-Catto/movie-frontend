@@ -435,7 +435,7 @@ export default function AdminContentPage() {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                   activeTab === tab.key
                     ? "bg-red-600 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -456,7 +456,7 @@ export default function AdminContentPage() {
                   <button
                     key={status}
                     onClick={() => handleFilterChange(status)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
                       filter === status
                         ? "bg-red-600 text-white"
                         : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -483,7 +483,7 @@ export default function AdminContentPage() {
               />
               <button
                 onClick={handleSearch}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                className="cursor-pointer px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
               >
                 Search
               </button>
@@ -598,7 +598,7 @@ export default function AdminContentPage() {
                         {content.isBlocked ? (
                           <button
                             onClick={() => handleUnblockContent(content)}
-                            className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                            className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                           >
                             {activeTab === "trending" ? "Unhide" : "Unblock"}
                           </button>
@@ -608,7 +608,7 @@ export default function AdminContentPage() {
                               setBlockReason("");
                               setBlockModal({ open: true, content });
                             }}
-                            className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
                           >
                             {activeTab === "trending" ? "Hide" : "Block"}
                           </button>
@@ -672,14 +672,14 @@ export default function AdminContentPage() {
                     setBlockModal({ open: false, content: null });
                     setBlockReason("");
                   }}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                  className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleBlockContent}
                   disabled={!blockReason}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isTrendingTab ? "Hide Content" : "Block Content"}
                 </button>

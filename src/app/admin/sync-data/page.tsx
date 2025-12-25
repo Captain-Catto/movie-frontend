@@ -303,7 +303,7 @@ export default function AdminSyncDataPage() {
                     className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                       busy
                         ? "cursor-not-allowed bg-red-900 text-red-300"
-                        : "bg-red-600 text-white hover:bg-red-700"
+                        : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
                     }`}
                   >
                     {busy ? "Syncing…" : "Run"}
@@ -402,7 +402,7 @@ export default function AdminSyncDataPage() {
               className={`rounded-md px-6 py-2 text-sm font-medium transition-colors ${
                 savingSettings
                   ? "cursor-not-allowed bg-red-900 text-red-300"
-                  : "bg-red-600 text-white hover:bg-red-700"
+                  : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
               }`}
             >
               {savingSettings ? "Saving..." : "Save Settings"}
