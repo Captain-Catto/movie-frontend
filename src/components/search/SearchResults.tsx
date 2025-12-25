@@ -24,6 +24,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 }) => {
   // Ensure results is always an array
   const safeResults = Array.isArray(results) ? results : [];
+
   // Loading skeleton
   const LoadingSkeleton = () => (
     <div className="space-y-3">
@@ -40,6 +41,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     </div>
   );
 
+  // Initial loading state (no results yet)
+  if (isLoading && safeResults.length === 0) {
+    return (
+      <div className="h-full overflow-y-auto">
+        <div className="p-4">
+          <LoadingSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   // Empty state - Fixed height to prevent layout shift
   if (!isLoading && safeResults.length === 0) {
     return (
@@ -55,8 +67,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     );
   }
 
+  // Results with optional loading overlay
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto relative">
+      {/* Subtle loading overlay when refreshing results */}
+      {isLoading && safeResults.length > 0 && (
+        <div className="absolute top-0 left-0 right-0 z-10 bg-gray-900/50 backdrop-blur-sm p-2">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center space-x-2 text-sm text-gray-300">
+              <div className="w-4 h-4 border-2 border-gray-400 border-t-red-500 rounded-full animate-spin"></div>
+              <span>Updating...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="p-4">
         {/* Results count */}
         {safeResults.length > 0 && (
@@ -79,8 +104,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           ))}
         </div>
 
-        {/* Loading more */}
-        {isLoading && (
+        {/* Loading more (appending results) */}
+        {isLoading && hasMore && (
           <div className="mt-4">
             <LoadingSkeleton />
           </div>

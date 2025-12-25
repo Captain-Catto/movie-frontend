@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { SearchResult } from "@/types/search";
 import { API_BASE_URL } from "@/services/api";
 import { useDebounce } from "./core/useDebounce";
@@ -18,6 +18,9 @@ interface UseSearchReturn {
   clearResults: () => void;
 }
 
+const LOADING_DELAY = 200; // Only show loading if search takes > 200ms
+const MIN_LOADING_TIME = 300; // Keep loading visible for at least 300ms to prevent flash
+
 export const useSearch = (): UseSearchReturn => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -28,14 +31,32 @@ export const useSearch = (): UseSearchReturn => {
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
 
+  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const minLoadingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const searchStartTimeRef = useRef<number>(0);
+
   // Use debounce hook instead of manual implementation
   const debouncedQuery = useDebounce(query, 600);
 
   const searchAPI = useCallback(
     async (searchQuery: string, searchType: string, pageNum: number = 1) => {
-      try {
-        setIsLoading(true);
+      // Clear any pending loading timers
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+      if (minLoadingTimerRef.current) {
+        clearTimeout(minLoadingTimerRef.current);
+      }
 
+      // Record search start time
+      searchStartTimeRef.current = Date.now();
+
+      // Only show loading indicator if search takes longer than LOADING_DELAY
+      loadingTimerRef.current = setTimeout(() => {
+        setIsLoading(true);
+      }, LOADING_DELAY);
+
+      try {
         const params = new URLSearchParams({
           q: searchQuery,
           page: pageNum.toString(),
@@ -68,26 +89,57 @@ export const useSearch = (): UseSearchReturn => {
               }))
             : [];
 
-          if (pageNum === 1) {
-            setResults(processedResults);
-          } else {
-            setResults((prev) => [...prev, ...processedResults]);
-          }
+          // Calculate how long the search took
+          const searchDuration = Date.now() - searchStartTimeRef.current;
 
-          setHasMore(pagination.page < pagination.totalPages);
-          setPage(pagination.page);
+          // Function to update results
+          const updateResults = () => {
+            if (pageNum === 1) {
+              setResults(processedResults);
+            } else {
+              setResults((prev) => [...prev, ...processedResults]);
+            }
+
+            setHasMore(pagination.page < pagination.totalPages);
+            setPage(pagination.page);
+            setIsLoading(false);
+          };
+
+          // If loading was shown and minimum time hasn't passed, wait
+          if (searchDuration >= LOADING_DELAY && searchDuration < MIN_LOADING_TIME) {
+            minLoadingTimerRef.current = setTimeout(
+              updateResults,
+              MIN_LOADING_TIME - searchDuration
+            );
+          } else {
+            // Clear loading timer if search completed before delay
+            if (loadingTimerRef.current) {
+              clearTimeout(loadingTimerRef.current);
+            }
+            updateResults();
+          }
         } else {
           console.error("Search API error:", data.message || "Unknown error");
-          setResults([]);
+          if (loadingTimerRef.current) {
+            clearTimeout(loadingTimerRef.current);
+          }
+          setIsLoading(false);
+          if (pageNum === 1) {
+            setResults([]);
+          }
           setHasMore(false);
         }
       } catch (error) {
         console.error("Search error:", error);
-        setResults([]);
+        if (loadingTimerRef.current) {
+          clearTimeout(loadingTimerRef.current);
+        }
+        setIsLoading(false);
+        if (pageNum === 1) {
+          setResults([]);
+        }
         setHasMore(false);
         setPage(1);
-      } finally {
-        setIsLoading(false);
       }
     },
     []
@@ -100,12 +152,33 @@ export const useSearch = (): UseSearchReturn => {
       setResults([]);
       setHasMore(false);
       setPage(1);
+      setIsLoading(false);
+      // Clear any pending timers
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+      if (minLoadingTimerRef.current) {
+        clearTimeout(minLoadingTimerRef.current);
+      }
       return;
     }
 
     // Trigger search after debounce
+    // Don't clear results here - keep previous results visible while loading
     searchAPI(debouncedQuery, selectedType, 1);
   }, [debouncedQuery, selectedType, searchAPI]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+      if (minLoadingTimerRef.current) {
+        clearTimeout(minLoadingTimerRef.current);
+      }
+    };
+  }, []);
 
   const loadMore = useCallback(() => {
     if (hasMore && !isLoading && query.trim().length >= 2) {
