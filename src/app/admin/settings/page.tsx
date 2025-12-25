@@ -7,13 +7,11 @@ import EffectSettings from "@/components/settings/EffectSettings";
 
 type MinMax = { min: number; max: number };
 type RegistrationSettings = {
-  id: MinMax;
   nickname: MinMax;
   password: MinMax;
 };
 
 const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
-  { key: "id", label: "ID" },
   { key: "nickname", label: "Nickname" },
   { key: "password", label: "Password" },
 ];
@@ -22,7 +20,6 @@ export default function AdminSettingsPage() {
   const adminApi = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
   const [settings, setSettings] = useState<RegistrationSettings>({
-    id: { min: 6, max: 16 },
     nickname: { min: 3, max: 16 },
     password: { min: 6, max: 16 },
   });
@@ -108,7 +105,7 @@ export default function AdminSettingsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Registration Items Section */}
-        <div className="bg-gray-800 rounded-lg border border-gray-700">
+        <div className="bg-gray-800 rounded-lg border border-gray-700 self-start">
           <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-white">
               Registration Items

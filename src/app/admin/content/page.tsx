@@ -447,54 +447,56 @@ export default function AdminContentPage() {
           </div>
         </div>
 
-        {/* Filters */}
-        {!isTrendingTab ? (
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex space-x-2">
-              {(["all", "active", "blocked"] as ContentStatusFilter[]).map(
-                (status) => (
-                  <button
-                    key={status}
-                    onClick={() => handleFilterChange(status)}
-                    className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
-                      filter === status
-                        ? "bg-red-600 text-white"
-                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                    }`}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                )
-              )}
-            </div>
+        {/* Filters - Fixed height to prevent layout shift */}
+        <div className="min-h-[88px] md:min-h-[44px]">
+          {!isTrendingTab ? (
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="flex space-x-2">
+                {(["all", "active", "blocked"] as ContentStatusFilter[]).map(
+                  (status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleFilterChange(status)}
+                      className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
+                        filter === status
+                          ? "bg-red-600 text-white"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                    >
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </button>
+                  )
+                )}
+              </div>
 
-            <div className="flex w-full items-center gap-2 md:w-auto">
-              <input
-                type="text"
-                placeholder="Search content..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
-                className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 md:w-80"
-              />
-              <button
-                onClick={handleSearch}
-                className="cursor-pointer px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-              >
-                Search
-              </button>
+              <div className="flex w-full items-center gap-2 md:w-auto">
+                <input
+                  type="text"
+                  placeholder="Search content..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 md:w-80"
+                />
+                <button
+                  onClick={handleSearch}
+                  className="cursor-pointer px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Search
+                </button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm text-gray-300">
-            Trending data is fetched from TMDB daily. Use the actions below to
-            hide or re-enable specific items in the trending carousel.
-          </div>
-        )}
+          ) : (
+            <div className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 text-sm text-gray-300">
+              Trending data is fetched from TMDB daily. Use the actions below to
+              hide or re-enable specific items in the trending carousel.
+            </div>
+          )}
+        </div>
 
         {/* Content Table */}
         <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
