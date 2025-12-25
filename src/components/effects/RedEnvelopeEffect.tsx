@@ -48,7 +48,7 @@ export default function RedEnvelopeEffect({
 
   // Default settings if not provided
   const settings = redEnvelopeSettings || {
-    fallSpeed: 0.8,
+    fallSpeed: 0.3,
     rotationSpeed: 1.0,
     windStrength: 0.3,
     sparkleFrequency: 0.02,
@@ -87,7 +87,7 @@ export default function RedEnvelopeEffect({
       size: Math.random() * 15 + 20,
       flip: Math.random() * 2 - 1, // -1 to 1
       flipSpeed: (Math.random() - 0.5) * 0.05,
-      velocityY: (Math.random() * 1.5 + 0.5) * settings.fallSpeed,
+      velocityY: (Math.random() * 0.8 + 0.2) * settings.fallSpeed, // Slower initial velocity
       hue: Math.random() * 20, // 0-20 for red color variations
     }));
 
@@ -219,8 +219,13 @@ export default function RedEnvelopeEffect({
       envelopesRef.current.forEach((envelope) => {
         drawEnvelope(envelope);
 
-        // Update position with smooth physics
-        envelope.velocityY += 0.02; // Gentle gravity effect
+        // Update position with smooth physics (reduced gravity for slower fall)
+        envelope.velocityY += 0.005; // Very gentle gravity effect
+
+        // Terminal velocity based on fallSpeed setting (prevent infinite acceleration)
+        const maxVelocity = 2.0 * settings.fallSpeed;
+        envelope.velocityY = Math.min(envelope.velocityY, maxVelocity);
+
         envelope.y += envelope.velocityY;
         envelope.x += envelope.wind;
 
@@ -243,7 +248,7 @@ export default function RedEnvelopeEffect({
           envelope.y = -50;
           envelope.x = Math.random() * canvas.width;
           envelope.rotation = Math.random() * 360;
-          envelope.velocityY = Math.random() * 1.5 + 0.5;
+          envelope.velocityY = (Math.random() * 0.8 + 0.2) * settings.fallSpeed;
           envelope.flip = Math.random() * 2 - 1;
           envelope.flipSpeed = (Math.random() - 0.5) * 0.05;
           envelope.hue = Math.random() * 20;

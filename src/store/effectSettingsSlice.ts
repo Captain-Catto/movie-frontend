@@ -24,7 +24,7 @@ interface EffectSettingsState extends EffectSettings {
 }
 
 const DEFAULT_RED_ENVELOPE_SETTINGS: RedEnvelopeSettings = {
-  fallSpeed: 0.8,
+  fallSpeed: 0.3,
   rotationSpeed: 1.0,
   windStrength: 0.3,
   sparkleFrequency: 0.02,
