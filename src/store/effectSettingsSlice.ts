@@ -2,17 +2,20 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { settingsApiService } from '@/services/settings-api';
 import type {
   EffectType as ApiEffectType,
-  AdvancedEffectSettings as ApiAdvancedEffectSettings
+  RedEnvelopeSettings as ApiRedEnvelopeSettings,
+  SnowSettings as ApiSnowSettings
 } from '@/services/settings-api';
 
 export type EffectType = ApiEffectType;
-export type AdvancedEffectSettings = ApiAdvancedEffectSettings;
+export type RedEnvelopeSettings = ApiRedEnvelopeSettings;
+export type SnowSettings = ApiSnowSettings;
 
 export interface EffectSettings {
   enabled: boolean;
   activeEffects: EffectType[];
   intensity: 'low' | 'medium' | 'high';
-  advancedSettings?: AdvancedEffectSettings;
+  redEnvelopeSettings?: RedEnvelopeSettings;
+  snowSettings?: SnowSettings;
 }
 
 interface EffectSettingsState extends EffectSettings {
@@ -20,18 +23,26 @@ interface EffectSettingsState extends EffectSettings {
   error: string | null;
 }
 
-const DEFAULT_ADVANCED_SETTINGS: AdvancedEffectSettings = {
+const DEFAULT_RED_ENVELOPE_SETTINGS: RedEnvelopeSettings = {
   fallSpeed: 0.8,
   rotationSpeed: 1.0,
   windStrength: 0.3,
   sparkleFrequency: 0.02,
 };
 
+const DEFAULT_SNOW_SETTINGS: SnowSettings = {
+  speed: 1.0,
+  density: 1.0,
+  size: 1.0,
+  windStrength: 0.2,
+};
+
 const initialState: EffectSettingsState = {
   enabled: false,
   activeEffects: [],
   intensity: 'medium',
-  advancedSettings: DEFAULT_ADVANCED_SETTINGS,
+  redEnvelopeSettings: DEFAULT_RED_ENVELOPE_SETTINGS,
+  snowSettings: DEFAULT_SNOW_SETTINGS,
   isLoading: false,
   error: null,
 };
@@ -96,16 +107,28 @@ const effectSettingsSlice = createSlice({
       state.activeEffects = [];
     },
 
-    setAdvancedSettings: (state, action: PayloadAction<Partial<AdvancedEffectSettings>>) => {
-      state.advancedSettings = {
-        ...DEFAULT_ADVANCED_SETTINGS,
-        ...state.advancedSettings,
+    setRedEnvelopeSettings: (state, action: PayloadAction<Partial<RedEnvelopeSettings>>) => {
+      state.redEnvelopeSettings = {
+        ...DEFAULT_RED_ENVELOPE_SETTINGS,
+        ...state.redEnvelopeSettings,
         ...action.payload,
       };
     },
 
-    resetAdvancedSettings: (state) => {
-      state.advancedSettings = DEFAULT_ADVANCED_SETTINGS;
+    resetRedEnvelopeSettings: (state) => {
+      state.redEnvelopeSettings = DEFAULT_RED_ENVELOPE_SETTINGS;
+    },
+
+    setSnowSettings: (state, action: PayloadAction<Partial<SnowSettings>>) => {
+      state.snowSettings = {
+        ...DEFAULT_SNOW_SETTINGS,
+        ...state.snowSettings,
+        ...action.payload,
+      };
+    },
+
+    resetSnowSettings: (state) => {
+      state.snowSettings = DEFAULT_SNOW_SETTINGS;
     },
   },
   extraReducers: (builder) => {
@@ -120,9 +143,13 @@ const effectSettingsSlice = createSlice({
         state.enabled = action.payload.enabled;
         state.activeEffects = action.payload.activeEffects;
         state.intensity = action.payload.intensity;
-        state.advancedSettings = {
-          ...DEFAULT_ADVANCED_SETTINGS,
-          ...action.payload.advancedSettings,
+        state.redEnvelopeSettings = {
+          ...DEFAULT_RED_ENVELOPE_SETTINGS,
+          ...action.payload.redEnvelopeSettings,
+        };
+        state.snowSettings = {
+          ...DEFAULT_SNOW_SETTINGS,
+          ...action.payload.snowSettings,
         };
       })
       .addCase(fetchEffectSettings.rejected, (state, action) => {
@@ -139,9 +166,13 @@ const effectSettingsSlice = createSlice({
         state.enabled = action.payload.enabled;
         state.activeEffects = action.payload.activeEffects;
         state.intensity = action.payload.intensity;
-        state.advancedSettings = {
-          ...DEFAULT_ADVANCED_SETTINGS,
-          ...action.payload.advancedSettings,
+        state.redEnvelopeSettings = {
+          ...DEFAULT_RED_ENVELOPE_SETTINGS,
+          ...action.payload.redEnvelopeSettings,
+        };
+        state.snowSettings = {
+          ...DEFAULT_SNOW_SETTINGS,
+          ...action.payload.snowSettings,
         };
       })
       .addCase(updateEffectSettings.rejected, (state, action) => {
@@ -158,8 +189,10 @@ export const {
   setActiveEffects,
   setIntensity,
   clearAllEffects,
-  setAdvancedSettings,
-  resetAdvancedSettings,
+  setRedEnvelopeSettings,
+  resetRedEnvelopeSettings,
+  setSnowSettings,
+  resetSnowSettings,
 } = effectSettingsSlice.actions;
 
 export default effectSettingsSlice.reducer;

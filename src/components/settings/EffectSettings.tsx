@@ -8,8 +8,10 @@ import {
   toggleEffect,
   setIntensity,
   updateEffectSettings,
-  setAdvancedSettings,
-  resetAdvancedSettings,
+  setRedEnvelopeSettings,
+  resetRedEnvelopeSettings,
+  setSnowSettings,
+  resetSnowSettings,
   EffectType,
 } from '@/store/effectSettingsSlice';
 import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders } from 'lucide-react';
@@ -33,12 +35,13 @@ const EFFECTS = [
 
 export default function EffectSettings() {
   const dispatch = useDispatch<AppDispatch>();
-  const { enabled, activeEffects, intensity, advancedSettings, isLoading, error } = useSelector(
+  const { enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, isLoading, error } = useSelector(
     (state: RootState) => state.effectSettings
   );
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitialMount = useRef(true);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isRedEnvelopeAdvancedOpen, setIsRedEnvelopeAdvancedOpen] = useState(false);
+  const [isSnowAdvancedOpen, setIsSnowAdvancedOpen] = useState(false);
 
   // Track last saved values to prevent infinite loop
   const lastSavedRef = useRef<string>('');
@@ -50,22 +53,22 @@ export default function EffectSettings() {
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      const currentValues = JSON.stringify({ enabled, activeEffects, intensity, advancedSettings });
+      const currentValues = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
 
       // Only save if values actually changed from last save
       if (currentValues !== lastSavedRef.current) {
         lastSavedRef.current = currentValues;
-        dispatch(updateEffectSettings({ enabled, activeEffects, intensity, advancedSettings }));
+        dispatch(updateEffectSettings({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings }));
       }
     }, 1000); // Save after 1 second of no changes
-  }, [dispatch, enabled, activeEffects, intensity, advancedSettings]);
+  }, [dispatch, enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings]);
 
   // Auto-save when settings change (except on initial mount)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
       // Store initial values
-      lastSavedRef.current = JSON.stringify({ enabled, activeEffects, intensity, advancedSettings });
+      lastSavedRef.current = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
       return;
     }
 
@@ -76,7 +79,7 @@ export default function EffectSettings() {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [enabled, activeEffects, intensity, advancedSettings, debouncedSave]);
+  }, [enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, debouncedSave]);
 
   const handleToggleEffects = () => {
     dispatch(toggleEffects());
@@ -90,15 +93,26 @@ export default function EffectSettings() {
     dispatch(setIntensity(newIntensity));
   };
 
-  const handleAdvancedSettingChange = (
+  const handleRedEnvelopeSettingChange = (
     key: 'fallSpeed' | 'rotationSpeed' | 'windStrength' | 'sparkleFrequency',
     value: number
   ) => {
-    dispatch(setAdvancedSettings({ [key]: value }));
+    dispatch(setRedEnvelopeSettings({ [key]: value }));
   };
 
-  const handleResetAdvancedSettings = () => {
-    dispatch(resetAdvancedSettings());
+  const handleResetRedEnvelopeSettings = () => {
+    dispatch(resetRedEnvelopeSettings());
+  };
+
+  const handleSnowSettingChange = (
+    key: 'speed' | 'density' | 'size' | 'windStrength',
+    value: number
+  ) => {
+    dispatch(setSnowSettings({ [key]: value }));
+  };
+
+  const handleResetSnowSettings = () => {
+    dispatch(resetSnowSettings());
   };
 
   return (
@@ -199,32 +213,32 @@ export default function EffectSettings() {
           </div>
         )}
 
-        {/* Advanced Settings */}
+        {/* Red Envelope Advanced Settings */}
         {enabled && activeEffects.includes('redEnvelope') && (
           <div className="space-y-4 pt-4 border-t border-gray-700">
             <button
-              onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+              onClick={() => setIsRedEnvelopeAdvancedOpen(!isRedEnvelopeAdvancedOpen)}
               className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4" />
-                Cài Đặt Nâng Cao
+                Cài Đặt Nâng Cao - Phong Bao Lì Xì
               </div>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${
-                  isAdvancedOpen ? 'rotate-180' : ''
+                  isRedEnvelopeAdvancedOpen ? 'rotate-180' : ''
                 }`}
               />
             </button>
 
-            {isAdvancedOpen && advancedSettings && (
+            {isRedEnvelopeAdvancedOpen && redEnvelopeSettings && (
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-xs text-gray-400">
                     Điều chỉnh chi tiết hiệu ứng phong bao lì xì
                   </p>
                   <button
-                    onClick={handleResetAdvancedSettings}
+                    onClick={handleResetRedEnvelopeSettings}
                     className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors"
                   >
                     <RotateCcw className="w-3 h-3" />
@@ -237,7 +251,7 @@ export default function EffectSettings() {
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-300">Tốc Độ Rơi</label>
                     <span className="text-xs text-gray-400 font-mono">
-                      {advancedSettings.fallSpeed.toFixed(2)}
+                      {redEnvelopeSettings.fallSpeed.toFixed(2)}
                     </span>
                   </div>
                   <input
@@ -245,9 +259,9 @@ export default function EffectSettings() {
                     min="0.1"
                     max="3"
                     step="0.1"
-                    value={advancedSettings.fallSpeed}
+                    value={redEnvelopeSettings.fallSpeed}
                     onChange={(e) =>
-                      handleAdvancedSettingChange('fallSpeed', parseFloat(e.target.value))
+                      handleRedEnvelopeSettingChange('fallSpeed', parseFloat(e.target.value))
                     }
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
@@ -262,7 +276,7 @@ export default function EffectSettings() {
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-300">Tốc Độ Xoay</label>
                     <span className="text-xs text-gray-400 font-mono">
-                      {advancedSettings.rotationSpeed.toFixed(2)}
+                      {redEnvelopeSettings.rotationSpeed.toFixed(2)}
                     </span>
                   </div>
                   <input
@@ -270,9 +284,9 @@ export default function EffectSettings() {
                     min="0.1"
                     max="5"
                     step="0.1"
-                    value={advancedSettings.rotationSpeed}
+                    value={redEnvelopeSettings.rotationSpeed}
                     onChange={(e) =>
-                      handleAdvancedSettingChange('rotationSpeed', parseFloat(e.target.value))
+                      handleRedEnvelopeSettingChange('rotationSpeed', parseFloat(e.target.value))
                     }
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
@@ -287,7 +301,7 @@ export default function EffectSettings() {
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-300">Độ Mạnh Gió</label>
                     <span className="text-xs text-gray-400 font-mono">
-                      {advancedSettings.windStrength.toFixed(2)}
+                      {redEnvelopeSettings.windStrength.toFixed(2)}
                     </span>
                   </div>
                   <input
@@ -295,9 +309,9 @@ export default function EffectSettings() {
                     min="0"
                     max="1"
                     step="0.05"
-                    value={advancedSettings.windStrength}
+                    value={redEnvelopeSettings.windStrength}
                     onChange={(e) =>
-                      handleAdvancedSettingChange('windStrength', parseFloat(e.target.value))
+                      handleRedEnvelopeSettingChange('windStrength', parseFloat(e.target.value))
                     }
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
@@ -312,7 +326,7 @@ export default function EffectSettings() {
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-300">Tần Suất Lấp Lánh</label>
                     <span className="text-xs text-gray-400 font-mono">
-                      {advancedSettings.sparkleFrequency.toFixed(3)}
+                      {redEnvelopeSettings.sparkleFrequency.toFixed(3)}
                     </span>
                   </div>
                   <input
@@ -320,15 +334,152 @@ export default function EffectSettings() {
                     min="0"
                     max="0.1"
                     step="0.005"
-                    value={advancedSettings.sparkleFrequency}
+                    value={redEnvelopeSettings.sparkleFrequency}
                     onChange={(e) =>
-                      handleAdvancedSettingChange('sparkleFrequency', parseFloat(e.target.value))
+                      handleRedEnvelopeSettingChange('sparkleFrequency', parseFloat(e.target.value))
                     }
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
                     <span>Ít (0)</span>
                     <span>Nhiều (0.1)</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Snow Advanced Settings */}
+        {enabled && activeEffects.includes('snow') && (
+          <div className="space-y-4 pt-4 border-t border-gray-700">
+            <button
+              onClick={() => setIsSnowAdvancedOpen(!isSnowAdvancedOpen)}
+              className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4" />
+                Cài Đặt Nâng Cao - Tuyết Rơi
+              </div>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  isSnowAdvancedOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {isSnowAdvancedOpen && snowSettings && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-xs text-gray-400">
+                    Điều chỉnh chi tiết hiệu ứng tuyết rơi
+                  </p>
+                  <button
+                    onClick={handleResetSnowSettings}
+                    className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset
+                  </button>
+                </div>
+
+                {/* Snow Speed */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Tốc Độ Rơi</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {snowSettings.speed.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="3"
+                    step="0.1"
+                    value={snowSettings.speed}
+                    onChange={(e) =>
+                      handleSnowSettingChange('speed', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Chậm (0.1)</span>
+                    <span>Nhanh (3.0)</span>
+                  </div>
+                </div>
+
+                {/* Snow Density */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Mật Độ Tuyết</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {snowSettings.density.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={snowSettings.density}
+                    onChange={(e) =>
+                      handleSnowSettingChange('density', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Thưa (0.5)</span>
+                    <span>Dày (2.0)</span>
+                  </div>
+                </div>
+
+                {/* Snow Size */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Kích Thước</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {snowSettings.size.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.1"
+                    value={snowSettings.size}
+                    onChange={(e) =>
+                      handleSnowSettingChange('size', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Nhỏ (0.5)</span>
+                    <span>Lớn (3.0)</span>
+                  </div>
+                </div>
+
+                {/* Wind Strength */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Độ Mạnh Gió</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {snowSettings.windStrength.toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={snowSettings.windStrength}
+                    onChange={(e) =>
+                      handleSnowSettingChange('windStrength', parseFloat(e.target.value))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Không gió (0)</span>
+                    <span>Gió mạnh (1.0)</span>
                   </div>
                 </div>
               </div>

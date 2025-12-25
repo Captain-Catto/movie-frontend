@@ -2,18 +2,26 @@ import axiosInstance from "@/lib/axios-instance";
 
 export type EffectType = "snow" | "redEnvelope" | "fireworks" | "sakura";
 
-export interface AdvancedEffectSettings {
+export interface RedEnvelopeSettings {
   fallSpeed: number; // 0.1 - 3
   rotationSpeed: number; // 0.1 - 5
   windStrength: number; // 0 - 1
   sparkleFrequency: number; // 0 - 0.1
 }
 
+export interface SnowSettings {
+  speed: number; // 0.1 - 3
+  density: number; // 0.5 - 2
+  size: number; // 0.5 - 3
+  windStrength: number; // 0 - 1
+}
+
 export interface EffectSettings {
   enabled: boolean;
   activeEffects: EffectType[];
   intensity: "low" | "medium" | "high";
-  advancedSettings?: AdvancedEffectSettings;
+  redEnvelopeSettings?: RedEnvelopeSettings;
+  snowSettings?: SnowSettings;
 }
 
 export interface ApiResponse<T = unknown> {

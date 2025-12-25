@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 
-interface AdvancedEffectSettings {
+interface RedEnvelopeSettings {
   fallSpeed: number;
   rotationSpeed: number;
   windStrength: number;
@@ -11,7 +11,7 @@ interface AdvancedEffectSettings {
 
 interface RedEnvelopeEffectProps {
   intensity?: 'low' | 'medium' | 'high';
-  advancedSettings?: AdvancedEffectSettings;
+  redEnvelopeSettings?: RedEnvelopeSettings;
 }
 
 interface RedEnvelope {
@@ -39,15 +39,15 @@ interface Sparkle {
 
 export default function RedEnvelopeEffect({
   intensity = 'medium',
-  advancedSettings,
+  redEnvelopeSettings,
 }: RedEnvelopeEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const envelopesRef = useRef<RedEnvelope[]>([]);
   const sparklesRef = useRef<Sparkle[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
 
-  // Default advanced settings if not provided
-  const settings = advancedSettings || {
+  // Default settings if not provided
+  const settings = redEnvelopeSettings || {
     fallSpeed: 0.8,
     rotationSpeed: 1.0,
     windStrength: 0.3,

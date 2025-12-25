@@ -2,8 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 
+interface SnowSettings {
+  speed: number;
+  density: number;
+  size: number;
+  windStrength: number;
+}
+
 interface SnowEffectProps {
   intensity?: 'low' | 'medium' | 'high';
+  snowSettings?: SnowSettings;
 }
 
 interface Snowflake {
@@ -15,10 +23,21 @@ interface Snowflake {
   opacity: number;
 }
 
-export default function SnowEffect({ intensity = 'medium' }: SnowEffectProps) {
+export default function SnowEffect({
+  intensity = 'medium',
+  snowSettings
+}: SnowEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const snowflakesRef = useRef<Snowflake[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+
+  // Default settings if not provided
+  const settings = snowSettings || {
+    speed: 1.0,
+    density: 1.0,
+    size: 1.0,
+    windStrength: 0.2,
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,20 +54,21 @@ export default function SnowEffect({ intensity = 'medium' }: SnowEffectProps) {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Snowflake count based on intensity
-    const snowflakeCount = {
+    // Snowflake count based on intensity and density setting
+    const baseSnowflakeCount = {
       low: 50,
       medium: 100,
       high: 150,
     }[intensity];
+    const snowflakeCount = Math.round(baseSnowflakeCount * settings.density);
 
-    // Initialize snowflakes
+    // Initialize snowflakes with settings applied
     snowflakesRef.current = Array.from({ length: snowflakeCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      radius: Math.random() * 3 + 1,
-      speed: Math.random() * 1 + 0.5,
-      wind: Math.random() * 0.5 - 0.25,
+      radius: (Math.random() * 3 + 1) * settings.size,
+      speed: (Math.random() * 1 + 0.5) * settings.speed,
+      wind: (Math.random() * 0.5 - 0.25) * settings.windStrength,
       opacity: Math.random() * 0.5 + 0.3,
     }));
 
@@ -90,7 +110,7 @@ export default function SnowEffect({ intensity = 'medium' }: SnowEffectProps) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [intensity]);
+  }, [intensity, settings.speed, settings.density, settings.size, settings.windStrength]);
 
   return (
     <canvas
