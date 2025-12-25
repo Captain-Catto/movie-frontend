@@ -20,15 +20,15 @@ import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders } f
 const EFFECTS = [
   {
     type: 'snow' as EffectType,
-    name: 'Tuyết Rơi',
-    description: 'Hiệu ứng tuyết rơi cho mùa đông',
+    name: 'Snow',
+    description: 'Snow effect for winter season',
     icon: Snowflake,
     color: 'text-blue-400',
   },
   {
     type: 'redEnvelope' as EffectType,
-    name: 'Phong Bao Lì Xì',
-    description: 'Hiệu ứng phong bao lì xì cho Tết',
+    name: 'Red Envelope',
+    description: 'Red envelope effect for Lunar New Year',
     icon: Gift,
     color: 'text-red-400',
   },
@@ -115,7 +115,7 @@ export default function EffectSettings() {
       <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Settings className="w-5 h-5 text-red-500" />
-          <h2 className="text-lg font-semibold text-white">Hiệu Ứng Màn Hình</h2>
+          <h2 className="text-lg font-semibold text-white">Visual Effects</h2>
           {isLoading && (
             <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
           )}
@@ -136,8 +136,7 @@ export default function EffectSettings() {
       <div className="p-6 space-y-6">
         {/* Description */}
         <p className="text-gray-400 text-sm">
-          Bật/tắt các hiệu ứng đặc biệt trên màn hình. Các hiệu ứng này sẽ được
-          hiển thị ở tất cả các trang.
+          Enable/disable special effects on screen. These effects will be displayed across all pages.
         </p>
 
         {/* Error Message */}
@@ -150,7 +149,7 @@ export default function EffectSettings() {
         {/* Effects List */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-            Chọn Hiệu Ứng
+            Select Effects
           </h3>
           {EFFECTS.map((effect) => (
             <div
@@ -185,22 +184,22 @@ export default function EffectSettings() {
         {enabled && activeEffects.length > 0 && (
           <div className="space-y-4 pt-4 border-t border-gray-700">
             <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
-              Mức Độ Hiệu Ứng
+              Effect Intensity
             </h3>
             <div className="grid grid-cols-3 gap-3">
               {(['low', 'medium', 'high'] as const).map((level) => (
                 <button
                   key={level}
                   onClick={() => handleSetIntensity(level)}
-                  className={`px-4 py-2 rounded-lg border transition-all ${
+                  className={`px-4 py-2 rounded-lg border transition-all cursor-pointer ${
                     intensity === level
                       ? 'bg-red-600 border-red-500 text-white'
                       : 'bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600'
                   }`}
                 >
-                  {level === 'low' && 'Nhẹ'}
-                  {level === 'medium' && 'Vừa'}
-                  {level === 'high' && 'Mạnh'}
+                  {level === 'low' && 'Low'}
+                  {level === 'medium' && 'Medium'}
+                  {level === 'high' && 'High'}
                 </button>
               ))}
             </div>
@@ -212,11 +211,11 @@ export default function EffectSettings() {
           <div className="space-y-4 pt-4 border-t border-gray-700">
             <button
               onClick={() => setIsRedEnvelopeAdvancedOpen(!isRedEnvelopeAdvancedOpen)}
-              className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors"
+              className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4" />
-                Cài Đặt Nâng Cao - Phong Bao Lì Xì
+                Advanced Settings - Red Envelope
               </div>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${
@@ -229,11 +228,11 @@ export default function EffectSettings() {
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-xs text-gray-400">
-                    Điều chỉnh chi tiết hiệu ứng phong bao lì xì
+                    Fine-tune red envelope effect parameters
                   </p>
                   <button
                     onClick={handleResetRedEnvelopeSettings}
-                    className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" />
                     Reset
@@ -243,7 +242,7 @@ export default function EffectSettings() {
                 {/* Fall Speed */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Tốc Độ Rơi</label>
+                    <label className="text-sm text-gray-300">Fall Speed</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {redEnvelopeSettings.fallSpeed.toFixed(2)}
                     </span>
@@ -260,15 +259,15 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Chậm (0.1)</span>
-                    <span>Nhanh (3.0)</span>
+                    <span>Slow (0.1)</span>
+                    <span>Fast (3.0)</span>
                   </div>
                 </div>
 
                 {/* Rotation Speed */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Tốc Độ Xoay</label>
+                    <label className="text-sm text-gray-300">Rotation Speed</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {redEnvelopeSettings.rotationSpeed.toFixed(2)}
                     </span>
@@ -285,15 +284,15 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Chậm (0.1)</span>
-                    <span>Nhanh (5.0)</span>
+                    <span>Slow (0.1)</span>
+                    <span>Fast (5.0)</span>
                   </div>
                 </div>
 
                 {/* Wind Strength */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Độ Mạnh Gió</label>
+                    <label className="text-sm text-gray-300">Wind Strength</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {redEnvelopeSettings.windStrength.toFixed(2)}
                     </span>
@@ -310,15 +309,15 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Không gió (0)</span>
-                    <span>Gió mạnh (1.0)</span>
+                    <span>No wind (0)</span>
+                    <span>Strong (1.0)</span>
                   </div>
                 </div>
 
                 {/* Sparkle Frequency */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Tần Suất Lấp Lánh</label>
+                    <label className="text-sm text-gray-300">Sparkle Frequency</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {redEnvelopeSettings.sparkleFrequency.toFixed(3)}
                     </span>
@@ -335,8 +334,8 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Ít (0)</span>
-                    <span>Nhiều (0.1)</span>
+                    <span>Low (0)</span>
+                    <span>High (0.1)</span>
                   </div>
                 </div>
               </div>
@@ -349,11 +348,11 @@ export default function EffectSettings() {
           <div className="space-y-4 pt-4 border-t border-gray-700">
             <button
               onClick={() => setIsSnowAdvancedOpen(!isSnowAdvancedOpen)}
-              className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors"
+              className="w-full flex items-center justify-between text-sm font-semibold text-gray-300 uppercase tracking-wide hover:text-white transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
                 <Sliders className="w-4 h-4" />
-                Cài Đặt Nâng Cao - Tuyết Rơi
+                Advanced Settings - Snow
               </div>
               <ChevronDown
                 className={`w-4 h-4 transition-transform ${
@@ -366,11 +365,11 @@ export default function EffectSettings() {
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-xs text-gray-400">
-                    Điều chỉnh chi tiết hiệu ứng tuyết rơi
+                    Fine-tune snow effect parameters
                   </p>
                   <button
                     onClick={handleResetSnowSettings}
-                    className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors"
+                    className="flex items-center gap-1 px-3 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors cursor-pointer"
                   >
                     <RotateCcw className="w-3 h-3" />
                     Reset
@@ -380,7 +379,7 @@ export default function EffectSettings() {
                 {/* Snow Speed */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Tốc Độ Rơi</label>
+                    <label className="text-sm text-gray-300">Fall Speed</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {snowSettings.speed.toFixed(2)}
                     </span>
@@ -397,15 +396,15 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Chậm (0.1)</span>
-                    <span>Nhanh (3.0)</span>
+                    <span>Slow (0.1)</span>
+                    <span>Fast (3.0)</span>
                   </div>
                 </div>
 
                 {/* Snow Density */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Mật Độ Tuyết</label>
+                    <label className="text-sm text-gray-300">Snow Density</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {snowSettings.density.toFixed(2)}
                     </span>
@@ -422,15 +421,15 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Thưa (0.5)</span>
-                    <span>Dày (2.0)</span>
+                    <span>Sparse (0.5)</span>
+                    <span>Dense (2.0)</span>
                   </div>
                 </div>
 
                 {/* Snow Size */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Kích Thước</label>
+                    <label className="text-sm text-gray-300">Size</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {snowSettings.size.toFixed(2)}
                     </span>
@@ -447,15 +446,15 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Nhỏ (0.5)</span>
-                    <span>Lớn (3.0)</span>
+                    <span>Small (0.5)</span>
+                    <span>Large (3.0)</span>
                   </div>
                 </div>
 
                 {/* Wind Strength */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-300">Độ Mạnh Gió</label>
+                    <label className="text-sm text-gray-300">Wind Strength</label>
                     <span className="text-xs text-gray-400 font-mono">
                       {snowSettings.windStrength.toFixed(2)}
                     </span>
@@ -472,8 +471,8 @@ export default function EffectSettings() {
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Không gió (0)</span>
-                    <span>Gió mạnh (1.0)</span>
+                    <span>No wind (0)</span>
+                    <span>Strong (1.0)</span>
                   </div>
                 </div>
               </div>
@@ -484,7 +483,7 @@ export default function EffectSettings() {
         {/* Info */}
         {enabled && activeEffects.length === 0 && (
           <div className="p-4 rounded-lg bg-blue-900/20 border border-blue-800/30 text-blue-200 text-sm">
-            💡 Chọn ít nhất một hiệu ứng để bắt đầu
+            💡 Select at least one effect to start
           </div>
         )}
 
@@ -499,7 +498,7 @@ export default function EffectSettings() {
               disabled={!isDirty || isLoading}
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                 isDirty && !isLoading
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
                   : 'bg-gray-700 text-gray-400 cursor-not-allowed'
               }`}
             >
