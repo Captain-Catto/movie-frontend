@@ -7,6 +7,7 @@ import { AuthLoader } from "@/components/auth/AuthLoader";
 import { FavoritesLoader } from "@/components/favorites/FavoritesLoader";
 import { ToastContainer } from "@/components/toast/ToastContainer";
 import { InitialPageLoader } from "@/components/loading/InitialPageLoader";
+import EffectManager from "@/components/effects/EffectManager";
 
 export const metadata: Metadata = {
   title: "MovieStream",
@@ -26,6 +27,7 @@ export default function RootLayout({
           <AuthLoader />
           <FavoritesLoader />
           <ToastContainer />
+          <EffectManager />
           {children}
         </ReduxProvider>
       </body>

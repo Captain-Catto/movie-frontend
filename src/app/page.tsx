@@ -11,6 +11,10 @@ import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
 import type { MovieCardData } from "@/types/movie";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
+import {
+  HERO_MINIMUM_LOADING_TIME,
+  HERO_MAXIMUM_TIMEOUT,
+} from "@/constants/app.constants";
 
 export default function Home() {
   const [nowPlayingMovies, setNowPlayingMovies] = useState<MovieCardData[]>([]);
@@ -18,6 +22,7 @@ export default function Home() {
   const [topRatedMovies, setTopRatedMovies] = useState<MovieCardData[]>([]);
   const [upcomingMovies, setUpcomingMovies] = useState<MovieCardData[]>([]);
   const [heroMovies, setHeroMovies] = useState<MovieCardData[]>([]);
+  const [heroLoading, setHeroLoading] = useState(true);
 
   // Individual loading states for progressive rendering
   const [loadingStates, setLoadingStates] = useState({
@@ -59,22 +64,60 @@ export default function Home() {
 
   // Fetch hero section immediately (highest priority)
   useEffect(() => {
+    const abortController = new AbortController();
+
     const fetchTrendingHero = async () => {
       try {
-        const trendingResponse = await apiService.getTrending();
+        // Promise for minimum delay
+        const minDelayPromise = new Promise<void>((resolve) =>
+          setTimeout(resolve, HERO_MINIMUM_LOADING_TIME)
+        );
 
-        if (trendingResponse.success && trendingResponse.data) {
+        // Promise for data fetch
+        const dataPromise = apiService.getTrending();
+
+        // Timeout promise for safety
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Hero data fetch timeout")),
+            HERO_MAXIMUM_TIMEOUT
+          )
+        );
+
+        // Wait for BOTH minimum delay AND data (or timeout)
+        const [, trendingResponse] = await Promise.race([
+          Promise.all([minDelayPromise, dataPromise]),
+          timeoutPromise,
+        ]);
+
+        if (
+          !abortController.signal.aborted &&
+          trendingResponse.success &&
+          trendingResponse.data
+        ) {
           const heroTrendingMovies = mapTrendingDataToFrontend(
             trendingResponse.data.slice(0, responsiveLimit)
           );
           setHeroMovies(heroTrendingMovies);
         }
       } catch (error) {
-        console.error("Error fetching trending movies for hero:", error);
+        if (!abortController.signal.aborted) {
+          console.error("Error fetching trending movies for hero:", error);
+        }
+        // Fallback data will be used automatically (heroMovies.length === 0)
+      } finally {
+        if (!abortController.signal.aborted) {
+          // Always hide loader - either data is ready or we're showing fallback
+          setHeroLoading(false);
+        }
       }
     };
 
     fetchTrendingHero();
+
+    return () => {
+      abortController.abort();
+    };
   }, [responsiveLimit]);
 
   // Fetch Now Playing when visible
@@ -284,7 +327,7 @@ export default function Home() {
 
   return (
     <Layout>
-      <HeroSection movies={heroMoviesToDisplay} />
+      <HeroSection movies={heroMoviesToDisplay} isLoading={heroLoading} />
 
       {/* Now Playing Section */}
       <div ref={nowPlayingRef} className="py-8">

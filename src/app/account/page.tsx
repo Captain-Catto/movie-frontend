@@ -333,7 +333,7 @@ export default function AccountPage() {
               </button>
             </form>
 
-            <div className="space-y-4">
+            <div className="space-y-4 mt-8">
               <button
                 className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white"
                 onClick={() => router.push("/account/change-password")}

@@ -19,3 +19,7 @@ export const DEFAULT_BROWSE_PAGE_SIZE = 24;
 export const SKELETON_COUNT_MOVIE = DEFAULT_MOVIE_PAGE_SIZE;
 export const SKELETON_COUNT_TV = DEFAULT_TV_PAGE_SIZE;
 export const SKELETON_COUNT_BROWSE = DEFAULT_BROWSE_PAGE_SIZE;
+
+// Hero loader timings (in milliseconds)
+export const HERO_MINIMUM_LOADING_TIME = 1200; // Minimum display time to prevent flash
+export const HERO_MAXIMUM_TIMEOUT = 10000; // Maximum wait time before showing fallback

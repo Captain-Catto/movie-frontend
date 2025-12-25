@@ -8,7 +8,6 @@ import { Pagination, Autoplay, EffectFade } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import HeroSkeleton from "@/components/ui/HeroSkeleton";
-import { useLoading } from "@/hooks/useLoading";
 import type { MovieCardData } from "@/types/movie";
 import GenreBadge from "@/components/ui/GenreBadge";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
@@ -24,10 +23,10 @@ import { Info } from "lucide-react";
 
 interface HeroSectionProps {
   movies: MovieCardData[];
+  isLoading?: boolean;
 }
 
-const HeroSection = ({ movies }: HeroSectionProps) => {
-  const { isLoading } = useLoading({ delay: 1200 });
+const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
   const { breakpoint } = useWindowWidth();

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import EffectSettings from "@/components/settings/EffectSettings";
 
 type MinMax = { min: number; max: number };
 type RegistrationSettings = {
@@ -192,6 +193,21 @@ export default function AdminSettingsPage() {
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Effect Settings Section */}
+      <div className="bg-gray-800 rounded-lg border border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-700">
+          <h2 className="text-lg font-semibold text-white">
+            Visual Effects Settings
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">
+            Control visual effects displayed to all users across the platform
+          </p>
+        </div>
+        <div className="p-6">
+          <EffectSettings />
         </div>
       </div>
     </div>
