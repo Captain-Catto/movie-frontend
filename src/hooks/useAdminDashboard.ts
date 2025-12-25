@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAdminApi } from "./useAdminApi";
+import { useToastRedux } from "./useToastRedux";
 
 export interface DashboardStats {
   totalMovies: number;
@@ -18,9 +19,8 @@ export function useAdminDashboard() {
   const [syncingTarget, setSyncingTarget] = useState<"all" | "popular" | null>(
     null
   );
-  const [syncSuccess, setSyncSuccess] = useState<string | null>(null);
-  const [syncError, setSyncError] = useState<string | null>(null);
   const adminApi = useAdminApi();
+  const { showSuccess, showError } = useToastRedux();
 
   const fetchDashboardStats = useCallback(async () => {
     try {
@@ -40,8 +40,6 @@ export function useAdminDashboard() {
 
   const triggerSync = useCallback(
     async (target: "all" | "popular") => {
-      setSyncError(null);
-      setSyncSuccess(null);
       setSyncingTarget(target);
 
       try {
@@ -55,20 +53,22 @@ export function useAdminDashboard() {
         }
 
         const label = target === "all" ? "Full daily export" : "Popular refresh";
-        setSyncSuccess(
-          response.data?.message || `${label} sync started successfully.`
+        showSuccess(
+          "Sync successful",
+          response.data?.message || `${label} sync started successfully`
         );
         await fetchDashboardStats();
       } catch (error) {
         console.error("Error triggering sync:", error);
-        setSyncError(
-          error instanceof Error ? error.message : "Failed to trigger sync task."
+        showError(
+          "Sync failed",
+          error instanceof Error ? error.message : "Failed to trigger sync task"
         );
       } finally {
         setSyncingTarget(null);
       }
     },
-    [adminApi, fetchDashboardStats]
+    [adminApi, fetchDashboardStats, showSuccess, showError]
   );
 
   useEffect(() => {
@@ -81,8 +81,6 @@ export function useAdminDashboard() {
     stats,
     loading,
     syncingTarget,
-    syncSuccess,
-    syncError,
     triggerSync,
     refetchStats: fetchDashboardStats,
   };

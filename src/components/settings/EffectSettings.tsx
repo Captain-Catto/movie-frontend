@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import {
@@ -14,6 +14,7 @@ import {
   resetSnowSettings,
   EffectType,
 } from '@/store/effectSettingsSlice';
+import { useToastRedux } from '@/hooks/useToastRedux';
 import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders } from 'lucide-react';
 
 const EFFECTS = [
@@ -38,48 +39,25 @@ export default function EffectSettings() {
   const { enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, isLoading, error } = useSelector(
     (state: RootState) => state.effectSettings
   );
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitialMount = useRef(true);
+  const { showSuccess, showError } = useToastRedux();
   const [isRedEnvelopeAdvancedOpen, setIsRedEnvelopeAdvancedOpen] = useState(false);
   const [isSnowAdvancedOpen, setIsSnowAdvancedOpen] = useState(false);
 
-  // Track last saved values to prevent infinite loop
-  const lastSavedRef = useRef<string>('');
+  const [initialSettings, setInitialSettings] = useState<string>('');
+  const [isDirty, setIsDirty] = useState(false);
 
-  // Debounced save function
-  const debouncedSave = useCallback(() => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      const currentValues = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
-
-      // Only save if values actually changed from last save
-      if (currentValues !== lastSavedRef.current) {
-        lastSavedRef.current = currentValues;
-        dispatch(updateEffectSettings({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings }));
-      }
-    }, 1000); // Save after 1 second of no changes
-  }, [dispatch, enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings]);
-
-  // Auto-save when settings change (except on initial mount)
+  // Snapshot on mount
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      // Store initial values
-      lastSavedRef.current = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
-      return;
-    }
+    const snapshot = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
+    setInitialSettings(snapshot);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    debouncedSave();
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, [enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, debouncedSave]);
+  // Track changes
+  useEffect(() => {
+    const current = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
+    setIsDirty(current !== initialSettings);
+  }, [enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, initialSettings]);
 
   const handleToggleEffects = () => {
     dispatch(toggleEffects());
@@ -113,6 +91,22 @@ export default function EffectSettings() {
 
   const handleResetSnowSettings = () => {
     dispatch(resetSnowSettings());
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      await dispatch(updateEffectSettings({
+        enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings
+      })).unwrap();
+
+      const newSnapshot = JSON.stringify({ enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings });
+      setInitialSettings(newSnapshot);
+      setIsDirty(false);
+
+      showSuccess('Saved', 'Effect settings have been updated');
+    } catch (err) {
+      showError('Error', err instanceof Error ? err.message : 'Failed to save settings');
+    }
   };
 
   return (
@@ -493,6 +487,26 @@ export default function EffectSettings() {
             💡 Chọn ít nhất một hiệu ứng để bắt đầu
           </div>
         )}
+
+        {/* Save Changes Section */}
+        <div className="pt-4 border-t border-gray-700">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-400">
+              {isDirty ? '⚠️ Unsaved changes' : '✓ All changes saved'}
+            </p>
+            <button
+              onClick={handleSaveSettings}
+              disabled={!isDirty || isLoading}
+              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                isDirty && !isLoading
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              {isLoading ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

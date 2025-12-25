@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useToastRedux } from "@/hooks/useToastRedux";
 
 interface DashboardStats {
   totalMovies: number;
@@ -55,10 +56,10 @@ const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string 
   ];
 
 export default function AdminSyncDataPage() {
+  const adminApi = useAdminApi();
+  const { showSuccess, showError } = useToastRedux();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [syncing, setSyncing] = useState<SyncTarget | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [customDate, setCustomDate] = useState<string>("");
   const [settings, setSettings] = useState<SyncSettings | null>(null);
   const [settingsForm, setSettingsForm] = useState({
@@ -67,9 +68,6 @@ export default function AdminSyncDataPage() {
     trendingCatalogLimit: 100,
   });
   const [savingSettings, setSavingSettings] = useState(false);
-  const [settingsSuccess, setSettingsSuccess] = useState<string | null>(null);
-  const [settingsError, setSettingsError] = useState<string | null>(null);
-  const adminApi = useAdminApi();
 
   const fetchStats = useCallback(async () => {
     if (!adminApi.isAuthenticated) {
@@ -85,9 +83,9 @@ export default function AdminSyncDataPage() {
       }
     } catch (error) {
       console.error("Error loading dashboard stats:", error);
-      setErrorMessage(error instanceof Error ? error.message : "Failed to load dashboard stats.");
+      showError("Load failed", error instanceof Error ? error.message : "Failed to load dashboard stats");
     }
-  }, [adminApi]);
+  }, [adminApi, showError]);
 
   const fetchSettings = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;
@@ -114,8 +112,6 @@ export default function AdminSyncDataPage() {
   const handleSync = async (target: SyncTarget) => {
     if (syncing) return;
 
-    setSuccessMessage(null);
-    setErrorMessage(null);
     setSyncing(target);
 
     try {
@@ -130,11 +126,11 @@ export default function AdminSyncDataPage() {
         throw new Error(response.error || response.message || "Sync failed");
       }
 
-      setSuccessMessage(response.message || `Sync "${target}" triggered successfully.`);
+      showSuccess("Sync successful", response.message || `Sync "${target}" triggered successfully`);
       await fetchStats();
     } catch (error) {
       console.error("Error triggering sync:", error);
-      setErrorMessage(error instanceof Error ? error.message : "Failed to trigger sync.");
+      showError("Sync failed", error instanceof Error ? error.message : "Failed to trigger sync");
     } finally {
       setSyncing(null);
     }
@@ -143,8 +139,6 @@ export default function AdminSyncDataPage() {
   const handleSaveSettings = async () => {
     if (savingSettings) return;
 
-    setSettingsSuccess(null);
-    setSettingsError(null);
     setSavingSettings(true);
 
     try {
@@ -154,11 +148,11 @@ export default function AdminSyncDataPage() {
         throw new Error(response.error || response.message || "Failed to save settings");
       }
 
-      setSettingsSuccess("Catalog limits updated successfully");
+      showSuccess("Saved", "Catalog limits updated successfully");
       await fetchSettings();
     } catch (error) {
       console.error("Error saving settings:", error);
-      setSettingsError(error instanceof Error ? error.message : "Failed to save settings");
+      showError("Save failed", error instanceof Error ? error.message : "Failed to save settings");
     } finally {
       setSavingSettings(false);
     }
@@ -179,18 +173,6 @@ export default function AdminSyncDataPage() {
             jobs.
           </p>
         </header>
-
-        {successMessage && (
-          <div className="rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-green-200">
-            {successMessage}
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="rounded-md border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
-            {errorMessage}
-          </div>
-        )}
 
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
@@ -344,18 +326,6 @@ export default function AdminSyncDataPage() {
               </p>
             </div>
           </div>
-
-          {settingsSuccess && (
-            <div className="mb-4 rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-green-200">
-              {settingsSuccess}
-            </div>
-          )}
-
-          {settingsError && (
-            <div className="mb-4 rounded-md border border-red-500/40 bg-red-500/10 px-4 py-3 text-red-200">
-              {settingsError}
-            </div>
-          )}
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>

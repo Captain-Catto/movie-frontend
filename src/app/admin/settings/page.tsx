@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useToastRedux } from "@/hooks/useToastRedux";
 import EffectSettings from "@/components/settings/EffectSettings";
 
 type MinMax = { min: number; max: number };
@@ -19,6 +20,7 @@ const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
 
 export default function AdminSettingsPage() {
   const adminApi = useAdminApi();
+  const { showSuccess, showError } = useToastRedux();
   const [settings, setSettings] = useState<RegistrationSettings>({
     id: { min: 6, max: 16 },
     nickname: { min: 3, max: 16 },
@@ -26,13 +28,10 @@ export default function AdminSettingsPage() {
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   const fetchSettings = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;
     setLoading(true);
-    setError("");
     try {
       const res = await adminApi.get<RegistrationSettings>(
         "/admin/settings/registration"
@@ -40,15 +39,15 @@ export default function AdminSettingsPage() {
       if (res.success && res.data) {
         setSettings(res.data as RegistrationSettings);
       } else if (res.error) {
-        setError(res.error);
+        showError("Load failed", res.error);
       }
     } catch (err) {
       console.error("Failed to load settings", err);
-      setError("Failed to load settings");
+      showError("Load failed", "Failed to load settings");
     } finally {
       setLoading(false);
     }
-  }, [adminApi]);
+  }, [adminApi, showError]);
 
   useEffect(() => {
     fetchSettings();
@@ -70,8 +69,6 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    setError("");
-    setMessage("");
     try {
       const res = await adminApi.put<RegistrationSettings>(
         "/admin/settings/registration",
@@ -79,13 +76,13 @@ export default function AdminSettingsPage() {
       );
       if (res.success && res.data) {
         setSettings(res.data as RegistrationSettings);
-        setMessage("Settings saved");
+        showSuccess("Saved", "Settings updated successfully");
       } else {
-        setError(res.error || "Failed to save settings");
+        showError("Save failed", res.error || "Failed to save settings");
       }
     } catch (err) {
       console.error("Failed to save settings", err);
-      setError("Failed to save settings");
+      showError("Save failed", "Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -108,17 +105,6 @@ export default function AdminSettingsPage() {
           {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
-
-      {error && (
-        <div className="px-4 py-3 rounded-lg bg-red-900/50 border border-red-700 text-red-200">
-          {error}
-        </div>
-      )}
-      {message && (
-        <div className="px-4 py-3 rounded-lg bg-green-900/40 border border-green-700 text-green-200">
-          {message}
-        </div>
-      )}
 
       <div className="bg-gray-800 rounded-lg border border-gray-700">
         <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">

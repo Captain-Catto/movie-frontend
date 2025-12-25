@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useToastRedux } from "@/hooks/useToastRedux";
 
 type TabKey = "movies" | "tv" | "trending";
 type ContentStatusFilter = "all" | "active" | "blocked";
@@ -92,6 +93,7 @@ export default function AdminContentPage() {
   }>({ open: false, content: null });
   const [blockReason, setBlockReason] = useState("");
   const adminApi = useAdminApi();
+  const { showSuccess, showError } = useToastRedux();
 
   const PAGE_SIZE = 20;
 
@@ -327,6 +329,8 @@ export default function AdminContentPage() {
   const handleBlockContent = async () => {
     if (!blockModal.content || !blockReason) return;
 
+    const title = blockModal.content.title;
+
     try {
       const endpoint = isTrendingTab
         ? "/admin/content/trending/block"
@@ -351,13 +355,28 @@ export default function AdminContentPage() {
         setBlockModal({ open: false, content: null });
         setBlockReason("");
         refreshCurrentTab();
+        showSuccess(
+          isTrendingTab ? "Hidden" : "Blocked",
+          `Content "${title}" has been ${isTrendingTab ? "hidden" : "blocked"}`
+        );
+      } else {
+        showError(
+          isTrendingTab ? "Hide failed" : "Block failed",
+          response.error || `Failed to ${isTrendingTab ? "hide" : "block"} content`
+        );
       }
     } catch (error) {
       console.error("Error blocking content:", error);
+      showError(
+        isTrendingTab ? "Hide failed" : "Block failed",
+        error instanceof Error ? error.message : `Failed to ${isTrendingTab ? "hide" : "block"} content`
+      );
     }
   };
 
   const handleUnblockContent = async (content: ContentItem) => {
+    const title = content.title;
+
     try {
       const endpoint = isTrendingTab
         ? "/admin/content/trending/unblock"
@@ -378,9 +397,22 @@ export default function AdminContentPage() {
 
       if (response.success) {
         refreshCurrentTab();
+        showSuccess(
+          isTrendingTab ? "Shown" : "Unblocked",
+          `Content "${title}" has been ${isTrendingTab ? "unhidden" : "unblocked"}`
+        );
+      } else {
+        showError(
+          isTrendingTab ? "Unhide failed" : "Unblock failed",
+          response.error || `Failed to ${isTrendingTab ? "unhide" : "unblock"} content`
+        );
       }
     } catch (error) {
       console.error("Error unblocking content:", error);
+      showError(
+        isTrendingTab ? "Unhide failed" : "Unblock failed",
+        error instanceof Error ? error.message : `Failed to ${isTrendingTab ? "unhide" : "unblock"} content`
+      );
     }
   };
 

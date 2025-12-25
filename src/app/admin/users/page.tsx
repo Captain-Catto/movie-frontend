@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useToastRedux } from "@/hooks/useToastRedux";
 
 type UserRole = "user" | "admin" | "super_admin" | "viewer";
 
@@ -46,6 +47,7 @@ export default function AdminUsersPage() {
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
   const adminApi = useAdminApi();
+  const { showSuccess, showError } = useToastRedux();
 
   const fetchUsers = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;
@@ -72,6 +74,8 @@ export default function AdminUsersPage() {
   const handleBanUser = async () => {
     if (!banModal.user || !banReason) return;
 
+    const userName = banModal.user.name || banModal.user.email;
+
     try {
       const response = await adminApi.post("/admin/users/ban", {
         userId: banModal.user.id,
@@ -82,21 +86,32 @@ export default function AdminUsersPage() {
         setBanModal({ open: false, user: null });
         setBanReason("");
         fetchUsers();
+        showSuccess("User banned", `User "${userName}" has been banned`);
+      } else {
+        showError("Ban failed", response.error || "Failed to ban user");
       }
     } catch (error) {
       console.error("Error banning user:", error);
+      showError("Ban failed", error instanceof Error ? error.message : "Failed to ban user");
     }
   };
 
   const handleUnbanUser = async (userId: number) => {
+    const user = users.find(u => u.id === userId);
+    const userName = user?.name || user?.email || `User #${userId}`;
+
     try {
       const response = await adminApi.post(`/admin/users/unban/${userId}`);
 
       if (response.success) {
         fetchUsers();
+        showSuccess("User unbanned", `User "${userName}" has been unbanned`);
+      } else {
+        showError("Unban failed", response.error || "Failed to unban user");
       }
     } catch (error) {
       console.error("Error unbanning user:", error);
+      showError("Unban failed", error instanceof Error ? error.message : "Failed to unban user");
     }
   };
 
@@ -174,6 +189,8 @@ export default function AdminUsersPage() {
   const handleUpdateUser = async () => {
     if (!editModal.user) return;
 
+    const userName = editModal.user.name || editModal.user.email;
+
     setEditSaving(true);
     setEditError("");
 
@@ -209,6 +226,7 @@ export default function AdminUsersPage() {
         );
         closeEditModal();
         fetchUsers();
+        showSuccess("User updated", `User "${userName}" has been updated successfully`);
       } else {
         setEditError(response.error || "Failed to update user");
       }
