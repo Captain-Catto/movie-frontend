@@ -8,7 +8,7 @@ export interface EffectSettings {
   intensity: "low" | "medium" | "high";
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T;
@@ -23,11 +23,12 @@ class SettingsApiService {
     try {
       const response = await axiosInstance.get("/settings/effects");
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       return {
         success: false,
         error:
-          error.response?.data?.message || "Failed to fetch effect settings",
+          err.response?.data?.message || "Failed to fetch effect settings",
       };
     }
   }
@@ -44,11 +45,12 @@ class SettingsApiService {
         settings
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
       return {
         success: false,
         error:
-          error.response?.data?.message || "Failed to update effect settings",
+          err.response?.data?.message || "Failed to update effect settings",
       };
     }
   }

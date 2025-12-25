@@ -19,7 +19,7 @@ interface RedEnvelope {
 export default function RedEnvelopeEffect({ intensity = 'medium' }: RedEnvelopeEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const envelopesRef = useRef<RedEnvelope[]>([]);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const canvas = canvasRef.current;

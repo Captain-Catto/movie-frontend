@@ -18,7 +18,7 @@ interface Snowflake {
 export default function SnowEffect({ intensity = 'medium' }: SnowEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const snowflakesRef = useRef<Snowflake[]>([]);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     const canvas = canvasRef.current;
