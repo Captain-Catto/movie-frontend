@@ -40,6 +40,9 @@ export default function EffectSettings() {
   const isInitialMount = useRef(true);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
+  // Track last saved values to prevent infinite loop
+  const lastSavedRef = useRef<string>('');
+
   // Debounced save function
   const debouncedSave = useCallback(() => {
     if (saveTimeoutRef.current) {
@@ -47,7 +50,13 @@ export default function EffectSettings() {
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      dispatch(updateEffectSettings({ enabled, activeEffects, intensity, advancedSettings }));
+      const currentValues = JSON.stringify({ enabled, activeEffects, intensity, advancedSettings });
+
+      // Only save if values actually changed from last save
+      if (currentValues !== lastSavedRef.current) {
+        lastSavedRef.current = currentValues;
+        dispatch(updateEffectSettings({ enabled, activeEffects, intensity, advancedSettings }));
+      }
     }, 1000); // Save after 1 second of no changes
   }, [dispatch, enabled, activeEffects, intensity, advancedSettings]);
 
@@ -55,6 +64,8 @@ export default function EffectSettings() {
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
+      // Store initial values
+      lastSavedRef.current = JSON.stringify({ enabled, activeEffects, intensity, advancedSettings });
       return;
     }
 
