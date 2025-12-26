@@ -44,19 +44,25 @@ export default function EffectSettings() {
 
   const [initialSettings, setInitialSettings] = useState<string>('');
   const [isDirty, setIsDirty] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  // Snapshot on mount
+  // Snapshot on mount and after initial load from API
   useEffect(() => {
-    const snapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
-    setInitialSettings(snapshot);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // If loading just finished (was loading, now not loading) and haven't loaded once yet
+    if (!isLoading && !hasLoadedOnce) {
+      const snapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
+      setInitialSettings(snapshot);
+      setHasLoadedOnce(true);
+      setIsDirty(false);
+    }
+  }, [isLoading, hasLoadedOnce, enabled, activeEffects, redEnvelopeSettings, snowSettings]);
 
   // Track changes
   useEffect(() => {
+    if (!hasLoadedOnce) return; // Don't track until initial load is done
     const current = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
     setIsDirty(current !== initialSettings);
-  }, [enabled, activeEffects, redEnvelopeSettings, snowSettings, initialSettings]);
+  }, [enabled, activeEffects, redEnvelopeSettings, snowSettings, initialSettings, hasLoadedOnce]);
 
   const handleToggleEffects = () => {
     dispatch(toggleEffects());
