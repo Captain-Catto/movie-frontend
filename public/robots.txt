@@ -10,4 +10,4 @@ Disallow: /auth/
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://moviestream.com/sitemap.xml
+Sitemap: https://movie.lequangtridat.com/sitemap.xml
