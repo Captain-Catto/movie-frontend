@@ -22,14 +22,14 @@ export default function VideoUploader() {
     if (file) {
       // Validate file type
       if (!file.type.startsWith("video/")) {
-        setError("Chỉ chấp nhận file video (mp4, avi, mov, etc.)");
+        setError("Only video files accepted (mp4, avi, mov, etc.)");
         return;
       }
 
       // Validate file size (max 500MB)
       const maxSize = 500 * 1024 * 1024; // 500MB
       if (file.size > maxSize) {
-        setError("File quá lớn. Giới hạn 500MB.");
+        setError("File too large. Maximum 500MB.");
         return;
       }
 
@@ -86,7 +86,7 @@ export default function VideoUploader() {
     <div className="max-w-2xl mx-auto p-6 bg-gray-900 rounded-lg">
       <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
         <Cloud className="w-6 h-6" />
-        Upload Video lên AWS S3
+        Upload Video to AWS S3
       </h2>
 
       {/* File Upload Area */}
@@ -103,10 +103,10 @@ export default function VideoUploader() {
         <label htmlFor="video-upload" className="cursor-pointer">
           <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-300 mb-2">
-            Click để chọn video hoặc kéo thả vào đây
+            Click to select video or drag and drop here
           </p>
           <p className="text-sm text-gray-500">
-            Hỗ trợ: MP4, AVI, MOV, etc. (Tối đa 500MB)
+            Supported: MP4, AVI, MOV, etc. (Max 500MB)
           </p>
         </label>
       </div>
@@ -147,12 +147,12 @@ export default function VideoUploader() {
           {uploading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Đang upload...
+              Uploading...
             </>
           ) : (
             <>
               <Cloud className="w-4 h-4" />
-              Upload lên S3
+              Upload to S3
             </>
           )}
         </button>

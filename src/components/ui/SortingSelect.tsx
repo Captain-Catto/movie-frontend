@@ -14,7 +14,7 @@ export default function SortingSelect({
   const sortOptions = [
     {
       value: "popularity",
-      label: "🔥 Phim đang hot",
+      label: "🔥 Trending Now",
     },
     {
       value: "top_rated",
@@ -22,13 +22,13 @@ export default function SortingSelect({
     },
     {
       value: "latest",
-      label: "🆕 Phim mới ra mắt",
+      label: "🆕 Latest Releases",
     },
   ];
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <label className="text-gray-300 text-sm font-medium">Sắp xếp theo:</label>
+      <label className="text-gray-300 text-sm font-medium">Sort by:</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}

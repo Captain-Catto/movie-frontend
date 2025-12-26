@@ -258,7 +258,7 @@ function BrowsePageContent() {
     updateUrlWithFilters(filters, 1, typeFromFilters || null);
   };
 
-  // Xử lý URL parameters từ các trang khác
+  // Handle URL parameters from other pages
   useEffect(() => {
     const countries =
       searchParams.get("countries")?.split(",").filter(Boolean) || [];

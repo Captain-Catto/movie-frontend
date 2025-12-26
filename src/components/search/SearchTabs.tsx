@@ -15,7 +15,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   const tabs = [
     {
       id: "all" as const,
-      label: "Tất cả",
+      label: "All",
       icon: Grid3X3,
     },
     {

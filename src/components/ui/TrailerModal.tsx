@@ -109,7 +109,7 @@ export default function TrailerModal({
               </div>
             ) : (
               <div className="flex items-center justify-center h-full bg-gray-800">
-                <p className="text-gray-400">Chọn video để phát</p>
+                <p className="text-gray-400">Select a video to play</p>
               </div>
             )}
           </div>
@@ -118,7 +118,7 @@ export default function TrailerModal({
           {youtubeVideos.length > 0 && (
             <div className="w-80 border-l border-gray-700 flex flex-col">
               <div className="p-4 border-b border-gray-700 flex-shrink-0">
-                <h3 className="text-white font-semibold">Danh sách Videos</h3>
+                <h3 className="text-white font-semibold">Video List</h3>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {youtubeVideos.map((video) => (

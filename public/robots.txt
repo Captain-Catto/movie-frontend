@@ -1,0 +1,13 @@
+# robots.txt for MovieStream
+
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and auth pages
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://moviestream.com/sitemap.xml

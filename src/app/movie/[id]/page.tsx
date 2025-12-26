@@ -291,66 +291,6 @@ const MovieDetailPageContent = () => {
           stack: err instanceof Error ? err.stack : undefined,
         });
         setError(err instanceof Error ? err.message : "An error occurred");
-
-        // console.log("🔄 [MovieDetailPage] Using fallback mock data");
-        // Fallback to mock data
-        setMovieData({
-          id: parseInt(movieId),
-          title: "Mùa Hè Kinh Hãi",
-          aliasTitle: "I Know What You Did Last Summer",
-          rating: 7.2,
-          year: 2025,
-          runtime: "1h 51m",
-          genres: ["Chiếu Rạp", "Gay Cấn", "Kinh Dị", "Bí Ẩn", "Tâm Lý"],
-          description:
-            "Khi năm người bạn vô tình gây ra một vụ tai nạn xe hơi chết người, họ quyết định che giấu và lập một giao ước giữ bí mật thay vì phải đối mặt với hậu quả.",
-          backgroundImage:
-            "https://static.nutscdn.com/vimg/1920-0/d8a4ebcb52a0c7b9769298a843a355e6.webp",
-          posterImage:
-            "https://static.nutscdn.com/vimg/0-260/5ced6fb31801f8d66238cbdfaa23136d.webp",
-          director: { id: 1, name: "Mike Flanagan" },
-          cast: [
-            {
-              id: 1,
-              name: "Madison Iseman",
-              character: "Main Character",
-              profile_path: null,
-            },
-            {
-              id: 2,
-              name: "Bill Heck",
-              character: "Supporting",
-              profile_path: null,
-            },
-            {
-              id: 3,
-              name: "Brianne Tju",
-              character: "Supporting",
-              profile_path: null,
-            },
-            {
-              id: 4,
-              name: "Ezekiel Goodman",
-              character: "Supporting",
-              profile_path: null,
-            },
-          ],
-          country: "Mỹ",
-          status: "Completed",
-          quality: "4K",
-          language: "Vietsub",
-          scenes: [
-            "https://static.nutscdn.com/vimg/150-0/d8a4ebcb52a0c7b9769298a843a355e6.webp",
-            "https://static.nutscdn.com/vimg/150-0/29cca985f832ea53a5cefa528fa7f666.webp",
-            "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
-            "https://static.nutscdn.com/vimg/150-0/7fb03fc7adc8de125e80bc0d67d0e841.webp",
-          ],
-          tmdbId: parseInt(movieId),
-          genreIds: [27, 9648, 53], // Horror, Mystery, Thriller
-          contentType: "movie" as const,
-          voteCount: 1234,
-          popularity: 85.5,
-        });
       } finally {
         // console.log("✅ [MovieDetailPage] fetchMovieData completed");
         setLoading(false);

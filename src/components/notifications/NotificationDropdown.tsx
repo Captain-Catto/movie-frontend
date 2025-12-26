@@ -218,10 +218,10 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
                 title={
                   !isConnected
-                    ? "⚠️ Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng."
+                    ? "⚠️ Cannot connect to server. Please check your network connection."
                     : notifications.every((n) => n.isRead)
-                    ? "Tất cả thông báo đã được đọc"
-                    : "Đánh dấu tất cả là đã đọc"
+                    ? "All notifications have been read"
+                    : "Mark all as read"
                 }
               >
                 {isMarkingAllAsRead ? "Marking..." : "Mark all read"}

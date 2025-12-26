@@ -7,7 +7,7 @@ export default function ContinueWatchingPage() {
       <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
         <Container size="narrow" withHeaderOffset className="py-12">
           <h1 className="text-4xl font-bold text-white mb-6">
-            ⏱️ Xem tiếp
+            ⏱️ Continue Watching
           </h1>
 
           <div className="bg-gray-800/50 rounded-xl p-12 text-center border border-gray-700">
@@ -16,13 +16,13 @@ export default function ContinueWatchingPage() {
               No viewing history
             </h2>
             <p className="text-gray-400 mb-6">
-              Bắt đầu xem phim để theo dõi tiến trình của bạn
+              Start watching movies to track your progress
             </p>
             <a
               href="/browse"
               className="inline-block px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
             >
-              Tìm phim hay
+              Browse Movies
             </a>
           </div>
         </Container>

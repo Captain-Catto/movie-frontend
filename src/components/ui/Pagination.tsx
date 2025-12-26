@@ -114,7 +114,7 @@ export function Pagination({
               ? "text-gray-500 cursor-not-allowed bg-gray-800"
               : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white"
           )}
-          aria-label="Trang trước"
+          aria-label="Previous page"
         >
           &lt;
         </button>
@@ -124,7 +124,7 @@ export function Pagination({
           {isInputMode ? (
             <form onSubmit={handleInputSubmit} className="flex items-center">
               <span className="text-sm font-medium text-gray-300 mr-2">
-                Trang
+                Page
               </span>
               <input
                 type="number"
@@ -147,7 +147,7 @@ export function Pagination({
               className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
             >
               <span>
-                Trang {currentPage} / {totalPages}
+                Page {currentPage} / {totalPages}
               </span>
             </button>
           )}
@@ -200,7 +200,7 @@ export function Pagination({
                       className="flex items-center"
                     >
                       <span className="text-xs font-medium text-gray-400 mr-1">
-                        Đến
+                        Go to
                       </span>
                       <input
                         type="number"
@@ -222,7 +222,7 @@ export function Pagination({
                         setDesktopInputValue("");
                       }}
                       className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors"
-                      title={`Nhảy đến trang (1-${totalPages})`}
+                      title={`Jump to page (1-${totalPages})`}
                     >
                       ...
                     </button>

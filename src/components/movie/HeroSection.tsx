@@ -156,7 +156,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               </div>
               {/* Overlay */}
               {/* <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" /> */}
-              {/* Overlay có 2 mép trái phải thì xám nhẹ còn chính giữa hơn 50% màu bình thường */}
+              {/* Overlay with light gray on left and right edges, normal color in center */}
               <div className="absolute inset-0 bg-gradient-to-r from-gray-800/90 via-gray-800/30 to-gray-800/90" />{" "}
               {/* Safe Area Content */}
               <div className="safe-area relative z-20 h-full flex items-center">

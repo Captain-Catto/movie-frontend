@@ -331,7 +331,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               <div>
                 <h3 className="text-xl font-bold text-white">Edit Profile</h3>
                 <p className="text-sm text-gray-400">
-                  Cập nhật thông tin của bạn
+                  Update your information
                 </p>
               </div>
               <button
@@ -346,7 +346,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
-                  Tên hiển thị
+                  Display name
                 </label>
                 <input
                   value={profileForm.name}
@@ -357,7 +357,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                     }))
                   }
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"
-                  placeholder="Tên của bạn"
+                  placeholder="Your name"
                 />
               </div>
 
@@ -366,13 +366,13 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                   Email
                 </label>
                 <div className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400">
-                  {user?.email || "Chưa có email"}
+                  {user?.email || "No email"}
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm text-gray-300 mb-1">
-                  Mật khẩu (để trống nếu không đổi)
+                  Password (leave blank to keep current)
                 </label>
                 <input
                   type="password"
@@ -402,12 +402,12 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 }}
                 className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
               >
-                Hủy
+                Cancel
               </button>
               <button
                 onClick={async () => {
                   if (!user?.id) {
-                    setProfileError("Không tìm thấy thông tin người dùng");
+                    setProfileError("User information not found");
                     return;
                   }
 
@@ -427,7 +427,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                       payload
                     );
                     if (!res.success) {
-                      setProfileError(res.error || "Cập nhật thất bại");
+                      setProfileError(res.error || "Update failed");
                       return;
                     }
                     setProfileOpen(false);
@@ -437,7 +437,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                     });
                   } catch (err) {
                     console.error("Update profile error:", err);
-                    setProfileError("Không thể cập nhật");
+                    setProfileError("Unable to update");
                   } finally {
                     setProfileSaving(false);
                   }
@@ -445,7 +445,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 disabled={profileSaving}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60"
               >
-                {profileSaving ? "Đang lưu..." : "Lưu"}
+                {profileSaving ? "Saving..." : "Save"}
               </button>
             </div>
           </div>

@@ -429,7 +429,7 @@ const PersonDetailPage = () => {
                     </>
                   ) : (
                     <p className="text-gray-400 italic">
-                      Biography hiện chưa có
+                      Biography not available yet
                     </p>
                   )}
                 </div>
@@ -519,8 +519,9 @@ const PersonDetailPage = () => {
               (activeTab === "crew" && crewItems.length === 0)) && (
               <div className="text-center py-12">
                 <p className="text-gray-400">
-                  No data available{" "}
-                  {activeTab === "cast" ? "diễn xuất" : "thành viên đoàn phim"}
+                  No{" "}
+                  {activeTab === "cast" ? "acting credits" : "crew credits"}{" "}
+                  available
                 </p>
               </div>
             )}

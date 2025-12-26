@@ -80,7 +80,7 @@ export const useSearch = (): UseSearchReturn => {
             totalPages: 1,
           };
 
-          // Backend trả về data đúng format rồi, chỉ cần map để set mediaType
+          // Backend returns data in correct format, just need to map to set mediaType
           const processedResults: SearchResult[] = Array.isArray(responseData)
             ? responseData.map((item: SearchResult) => ({
                 ...item,

@@ -126,12 +126,13 @@ export const formatRelativeTime = (dateInput: string | Date | null | undefined):
 };
 
 /**
- * Format for Vietnamese locale (optional - if you want Vietnamese)
+ * Format for Vietnamese locale (optional - legacy support)
  * @param dateInput - UTC date from backend
+ * @deprecated Use formatDateTime instead
  */
 export const formatDateTimeVN = (dateInput: string | Date | null | undefined): string => {
   const date = parseDate(dateInput);
-  if (!date) return 'Không rõ thời gian';
+  if (!date) return 'Unknown time';
 
   try {
     return date.toLocaleString('vi-VN', {
@@ -144,7 +145,7 @@ export const formatDateTimeVN = (dateInput: string | Date | null | undefined): s
     });
   } catch (error) {
     console.error('❌ Vietnamese date formatting error:', error);
-    return 'Thời gian không hợp lệ';
+    return 'Invalid time';
   }
 };
 

@@ -65,7 +65,7 @@ const MoviesGrid = ({
               <h3 className="text-lg font-medium text-white mb-2">
                 No movies found
               </h3>
-              <p>Danh sách phim hiện tại trống</p>
+              <p>The current movie list is empty</p>
             </div>
           </div>
         )}

@@ -20,7 +20,7 @@ export function CommentForm({
   editingComment,
   onSubmit,
   onCancel,
-  placeholder = "Viết bình luận",
+  placeholder = "Write a comment",
   className = "",
 }: CommentFormProps) {
   const [content, setContent] = useState(editingComment?.content || "");
@@ -125,18 +125,18 @@ export function CommentForm({
     e.preventDefault();
 
     if (!isAuthenticated) {
-      setContentError("Bạn cần đăng nhập để bình luận");
+      setContentError("You need to login to comment");
       return;
     }
 
     const trimmedContent = content.trim();
     if (!trimmedContent) {
-      setContentError("Nội dung không được để trống");
+      setContentError("Content cannot be empty");
       return;
     }
 
     if (trimmedContent.length > 1000) {
-      setContentError("Nội dung quá dài (tối đa 1000 ký tự)");
+      setContentError("Content is too long (max 1000 characters)");
       return;
     }
 
@@ -148,7 +148,7 @@ export function CommentForm({
       const filterResult = await checkContent(trimmedContent);
       if (!filterResult.isAllowed) {
         setContentError(
-          filterResult.reason || "Nội dung không phù hợp"
+          filterResult.reason || "Inappropriate content"
         );
         return;
       }
@@ -171,7 +171,7 @@ export function CommentForm({
       setContentError(null);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Không thể gửi bình luận";
+        error instanceof Error ? error.message : "Unable to send comment";
       setContentError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -190,7 +190,7 @@ export function CommentForm({
     return (
       <div className="my-area bg-gray-800 rounded-lg p-4">
         <div className="text-center text-gray-400">
-          Vui lòng đăng nhập để bình luận
+          Please login to comment
         </div>
       </div>
     );
@@ -211,7 +211,7 @@ export function CommentForm({
           />
         </div>
         <div className="info">
-          <small className="text-gray-400 text-xs block">Bình luận với tên</small>
+          <small className="text-gray-400 text-xs block">Commenting as</small>
           <span className="text-white text-sm font-medium">{user?.name || "User"}</span>
         </div>
       </div>
@@ -240,7 +240,7 @@ export function CommentForm({
               {loadingMentions ? (
                 <div className="p-3 text-center text-gray-400 text-sm">
                   <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" />
-                  Đang tìm...
+                  Searching...
                 </div>
               ) : mentionUsers.length > 0 ? (
                 <ul className="py-1">
@@ -264,11 +264,11 @@ export function CommentForm({
                 </ul>
               ) : mentionQuery.length >= 2 ? (
                 <div className="p-3 text-center text-gray-400 text-sm">
-                  Không tìm thấy người dùng
+                  No users found
                 </div>
               ) : (
                 <div className="p-3 text-center text-gray-400 text-sm">
-                  Nhập ít nhất 2 ký tự để tìm kiếm
+                  Enter at least 2 characters to search
                 </div>
               )}
             </div>

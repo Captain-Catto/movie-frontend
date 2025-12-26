@@ -356,7 +356,7 @@ export function CommentItem({
               editingComment={currentComment}
               onSubmit={handleEditSubmit}
               onCancel={handleCancelEdit}
-              placeholder="Chỉnh sửa bình luận"
+              placeholder="Edit comment"
             />
           </div>
         ) : (

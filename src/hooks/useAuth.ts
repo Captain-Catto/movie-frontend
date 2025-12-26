@@ -38,7 +38,7 @@ export interface UseAuthReturn {
 
 /**
  * useAuth hook (Redux-based)
- * Nguồn state duy nhất cho auth (token, refreshToken, user)
+ * Single source of state for auth (token, refreshToken, user)
  */
 export function useAuth(): UseAuthReturn {
   const dispatch = useAppDispatch();

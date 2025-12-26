@@ -20,11 +20,11 @@ interface FavoriteButtonProps {
     media_type?: "movie" | "tv";
   };
   className?: string;
-  // thêm class active để ép style khi favorited
+  // add active class to enforce style when favorited
   activeClassName?: string;
   iconOnly?: boolean;
   size?: "default" | "compact";
-  stopPropagation?: boolean; // chặn click lên cha
+  stopPropagation?: boolean; // prevent click propagation to parent
   preventDefault?: boolean;
 }
 

@@ -1,4 +1,4 @@
-// Utility để fetch genres từ TMDB API
+// Utility to fetch genres from TMDB API
 // Movie URL: https://api.themoviedb.org/3/genre/movie/list?api_key=YOUR_API_KEY
 // TV URL: https://api.themoviedb.org/3/genre/tv/list?api_key=YOUR_API_KEY
 
@@ -7,47 +7,47 @@ export const TMDB_MOVIE_GENRES_ENDPOINT =
 export const TMDB_TV_GENRES_ENDPOINT =
   "https://api.themoviedb.org/3/genre/tv/list";
 
-// Movie genres from TMDB API - Vietnamese translation
+// Movie genres from TMDB API - English translation
 export const TMDB_MOVIE_GENRE_MAP: Record<number, string> = {
-  28: "Hành động",
-  12: "Phiêu lưu",
-  16: "Hoạt hình",
-  35: "Hài",
-  80: "Hình sự",
-  99: "Tài liệu",
-  18: "Chính kịch",
-  10751: "Gia đình",
-  14: "Viễn tưởng",
-  36: "Lịch sử",
-  27: "Kinh dị",
-  10402: "Âm nhạc",
-  9648: "Bí ẩn",
-  10749: "Lãng mạn",
-  878: "Khoa học viễn tưởng",
-  10770: "Phim truyền hình",
-  53: "Giật gân",
-  10752: "Chiến tranh",
-  37: "Miền tây",
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Science Fiction",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
 };
 
-// TV genres from TMDB API - Vietnamese translation
+// TV genres from TMDB API - English translation
 export const TMDB_TV_GENRE_MAP: Record<number, string> = {
-  10759: "Hành động & Phiêu lưu",
-  16: "Hoạt hình",
-  35: "Hài",
-  80: "Hình sự",
-  99: "Tài liệu",
-  18: "Chính kịch",
-  10751: "Gia đình",
-  10762: "Trẻ em",
-  9648: "Bí ẩn",
-  10763: "Tin tức",
-  10764: "Thực tế",
-  10765: "Khoa học viễn tưởng",
-  10766: "Phim dài tập",
-  10767: "Talk show",
-  10768: "Chiến tranh & Chính trị",
-  37: "Miền tây",
+  10759: "Action & Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  10762: "Kids",
+  9648: "Mystery",
+  10763: "News",
+  10764: "Reality",
+  10765: "Sci-Fi & Fantasy",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics",
+  37: "Western",
 };
 
 // Combined genre map for both movies and TV
@@ -65,7 +65,7 @@ export interface TMDBGenresResponse {
   genres: TMDBGenre[];
 }
 
-// Function để fetch movie genres từ TMDB (nếu cần update)
+// Function to fetch movie genres from TMDB (if update needed)
 export async function fetchTMDBMovieGenres(
   apiKey: string
 ): Promise<TMDBGenresResponse> {
@@ -78,7 +78,7 @@ export async function fetchTMDBMovieGenres(
   return response.json();
 }
 
-// Function để fetch TV genres từ TMDB (nếu cần update)
+// Function to fetch TV genres from TMDB (if update needed)
 export async function fetchTMDBTVGenres(
   apiKey: string
 ): Promise<TMDBGenresResponse> {

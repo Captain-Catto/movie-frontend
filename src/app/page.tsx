@@ -224,106 +224,12 @@ export default function Home() {
     }
   }, [upcomingVisible, fetched.upcoming, responsiveLimit]);
 
-  // Fallback static hero data
-  const fallbackHeroMoviesRaw = [
-    {
-      id: "119051",
-      tmdbId: 119051,
-      title: "Mùa Hè Kinh Hãi",
-      aliasTitle: "I Know What You Did Last Summer",
-      rating: 7.2,
-      year: 2025,
-      duration: "1h 51m",
-      season: "Phần 1",
-      episode: "Tập 14",
-      genres: ["Chiếu Rạp", "Gay Cấn", "Kinh Dị", "Bí Ẩn", "Tâm Lý"],
-      description:
-        "Khi năm người bạn vô tình gây ra một vụ tai nạn xe hơi chết người, họ quyết định che giấu và lập một giao ước giữ bí mật thay vì phải đối mặt với hậu quả. Một năm sau, quá khứ trở lại ám ảnh họ, buộc họ phải đối diện với một sự thật khủng khiếp: có ai đó biết những gì họ đã làm vào mùa hè năm ngoái… và quyết tâm trả thù họ.",
-      backgroundImage:
-        "https://static.nutscdn.com/vimg/1920-0/d8a4ebcb52a0c7b9769298a843a355e6.webp",
-      posterImage:
-        "https://static.nutscdn.com/vimg/0-260/5ced6fb31801f8d66238cbdfaa23136d.webp",
-      scenes: [
-        "https://static.nutscdn.com/vimg/150-0/d8a4ebcb52a0c7b9769298a843a355e6.webp",
-        "https://static.nutscdn.com/vimg/150-0/29cca985f832ea53a5cefa528fa7f666.webp",
-        "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
-      ],
-      href: "/tv/119051",
-    },
-    {
-      id: "157239",
-      tmdbId: 157239,
-      title: "Dính Lẹo",
-      aliasTitle: "Together",
-      rating: 6.8,
-      year: 2025,
-      duration: "1h 42m",
-      season: "Phần 1",
-      episode: "Tập 8",
-      genres: ["Chiếu Rạp", "Gay Cấn", "Kinh Dị", "Tâm Lý"],
-      description:
-        "Việc chuyển về vùng quê hẻo lánh đã đủ khiến mối quan hệ của cặp đôi này đứng bên bờ vực tan vỡ — nhưng một cuộc chạm trán siêu nhiên bất ngờ lại khởi đầu cho một sự biến đổi cực đoan về tình yêu, cuộc sống… và cả thể xác của họ.",
-      backgroundImage:
-        "https://static.nutscdn.com/vimg/1920-0/a7d2094512631c096231413e5bce5e29.webp",
-      posterImage:
-        "https://static.nutscdn.com/vimg/0-260/f4ba899bc021b4de498255efd6011274.png",
-      scenes: [
-        "https://static.nutscdn.com/vimg/150-0/29cca985f832ea53a5cefa528fa7f666.webp",
-        "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
-        "https://static.nutscdn.com/vimg/150-0/7fb03fc7adc8de125e80bc0d67d0e841.webp",
-      ],
-      href: "/tv/157239",
-    },
-    {
-      id: "1011985",
-      tmdbId: 1011985,
-      title: "Elio: Cậu Bé Đến Từ Trái Đất",
-      aliasTitle: "Elio",
-      rating: 7.0,
-      year: 2025,
-      duration: "1h 37m",
-      season: "Phần 1",
-      episode: "Full",
-      genres: [
-        "Chiếu Rạp",
-        "Gia Đình",
-        "Khoa Học",
-        "Thiếu Nhi",
-        "Hài",
-        "Hoạt Hình",
-        "Phiêu Lưu",
-      ],
-      description:
-        "Điều gì sẽ xảy ra nếu chính thứ bạn đang tìm kiếm lại tìm đến bạn trước? Trong cuộc phiêu lưu dở khóc dở cười trên màn ảnh rộng của Pixar, Elio – cậu bé mê mẩn người ngoài hành tinh – bất ngờ bị cuốn vào Liên Hiệp Thiên Hà.",
-      backgroundImage:
-        "https://static.nutscdn.com/vimg/1920-0/b83f91db6c94d70423914163dc77feae.jpg",
-      posterImage:
-        "https://static.nutscdn.com/vimg/0-260/0e7257a6bfb5434095c2d425aa7306a5.png",
-      scenes: [
-        "https://static.nutscdn.com/vimg/150-0/b83f91db6c94d70423914163dc77feae.jpg",
-        "https://static.nutscdn.com/vimg/150-0/7fb03fc7adc8de125e80bc0d67d0e841.webp",
-        "https://static.nutscdn.com/vimg/150-0/fdf26f9295adea7a951f615d6171cfc2.jpg",
-      ],
-      href: "/movie/1011985",
-    },
-  ];
-
-  const fallbackHeroMovies: MovieCardData[] = fallbackHeroMoviesRaw.map(
-    (movie) => ({
-      ...movie,
-      poster: movie.posterImage || movie.backgroundImage,
-    })
-  );
-
   // Use fetched movies (no fallback - show skeleton when loading)
   const nowPlayingToDisplay = nowPlayingMovies;
   const popularToDisplay = popularMovies;
   const topRatedToDisplay = topRatedMovies;
   const upcomingToDisplay = upcomingMovies;
-
-  // Use trending hero movies if available, otherwise fall back to static data (hero needs fallback for proper display)
-  const heroMoviesToDisplay =
-    heroMovies.length > 0 ? heroMovies : fallbackHeroMovies;
+  const heroMoviesToDisplay = heroMovies;
 
   return (
     <Layout>

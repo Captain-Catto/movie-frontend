@@ -109,7 +109,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="#"
+                  href="/"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Home
@@ -117,7 +117,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/browse?sort=latest"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   New Releases
@@ -125,7 +125,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/movies"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Movies
@@ -133,7 +133,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/tv"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   TV Series
@@ -141,10 +141,10 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/trending"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  In Theaters
+                  Trending
                 </Link>
               </li>
             </ul>
@@ -156,7 +156,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="#"
+                  href="/browse?genre=28"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Action
@@ -164,7 +164,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/browse?genre=10749"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Romance
@@ -172,7 +172,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/browse?genre=35"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Comedy
@@ -180,7 +180,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/browse?genre=16"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Animation
@@ -188,7 +188,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="#"
+                  href="/browse?genre=27"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Horror
@@ -248,19 +248,19 @@ const Footer = () => {
             </p>
             <div className="flex space-x-6">
               <Link
-                href="#"
+                href="/terms"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
                 Terms of Use
               </Link>
               <Link
-                href="#"
+                href="/privacy"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
-                href="#"
+                href="/faq"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
                 FAQ

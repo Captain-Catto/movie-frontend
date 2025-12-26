@@ -26,21 +26,21 @@ export default function RegisterForm({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Vui lòng nhập tên người dùng";
+      newErrors.name = "Please enter your username";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = "Please enter your email";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = "Invalid email format";
     }
 
     if (!formData.password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+      newErrors.password = "Please enter your password";
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu không khớp";
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -60,7 +60,7 @@ export default function RegisterForm({
       await onSuccess(formData.name, formData.email, formData.password);
     } catch (error) {
       console.error("Registration error:", error);
-      onError("Đã xảy ra lỗi. Vui lòng thử lại.");
+      onError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -79,13 +79,13 @@ export default function RegisterForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name" className="text-white">
-          Tên người dùng <span className="text-red-500">*</span>
+          Username <span className="text-red-500">*</span>
         </Label>
         <Input
           id="name"
           name="name"
           type="text"
-          placeholder="VD: nguyenvana"
+          placeholder="e.g., john_doe"
           value={formData.name}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -117,7 +117,7 @@ export default function RegisterForm({
 
       <div className="space-y-2">
         <Label htmlFor="password" className="text-white">
-          Mật khẩu <span className="text-red-500">*</span>
+          Password <span className="text-red-500">*</span>
         </Label>
         <Input
           id="password"
@@ -138,7 +138,7 @@ export default function RegisterForm({
 
       <div className="space-y-2">
         <Label htmlFor="confirmPassword" className="text-white">
-          Xác nhận mật khẩu <span className="text-red-500">*</span>
+          Confirm Password <span className="text-red-500">*</span>
         </Label>
         <Input
           id="confirmPassword"
@@ -162,7 +162,7 @@ export default function RegisterForm({
         className="w-full bg-red-600 hover:bg-red-700 text-white"
         disabled={isLoading}
       >
-        {isLoading ? "Đang đăng ký..." : "Đăng ký"}
+        {isLoading ? "Registering..." : "Register"}
       </Button>
     </form>
   );

@@ -110,12 +110,12 @@ const TableFilters = ({
   ];
 
   const sortOptions = [
-    { value: "popularity", label: "Phổ biến" },
-    { value: "latest", label: "Mới nhất" },
-    { value: "top_rated", label: "Đánh giá cao" },
-    { value: "updated", label: "Mới cập nhật" },
-    { value: "imdb", label: "Điểm IMDb" },
-    { value: "views", label: "Lượt xem" },
+    { value: "popularity", label: "Popular" },
+    { value: "latest", label: "Latest" },
+    { value: "top_rated", label: "Top Rated" },
+    { value: "updated", label: "Recently Updated" },
+    { value: "imdb", label: "IMDb Score" },
+    { value: "views", label: "Most Viewed" },
   ];
 
   const handleMultiFilterClick = (
@@ -238,17 +238,17 @@ const TableFilters = ({
                 d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
               />
             </svg>
-            <h3 className="text-white font-small text-xs">Bộ lọc</h3>
+            <h3 className="text-white font-small text-xs">Filters</h3>
           </div>
         </div>
       )}
 
       {/* Filter Content */}
       <div className={`${showToggle && !isExpanded ? "hidden" : "block"} p-4`}>
-        {/* Quốc gia */}
+        {/* Country */}
         <div className="fe-row mb-4">
           <div className="fe-name text-white font-medium mb-2 min-w-[100px]">
-            Quốc gia:
+            Country:
           </div>
           <div className="fe-results flex flex-wrap gap-2">
             {countries.map((country) => (
@@ -273,9 +273,9 @@ const TableFilters = ({
           </div>
         </div>
 
-        {/* Loại phim */}
+        {/* Movie Type */}
         <div className="fe-row mb-4">
-          <div className="fe-name text-white font-medium mb-2">Loại phim:</div>
+          <div className="fe-name text-white font-medium mb-2">Type:</div>
           <div className="fe-results flex flex-wrap gap-2">
             {movieTypes.map((type) => (
               <div
@@ -293,9 +293,9 @@ const TableFilters = ({
           </div>
         </div>
 
-        {/* Thể loại */}
+        {/* Genre */}
         <div className="fe-row mb-4">
-          <div className="fe-name text-white font-medium mb-2">Thể loại:</div>
+          <div className="fe-name text-white font-medium mb-2">Genre:</div>
           <div className="fe-results flex flex-wrap gap-2 max-h-32 overflow-y-auto">
             {genres.map((genre) => (
               <div
@@ -317,10 +317,10 @@ const TableFilters = ({
           </div>
         </div>
 
-        {/* Năm sản xuất */}
+        {/* Release Year */}
         <div className="fe-row mb-4">
           <div className="fe-name text-white font-medium mb-2">
-            Năm sản xuất:
+            Year:
           </div>
           <div className="fe-results flex flex-wrap gap-2 items-center">
             {years.map((year) => (
@@ -345,7 +345,7 @@ const TableFilters = ({
                 <input
                   type="text"
                   maxLength={4}
-                  placeholder="Nhập năm + Enter"
+                  placeholder="Enter year + Enter"
                   value={filters.customYear}
                   onChange={handleCustomYearChange}
                   onKeyPress={handleCustomYearSubmit}
@@ -373,7 +373,7 @@ const TableFilters = ({
           {/* Selected Years Display */}
           {filters.years.length > 0 && (
             <div className="mt-3">
-              <div className="text-sm text-gray-400 mb-2">Năm đã chọn:</div>
+              <div className="text-sm text-gray-400 mb-2">Selected years:</div>
               <div className="flex flex-wrap gap-2">
                 {filters.years.map((selectedYear) => (
                   <span
@@ -394,9 +394,9 @@ const TableFilters = ({
           )}
         </div>
 
-        {/* Sắp xếp */}
+        {/* Sort By */}
         <div className="fe-row mb-6">
-          <div className="fe-name text-white font-medium mb-2">Sắp xếp:</div>
+          <div className="fe-name text-white font-medium mb-2">Sort by:</div>
           <div className="fe-results flex flex-wrap gap-2">
             {sortOptions.map((option) => (
               <div
@@ -423,7 +423,7 @@ const TableFilters = ({
               onClick={handleApplyFilters}
               className="btn bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-medium transition-colors flex items-center space-x-2"
             >
-              <span>Lọc kết quả</span>
+              <span>Apply Filters</span>
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -444,7 +444,7 @@ const TableFilters = ({
                 onClick={onClose}
                 className="btn bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white px-4 py-2 rounded-full font-medium transition-colors"
               >
-                Đóng
+                Close
               </button>
             )}
           </div>

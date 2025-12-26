@@ -28,7 +28,7 @@ function MoviesPageContent() {
   const [totalPages, setTotalPages] = useState(1);
 
   const handleFilterChange = (filters: FilterOptions) => {
-    // Chuyển sang trang browse với filters
+    // Navigate to browse page with filters
     const params = new URLSearchParams();
     if (filters.countries?.length)
       params.set("countries", filters.countries.join(","));

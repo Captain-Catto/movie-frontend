@@ -24,13 +24,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "Vui lòng nhập email";
+      newErrors.email = "Please enter your email";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Email không hợp lệ";
+      newErrors.email = "Invalid email format";
     }
 
     if (!formData.password) {
-      newErrors.password = "Vui lòng nhập mật khẩu";
+      newErrors.password = "Please enter your password";
     }
 
     setErrors(newErrors);
@@ -49,13 +49,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     try {
       const result = await onSubmit(formData.email, formData.password);
       if (!result.success) {
-        setSubmitError(result.error || "Đăng nhập thất bại");
+        setSubmitError(result.error || "Login failed");
       } else {
         setSubmitError("");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setSubmitError("Đã xảy ra lỗi. Vui lòng thử lại.");
+      setSubmitError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +100,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="login-password" className="text-white">
-          Mật khẩu
+          Password
         </Label>
         <Input
           id="login-password"
@@ -124,7 +124,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           type="button"
           className="text-sm text-red-400 hover:text-red-300 transition-colors"
         >
-          Quên mật khẩu?
+          Forgot password?
         </button>
       </div>
 
@@ -133,7 +133,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         className="w-full bg-red-600 hover:bg-red-700 text-white"
         disabled={isLoading}
       >
-        {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+        {isLoading ? "Logging in..." : "Login"}
       </Button>
     </form>
   );

@@ -35,14 +35,14 @@ export default function MovieUploader() {
     if (file) {
       // Validate file type
       if (!file.type.startsWith("video/")) {
-        setError("Chỉ chấp nhận file video (mp4, avi, mov, etc.)");
+        setError("Only video files accepted (mp4, avi, mov, etc.)");
         return;
       }
 
       // Validate file size (max 500MB for demo)
       const maxSize = 500 * 1024 * 1024; // 500MB
       if (file.size > maxSize) {
-        setError("File quá lớn. Giới hạn 500MB cho demo.");
+        setError("File too large. Maximum 500MB for demo.");
         return;
       }
 
@@ -59,12 +59,12 @@ export default function MovieUploader() {
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setError("Vui lòng chọn file video");
+      setError("Please select a video file");
       return;
     }
 
     if (!movieData.title.trim()) {
-      setError("Vui lòng nhập tên phim");
+      setError("Please enter movie title");
       return;
     }
 
@@ -152,7 +152,7 @@ export default function MovieUploader() {
             <CheckCircle className="text-green-500" size={24} />
             <div>
               <h3 className="text-green-400 font-semibold">
-                Upload thành công!
+                Upload successful!
               </h3>
               <p className="text-green-300 text-sm">
                 Movie uploaded to AWS S3 and ready to stream
@@ -171,25 +171,25 @@ export default function MovieUploader() {
               onClick={resetUpload}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
-              Upload phim khác
+              Upload another movie
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-sm text-gray-300">
             <div>
-              <strong>File gốc:</strong> {uploadedMovie.originalName}
+              <strong>Original file:</strong> {uploadedMovie.originalName}
             </div>
             <div>
-              <strong>Kích thước:</strong>{" "}
+              <strong>Size:</strong>{" "}
               {formatFileSize(uploadedMovie.fileSize)}
             </div>
             <div>
-              <strong>Upload lúc:</strong>{" "}
-              {new Date(uploadedMovie.uploadDate).toLocaleString("vi-VN")}
+              <strong>Uploaded at:</strong>{" "}
+              {new Date(uploadedMovie.uploadDate).toLocaleString("en-US")}
             </div>
             <div className="flex items-center">
               <Cloud className="mr-1 text-blue-400" size={16} />
-              <strong>Lưu trữ:</strong> AWS S3
+              <strong>Storage:</strong> AWS S3
             </div>
           </div>
 
@@ -228,7 +228,7 @@ export default function MovieUploader() {
         {/* File Upload */}
         <div className="mb-6">
           <label className="block text-white font-medium mb-2">
-            Chọn file video
+            Select video file
           </label>
           <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-gray-500 transition-colors">
             <input
@@ -257,10 +257,10 @@ export default function MovieUploader() {
                 <div className="space-y-2">
                   <Upload className="mx-auto text-gray-400" size={48} />
                   <p className="text-gray-400">
-                    Click để chọn file video hoặc kéo thả vào đây
+                    Click to select video or drag and drop here
                   </p>
                   <p className="text-gray-500 text-sm">
-                    Hỗ trợ: MP4, AVI, MOV, WMV (Tối đa 500MB)
+                    Supported: MP4, AVI, MOV, WMV (Max 500MB)
                   </p>
                 </div>
               )}
@@ -272,7 +272,7 @@ export default function MovieUploader() {
         <div className="space-y-4 mb-6">
           <div>
             <label className="block text-white font-medium mb-2">
-              Tên phim *
+              Movie title *
             </label>
             <input
               type="text"
@@ -281,14 +281,14 @@ export default function MovieUploader() {
                 setMovieData((prev) => ({ ...prev, title: e.target.value }))
               }
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-              placeholder="Nhập tên phim"
+              placeholder="Enter movie title"
               disabled={uploading}
               required
             />
           </div>
 
           <div>
-            <label className="block text-white font-medium mb-2">Mô tả</label>
+            <label className="block text-white font-medium mb-2">Description</label>
             <textarea
               value={movieData.description}
               onChange={(e) =>
@@ -298,7 +298,7 @@ export default function MovieUploader() {
                 }))
               }
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
-              placeholder="Mô tả về phim (tùy chọn)"
+              placeholder="Movie description (optional)"
               rows={3}
               disabled={uploading}
             />
@@ -306,7 +306,7 @@ export default function MovieUploader() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-white font-medium mb-2">Năm</label>
+              <label className="block text-white font-medium mb-2">Year</label>
               <input
                 type="number"
                 value={movieData.year}
@@ -325,7 +325,7 @@ export default function MovieUploader() {
 
             <div>
               <label className="block text-white font-medium mb-2">
-                Thể loại
+                Genre
               </label>
               <select
                 value={movieData.genre}
@@ -336,17 +336,17 @@ export default function MovieUploader() {
                 disabled={uploading}
               >
                 <option value="Demo">Demo</option>
-                <option value="Action">Hành động</option>
-                <option value="Drama">Chính kịch</option>
-                <option value="Comedy">Hài kịch</option>
-                <option value="Horror">Kinh dị</option>
-                <option value="Documentary">Tài liệu</option>
+                <option value="Action">Action</option>
+                <option value="Drama">Drama</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Horror">Horror</option>
+                <option value="Documentary">Documentary</option>
               </select>
             </div>
 
             <div>
               <label className="block text-white font-medium mb-2">
-                Thời lượng
+                Duration
               </label>
               <input
                 type="text"
@@ -399,19 +399,19 @@ export default function MovieUploader() {
           ) : (
             <div className="flex items-center justify-center space-x-2">
               <Cloud size={20} />
-              <span>Upload lên S3</span>
+              <span>Upload to S3</span>
             </div>
           )}
         </button>
 
         {/* Instructions */}
         <div className="mt-6 text-sm text-gray-400">
-          <p className="font-medium mb-2">📝 Lưu ý:</p>
+          <p className="font-medium mb-2">📝 Notes:</p>
           <ul className="space-y-1 text-xs">
-            <li>• File sẽ được upload lên AWS S3 bucket</li>
-            <li>• Cần cấu hình AWS credentials trong backend</li>
-            <li>• File video sẽ có thể stream trực tiếp từ S3</li>
-            <li>• Giới hạn 500MB cho demo (có thể tăng)</li>
+            <li>• File will be uploaded to AWS S3 bucket</li>
+            <li>• AWS credentials configuration required in backend</li>
+            <li>• Video files can be streamed directly from S3</li>
+            <li>• 500MB limit for demo (can be increased)</li>
           </ul>
         </div>
       </div>

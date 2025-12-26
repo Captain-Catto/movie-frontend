@@ -4,8 +4,8 @@ import { Component, ReactNode, ErrorInfo } from "react";
 
 interface HydrationBoundaryProps {
   children: ReactNode;
-  fallback?: ReactNode; // UI thay thế khi lỗi hydration
-  onError?: (error: Error, errorInfo: ErrorInfo) => void; // Callback khi bắt lỗi
+  fallback?: ReactNode; // Fallback UI when hydration error occurs
+  onError?: (error: Error, errorInfo: ErrorInfo) => void; // Callback when error is caught
 }
 
 interface HydrationBoundaryState {
@@ -14,23 +14,23 @@ interface HydrationBoundaryState {
 }
 
 /**
- * Error Boundary chuyên bắt và xử lý lỗi hydration của React.
+ * Error Boundary specialized in catching and handling React hydration errors.
  *
- * Bắt lỗi khi HTML từ server không khớp với render từ client.
- * Cung cấp fallback UI hoặc tự phục hồi khi xảy ra lỗi.
+ * Catches errors when server HTML doesn't match client render.
+ * Provides fallback UI or auto-recovers when errors occur.
  *
  * @example
- * // Cơ bản
+ * // Basic
  * <HydrationBoundary>
- *   <ComponentCoTheLoi />
+ *   <ComponentThatMightFail />
  * </HydrationBoundary>
  *
- * // Với fallback UI
- * <HydrationBoundary fallback={<div>Không thể tải nội dung</div>}>
+ * // With fallback UI
+ * <HydrationBoundary fallback={<div>Unable to load content</div>}>
  *   <DynamicContent />
  * </HydrationBoundary>
  *
- * // Với error logging
+ * // With error logging
  * <HydrationBoundary onError={(error) => console.error(error)}>
  *   <ComplexComponent />
  * </HydrationBoundary>
@@ -45,7 +45,7 @@ export class HydrationBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): HydrationBoundaryState {
-    // Kiểm tra có phải lỗi hydration không
+    // Check if it's a hydration error
     const isHydrationError =
       error.message.includes("Hydration") ||
       error.message.includes("hydration") ||
@@ -55,7 +55,7 @@ export class HydrationBoundary extends Component<
       return { hasError: true, error };
     }
 
-    throw error; // Ném lại lỗi khác (không phải hydration)
+    throw error; // Re-throw other errors (non-hydration)
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -67,14 +67,14 @@ export class HydrationBoundary extends Component<
     if (isHydrationError) {
       console.error("HydrationBoundary caught an error:", error, errorInfo);
 
-      this.props.onError?.(error, errorInfo); // Gọi callback nếu có
+      this.props.onError?.(error, errorInfo); // Call callback if provided
 
-      // Hiển thị debug info khi dev
+      // Show debug info in development
       if (process.env.NODE_ENV === "development") {
         console.group("🔍 Hydration Error Debug Info");
         console.log("Error:", error.message);
         console.log("Component Stack:", errorInfo.componentStack);
-        console.log("Tip: Kiểm tra timestamp, số random, hoặc conditional render khác nhau giữa server/client");
+        console.log("Tip: Check for timestamps, random numbers, or different conditional renders between server/client");
         console.groupEnd();
       }
     }
@@ -82,12 +82,12 @@ export class HydrationBoundary extends Component<
 
   render() {
     if (this.state.hasError) {
-      // Nếu có fallback UI thì dùng
+      // If fallback UI is provided, use it
       if (this.props.fallback !== undefined) {
         return this.props.fallback;
       }
 
-      // Không có fallback → thử render children (tự phục hồi)
+      // No fallback → try rendering children (auto-recover)
       return this.props.children;
     }
 

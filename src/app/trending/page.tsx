@@ -83,7 +83,7 @@ function TrendingPageContent() {
   }, [currentPage]); // ✅ Add currentPage dependency
 
   const handleFilterChange = (filters: FilterOptions) => {
-    // Chuyển sang trang browse với filters, ưu tiên movieType người dùng chọn
+    // Navigate to browse page with filters, prioritize user-selected movieType
     const params = new URLSearchParams();
     if (filters.countries?.length)
       params.set("countries", filters.countries.join(","));

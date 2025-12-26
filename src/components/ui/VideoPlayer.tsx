@@ -213,7 +213,7 @@ export default function VideoPlayer({
             default={subtitle.default}
           />
         ))}
-        Trình duyệt của bạn không hỗ trợ video HTML5.
+        Your browser does not support HTML5 video.
       </video>
 
       {/* Loading Overlay */}
@@ -279,7 +279,7 @@ export default function VideoPlayer({
               <button
                 onClick={() => skipTime(-10)}
                 className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
-                title="Lùi 10 giây"
+                title="Rewind 10 seconds"
               >
                 <SkipBack size={20} />
               </button>
@@ -288,7 +288,7 @@ export default function VideoPlayer({
               <button
                 onClick={() => skipTime(10)}
                 className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
-                title="Tua 10 giây"
+                title="Forward 10 seconds"
               >
                 <SkipForward size={20} />
               </button>
@@ -298,7 +298,7 @@ export default function VideoPlayer({
                 <button
                   onClick={toggleMute}
                   className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
-                  title={isMuted ? "Bật âm thanh" : "Tắt âm thanh"}
+                  title={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted || volume === 0 ? (
                     <VolumeX size={20} />
@@ -314,7 +314,7 @@ export default function VideoPlayer({
                   value={isMuted ? 0 : volume}
                   onChange={handleVolumeChange}
                   className="w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
-                  title="Điều chỉnh âm lượng"
+                  title="Adjust volume"
                 />
               </div>
 
@@ -330,7 +330,7 @@ export default function VideoPlayer({
                 <button
                   onClick={toggleSettings}
                   className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
-                  title="Cài đặt"
+                  title="Settings"
                 >
                   <Settings size={20} />
                 </button>
@@ -339,7 +339,7 @@ export default function VideoPlayer({
                 {showSettings && (
                   <div className="absolute bottom-full right-0 mb-2 bg-black bg-opacity-90 rounded-lg p-3 min-w-[180px] border border-gray-600">
                     <div className="text-white text-sm font-medium mb-2">
-                      Tốc độ phát
+                      Playback speed
                     </div>
                     <div className="space-y-1">
                       {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
@@ -355,7 +355,7 @@ export default function VideoPlayer({
                               : "text-gray-300 hover:bg-gray-700"
                           }`}
                         >
-                          {speed === 1 ? "Bình thường" : `${speed}x`}
+                          {speed === 1 ? "Normal" : `${speed}x`}
                         </button>
                       ))}
                     </div>
@@ -367,7 +367,7 @@ export default function VideoPlayer({
               <button
                 onClick={toggleFullscreen}
                 className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
-                title="Toàn màn hình"
+                title="Fullscreen"
               >
                 <Maximize size={20} />
               </button>

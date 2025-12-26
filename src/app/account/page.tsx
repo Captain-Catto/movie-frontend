@@ -70,7 +70,7 @@ export default function AccountPage() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setAvatarError("Ảnh phải nhỏ hơn 5MB");
+      setAvatarError("Image must be smaller than 5MB");
       e.target.value = "";
       return;
     }
@@ -89,7 +89,7 @@ export default function AccountPage() {
 
       const uploadUrl = uploadRes.data?.url;
       if (!uploadRes.data?.success || !uploadUrl) {
-        throw new Error(uploadRes.data?.message || "Tải ảnh thất bại");
+        throw new Error(uploadRes.data?.message || "Image upload failed");
       }
 
       const profileRes = await axiosInstance.put("/auth/profile", {
@@ -97,11 +97,11 @@ export default function AccountPage() {
       });
 
       if (!profileRes.data?.success) {
-        throw new Error(profileRes.data?.message || "Cập nhật ảnh thất bại");
+        throw new Error(profileRes.data?.message || "Image update failed");
       }
 
       if (!user?.id || !user.email) {
-        throw new Error("User info not available. Vui lòng tải lại trang");
+        throw new Error("User info not available. Please reload the page");
       }
 
       const updatedUser: StoredUser = {
@@ -114,13 +114,13 @@ export default function AccountPage() {
       };
       authStorage.setUser(updatedUser);
       setAvatarUrl(uploadUrl);
-      setFormSuccess("Ảnh đại diện đã được cập nhật");
+      setFormSuccess("Avatar updated successfully");
       checkAuth();
     } catch (error: unknown) {
       const message =
         error instanceof Error
           ? error.message
-          : "Không thể tải ảnh. Vui lòng thử lại";
+          : "Unable to upload image. Please try again";
       setAvatarError(message);
     } finally {
       setUploadingAvatar(false);
@@ -133,7 +133,7 @@ export default function AccountPage() {
     setFormSuccess("");
 
     if (form.password && form.password !== form.confirmPassword) {
-      setFormError("Mật khẩu xác nhận không khớp");
+      setFormError("Confirm password does not match");
       return;
     }
 
@@ -144,13 +144,13 @@ export default function AccountPage() {
       if (form.password.trim()) payload.password = form.password.trim();
 
       if (Object.keys(payload).length === 0) {
-        setFormError("Vui lòng nhập tên hoặc mật khẩu mới");
+        setFormError("Please enter a name or new password");
         return;
       }
 
       const res = await axiosInstance.put("/auth/profile", payload);
       if (res.data?.success) {
-        setFormSuccess("Cập nhật thành công");
+        setFormSuccess("Update successful");
         setForm({ name: "", password: "", confirmPassword: "" });
         if (user) {
           const updatedUser = { ...user, ...(payload.name ? { name: payload.name } : {}) };
@@ -158,7 +158,7 @@ export default function AccountPage() {
           checkAuth();
         }
       } else {
-        setFormError(res.data?.message || "Cập nhật thất bại");
+        setFormError(res.data?.message || "Update failed");
       }
     } catch (error: unknown) {
       const backendMessage =
@@ -173,7 +173,7 @@ export default function AccountPage() {
           : Array.isArray(backendMessage)
           ? backendMessage.join(", ")
           : undefined;
-      setFormError(msg || "Cập nhật thất bại");
+      setFormError(msg || "Update failed");
     } finally {
       setSaving(false);
     }
@@ -195,7 +195,7 @@ export default function AccountPage() {
               <div
                 className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-gray-600 cursor-pointer group"
                 onClick={handleAvatarClick}
-                title="Thay đổi ảnh đại diện"
+                title="Change avatar"
               >
                 <Image
                   src={avatarSrc}
@@ -209,7 +209,7 @@ export default function AccountPage() {
                   }}
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white">
-                  {uploadingAvatar ? "Đang tải..." : "Đổi ảnh"}
+                  {uploadingAvatar ? "Uploading..." : "Change"}
                 </div>
                 {uploadingAvatar && (
                   <div className="absolute inset-0 flex items-center justify-center">

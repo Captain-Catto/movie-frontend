@@ -4,26 +4,26 @@ import { ReactNode } from "react";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 
 interface ClientOnlyProps {
-  children: ReactNode; // Nội dung chỉ render sau khi hydration xong
-  fallback?: ReactNode; // UI thay thế khi SSR (mặc định: null)
+  children: ReactNode; // Content only renders after hydration completes
+  fallback?: ReactNode; // Fallback UI during SSR (default: null)
 }
 
 /**
- * Component chỉ render children sau khi hydration hoàn tất.
+ * Component that only renders children after hydration completes.
  *
- * Khi SSR: hiển thị fallback (hoặc không hiển thị gì).
- * Sau hydration: hiển thị children.
+ * During SSR: shows fallback (or nothing).
+ * After hydration: shows children.
  *
- * Dùng khi component cần browser API (localStorage, window, etc.)
- * hoặc để tránh hydration mismatch.
+ * Use when component needs browser APIs (localStorage, window, etc.)
+ * or to avoid hydration mismatch.
  *
  * @example
- * // Ẩn khi SSR, hiện sau hydration
+ * // Hide during SSR, show after hydration
  * <ClientOnly>
  *   <UserPreferences />
  * </ClientOnly>
  *
- * // Với loading skeleton
+ * // With loading skeleton
  * <ClientOnly fallback={<Skeleton />}>
  *   <DynamicContent />
  * </ClientOnly>

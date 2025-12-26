@@ -1,15 +1,15 @@
 import { useEffect, useLayoutEffect } from "react";
 
 /**
- * Hook tự động chọn useLayoutEffect (client) hoặc useEffect (server).
+ * Hook that automatically chooses useLayoutEffect (client) or useEffect (server).
  *
- * Tránh warning khi SSR vì useLayoutEffect không hoạt động trên server.
- * Dùng khi cần đo DOM hoặc thay đổi layout trước khi browser vẽ màn hình.
+ * Avoids SSR warnings since useLayoutEffect doesn't work on the server.
+ * Use when you need to measure DOM or change layout before browser paints.
  *
  * @example
  * useIsomorphicLayoutEffect(() => {
  *   const height = ref.current?.getBoundingClientRect().height;
- *   setHeight(height); // Đo chiều cao trước khi render
+ *   setHeight(height); // Measure height before render
  * }, []);
  */
 export const useIsomorphicLayoutEffect =

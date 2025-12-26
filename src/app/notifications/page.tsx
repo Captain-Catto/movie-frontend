@@ -59,12 +59,12 @@ export default function NotificationsPage() {
           setNotifications(items);
           setIsEmpty(items.length === 0);
         } else {
-          setError("Không tìm thấy thông báo nào");
+          setError("No notifications found");
           setIsEmpty(true);
         }
       } catch (err) {
         console.error("Failed to load notifications:", err);
-        setError("Không thể tải thông báo. Vui lòng thử lại.");
+        setError("Unable to load notifications. Please try again.");
         setIsEmpty(true);
       } finally {
         setLoading(false);
@@ -115,16 +115,16 @@ export default function NotificationsPage() {
           <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-2xl border border-gray-800 shadow-xl p-6 mb-8">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold text-white">Thông báo</h1>
+                <h1 className="text-2xl font-semibold text-white">Notifications</h1>
                 <p className="text-gray-400 text-sm mt-1">
-                  Những cập nhật mới nhất dành cho tài khoản của bạn.
+                  Latest updates for your account.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-400">
                   {notifications.length > 0
-                    ? `${notifications.length} thông báo`
-                    : "Không có thông báo"}
+                    ? `${notifications.length} notifications`
+                    : "No notifications"}
                 </span>
                 <button
                   onClick={() => setShowUnreadOnly((v) => !v)}
@@ -134,7 +134,7 @@ export default function NotificationsPage() {
                       : "bg-gray-800 border-gray-700 text-gray-200 hover:bg-gray-750"
                   }`}
                 >
-                  {showUnreadOnly ? "Hiển thị tất cả" : "Chỉ chưa đọc"}
+                  {showUnreadOnly ? "Show all" : "Unread only"}
                 </button>
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function NotificationsPage() {
 
           {loading || isLoading ? (
             <div className="text-gray-300 bg-gray-800 border border-gray-700 rounded-lg p-4">
-              Đang tải thông báo...
+              Loading notifications...
             </div>
           ) : null}
 
@@ -157,20 +157,19 @@ export default function NotificationsPage() {
               {isEmpty ? (
                 <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300 min-h-[300px] flex flex-col items-center justify-center">
                   <div className="text-lg font-semibold text-white mb-2">
-                    Chưa có thông báo
+                    No notifications yet
                   </div>
                   <p className="text-sm text-gray-400">
-                    Khi có cập nhật mới, thông báo sẽ xuất hiện ở đây.
+                    When there are new updates, notifications will appear here.
                   </p>
                 </div>
               ) : filteredEmpty ? (
                 <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300 min-h-[300px] flex flex-col items-center justify-center">
                   <div className="text-lg font-semibold text-white mb-2">
-                    Không có thông báo chưa đọc
+                    No unread notifications
                   </div>
                   <p className="text-sm text-gray-400">
-                    Bạn đã xem hết các thông báo. Chuyển sang &quot;Hiển thị tất
-                    cả&quot; để xem lịch sử.
+                    You&apos;ve read all notifications. Switch to &quot;Show all&quot; to view history.
                   </p>
                 </div>
               ) : null}
@@ -249,7 +248,7 @@ export default function NotificationsPage() {
                               <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 rounded-md">
                                 <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
                                 <span className="text-xs text-blue-300 font-medium">
-                                  Mới
+                                  New
                                 </span>
                               </div>
                             )}

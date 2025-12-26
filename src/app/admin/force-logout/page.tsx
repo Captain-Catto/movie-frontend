@@ -37,10 +37,10 @@ export default function ForceLogoutPage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600" />
         <div>
           <h2 className="text-xl font-semibold text-white mb-1">
-            Đang đăng xuất...
+            Logging out...
           </h2>
           <p className="text-gray-400 text-sm">
-            Vui lòng đợi, chúng tôi đang dọn sạch phiên đăng nhập của bạn.
+            Please wait, we are clearing your login session.
           </p>
         </div>
       </div>

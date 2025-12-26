@@ -48,7 +48,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     };
 
     if (isOpen) {
-      // Chỉ ESC key và focus - không touch scroll lock
+      // ESC key and focus only - no touch scroll lock
       document.addEventListener("keydown", handleEscape);
 
       // Focus input when modal opens
@@ -99,7 +99,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         left: 0,
         width: "100vw",
         height: "100vh",
-        backdropFilter: "blur(12px)", // Thêm inline backup
+        backdropFilter: "blur(12px)", // Add inline backup
       }}
       onClick={handleBackdropClick}
     >

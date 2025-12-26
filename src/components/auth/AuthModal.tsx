@@ -56,7 +56,7 @@ export default function AuthModal({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Đã xảy ra lỗi. Vui lòng thử lại.";
+          : "An error occurred. Please try again.";
       handleError(errorMessage);
     }
   };
@@ -143,13 +143,13 @@ export default function AuthModal({
               value="login"
               className="data-[state=active]:bg-red-600 data-[state=active]:text-white"
             >
-              Đăng nhập
+              Login
             </TabsTrigger>
             <TabsTrigger
               value="register"
               className="data-[state=active]:bg-red-600 data-[state=active]:text-white"
             >
-              Đăng ký
+              Register
             </TabsTrigger>
           </TabsList>
 
@@ -219,20 +219,20 @@ export default function AuthModal({
               disabled={isGoogleLoading}
             >
               <FcGoogle className="w-5 h-5 mr-2" />
-              {isGoogleLoading ? "Đang xử lý..." : "Đăng ký với Google"}
+              {isGoogleLoading ? "Processing..." : "Register with Google"}
             </Button>
           </TabsContent>
         </Tabs>
 
         <div className="text-center text-sm text-gray-400 mt-4">
-          <p>Bằng cách tiếp tục, bạn đồng ý với</p>
+          <p>By continuing, you agree to</p>
           <p>
             <span className="text-red-400 hover:underline cursor-pointer">
-              Điều khoản dịch vụ
+              Terms of Service
             </span>{" "}
-            và{" "}
+            and{" "}
             <span className="text-red-400 hover:underline cursor-pointer">
-              Chính sách bảo mật
+              Privacy Policy
             </span>
           </p>
         </div>

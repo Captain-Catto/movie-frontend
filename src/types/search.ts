@@ -11,7 +11,7 @@ export interface SearchResult {
   voteAverage?: number;
   voteCount?: number;
   popularity?: number;
-  genreIds?: number[]; // Backend trả về number array
+  genreIds?: number[]; // Backend returns number array
   originalLanguage?: string;
   mediaType: "movie" | "tv";
   media_type?: "movie" | "tv"; // Backend field

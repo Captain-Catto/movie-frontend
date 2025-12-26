@@ -110,9 +110,9 @@ export default function GoogleOAuthCallbackPage() {
               status === "error" ? "text-red-400" : "text-white"
             }`}
           >
-            {status === "loading" && "Đang xử lý..."}
-            {status === "success" && "Thành công!"}
-            {status === "error" && "Lỗi"}
+            {status === "loading" && "Processing..."}
+            {status === "success" && "Success!"}
+            {status === "error" && "Error"}
           </h2>
           <p className="text-gray-300">{message}</p>
 
@@ -128,7 +128,7 @@ export default function GoogleOAuthCallbackPage() {
               }}
               className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
             >
-              Đóng cửa sổ
+              Close Window
             </button>
           )}
         </div>
