@@ -22,6 +22,17 @@ interface User {
   lastLoginCountry?: string | null;
 }
 
+interface UserLog {
+  id: number;
+  userId: number;
+  action: string;
+  description: string;
+  ipAddress?: string;
+  userAgent?: string;
+  createdAt: string;
+  metadata?: Record<string, unknown>;
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +57,10 @@ export default function AdminUsersPage() {
   });
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
+  const [activeTab, setActiveTab] = useState<"info" | "logs">("info");
+  const [userLogs, setUserLogs] = useState<UserLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [logFilter, setLogFilter] = useState<string>("all");
   const adminApi = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
 
@@ -170,6 +185,23 @@ export default function AdminUsersPage() {
     );
   };
 
+  const fetchUserLogs = useCallback(async (userId: number) => {
+    setLogsLoading(true);
+    try {
+      const response = await adminApi.get<{ logs: UserLog[] }>(
+        `/admin/users/${userId}/logs`
+      );
+      if (response.success && response.data) {
+        setUserLogs(response.data.logs || []);
+      }
+    } catch (error) {
+      console.error("Error fetching user logs:", error);
+      setUserLogs([]);
+    } finally {
+      setLogsLoading(false);
+    }
+  }, [adminApi]);
+
   const openEditModal = (user: User) => {
     setEditModal({ open: true, user });
     setEditForm({
@@ -178,12 +210,17 @@ export default function AdminUsersPage() {
       password: "",
     });
     setEditError("");
+    setActiveTab("info");
+    setUserLogs([]);
+    setLogFilter("all");
   };
 
   const closeEditModal = () => {
     setEditModal({ open: false, user: null });
     setEditError("");
     setEditSaving(false);
+    setActiveTab("info");
+    setUserLogs([]);
   };
 
   const handleUpdateUser = async () => {
@@ -449,13 +486,13 @@ export default function AdminUsersPage() {
 
         {/* Edit Modal */}
         {editModal.open && editModal.user && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl border border-gray-700 shadow-2xl">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-4xl border border-gray-700 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-white">Edit user</h3>
+                  <h3 className="text-xl font-bold text-white">User Details</h3>
                   <p className="text-gray-400 text-sm">
-                    Update profile and role for {editModal.user.email}
+                    {editModal.user.email}
                   </p>
                 </div>
                 <button
@@ -463,145 +500,266 @@ export default function AdminUsersPage() {
                   className="cursor-pointer text-gray-400 hover:text-white transition-colors"
                   aria-label="Close"
                 >
-                  X
+                  ✕
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">
-                    Display name
-                  </label>
-                  <input
-                    value={editForm.name}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, name: e.target.value }))
+              {/* Tabs */}
+              <div className="flex space-x-1 mb-6 border-b border-gray-700">
+                <button
+                  onClick={() => setActiveTab("info")}
+                  className={`px-4 py-2 font-medium transition-colors ${
+                    activeTab === "info"
+                      ? "text-white border-b-2 border-red-600"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  User Info
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("logs");
+                    if (userLogs.length === 0 && !logsLoading && editModal.user) {
+                      fetchUserLogs(editModal.user.id);
                     }
-                    placeholder="Display name"
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">
-                    Email (read-only)
-                  </label>
-                  <div className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300">
-                    {editModal.user.email}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">
-                    Role
-                  </label>
-                  <select
-                    value={editForm.role}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        role: e.target.value as UserRole,
-                      }))
-                    }
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
-                  >
-                    {roleOptions.map((role) => (
-                      <option
-                        key={role}
-                        value={role}
-                        className="bg-gray-800 text-white"
+                  }}
+                  className={`px-4 py-2 font-medium transition-colors ${
+                    activeTab === "logs"
+                      ? "text-white border-b-2 border-red-600"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  Activity Logs
+                </button>
+              </div>
+
+              {/* Tab Content: User Info */}
+              {activeTab === "info" && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        Display name
+                      </label>
+                      <input
+                        value={editForm.name}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, name: e.target.value }))
+                        }
+                        placeholder="Display name"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        Email (read-only)
+                      </label>
+                      <div className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300">
+                        {editModal.user.email}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        Role
+                      </label>
+                      <select
+                        value={editForm.role}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            role: e.target.value as UserRole,
+                          }))
+                        }
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
                       >
-                        {role.replace("_", " ")}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">
-                    Status
-                  </label>
-                  <div className="flex flex-col space-y-1">
-                    {editModal.user.isActive ? (
-                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white w-fit">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-600 text-white w-fit">
-                        Banned
-                      </span>
-                    )}
-                    {editModal.user.bannedReason && (
-                      <span className="text-xs text-gray-400">
-                        {editModal.user.bannedReason}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">
-                    New password
-                  </label>
-                  <input
-                    type="password"
-                    value={editForm.password}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        password: e.target.value,
-                      }))
-                    }
-                    placeholder="Leave blank to keep current password"
-                    className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    Admins cannot change email. Set a new password only if
-                    needed (min 6 characters).
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                <div className="text-sm text-gray-400 mb-2">
-                  Last login details
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-white">
-                  <div>
-                    <div className="text-gray-400 text-xs">Last seen</div>
-                    <div>{formatDateTime(editModal.user.lastLoginAt)}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 text-xs">IP</div>
-                    <div>{editModal.user.lastLoginIp || "N/A"}</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 text-xs">Device</div>
-                    <div className="capitalize">
-                      {editModal.user.lastLoginDevice || "N/A"}
+                        {roleOptions.map((role) => (
+                          <option
+                            key={role}
+                            value={role}
+                            className="bg-gray-800 text-white"
+                          >
+                            {role.replace("_", " ")}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        Status
+                      </label>
+                      <div className="flex flex-col space-y-1">
+                        {editModal.user.isActive ? (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white w-fit">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-600 text-white w-fit">
+                            Banned
+                          </span>
+                        )}
+                        {editModal.user.bannedReason && (
+                          <span className="text-xs text-gray-400">
+                            {editModal.user.bannedReason}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {editError && (
-                <div className="mt-3 text-sm text-red-400">{editError}</div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">
+                        New password
+                      </label>
+                      <input
+                        type="password"
+                        value={editForm.password}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            password: e.target.value,
+                          }))
+                        }
+                        placeholder="Leave blank to keep current password"
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Admins cannot change email. Set a new password only if
+                        needed (min 6 characters).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <div className="text-sm text-gray-400 mb-2">
+                      Last login details
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-white">
+                      <div>
+                        <div className="text-gray-400 text-xs">Last seen</div>
+                        <div>{formatDateTime(editModal.user.lastLoginAt)}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400 text-xs">IP</div>
+                        <div>{editModal.user.lastLoginIp || "N/A"}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400 text-xs">Device</div>
+                        <div className="capitalize">
+                          {editModal.user.lastLoginDevice || "N/A"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {editError && (
+                    <div className="mt-3 text-sm text-red-400">{editError}</div>
+                  )}
+
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={closeEditModal}
+                      className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdateUser}
+                      disabled={editSaving}
+                      className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {editSaving ? "Saving..." : "Save changes"}
+                    </button>
+                  </div>
+                </>
               )}
 
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={closeEditModal}
-                  className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleUpdateUser}
-                  disabled={editSaving}
-                  className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {editSaving ? "Saving..." : "Save changes"}
-                </button>
-              </div>
+              {/* Tab Content: Activity Logs */}
+              {activeTab === "logs" && (
+                <>
+                  {/* Filter */}
+                  <div className="mb-4 flex items-center justify-between">
+                    <p className="text-sm text-gray-400">
+                      User activity history including logins, actions, and events
+                    </p>
+                    <select
+                      value={logFilter}
+                      onChange={(e) => setLogFilter(e.target.value)}
+                      className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                    >
+                      <option value="all">All Actions</option>
+                      <option value="login">Login</option>
+                      <option value="watch">Watch</option>
+                      <option value="favorite">Favorite</option>
+                      <option value="comment">Comment</option>
+                      <option value="search">Search</option>
+                    </select>
+                  </div>
+
+                  {/* Logs List */}
+                  <div className="bg-gray-700/30 rounded-lg border border-gray-600 max-h-96 overflow-y-auto">
+                    {logsLoading ? (
+                      <div className="p-8 text-center text-gray-400">
+                        Loading logs...
+                      </div>
+                    ) : userLogs.length === 0 ? (
+                      <div className="p-8 text-center text-gray-400">
+                        No activity logs found
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-600">
+                        {userLogs
+                          .filter((log) =>
+                            logFilter === "all" || log.action.toLowerCase().includes(logFilter.toLowerCase())
+                          )
+                          .map((log) => (
+                            <div key={log.id} className="p-4 hover:bg-gray-700/50 transition-colors">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-1">
+                                    <span className="text-sm font-medium text-white">
+                                      {log.action}
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                      {formatDateTime(log.createdAt)}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm text-gray-300">
+                                    {log.description}
+                                  </p>
+                                  {log.ipAddress && (
+                                    <p className="text-xs text-gray-400 mt-1">
+                                      IP: {log.ipAddress}
+                                    </p>
+                                  )}
+                                  {log.metadata && Object.keys(log.metadata).length > 0 && (
+                                    <details className="mt-2">
+                                      <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-300">
+                                        View details
+                                      </summary>
+                                      <pre className="text-xs text-gray-300 mt-1 p-2 bg-gray-800 rounded overflow-auto">
+                                        {JSON.stringify(log.metadata, null, 2)}
+                                      </pre>
+                                    </details>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end mt-6">
+                    <button
+                      onClick={closeEditModal}
+                      className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
