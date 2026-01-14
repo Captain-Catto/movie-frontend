@@ -89,13 +89,15 @@ export default function RedEnvelopeEffect({
       flipSpeed: (Math.random() - 0.5) * 0.05,
       velocityY: (Math.random() * 0.8 + 0.2) * settings.fallSpeed, // Slower initial velocity
       hue: Math.random() * 20, // 0-20 for red color variations
+      swayPhase: Math.random() * Math.PI * 2, // Random starting phase for sway
+      swaySpeed: Math.random() * 1 + 0.5, // Different sway speeds
     }));
 
     // Initialize sparkles
     sparklesRef.current = [];
 
     // Draw enhanced red envelope with 3D effects
-    const drawEnvelope = (envelope: RedEnvelope) => {
+    const drawEnvelope = (envelope: RedEnvelope & { swayPhase?: number; swaySpeed?: number }) => {
       ctx.save();
       ctx.translate(envelope.x, envelope.y);
       ctx.rotate((envelope.rotation * Math.PI) / 180);
@@ -103,6 +105,7 @@ export default function RedEnvelopeEffect({
       const width = envelope.size * Math.abs(envelope.flip); // 3D width based on flip
       const height = envelope.size * 1.4;
       const isFront = envelope.flip > 0;
+      const cornerRadius = 4; // Rounded corners
 
       // Drop shadow for depth
       ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
@@ -110,12 +113,22 @@ export default function RedEnvelopeEffect({
       ctx.shadowOffsetX = 3;
       ctx.shadowOffsetY = 3;
 
+      // Draw rounded rectangle path
+      ctx.beginPath();
+      // Simple fallback for rounded rect if not supported (though widely supported)
+      if (ctx.roundRect) {
+        ctx.roundRect(-width / 2, -height / 2, width, height, cornerRadius);
+      } else {
+        ctx.rect(-width / 2, -height / 2, width, height);
+      }
+      ctx.clip(); // Clip everything to the rounded shape
+
       // Main envelope body with gradient (3D effect)
       const gradient = ctx.createLinearGradient(-width / 2, -height / 2, width / 2, height / 2);
       const redHue = 0 + envelope.hue; // 0-20 range for color variety
-      gradient.addColorStop(0, `hsl(${redHue}, 75%, 55%)`); // Lighter red
-      gradient.addColorStop(0.5, `hsl(${redHue}, 85%, 45%)`); // Main red
-      gradient.addColorStop(1, `hsl(${redHue}, 75%, 35%)`); // Darker red for depth
+      gradient.addColorStop(0, `hsl(${redHue}, 85%, 55%)`); // Lighter red
+      gradient.addColorStop(0.5, `hsl(${redHue}, 95%, 45%)`); // Richer red center
+      gradient.addColorStop(1, `hsl(${redHue}, 85%, 35%)`); // Darker red for depth
 
       ctx.fillStyle = gradient;
       ctx.fillRect(-width / 2, -height / 2, width, height);
@@ -127,44 +140,59 @@ export default function RedEnvelopeEffect({
       ctx.shadowOffsetY = 0;
 
       // Double golden border for richness
-      ctx.strokeStyle = '#FFD700';
-      ctx.lineWidth = 2.5;
-      ctx.strokeRect(-width / 2, -height / 2, width, height);
+      const goldGradient = ctx.createLinearGradient(-width/2, -height/2, width/2, height/2);
+      goldGradient.addColorStop(0, '#FFD700');
+      goldGradient.addColorStop(0.3, '#FFFACD'); // Shiny spot
+      goldGradient.addColorStop(0.6, '#FFD700');
+      goldGradient.addColorStop(1, '#B8860B'); // Bronze/Dark Gold
 
-      ctx.strokeStyle = '#FFA500';
+      ctx.strokeStyle = goldGradient;
+      ctx.lineWidth = 2.5;
+      
+      // Draw border using the same rounded path
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(-width / 2, -height / 2, width, height, cornerRadius);
+      } else {
+        ctx.rect(-width / 2, -height / 2, width, height);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 165, 0, 0.7)'; // Orange-ish inner border
       ctx.lineWidth = 1;
       ctx.strokeRect(-width / 2 + 3, -height / 2 + 3, width - 6, height - 6);
 
       // Inner decorative pattern (subtle corner ornaments)
       ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
       const cornerSize = envelope.size * 0.15;
-      // Top-left corner
       ctx.fillRect(-width / 2, -height / 2, cornerSize, cornerSize);
-      // Top-right corner
       ctx.fillRect(width / 2 - cornerSize, -height / 2, cornerSize, cornerSize);
-      // Bottom-left corner
       ctx.fillRect(-width / 2, height / 2 - cornerSize, cornerSize, cornerSize);
-      // Bottom-right corner
       ctx.fillRect(width / 2 - cornerSize, height / 2 - cornerSize, cornerSize, cornerSize);
 
       if (isFront && width > envelope.size * 0.3) {
+        // Content transformation for 3D effect
+        ctx.save();
+        // Scale the context horizontally based on the flip factor
+        // This makes the text look like it's attached to the surface as it rotates
+        ctx.scale(Math.abs(envelope.flip), 1);
+
         // Golden "福" character with glow effect
         ctx.shadowColor = '#FFD700';
         ctx.shadowBlur = 10;
 
-        ctx.fillStyle = '#FFD700';
+        ctx.fillStyle = goldGradient; // Use gold gradient for text too
         ctx.font = `bold ${envelope.size * 0.6}px "SimSun", serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText('福', 0, 0);
 
         // Add subtle text shadow for depth
-        ctx.shadowBlur = 5;
+        ctx.shadowBlur = 2;
         ctx.shadowColor = '#8B4513';
-        ctx.shadowOffsetX = 1;
-        ctx.shadowOffsetY = 1;
-        ctx.fillStyle = '#FFEC8B';
         ctx.fillText('福', 0, 0);
+        
+        ctx.restore();
       }
 
       ctx.restore();
@@ -182,7 +210,7 @@ export default function RedEnvelopeEffect({
       }
     };
 
-    // Draw sparkle particles
+    // Draw sparkle particles (unchanged)
     const drawSparkle = (sparkle: Sparkle) => {
       ctx.save();
       ctx.fillStyle = `rgba(255, 215, 0, ${sparkle.opacity * sparkle.life})`;
@@ -198,7 +226,9 @@ export default function RedEnvelopeEffect({
     };
 
     // Animation loop with enhanced physics
+    let time = 0;
     const animate = () => {
+      time += 0.05;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw and update sparkles first (background layer)
@@ -216,18 +246,21 @@ export default function RedEnvelopeEffect({
       });
 
       // Draw and update envelopes
-      envelopesRef.current.forEach((envelope) => {
+      envelopesRef.current.forEach((envelope: RedEnvelope & { swayPhase?: number; swaySpeed?: number }) => {
         drawEnvelope(envelope);
 
-        // Update position with smooth physics (reduced gravity for slower fall)
-        envelope.velocityY += 0.005; // Very gentle gravity effect
-
-        // Terminal velocity based on fallSpeed setting (prevent infinite acceleration)
+        // Update position with smooth physics
+        envelope.velocityY += 0.005; // Gentle gravity
+        
+        // Terminal velocity
         const maxVelocity = 2.0 * settings.fallSpeed;
         envelope.velocityY = Math.min(envelope.velocityY, maxVelocity);
 
         envelope.y += envelope.velocityY;
-        envelope.x += envelope.wind;
+        
+        // Swaying motion (Sine wave)
+        const sway = Math.sin(time * (envelope.swaySpeed || 1) + (envelope.swayPhase || 0));
+        envelope.x += envelope.wind + sway * 0.5; // Combine constant wind with swaying
 
         // Update rotation with smoother animation
         envelope.rotation += envelope.rotationSpeed;
@@ -242,16 +275,16 @@ export default function RedEnvelopeEffect({
           envelope.flipSpeed = Math.abs(envelope.flipSpeed);
         }
 
-        // Bounce effect when hitting bottom (subtle)
+        // Reset if out of bounds
         if (envelope.y > canvas.height + 20) {
-          // Reset to top with new random properties
           envelope.y = -50;
           envelope.x = Math.random() * canvas.width;
           envelope.rotation = Math.random() * 360;
           envelope.velocityY = (Math.random() * 0.8 + 0.2) * settings.fallSpeed;
           envelope.flip = Math.random() * 2 - 1;
-          envelope.flipSpeed = (Math.random() - 0.5) * 0.05;
           envelope.hue = Math.random() * 20;
+          // Reset sway properties
+          envelope.swayPhase = Math.random() * Math.PI * 2;
         }
 
         // Wrap horizontally with smooth transition
