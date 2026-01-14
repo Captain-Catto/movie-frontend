@@ -232,6 +232,32 @@ export default function EffectSettings() {
                   </button>
                 </div>
 
+                {/* Quantity */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-300">Quantity (Amount)</label>
+                    <span className="text-xs text-gray-400 font-mono">
+                      {redEnvelopeSettings.quantity || 25}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={redEnvelopeSettings.quantity || 25}
+                    onChange={(e) =>
+                      // @ts-ignore - Dynamic key access with number
+                      dispatch(setRedEnvelopeSettings({ quantity: parseInt(e.target.value) }))
+                    }
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Few (1)</span>
+                    <span>Many (100)</span>
+                  </div>
+                </div>
+
                 {/* Fall Speed */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">

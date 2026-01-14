@@ -7,6 +7,7 @@ interface RedEnvelopeSettings {
   rotationSpeed: number;
   windStrength: number;
   sparkleFrequency: number;
+  quantity?: number;
 }
 
 interface RedEnvelopeEffectProps {
@@ -26,6 +27,8 @@ interface RedEnvelope {
   flipSpeed: number;
   velocityY: number; // For bounce effect
   hue: number; // Color variation (0-20 for red shades)
+  swayPhase: number;
+  swaySpeed: number;
 }
 
 interface Sparkle {
@@ -45,6 +48,8 @@ export default function RedEnvelopeEffect({
   const envelopesRef = useRef<RedEnvelope[]>([]);
   const sparklesRef = useRef<Sparkle[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  // Keep track of previous settings to detect changes
+  const prevSettingsRef = useRef<RedEnvelopeSettings | undefined>(undefined);
 
   // Default settings if not provided
   const settings = redEnvelopeSettings || {
@@ -52,6 +57,7 @@ export default function RedEnvelopeEffect({
     rotationSpeed: 1.0,
     windStrength: 0.3,
     sparkleFrequency: 0.02,
+    quantity: 25,
   };
 
   useEffect(() => {
@@ -69,17 +75,20 @@ export default function RedEnvelopeEffect({
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // Envelope count based on intensity
-    const envelopeCount = {
-      low: 15,
-      medium: 25,
-      high: 40,
-    }[intensity];
+    // Determine target count
+    let targetCount = settings.quantity;
+    if (!targetCount) {
+       targetCount = {
+        low: 15,
+        medium: 25,
+        high: 40,
+      }[intensity];
+    }
 
-    // Initialize red envelopes with enhanced properties using advanced settings
-    envelopesRef.current = Array.from({ length: envelopeCount }, () => ({
+    // Function to create a new envelope
+    const createEnvelope = (yStart: number = -100): RedEnvelope => ({
       x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height - canvas.height,
+      y: yStart,
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 2 * settings.rotationSpeed,
       speed: Math.random() * 1.5 + 0.5,
@@ -91,7 +100,53 @@ export default function RedEnvelopeEffect({
       hue: Math.random() * 20, // 0-20 for red color variations
       swayPhase: Math.random() * Math.PI * 2, // Random starting phase for sway
       swaySpeed: Math.random() * 1 + 0.5, // Different sway speeds
-    }));
+    });
+
+    // Check if we need to re-initialize or update existing
+    // If envelopes array is empty, initialize it full
+    if (envelopesRef.current.length === 0) {
+      envelopesRef.current = Array.from({ length: targetCount }, () => 
+        createEnvelope(Math.random() * canvas.height - canvas.height)
+      );
+    } else {
+      // Logic for real-time updates without full reset
+      
+      // 1. Update count
+      if (envelopesRef.current.length < targetCount) {
+        // Add more
+        const needed = targetCount - envelopesRef.current.length;
+        for (let i = 0; i < needed; i++) {
+          envelopesRef.current.push(createEnvelope(Math.random() * -500)); // Start above
+        }
+      } else if (envelopesRef.current.length > targetCount) {
+        // Remove excess
+        envelopesRef.current = envelopesRef.current.slice(0, targetCount);
+      }
+
+      // 2. Update physics parameters for ALL envelopes to match new settings (wind, speed, etc.)
+      // This ensures slider changes feel "live"
+      envelopesRef.current.forEach(env => {
+         // Update proportional to their original random values if possible, 
+         // or just clamp/scale them based on new settings.
+         
+         // Re-calculate derived values based on new settings while keeping randomness
+         // We can't perfectly preserve "original random seed" easily without storing it,
+         // but we can just re-assign somewhat random values bounded by new settings.
+         // Or simpler: just update the factors that depend on settings.
+         
+         // Update rotation speed range
+         const dir = Math.sign(env.rotationSpeed) || 1;
+         env.rotationSpeed = dir * (Math.random() * 0.5 + 0.5) * settings.rotationSpeed;
+         
+         // Update wind
+         const windDir = Math.sign(env.wind) || (Math.random() > 0.5 ? 1 : -1);
+         env.wind = windDir * (Math.random() * 0.3) * settings.windStrength;
+         
+         // Note: Vertical velocity is updated in the loop based on drag/gravity settings, 
+         // but current velocity needs to be capped by new limits immediately?
+         // Actually animate loop handles velocity update, so we just let it converge.
+      });
+    }
 
     // Initialize sparkles
     sparklesRef.current = [];

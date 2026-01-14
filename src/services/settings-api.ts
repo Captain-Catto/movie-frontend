@@ -7,6 +7,7 @@ export interface RedEnvelopeSettings {
   rotationSpeed: number; // 0.1 - 5
   windStrength: number; // 0 - 1
   sparkleFrequency: number; // 0 - 0.1
+  quantity?: number; // 1 - 100
 }
 
 export interface SnowSettings {

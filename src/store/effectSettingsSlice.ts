@@ -29,6 +29,7 @@ const DEFAULT_RED_ENVELOPE_SETTINGS: RedEnvelopeSettings = {
   rotationSpeed: 1.0,
   windStrength: 0.3,
   sparkleFrequency: 0.02,
+  quantity: 25,
 };
 
 const DEFAULT_SNOW_SETTINGS: SnowSettings = {
