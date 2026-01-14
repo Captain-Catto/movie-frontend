@@ -169,7 +169,7 @@ export default function MovieUploader() {
             </h2>
             <button
               onClick={resetUpload}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors cursor-pointer"
             >
               Upload another movie
             </button>
@@ -388,7 +388,7 @@ export default function MovieUploader() {
           className={`w-full py-3 rounded-lg font-medium transition-colors ${
             !selectedFile || uploading || !movieData.title.trim()
               ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-              : "bg-blue-600 hover:bg-blue-700 text-white"
+              : "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
           }`}
         >
           {uploading ? (

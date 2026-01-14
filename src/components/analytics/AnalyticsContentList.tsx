@@ -46,7 +46,7 @@ export default function AnalyticsContentList({
         {data.length > 0 && (
           <button
             onClick={() => exportToCSV(data, exportFilename)}
-            className="text-sm text-gray-400 hover:text-white transition-colors"
+            className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
             Export
           </button>

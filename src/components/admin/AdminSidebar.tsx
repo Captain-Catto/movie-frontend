@@ -219,7 +219,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
         <button
           ref={menuButtonRef}
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="flex w-full items-center gap-3 text-left "
+          className="flex w-full items-center gap-3 text-left cursor-pointer"
         >
           <div className="w-12 h-12 rounded-full bg-red-600 text-white font-bold flex items-center justify-center cursor-pointer">
             {(user?.name || "A").charAt(0).toUpperCase()}
@@ -336,7 +336,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               </div>
               <button
                 onClick={() => setProfileOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                 aria-label="Close profile modal"
               >
                 ✕
@@ -400,7 +400,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                   setProfileForm({ name: user?.name ?? "", password: "" });
                   setProfileError("");
                 }}
-                className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -443,7 +443,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                   }
                 }}
                 disabled={profileSaving}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60"
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60 cursor-pointer"
               >
                 {profileSaving ? "Saving..." : "Save"}
               </button>

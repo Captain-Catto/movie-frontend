@@ -90,7 +90,7 @@ export function ToastContainer() {
 
               <button
                 onClick={() => dispatch(removeToast(toast.id))}
-                className="flex-shrink-0 text-gray-400 hover:text-white transition-colors"
+                className="flex-shrink-0 text-gray-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X size={16} />
               </button>

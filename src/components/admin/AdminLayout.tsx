@@ -106,7 +106,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         lastUpdateAt: analytics.lastUpdateAt,
       }}
     >
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-gray-900 admin-layout-root">
         <div className="flex">
           <AdminSidebar isOpen={sidebarOpen} user={user} />
           <main

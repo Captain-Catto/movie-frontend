@@ -508,7 +508,7 @@ export default function AdminUsersPage() {
               <div className="flex space-x-1 mb-6 border-b border-gray-700">
                 <button
                   onClick={() => setActiveTab("info")}
-                  className={`px-4 py-2 font-medium transition-colors ${
+                  className={`px-4 py-2 font-medium transition-colors cursor-pointer ${
                     activeTab === "info"
                       ? "text-white border-b-2 border-red-600"
                       : "text-gray-400 hover:text-white"
@@ -523,7 +523,7 @@ export default function AdminUsersPage() {
                       fetchUserLogs(editModal.user.id);
                     }
                   }}
-                  className={`px-4 py-2 font-medium transition-colors ${
+                  className={`px-4 py-2 font-medium transition-colors cursor-pointer ${
                     activeTab === "logs"
                       ? "text-white border-b-2 border-red-600"
                       : "text-gray-400 hover:text-white"

@@ -54,7 +54,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>

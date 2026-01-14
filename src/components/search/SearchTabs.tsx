@@ -44,7 +44,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
               isActive
                 ? "bg-red-500 text-white"
                 : "text-gray-400 hover:text-white hover:bg-gray-700"
-            }`}
+            } cursor-pointer`}
           >
             <Icon className="w-4 h-4" />
             <span>{tab.label}</span>

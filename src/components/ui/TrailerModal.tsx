@@ -86,7 +86,7 @@ export default function TrailerModal({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
             <X size={24} />
           </button>
@@ -129,7 +129,7 @@ export default function TrailerModal({
                       selectedVideo?.id === video.id
                         ? "border-blue-500 bg-blue-500/20 text-white"
                         : "border-gray-600 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
+                    } cursor-pointer`}
                   >
                     <div className="flex items-center space-x-3">
                       <Play size={16} className="text-red-500 flex-shrink-0" />

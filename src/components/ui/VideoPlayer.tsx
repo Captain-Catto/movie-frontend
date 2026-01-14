@@ -234,7 +234,7 @@ export default function VideoPlayer({
           <div className="absolute inset-0 flex items-center justify-center">
             <button
               onClick={togglePlay}
-              className="bg-red-600 hover:bg-red-700 rounded-full p-6 transition-all shadow-lg hover:scale-110"
+              className="bg-red-600 hover:bg-red-700 rounded-full p-6 transition-all shadow-lg hover:scale-110 cursor-pointer"
             >
               <Play size={32} className="text-white ml-1" fill="currentColor" />
             </button>
@@ -266,7 +266,7 @@ export default function VideoPlayer({
               {/* Play/Pause */}
               <button
                 onClick={togglePlay}
-                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
+                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10 cursor-pointer"
               >
                 {isPlaying ? (
                   <Pause size={24} fill="currentColor" />
@@ -278,7 +278,7 @@ export default function VideoPlayer({
               {/* Skip Backward */}
               <button
                 onClick={() => skipTime(-10)}
-                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
+                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10 cursor-pointer"
                 title="Rewind 10 seconds"
               >
                 <SkipBack size={20} />
@@ -287,7 +287,7 @@ export default function VideoPlayer({
               {/* Skip Forward */}
               <button
                 onClick={() => skipTime(10)}
-                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
+                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10 cursor-pointer"
                 title="Forward 10 seconds"
               >
                 <SkipForward size={20} />
@@ -297,7 +297,7 @@ export default function VideoPlayer({
               <div className="flex items-center space-x-2">
                 <button
                   onClick={toggleMute}
-                  className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
+                  className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10 cursor-pointer"
                   title={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted || volume === 0 ? (
@@ -329,7 +329,7 @@ export default function VideoPlayer({
               <div className="relative settings-dropdown">
                 <button
                   onClick={toggleSettings}
-                  className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
+                  className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10 cursor-pointer"
                   title="Settings"
                 >
                   <Settings size={20} />
@@ -349,7 +349,7 @@ export default function VideoPlayer({
                             changePlaybackSpeed(speed);
                             setShowSettings(false);
                           }}
-                          className={`block w-full text-left px-2 py-1 rounded text-sm transition-colors ${
+                          className={`block w-full text-left px-2 py-1 rounded text-sm transition-colors cursor-pointer ${
                             playbackSpeed === speed
                               ? "bg-red-600 text-white"
                               : "text-gray-300 hover:bg-gray-700"
@@ -366,7 +366,7 @@ export default function VideoPlayer({
               {/* Fullscreen */}
               <button
                 onClick={toggleFullscreen}
-                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10"
+                className="text-white hover:text-red-500 transition-colors p-1 rounded hover:bg-white hover:bg-opacity-10 cursor-pointer"
                 title="Fullscreen"
               >
                 <Maximize size={20} />

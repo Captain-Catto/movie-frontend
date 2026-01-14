@@ -235,7 +235,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     {/* Touch/Action Buttons */}
                     <div className="touch flex items-center space-x-4">
                       <Link href={watchHref} className="button-play" onClick={handleWatchClick}>
-                        <button className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors">
+                        <div className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors cursor-pointer">
                           <svg
                             className="w-5 h-5"
                             fill="currentColor"
@@ -243,7 +243,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                           >
                             <path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                           </svg>
-                        </button>
+                        </div>
                       </Link>
 
                       <div className="touch-group flex items-center space-x-2">

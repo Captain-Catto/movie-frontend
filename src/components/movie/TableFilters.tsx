@@ -421,7 +421,7 @@ const TableFilters = ({
             <button
               type="button"
               onClick={handleApplyFilters}
-              className="btn bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-medium transition-colors flex items-center space-x-2"
+              className="btn bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-medium transition-colors flex items-center space-x-2 cursor-pointer"
             >
               <span>Apply Filters</span>
               <svg
@@ -442,7 +442,7 @@ const TableFilters = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="btn bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white px-4 py-2 rounded-full font-medium transition-colors"
+                className="btn bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white px-4 py-2 rounded-full font-medium transition-colors cursor-pointer"
               >
                 Close
               </button>

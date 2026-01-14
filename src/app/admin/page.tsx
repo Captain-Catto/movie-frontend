@@ -223,7 +223,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <a
             href="/admin/content"
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors"
+            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer"
           >
             <div className="flex items-center mb-3">
               <div className="bg-blue-500 p-2 rounded-lg mr-3">
@@ -244,7 +244,7 @@ export default function AdminDashboard() {
 
           <a
             href="/admin/users"
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-green-500 transition-colors"
+            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-green-500 transition-colors cursor-pointer"
           >
             <div className="flex items-center mb-3">
               <div className="bg-green-500 p-2 rounded-lg mr-3">
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
 
           <a
             href="/admin/analytics"
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-purple-500 transition-colors"
+            className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-purple-500 transition-colors cursor-pointer"
           >
             <div className="flex items-center mb-3">
               <div className="bg-purple-500 p-2 rounded-lg mr-3">

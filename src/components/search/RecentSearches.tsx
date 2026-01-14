@@ -120,7 +120,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                   e.stopPropagation();
                   onRemoveSearch(search);
                 }}
-                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all"
+                className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

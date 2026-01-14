@@ -128,7 +128,7 @@ export default function VideoUploader() {
             </div>
             <button
               onClick={() => setSelectedFile(null)}
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white cursor-pointer"
               disabled={uploading}
             >
               <X className="w-5 h-5" />
@@ -142,7 +142,7 @@ export default function VideoUploader() {
         <button
           onClick={handleUpload}
           disabled={uploading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
           {uploading ? (
             <>

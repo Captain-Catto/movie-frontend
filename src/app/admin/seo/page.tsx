@@ -648,19 +648,19 @@ export default function AdminSeoPage() {
         <div className="flex flex-wrap gap-3 items-center">
           <button
             onClick={() => openEditModal(null, true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
           >
             Add SEO Metadata
           </button>
           <button
             onClick={setupDefaults}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
           >
             Setup Defaults
           </button>
           <button
             onClick={handleRefresh}
-            className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500"
+            className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500 cursor-pointer"
           >
             Refresh now
           </button>
@@ -701,13 +701,13 @@ export default function AdminSeoPage() {
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => exportSeoData("csv")}
-              className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600"
+              className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600 cursor-pointer"
             >
               Export CSV
             </button>
             <button
               onClick={() => exportSeoData("excel")}
-              className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700"
+              className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 cursor-pointer"
             >
               Export Excel
             </button>
@@ -792,13 +792,13 @@ export default function AdminSeoPage() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => openEditModal(seo, false)}
-                          className="text-indigo-600 hover:text-indigo-900"
+                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleToggleActive(seo.id)}
-                          className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1"
+                          className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1 cursor-pointer"
                         >
                           {seo.isActive ? (
                             <>
@@ -812,7 +812,7 @@ export default function AdminSeoPage() {
                         </button>
                         <button
                           onClick={() => handleDelete(seo.id)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 cursor-pointer"
                         >
                           Delete
                         </button>
@@ -1030,13 +1030,13 @@ export default function AdminSeoPage() {
                   onClick={() =>
                     setEditModal({ open: false, seo: null, isNew: false })
                   }
-                  className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600"
+                  className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 cursor-pointer"
                 >
                   {editModal.isNew ? "Create" : "Update"}
                 </button>

@@ -131,7 +131,7 @@ export default function NotificationsHeader({
           <div className="flex items-end">
             <button
               onClick={onClearFilters}
-              className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 hover:bg-gray-600 transition-colors"
+              className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 hover:bg-gray-600 transition-colors cursor-pointer"
             >
               Clear Filters
             </button>
@@ -155,7 +155,7 @@ export default function NotificationsHeader({
                     ? handleMaintenanceClick()
                     : onOpenSendModal(button.type)
                 }
-                className={`${buttonColor} text-white p-4 rounded-lg font-semibold transition-colors text-left`}
+                className={`${buttonColor} text-white p-4 rounded-lg font-semibold transition-colors text-left cursor-pointer`}
               >
                 <div className="flex items-start gap-3">
                   <IconComponent />

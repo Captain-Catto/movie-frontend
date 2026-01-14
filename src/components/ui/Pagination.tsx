@@ -112,7 +112,7 @@ export function Pagination({
             "relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
             currentPage === 1
               ? "text-gray-500 cursor-not-allowed bg-gray-800"
-              : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white"
+              : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white cursor-pointer"
           )}
           aria-label="Previous page"
         >
@@ -144,7 +144,7 @@ export function Pagination({
           ) : (
             <button
               onClick={handleMobilePageClick}
-              className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
+              className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
             >
               <span>
                 Page {currentPage} / {totalPages}
@@ -160,7 +160,7 @@ export function Pagination({
             <>
               <button
                 onClick={() => onPageChange?.(1)}
-                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
+                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
               >
                 1
               </button>
@@ -180,8 +180,8 @@ export function Pagination({
               className={classNames(
                 "relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors",
                 page === currentPage
-                  ? "z-10 bg-red-600 border-red-600 text-white"
-                  : "text-gray-300 bg-gray-700 border border-gray-600 hover:bg-gray-600 hover:text-white"
+                  ? "z-10 bg-red-600 border-red-600 text-white cursor-default"
+                  : "text-gray-300 bg-gray-700 border border-gray-600 hover:bg-gray-600 hover:text-white cursor-pointer"
               )}
               aria-current={page === currentPage ? "page" : undefined}
             >
@@ -221,7 +221,7 @@ export function Pagination({
                         setDesktopInputMode(true);
                         setDesktopInputValue("");
                       }}
-                      className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors"
+                      className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
                       title={`Jump to page (1-${totalPages})`}
                     >
                       ...
@@ -231,7 +231,7 @@ export function Pagination({
               )}
               <button
                 onClick={() => onPageChange?.(totalPages)}
-                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors"
+                className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
               >
                 {totalPages}
               </button>
@@ -249,7 +249,7 @@ export function Pagination({
             "relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors",
             currentPage === totalPages
               ? "text-gray-500 cursor-not-allowed bg-gray-800"
-              : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white"
+              : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white cursor-pointer"
           )}
           aria-label="Trang sau"
         >

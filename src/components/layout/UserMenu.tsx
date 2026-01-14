@@ -89,7 +89,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="flex items-center space-x-2 focus:outline-none group"
+        className="flex items-center space-x-2 focus:outline-none group cursor-pointer"
       >
         <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-gray-600 group-hover:border-red-500 transition-colors cursor-pointer">
           <Image
@@ -154,7 +154,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center px-4 py-3 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors border-t border-gray-700 mt-2"
+              className="w-full flex items-center px-4 py-3 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors border-t border-gray-700 mt-2 cursor-pointer"
             >
               <FaSignOutAlt className="w-4 h-4 mr-3 text-gray-400" />
               Logout

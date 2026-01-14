@@ -64,7 +64,7 @@ export default function AnalyticsHeader({
           <button
             onClick={onRefresh}
             aria-label="Refresh analytics data"
-            className="h-10 w-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center"
+            className="h-10 w-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center cursor-pointer"
             title={
               lastRefreshed
                 ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}`
@@ -88,7 +88,7 @@ export default function AnalyticsHeader({
           </button>
           <button
             onClick={() => exportToCSV(viewStats, "analytics-views")}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer"
           >
             <svg
               className="w-5 h-5"
@@ -109,7 +109,7 @@ export default function AnalyticsHeader({
             onClick={() =>
               exportToCSV(mostViewedContent, "analytics-most-viewed")
             }
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer"
           >
             <svg
               className="w-5 h-5"
@@ -142,7 +142,7 @@ export default function AnalyticsHeader({
                 <button
                   key={preset.key}
                   onClick={() => onDatePresetChange(preset.key)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                     datePreset === preset.key
                       ? "bg-red-600 text-white"
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"

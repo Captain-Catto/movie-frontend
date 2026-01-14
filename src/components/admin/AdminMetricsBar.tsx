@@ -42,7 +42,7 @@ export default function AdminMetricsBar({ metrics }: AdminMetricsBarProps) {
             <Link
               href="/admin/analytics"
               key={metric.label}
-              className="flex items-start gap-3 bg-gray-800 text-gray-50 rounded-lg px-3 py-2 shadow-sm border border-gray-700 min-w-[185px] hover:-translate-y-[1px] hover:shadow-lg hover:border-gray-600 transition"
+              className="flex items-start gap-3 bg-gray-800 text-gray-50 rounded-lg px-3 py-2 shadow-sm border border-gray-700 min-w-[185px] hover:-translate-y-[1px] hover:shadow-lg hover:border-gray-600 transition cursor-pointer"
             >
               <div
                 className={`w-9 h-9 rounded-lg flex items-center justify-center text-white ${

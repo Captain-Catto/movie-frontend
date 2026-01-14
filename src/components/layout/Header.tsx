@@ -157,7 +157,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   ) : isHydrated ? (
                     <button
                       onClick={handleAuthModalOpen}
-                      className="text-white hover:text-red-500 transition-colors text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 rounded bg-red-600 hover:bg-red-700 whitespace-nowrap"
+                      className="text-white hover:text-red-500 transition-colors text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 rounded bg-red-600 hover:bg-red-700 whitespace-nowrap cursor-pointer"
                     >
                       Login
                     </button>
@@ -169,7 +169,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
               {/* Hamburger Menu Button - Tablet & Mobile (only visible on mobile) */}
               <button
-                className="lg:hidden p-2 hover:text-red-500 transition-colors text-white relative z-50 flex-shrink-0"
+                className="lg:hidden p-2 hover:text-red-500 transition-colors text-white relative z-50 flex-shrink-0 cursor-pointer"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                 aria-expanded={isMenuOpen}
@@ -207,7 +207,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
             <button
               onClick={() => setIsMenuOpen(false)}
               aria-label="Close menu"
-              className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <span className="sr-only">Close</span>
               <svg
@@ -281,7 +281,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                       setIsMenuOpen(false);
                       handleSearchClick();
                     }}
-                    className="p-2 text-white hover:text-red-500 transition-colors inline-flex items-center justify-center"
+                    className="p-2 text-white hover:text-red-500 transition-colors inline-flex items-center justify-center cursor-pointer"
                     aria-label="Search"
                   >
                     <Search size={16} />
@@ -295,7 +295,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                     setIsMenuOpen(false);
                     handleAuthModalOpen();
                   }}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-lg transition-colors text-lg"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-lg transition-colors text-lg cursor-pointer"
                 >
                   Login / Sign up
                 </button>

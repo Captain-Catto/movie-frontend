@@ -126,7 +126,7 @@ export default function NotificationsTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     onClick={() => onDeleteNotification(notification.id)}
-                    className="text-red-500 hover:text-red-400"
+                    className="text-red-500 hover:text-red-400 cursor-pointer"
                   >
                     Delete
                   </button>
@@ -165,7 +165,7 @@ export default function NotificationsTable({
                 onPaginationChange({ ...pagination, page: pagination.page - 1 })
               }
               disabled={pagination.page === 1}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               Previous
             </button>
@@ -191,7 +191,7 @@ export default function NotificationsTable({
                         pagination.page === page
                           ? "bg-blue-600 text-white"
                           : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                      }`}
+                      } cursor-pointer`}
                     >
                       {page}
                     </button>
@@ -204,7 +204,7 @@ export default function NotificationsTable({
                 onPaginationChange({ ...pagination, page: pagination.page + 1 })
               }
               disabled={pagination.page >= pagination.totalPages}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
               Next
             </button>

@@ -327,7 +327,7 @@ export default function AccountPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {saving ? "Saving..." : "Save changes"}
               </button>
@@ -335,7 +335,7 @@ export default function AccountPage() {
 
             <div className="space-y-4 mt-8">
               <button
-                className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white"
+                className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
                 onClick={() => router.push("/account/change-password")}
               >
                 <div className="flex items-center justify-between">
@@ -350,7 +350,7 @@ export default function AccountPage() {
               </button>
 
               <button
-                className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white"
+                className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
                 onClick={() => router.push("/notifications")}
               >
                 <div className="flex items-center justify-between">

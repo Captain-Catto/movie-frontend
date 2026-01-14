@@ -17,7 +17,7 @@ export default function AdminTopBar({ onMenuClick, user }: AdminTopBarProps) {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-800 text-gray-300 hover:text-white transition-colors cursor-pointer"
             aria-label="Toggle sidebar"
           >
             <svg

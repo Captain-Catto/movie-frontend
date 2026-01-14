@@ -421,7 +421,7 @@ const PersonDetailPage = () => {
                       {personData.biography.length > 300 && (
                         <button
                           onClick={() => setShowFullBio(!showFullBio)}
-                          className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block"
+                          className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block cursor-pointer"
                         >
                           {showFullBio ? "Show less" : "Read more"}
                         </button>
@@ -447,7 +447,7 @@ const PersonDetailPage = () => {
             <div className="flex space-x-4 mb-6">
               <button
                 onClick={() => handleTabChange("cast")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                   activeTab === "cast"
                     ? "bg-red-500 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -457,7 +457,7 @@ const PersonDetailPage = () => {
               </button>
               <button
                 onClick={() => handleTabChange("crew")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                   activeTab === "crew"
                     ? "bg-red-500 text-white"
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
