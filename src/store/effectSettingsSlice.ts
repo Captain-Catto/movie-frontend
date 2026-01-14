@@ -16,6 +16,7 @@ export interface EffectSettings {
   intensity: 'low' | 'medium' | 'high';
   redEnvelopeSettings?: RedEnvelopeSettings;
   snowSettings?: SnowSettings;
+  excludedPaths?: string[];
 }
 
 interface EffectSettingsState extends EffectSettings {
@@ -43,6 +44,7 @@ const initialState: EffectSettingsState = {
   intensity: 'medium',
   redEnvelopeSettings: DEFAULT_RED_ENVELOPE_SETTINGS,
   snowSettings: DEFAULT_SNOW_SETTINGS,
+  excludedPaths: [],
   isLoading: false,
   error: null,
 };
@@ -130,6 +132,10 @@ const effectSettingsSlice = createSlice({
     resetSnowSettings: (state) => {
       state.snowSettings = DEFAULT_SNOW_SETTINGS;
     },
+
+    setExcludedPaths: (state, action: PayloadAction<string[]>) => {
+      state.excludedPaths = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -151,6 +157,7 @@ const effectSettingsSlice = createSlice({
           ...DEFAULT_SNOW_SETTINGS,
           ...action.payload.snowSettings,
         };
+        state.excludedPaths = action.payload.excludedPaths || [];
       })
       .addCase(fetchEffectSettings.rejected, (state, action) => {
         state.isLoading = false;
@@ -174,6 +181,7 @@ const effectSettingsSlice = createSlice({
           ...DEFAULT_SNOW_SETTINGS,
           ...action.payload.snowSettings,
         };
+        state.excludedPaths = action.payload.excludedPaths || [];
       })
       .addCase(updateEffectSettings.rejected, (state, action) => {
         state.isLoading = false;
@@ -193,6 +201,7 @@ export const {
   resetRedEnvelopeSettings,
   setSnowSettings,
   resetSnowSettings,
+  setExcludedPaths,
 } = effectSettingsSlice.actions;
 
 export default effectSettingsSlice.reducer;

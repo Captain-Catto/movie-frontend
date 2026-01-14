@@ -19,7 +19,7 @@ const RedEnvelopeEffect = dynamic(() => import('./RedEnvelopeEffect'), {
 export default function EffectManager() {
   const dispatch = useDispatch<AppDispatch>();
   const pathname = usePathname();
-  const { enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings } = useSelector(
+  const { enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, excludedPaths } = useSelector(
     (state: RootState) => state.effectSettings
   );
 
@@ -31,7 +31,16 @@ export default function EffectManager() {
   // Don't show effects on admin pages (better UX for admin work)
   const isAdminPage = pathname?.startsWith('/admin');
 
-  if (isAdminPage || !enabled || activeEffects.length === 0) {
+  // Check if current page is in excluded paths
+  const isExcluded = excludedPaths?.some(path => {
+    // Exact match or sub-path match (e.g., /login matches /login and /login/something)
+    // But be careful with simple prefix matching (e.g. /log matches /login)
+    if (path === pathname) return true;
+    if (pathname?.startsWith(path + '/')) return true;
+    return false;
+  });
+
+  if (isAdminPage || isExcluded || !enabled || activeEffects.length === 0) {
     return null;
   }
 

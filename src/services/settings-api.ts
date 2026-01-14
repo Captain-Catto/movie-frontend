@@ -22,6 +22,7 @@ export interface EffectSettings {
   intensity: "low" | "medium" | "high";
   redEnvelopeSettings?: RedEnvelopeSettings;
   snowSettings?: SnowSettings;
+  excludedPaths?: string[];
 }
 
 export interface ApiResponse<T = unknown> {

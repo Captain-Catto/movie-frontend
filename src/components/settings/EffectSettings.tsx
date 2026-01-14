@@ -11,10 +11,11 @@ import {
   resetRedEnvelopeSettings,
   setSnowSettings,
   resetSnowSettings,
+  setExcludedPaths,
   EffectType,
 } from '@/store/effectSettingsSlice';
 import { useToastRedux } from '@/hooks/useToastRedux';
-import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders } from 'lucide-react';
+import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders, Plus, X, Trash2 } from 'lucide-react';
 
 const EFFECTS = [
   {
@@ -35,7 +36,7 @@ const EFFECTS = [
 
 export default function EffectSettings() {
   const dispatch = useDispatch<AppDispatch>();
-  const { enabled, activeEffects, redEnvelopeSettings, snowSettings, isLoading, error } = useSelector(
+  const { enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths, isLoading, error } = useSelector(
     (state: RootState) => state.effectSettings
   );
   const { showSuccess, showError } = useToastRedux();
@@ -45,24 +46,25 @@ export default function EffectSettings() {
   const [initialSettings, setInitialSettings] = useState<string>('');
   const [isDirty, setIsDirty] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [newExcludedPath, setNewExcludedPath] = useState('');
 
   // Snapshot on mount and after initial load from API
   useEffect(() => {
     // If loading just finished (was loading, now not loading) and haven't loaded once yet
     if (!isLoading && !hasLoadedOnce) {
-      const snapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
+      const snapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths });
       setInitialSettings(snapshot);
       setHasLoadedOnce(true);
       setIsDirty(false);
     }
-  }, [isLoading, hasLoadedOnce, enabled, activeEffects, redEnvelopeSettings, snowSettings]);
+  }, [isLoading, hasLoadedOnce, enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths]);
 
   // Track changes
   useEffect(() => {
     if (!hasLoadedOnce) return; // Don't track until initial load is done
-    const current = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
+    const current = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths });
     setIsDirty(current !== initialSettings);
-  }, [enabled, activeEffects, redEnvelopeSettings, snowSettings, initialSettings, hasLoadedOnce]);
+  }, [enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths, initialSettings, hasLoadedOnce]);
 
   const handleToggleEffects = () => {
     dispatch(toggleEffects());
@@ -94,13 +96,29 @@ export default function EffectSettings() {
     dispatch(resetSnowSettings());
   };
 
+  const handleAddExcludedPath = () => {
+    if (!newExcludedPath.trim()) return;
+    if (excludedPaths?.includes(newExcludedPath.trim())) {
+      setNewExcludedPath('');
+      return;
+    }
+    const newPaths = [...(excludedPaths || []), newExcludedPath.trim()];
+    dispatch(setExcludedPaths(newPaths));
+    setNewExcludedPath('');
+  };
+
+  const handleRemoveExcludedPath = (path: string) => {
+    const newPaths = (excludedPaths || []).filter(p => p !== path);
+    dispatch(setExcludedPaths(newPaths));
+  };
+
   const handleSaveSettings = async () => {
     try {
       await dispatch(updateEffectSettings({
-        enabled, activeEffects, intensity: 'medium', redEnvelopeSettings, snowSettings
+        enabled, activeEffects, intensity: 'medium', redEnvelopeSettings, snowSettings, excludedPaths
       })).unwrap();
 
-      const newSnapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings });
+      const newSnapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths });
       setInitialSettings(newSnapshot);
       setIsDirty(false);
 
@@ -459,6 +477,61 @@ export default function EffectSettings() {
         {enabled && activeEffects.length === 0 && (
           <div className="p-4 rounded-lg bg-blue-900/20 border border-blue-800/30 text-blue-200 text-sm">
             💡 Select at least one effect to start
+          </div>
+        )}
+
+        {/* Page Visibility Settings */}
+        {enabled && (
+          <div className="space-y-4 pt-4 border-t border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+              Page Visibility
+            </h3>
+            <p className="text-xs text-gray-400">
+              Specify paths where effects should be hidden (e.g., /login, /admin)
+            </p>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newExcludedPath}
+                onChange={(e) => setNewExcludedPath(e.target.value)}
+                placeholder="/path/to/hide"
+                className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddExcludedPath();
+                  }
+                }}
+              />
+              <button
+                onClick={handleAddExcludedPath}
+                disabled={!newExcludedPath.trim()}
+                className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg border border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {excludedPaths && excludedPaths.length > 0 ? (
+                excludedPaths.map((path) => (
+                  <div key={path} className="flex items-center justify-between px-3 py-2 bg-gray-700/50 rounded border border-gray-700">
+                    <span className="text-sm text-gray-300 font-mono">{path}</span>
+                    <button
+                      onClick={() => handleRemoveExcludedPath(path)}
+                      className="text-gray-400 hover:text-red-400 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="text-xs text-gray-500 italic">
+                  No pages excluded. Effects will show on all pages.
+                </div>
+              )}
+            </div>
           </div>
         )}
 
