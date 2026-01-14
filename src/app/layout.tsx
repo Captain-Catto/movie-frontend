@@ -58,6 +58,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    google: "-8vZ66NSFBBoT9mdhvoV1N8U116kETyyQMBrBS1sYfk",
+  },
   manifest: "/manifest.json",
 };
 
