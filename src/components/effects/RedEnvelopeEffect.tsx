@@ -48,8 +48,6 @@ export default function RedEnvelopeEffect({
   const envelopesRef = useRef<RedEnvelope[]>([]);
   const sparklesRef = useRef<Sparkle[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
-  // Keep track of previous settings to detect changes
-  const prevSettingsRef = useRef<RedEnvelopeSettings | undefined>(undefined);
 
   // Default settings if not provided
   const settings = redEnvelopeSettings || {
@@ -361,7 +359,7 @@ export default function RedEnvelopeEffect({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [intensity, settings.fallSpeed, settings.rotationSpeed, settings.windStrength, settings.sparkleFrequency]);
+  }, [intensity, settings.fallSpeed, settings.rotationSpeed, settings.windStrength, settings.sparkleFrequency, settings.quantity]);
 
   return (
     <canvas

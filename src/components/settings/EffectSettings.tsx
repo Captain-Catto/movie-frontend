@@ -15,7 +15,7 @@ import {
   EffectType,
 } from '@/store/effectSettingsSlice';
 import { useToastRedux } from '@/hooks/useToastRedux';
-import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders, Plus, X, Trash2 } from 'lucide-react';
+import { Snowflake, Gift, Settings, Loader2, ChevronDown, RotateCcw, Sliders, Plus, Trash2 } from 'lucide-react';
 
 const EFFECTS = [
   {
@@ -247,7 +247,6 @@ export default function EffectSettings() {
                     step="1"
                     value={redEnvelopeSettings.quantity || 25}
                     onChange={(e) =>
-                      // @ts-ignore - Dynamic key access with number
                       dispatch(setRedEnvelopeSettings({ quantity: parseInt(e.target.value) }))
                     }
                     className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-600"
