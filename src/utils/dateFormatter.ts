@@ -132,7 +132,7 @@ export const formatRelativeTime = (dateInput: string | Date | null | undefined):
  */
 export const formatDateTimeVN = (dateInput: string | Date | null | undefined): string => {
   const date = parseDate(dateInput);
-  if (!date) return 'Unknown time';
+  if (!date) return 'Không rõ thời gian';
 
   try {
     return date.toLocaleString('vi-VN', {
@@ -145,7 +145,7 @@ export const formatDateTimeVN = (dateInput: string | Date | null | undefined): s
     });
   } catch (error) {
     console.error('❌ Vietnamese date formatting error:', error);
-    return 'Invalid time';
+    return 'Thời gian không hợp lệ';
   }
 };
 

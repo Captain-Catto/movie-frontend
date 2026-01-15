@@ -71,11 +71,7 @@ export class HydrationBoundary extends Component<
 
       // Show debug info in development
       if (process.env.NODE_ENV === "development") {
-        console.group("🔍 Hydration Error Debug Info");
-        console.log("Error:", error.message);
-        console.log("Component Stack:", errorInfo.componentStack);
-        console.log("Tip: Check for timestamps, random numbers, or different conditional renders between server/client");
-        console.groupEnd();
+   console.groupEnd();
       }
     }
   }

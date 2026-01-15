@@ -21,17 +21,13 @@ export function FavoritesLoader() {
 
     // If we have a token (even if isAuthenticated hasn't flipped yet), try load favorites
     if (token) {
-      console.log(
-        "[FavoritesLoader] Token detected, requesting favorites...",
-        { isAuthenticated }
-      );
       // Load favorites when user is authenticated (only once per session change)
       if (!hasFetched.current) {
         dispatch(fetchFavorites());
         hasFetched.current = true;
       }
     } else {
-      console.log("[FavoritesLoader] No token, clearing favorites.");
+
       // Clear favorites when user logs out
       dispatch(clearFavorites());
       hasFetched.current = false;

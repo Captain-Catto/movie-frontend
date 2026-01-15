@@ -31,7 +31,7 @@ const FavoritesPage = () => {
     async (pageNum: number = 1, append: boolean = false) => {
       if (!isAuthenticated) return;
 
-      console.log("[FavoritesPage] fetchFavorites called", { pageNum, append });
+
 
       if (pageNum === 1) {
         setLoading(true);
@@ -45,13 +45,6 @@ const FavoritesPage = () => {
         };
 
         const response = await favoritesService.getUserFavorites(queryParams);
-        console.log("[FavoritesPage] favorites response", {
-          page: response.page,
-          totalPages: response.totalPages,
-          total: response.total,
-          count: response.favorites.length,
-          hasMore: response.hasMore,
-        });
         setFavorites(response.favorites);
 
         setHasMore(response.hasMore);
@@ -72,10 +65,10 @@ const FavoritesPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       // Only fetch local favorites data
-      console.log("[FavoritesPage] initial load: authenticated, fetching page 1");
+
       fetchFavorites(1, false);
     } else {
-      console.log("[FavoritesPage] initial load: not authenticated, skip fetch");
+
     }
   }, [isAuthenticated, fetchFavorites]);
 

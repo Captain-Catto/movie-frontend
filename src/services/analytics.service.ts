@@ -31,7 +31,7 @@ class AnalyticsService {
 
     // Prevent duplicate tracking of same event within debounce period
     if (lastTracked && now - lastTracked < this.DEBOUNCE_MS) {
-      console.log("[Analytics] Skipping duplicate event:", eventKey);
+
       return;
     }
 
@@ -48,7 +48,7 @@ class AnalyticsService {
         metadata: params.metadata || {},
       };
 
-      console.log("[Analytics] Tracking event:", payload);
+
 
       // Send to backend (non-blocking, don't await)
       axiosInstance

@@ -45,7 +45,7 @@ export interface UseAsyncQueryResult<T> {
  *     return response.data;
  *   },
  *   dependencies: [page, genre],
- *   onSuccess: (data) => console.log('Movies loaded:', data),
+ *   onSuccess: (data) => {},
  *   onError: (error) => console.error('Failed to load:', error)
  * });
  * 
