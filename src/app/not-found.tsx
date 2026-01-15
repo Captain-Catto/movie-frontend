@@ -30,15 +30,8 @@ export default function NotFound() {
             Browse Movies
           </Link>
         </div>
-
-        <div className="mt-12 text-gray-500 text-sm">
-          <p>Looking for something specific?</p>
-          <Link href="/browse" className="text-red-500 hover:text-red-400">
-            Try our search feature
-          </Link>
-        </div>
       </div>
-      <div className="w-full mt-16">
+      <div className="w-full">
         <TrendingSuggestions type="all" title="Trending Now" />
       </div>
     </div>
