@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import MovieCard from "@/components/movie/MovieCard";
 import type { MovieCardData } from "@/types/movie";
@@ -309,22 +310,9 @@ const PersonDetailPage = () => {
     );
   }
 
-  if (error || !personData) {
-    return (
-      <Layout>
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              Actor not found
-            </h1>
-            <p className="text-gray-400">
-              {error || "This actor does not exist"}
-            </p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+    if (error || !personData) {
+      notFound();
+    }
 
   // Get paginated items for current tab
   const getPaginatedItems = () => {

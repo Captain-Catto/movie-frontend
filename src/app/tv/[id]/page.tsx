@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense, lazy } from "react";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
@@ -387,26 +387,7 @@ const TVDetailPageContent = () => {
   }
 
   if (error || !tvData) {
-    return (
-      <Layout>
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white mb-2">
-              TV series not found
-            </h1>
-            <p className="text-gray-400">
-              {error || "This TV series does not exist"}
-            </p>
-            <Link
-              href="/tv"
-              className="mt-4 inline-block px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              ← Back to TV series list
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
+    notFound();
   }
 
   return (

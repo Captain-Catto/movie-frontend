@@ -1,8 +1,11 @@
 import Link from "next/link";
+import Layout from "@/components/layout/Layout";
+import TrendingSuggestions from "@/components/movie/TrendingSuggestions";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
+    <Layout>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 py-20">
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
           <h1 className="text-9xl font-bold text-red-500 mb-4">404</h1>
@@ -35,6 +38,10 @@ export default function NotFound() {
           </Link>
         </div>
       </div>
+      <div className="w-full mt-16">
+        <TrendingSuggestions type="all" title="Trending Now" />
+      </div>
     </div>
+    </Layout>
   );
 }

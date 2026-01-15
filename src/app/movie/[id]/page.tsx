@@ -2,7 +2,7 @@
 
 import { useState, useEffect, lazy, Suspense } from "react";
 import type { SyntheticEvent } from "react";
-import { useParams } from "next/navigation";
+import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
@@ -323,18 +323,7 @@ const MovieDetailPageContent = () => {
   }
 
   if (!movieData) {
-    // console.log("❌ [MovieDetailPage] Rendering error: No movie data");
-    return (
-      <Layout>
-        <div className="min-h-screen">
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center text-white">
-              <p>Movie information not found.</p>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
+    notFound();
   }
 
   // console.log("✨ [MovieDetailPage] Rendering movie detail page with data:", {
