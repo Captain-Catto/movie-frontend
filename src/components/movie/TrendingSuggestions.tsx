@@ -38,11 +38,11 @@ export default function TrendingSuggestions({
             const rawData =
               Array.isArray(res.data) 
                 ? res.data 
-                : (res.data as any)?.data && Array.isArray((res.data as any).data)
-                ? (res.data as any).data
+                : (res.data as { data: unknown[] })?.data && Array.isArray((res.data as { data: unknown[] }).data)
+                ? (res.data as { data: unknown[] }).data
                 : [];
                 
-            data = rawData.map((tv: any) => mapTVSeriesToFrontend(tv));
+            data = rawData.map((tv: unknown) => mapTVSeriesToFrontend(tv as Record<string, unknown>));
           }
         } else {
           // "all" - use trending

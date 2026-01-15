@@ -11,7 +11,7 @@ export default function MovieNotFound() {
             <h1 className="text-8xl font-bold text-gray-800 mb-4">404</h1>
             <h2 className="text-3xl font-bold text-white mb-4">Movie Not Found</h2>
             <p className="text-gray-400 text-lg mb-8">
-              We couldn't find the movie you're looking for. It might have been removed or the URL is incorrect.
+              We couldn&apos;t find the movie you&apos;re looking for. It might have been removed or the URL is incorrect.
             </p>
           </div>
 

@@ -10,7 +10,7 @@ export default function ActorNotFound() {
             <h1 className="text-8xl font-bold text-gray-800 mb-4">404</h1>
             <h2 className="text-3xl font-bold text-white mb-4">Actor Not Found</h2>
             <p className="text-gray-400 text-lg mb-8">
-              We couldn't find the actor you're looking for. They might have been removed or the ID is incorrect.
+              We couldn&apos;t find the actor you&apos;re looking for. They might have been removed or the ID is incorrect.
             </p>
           </div>
 

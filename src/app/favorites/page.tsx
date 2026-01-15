@@ -44,13 +44,13 @@ const FavoritesPage = () => {
           limit: 20,
         };
 
-        const response = await favoritesService.getUserFavorites(queryParams);
-        setFavorites(response.favorites);
+        const favData = await favoritesService.getUserFavorites(queryParams);
+        setFavorites(favData.favorites);
 
-        setHasMore(response.hasMore);
+        setHasMore(favData.hasMore);
         setPage(pageNum);
-        setTotalPages(response.totalPages);
-        setTotal(response.total);
+        setTotalPages(favData.totalPages);
+        setTotal(favData.total);
       } catch (err) {
         console.error("Error fetching favorites:", err);
         setError("Failed to load favorites. Please try again.");
