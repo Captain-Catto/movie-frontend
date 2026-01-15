@@ -54,7 +54,7 @@ class AnalyticsService {
       axiosInstance
         .post("/analytics/track", payload)
         .then((response) => {
-          console.log("[Analytics] Event tracked successfully:", response.data);
+          // Event tracked
         })
         .catch((error) => {
           console.error("[Analytics] Failed to track event:", error);
