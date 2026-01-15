@@ -6,6 +6,7 @@ import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
+import GenreBadge from "@/components/ui/GenreBadge";
 import { apiService } from "@/services/api";
 import {
   mapContentToWatchContent,
@@ -437,15 +438,15 @@ const WatchPage = () => {
                       {/* Genres */}
                       {movieData.genres.length > 0 && (
                         <div className="hl-tags flex flex-wrap gap-2">
-                          {movieData.genres.map((genre, index) => (
-                            <a
-                              key={index}
-                              className="tag-topic bg-gray-600 text-white hover:text-red-400 px-3 py-1 rounded text-sm transition-colors"
-                              href={`/genre/${genre.toLowerCase()}`}
-                            >
-                              {genre}
-                            </a>
-                          ))}
+                        {movieData.genres.map((genre, index) => (
+                          <GenreBadge
+                            key={index}
+                            genre={genre}
+                            contentType={movieData.contentType}
+                            className="bg-gray-600 hover:text-red-400"
+                            variant="hero"
+                          />
+                        ))}
                         </div>
                       )}
                     </div>
