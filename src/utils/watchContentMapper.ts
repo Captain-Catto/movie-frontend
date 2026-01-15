@@ -110,7 +110,7 @@ export function mapMovieToWatchContent(
     title: movie.title || movie.name || "Untitled",
     aliasTitle:
       movie.originalTitle || movie.original_title || movie.original_name,
-    description: movie.overview || "Không có mô tả",
+    description: movie.overview || "No description",
     releaseDate: movie.releaseDate || movie.release_date || "",
     rating,
     duration,
@@ -153,7 +153,7 @@ export function mapTVToWatchContent(
     tmdbId: tv.tmdbId || tv.id || 0,
     title: tv.title || tv.name || "Untitled",
     aliasTitle: tv.originalTitle || tv.original_title || tv.original_name,
-    description: tv.overview || "Không có mô tả",
+    description: tv.overview || "No description",
     releaseDate: tv.firstAirDate || tv.first_air_date || "",
     rating,
     duration,

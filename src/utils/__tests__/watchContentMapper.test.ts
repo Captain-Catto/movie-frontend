@@ -145,7 +145,7 @@ describe("mapMovieToWatchContent", () => {
 
     const result = mapMovieToWatchContent(noOverview, "movie-12345");
 
-    expect(result.description).toBe("Không có mô tả");
+    expect(result.description).toBe("No description");
   });
 
   it("should handle missing title with fallback", () => {
