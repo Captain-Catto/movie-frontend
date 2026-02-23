@@ -236,6 +236,35 @@ class ApiService {
     return this.fetchWithErrorHandling(url);
   }
 
+  async getTVSeasonEpisodes(
+    tvId: number,
+    seasonNumber: number,
+    language: string = DEFAULT_LANGUAGE
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      season_number: number;
+      name: string;
+      episodes: Array<{
+        episode_number: number;
+        name: string;
+        overview: string;
+        air_date: string | null;
+        still_path: string | null;
+        runtime: number | null;
+        vote_average: number;
+      }>;
+    };
+    error?: string;
+  }> {
+    const params = this.buildQueryParams({ language });
+    const url = `${API_BASE_URL}/tv/${tvId}/seasons/${seasonNumber}/episodes${
+      params ? `?${params}` : ""
+    }`;
+    return this.fetchWithErrorHandling(url);
+  }
+
   async getMovieVideos(id: number): Promise<{
     success: boolean;
     message: string;

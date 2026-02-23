@@ -10,6 +10,9 @@ type RegistrationSettings = {
   nickname: MinMax;
   password: MinMax;
 };
+type StreamDomainSettings = {
+  domains: string[];
+};
 
 const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
   { key: "nickname", label: "Nickname" },
@@ -25,18 +28,29 @@ export default function AdminSettingsPage() {
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [streamDomainText, setStreamDomainText] = useState("");
+  const [streamSaving, setStreamSaving] = useState(false);
 
   const fetchSettings = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;
     setLoading(true);
     try {
-      const res = await adminApi.get<RegistrationSettings>(
-        "/admin/settings/registration"
-      );
-      if (res.success && res.data) {
-        setSettings(res.data as RegistrationSettings);
-      } else if (res.error) {
-        showError("Load failed", res.error);
+      const [registrationRes, streamDomainsRes] = await Promise.all([
+        adminApi.get<RegistrationSettings>("/admin/settings/registration"),
+        adminApi.get<StreamDomainSettings>("/admin/settings/stream-domains"),
+      ]);
+
+      if (registrationRes.success && registrationRes.data) {
+        setSettings(registrationRes.data as RegistrationSettings);
+      } else if (registrationRes.error) {
+        showError("Load failed", registrationRes.error);
+      }
+
+      if (streamDomainsRes.success && streamDomainsRes.data) {
+        const streamDomains = streamDomainsRes.data as StreamDomainSettings;
+        setStreamDomainText((streamDomains.domains || []).join("\n"));
+      } else if (streamDomainsRes.error) {
+        showError("Load failed", streamDomainsRes.error);
       }
     } catch (err) {
       console.error("Failed to load settings", err);
@@ -82,6 +96,39 @@ export default function AdminSettingsPage() {
       showError("Save failed", "Failed to save settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveStreamDomains = async () => {
+    const domains = streamDomainText
+      .split(/[\n,]+/)
+      .map((domain) => domain.trim())
+      .filter(Boolean);
+
+    if (domains.length === 0) {
+      showError("Save failed", "Please provide at least one stream domain");
+      return;
+    }
+
+    setStreamSaving(true);
+    try {
+      const res = await adminApi.put<StreamDomainSettings>(
+        "/admin/settings/stream-domains",
+        { domains }
+      );
+
+      if (res.success && res.data) {
+        const saved = res.data as StreamDomainSettings;
+        setStreamDomainText((saved.domains || []).join("\n"));
+        showSuccess("Saved", "Stream domains updated successfully");
+      } else {
+        showError("Save failed", res.error || "Failed to save stream domains");
+      }
+    } catch (err) {
+      console.error("Failed to save stream domains", err);
+      showError("Save failed", "Failed to save stream domains");
+    } finally {
+      setStreamSaving(false);
     }
   };
 
@@ -193,6 +240,37 @@ export default function AdminSettingsPage() {
           </div>
           <div className="p-6">
             <EffectSettings />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg border border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-700 flex flex-col gap-1">
+          <h2 className="text-lg font-semibold text-white">Stream Domains</h2>
+          <p className="text-xs text-gray-400">
+            One domain per line. The first domain is the primary source and the
+            remaining domains are fallback sources.
+          </p>
+        </div>
+        <div className="p-6 space-y-4">
+          <textarea
+            value={streamDomainText}
+            onChange={(e) => setStreamDomainText(e.target.value)}
+            rows={8}
+            placeholder="https://vidsrcme.ru&#10;https://vidsrc-embed.ru&#10;https://vsrc.su"
+            className="w-full rounded-md border border-gray-600 bg-gray-900 text-white text-sm p-3 focus:outline-none focus:ring-2 focus:ring-red-600"
+          />
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-gray-400">
+              Tip: You can paste domains separated by newline or comma.
+            </p>
+            <button
+              onClick={handleSaveStreamDomains}
+              disabled={streamSaving}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {streamSaving ? "Saving..." : "Save Stream Domains"}
+            </button>
           </div>
         </div>
       </div>

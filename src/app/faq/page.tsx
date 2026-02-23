@@ -40,9 +40,9 @@ const faqs = [
       "We offer multiple video quality options depending on your internet connection and device capabilities. The player will automatically adjust quality for the best viewing experience.",
   },
   {
-    question: "How do I continue watching where I left off?",
+    question: "How can I track watched episodes for TV series?",
     answer:
-      'Your watch progress is automatically saved. Visit the "Continue Watching" page to pick up where you left off on any movie or show.',
+      "At the moment, episode tracking is available only inside TV series viewing flow. A dedicated Continue Watching page is not available yet.",
   },
   {
     question: "Can I rate and review movies?",

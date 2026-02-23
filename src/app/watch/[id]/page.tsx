@@ -7,6 +7,7 @@ import Layout from "@/components/layout/Layout";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import GenreBadge from "@/components/ui/GenreBadge";
+import EpisodePicker from "@/components/ui/EpisodePicker";
 import { apiService } from "@/services/api";
 import {
   mapContentToWatchContent,
@@ -64,7 +65,6 @@ const WatchPage = () => {
   const [streamCandidates, setStreamCandidates] = useState<string[]>([]);
   const [activeStreamIndex, setActiveStreamIndex] = useState(0);
   const [streamError, setStreamError] = useState<string | null>(null);
-  const [streamLoading, setStreamLoading] = useState(false);
   const streamLoadingRef = useRef(false);
   const streamTimeoutRef = useRef<number | null>(null);
 
@@ -99,8 +99,10 @@ const WatchPage = () => {
     return undefined;
   };
 
-  const season = parsePositiveInt(searchParams.get("season"));
-  const episode = parsePositiveInt(searchParams.get("episode"));
+  const seasonParam = parsePositiveInt(searchParams.get("season"));
+  const episodeParam = parsePositiveInt(searchParams.get("episode"));
+  const season = seasonParam ?? 1;
+  const episode = episodeParam ?? 1;
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -126,7 +128,7 @@ const WatchPage = () => {
         setRecommendationsLoading(true);
 
         const streamOptions =
-          contentType === "tv" && season && episode
+          contentType === "tv"
             ? {
                 season,
                 episode,
@@ -285,7 +287,6 @@ const WatchPage = () => {
   const handleStreamLoadError = useCallback(() => {
     clearStreamTimeout();
     streamLoadingRef.current = false;
-    setStreamLoading(false);
     setActiveStreamIndex((prev) => {
       if (prev < streamCandidates.length - 1) {
         setStreamError(null);
@@ -299,19 +300,16 @@ const WatchPage = () => {
   const handleStreamLoadSuccess = useCallback(() => {
     clearStreamTimeout();
     streamLoadingRef.current = false;
-    setStreamLoading(false);
   }, [clearStreamTimeout]);
 
   useEffect(() => {
     if (!isPlaying || !activeStreamUrl) {
       clearStreamTimeout();
       streamLoadingRef.current = false;
-      setStreamLoading(false);
       return;
     }
 
     streamLoadingRef.current = true;
-    setStreamLoading(true);
     clearStreamTimeout();
     streamTimeoutRef.current = window.setTimeout(() => {
       if (streamLoadingRef.current) {
@@ -364,11 +362,6 @@ const WatchPage = () => {
                     onLoad={handleStreamLoadSuccess}
                     onError={handleStreamLoadError}
                   />
-                  {streamLoading && (
-                    <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
-                      <div className="text-white text-sm">Loading stream...</div>
-                    </div>
-                  )}
                   {activeStreamIndex > 0 && (
                     <div className="absolute top-4 left-4 px-3 py-1 rounded bg-black/70 text-xs text-white">
                       Fallback source {activeStreamIndex + 1}/
@@ -378,9 +371,9 @@ const WatchPage = () => {
                 </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-black px-6">
-                  <p className="text-gray-300 text-center">
-                    {streamError || "Loading stream source..."}
-                  </p>
+                  {streamError ? (
+                    <p className="text-gray-300 text-center">{streamError}</p>
+                  ) : null}
                 </div>
               )
             ) : (
@@ -411,6 +404,19 @@ const WatchPage = () => {
             )}
           </div>
         </div>
+
+        {/* Episode Picker - TV Series only */}
+        {movieData.contentType === "tv" && movieData.numberOfSeasons && (
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+            <EpisodePicker
+              tmdbId={movieData.tmdbId}
+              numberOfSeasons={movieData.numberOfSeasons}
+              currentSeason={season}
+              currentEpisode={episode}
+              contentId={movieId}
+            />
+          </div>
+        )}
 
         {/* Movie Information */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

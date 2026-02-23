@@ -5,7 +5,7 @@ import type { SyntheticEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { FaHeart, FaClock, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
+import { FaHeart, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 
 interface UserMenuProps {
@@ -68,11 +68,6 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
       icon: <FaHeart className="w-4 h-4" />,
       label: "Favorites",
       href: "/favorites",
-    },
-    {
-      icon: <FaClock className="w-4 h-4" />,
-      label: "Continue Watching",
-      href: "/continue-watching",
     },
     {
       icon: <FaUser className="w-4 h-4" />,

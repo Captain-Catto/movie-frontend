@@ -476,7 +476,7 @@ const TVDetailPageContent = () => {
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4">
                   <Link
-                    href={`/watch/tv-${tvData.tmdbId || numericTvId}`}
+                    href={`/watch/tv-${tvData.tmdbId || numericTvId}?season=1&episode=1`}
                     className="px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 bg-red-500 hover:bg-red-600 text-white text-sm sm:text-base font-semibold rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <svg
