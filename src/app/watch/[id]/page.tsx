@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense } from "react";
-import { useParams, useRouter, notFound } from "next/navigation";
+import { useState, useEffect, lazy, Suspense, useCallback, useRef } from "react";
+import { useParams, useSearchParams, notFound } from "next/navigation";
 import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
@@ -43,9 +43,11 @@ interface RecommendationItem {
   vote_average: number;
 }
 
+const STREAM_LOAD_TIMEOUT_MS = 15000;
+
 const WatchPage = () => {
   const params = useParams();
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const movieId = params.id as string;
   const [movieData, setMovieData] = useState<WatchContentData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,6 +61,12 @@ const WatchPage = () => {
   const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const [hasTrackedPlay, setHasTrackedPlay] = useState(false);
   const [hasTrackedView, setHasTrackedView] = useState(false);
+  const [streamCandidates, setStreamCandidates] = useState<string[]>([]);
+  const [activeStreamIndex, setActiveStreamIndex] = useState(0);
+  const [streamError, setStreamError] = useState<string | null>(null);
+  const [streamLoading, setStreamLoading] = useState(false);
+  const streamLoadingRef = useRef(false);
+  const streamTimeoutRef = useRef<number | null>(null);
 
   // Parse prefixed ID (movie-123 or tv-456 or plain 123)
   const parseContentId = (
@@ -82,6 +90,18 @@ const WatchPage = () => {
     return undefined;
   };
 
+  const parsePositiveInt = (value: string | null): number | undefined => {
+    if (!value) return undefined;
+    const parsed = Number(value);
+    if (Number.isInteger(parsed) && parsed > 0) {
+      return parsed;
+    }
+    return undefined;
+  };
+
+  const season = parsePositiveInt(searchParams.get("season"));
+  const episode = parsePositiveInt(searchParams.get("episode"));
+
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
@@ -98,21 +118,35 @@ const WatchPage = () => {
         setMovieData(mappedData);
         const contentType = response.contentType || mappedData.contentType;
         setError(null);
+        setStreamError(null);
+        setActiveStreamIndex(0);
 
         // Fetch credits and recommendations in parallel
         setCreditsLoading(true);
         setRecommendationsLoading(true);
 
-        const [creditsResponse, recommendationsResponse] = await Promise.all([
-          // Fetch credits
-          contentType === "movie"
-            ? apiService.getMovieCredits(tmdbId)
-            : apiService.getTVCredits(tmdbId),
-          // Fetch recommendations
-          contentType === "movie"
-            ? apiService.getMovieRecommendations(tmdbId, 1)
-            : apiService.getTVRecommendations(tmdbId, 1),
-        ]);
+        const streamOptions =
+          contentType === "tv" && season && episode
+            ? { season, episode }
+            : undefined;
+
+        const [creditsResponse, recommendationsResponse, streamResponse] =
+          await Promise.all([
+            // Fetch credits
+            contentType === "movie"
+              ? apiService.getMovieCredits(tmdbId)
+              : apiService.getTVCredits(tmdbId),
+            // Fetch recommendations
+            contentType === "movie"
+              ? apiService.getMovieRecommendations(tmdbId, 1)
+              : apiService.getTVRecommendations(tmdbId, 1),
+            // Fetch streaming embed URL
+            apiService.getStreamUrlByTmdbId(
+              tmdbId,
+              contentType === "tv" ? "tv" : "movie",
+              streamOptions
+            ),
+          ]);
 
         // Set credits
         if (creditsResponse.success) {
@@ -169,6 +203,21 @@ const WatchPage = () => {
           setRecommendations(mappedRecommendations);
         }
         setRecommendationsLoading(false);
+
+        if (streamResponse.success && streamResponse.data?.url) {
+          const candidates = [
+            streamResponse.data.url,
+            ...(streamResponse.data.fallbackUrls || []),
+          ]
+            .filter((url) => !!url)
+            .filter((url, index, all) => all.indexOf(url) === index);
+
+          setStreamCandidates(candidates);
+          setActiveStreamIndex(0);
+        } else {
+          setStreamCandidates([]);
+          setStreamError("No stream source available right now.");
+        }
       } catch (err) {
         console.error("Error fetching content data:", err);
         setError("Unable to load content information");
@@ -183,8 +232,11 @@ const WatchPage = () => {
       fetchMovieData();
       setHasTrackedPlay(false);
       setHasTrackedView(false);
+      setStreamCandidates([]);
+      setStreamError(null);
+      setActiveStreamIndex(0);
     }
-  }, [movieId]);
+  }, [movieId, season, episode]);
 
   useEffect(() => {
     if (!movieData || hasTrackedView) return;
@@ -215,6 +267,57 @@ const WatchPage = () => {
     setIsPlaying(true);
   };
 
+  const activeStreamUrl = streamCandidates[activeStreamIndex];
+
+  const clearStreamTimeout = useCallback(() => {
+    if (streamTimeoutRef.current !== null) {
+      window.clearTimeout(streamTimeoutRef.current);
+      streamTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handleStreamLoadError = useCallback(() => {
+    clearStreamTimeout();
+    streamLoadingRef.current = false;
+    setStreamLoading(false);
+    setActiveStreamIndex((prev) => {
+      if (prev < streamCandidates.length - 1) {
+        setStreamError(null);
+        return prev + 1;
+      }
+      setStreamError("Unable to load stream from available providers.");
+      return prev;
+    });
+  }, [clearStreamTimeout, streamCandidates.length]);
+
+  const handleStreamLoadSuccess = useCallback(() => {
+    clearStreamTimeout();
+    streamLoadingRef.current = false;
+    setStreamLoading(false);
+  }, [clearStreamTimeout]);
+
+  useEffect(() => {
+    if (!isPlaying || !activeStreamUrl) {
+      clearStreamTimeout();
+      streamLoadingRef.current = false;
+      setStreamLoading(false);
+      return;
+    }
+
+    streamLoadingRef.current = true;
+    setStreamLoading(true);
+    clearStreamTimeout();
+    streamTimeoutRef.current = window.setTimeout(() => {
+      if (streamLoadingRef.current) {
+        handleStreamLoadError();
+      }
+    }, STREAM_LOAD_TIMEOUT_MS);
+
+    return () => {
+      clearStreamTimeout();
+    };
+  }, [activeStreamUrl, clearStreamTimeout, handleStreamLoadError, isPlaying]);
+
   if (loading) {
     return (
       <Layout>
@@ -243,23 +346,37 @@ const WatchPage = () => {
         <div className="relative flex items-center justify-center bg-black">
           <div className="w-full aspect-video max-h-[100vh] min-h-[240px] sm:min-h-[320px] flex items-center justify-center">
             {isPlaying ? (
-              // Video Player with Demo Video
-              <video
-                className="w-full h-full object-contain"
-                controls
-                autoPlay
-                poster={movieData.backgroundImage}
-              >
-                <source
-                  src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                  type="video/mp4"
-                />
-                <source
-                  src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
-                  type="application/x-mpegURL"
-                />
-                Your browser does not support the video tag.
-              </video>
+              activeStreamUrl ? (
+                <div className="relative w-full h-full">
+                  <iframe
+                    key={activeStreamUrl}
+                    src={activeStreamUrl}
+                    className="w-full h-full"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    referrerPolicy="origin"
+                    onLoad={handleStreamLoadSuccess}
+                    onError={handleStreamLoadError}
+                  />
+                  {streamLoading && (
+                    <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+                      <div className="text-white text-sm">Loading stream...</div>
+                    </div>
+                  )}
+                  {activeStreamIndex > 0 && (
+                    <div className="absolute top-4 left-4 px-3 py-1 rounded bg-black/70 text-xs text-white">
+                      Fallback source {activeStreamIndex + 1}/
+                      {streamCandidates.length}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-black px-6">
+                  <p className="text-gray-300 text-center">
+                    {streamError || "Loading stream source..."}
+                  </p>
+                </div>
+              )
             ) : (
               // Movie Poster with Play Button
               <div

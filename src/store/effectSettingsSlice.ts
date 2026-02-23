@@ -19,6 +19,7 @@ export interface EffectSettings {
   excludedPaths?: string[];
 }
 
+
 interface EffectSettingsState extends EffectSettings {
   isLoading: boolean;
   error: string | null;

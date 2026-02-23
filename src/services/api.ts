@@ -611,6 +611,69 @@ class ApiService {
     };
   }
 
+  async getStreamUrlByTmdbId(
+    tmdbId: number,
+    contentType: "movie" | "tv",
+    options?: {
+      season?: number;
+      episode?: number;
+      dsLang?: string;
+      autoplay?: boolean;
+      autoNext?: boolean;
+    }
+  ): Promise<{
+    success: boolean;
+    data?: {
+      provider: string;
+      tmdbId: number;
+      contentType: "movie" | "tv";
+      url: string;
+      fallbackUrls: string[];
+    };
+    message?: string;
+  }> {
+    try {
+      const params = this.buildQueryParams({
+        contentType,
+        season: options?.season,
+        episode: options?.episode,
+        dsLang: options?.dsLang,
+        autoplay:
+          options?.autoplay === undefined ? undefined : options.autoplay ? 1 : 0,
+        autoNext:
+          options?.autoNext === undefined ? undefined : options.autoNext ? 1 : 0,
+      });
+
+      const url = `${API_BASE_URL}/content/stream-url/${tmdbId}${
+        params ? `?${params}` : ""
+      }`;
+
+      const response = await this.fetchWithErrorHandling<{
+        success: boolean;
+        message: string;
+        data: {
+          provider: string;
+          tmdbId: number;
+          contentType: "movie" | "tv";
+          url: string;
+          fallbackUrls: string[];
+        } | null;
+      }>(url);
+
+      return {
+        success: response.success,
+        data: response.data || undefined,
+        message: response.message,
+      };
+    } catch (error) {
+      console.error("Get stream URL by TMDB ID failed:", error);
+      return {
+        success: false,
+        message: `Failed to get stream URL for TMDB ID ${tmdbId}: ${error}`,
+      };
+    }
+  }
+
   async lookupByTmdbId(tmdbId: number): Promise<{
     success: boolean;
     data?: {

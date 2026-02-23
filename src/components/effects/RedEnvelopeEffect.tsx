@@ -15,6 +15,17 @@ interface RedEnvelopeEffectProps {
   redEnvelopeSettings?: RedEnvelopeSettings;
 }
 
+// Mouse state for wind trail effect
+interface MouseState {
+  x: number;
+  y: number;
+  lastX: number;
+  lastY: number;
+  velocityX: number;
+  velocityY: number;
+  isActive: boolean;
+}
+
 interface RedEnvelope {
   x: number;
   y: number;
@@ -26,6 +37,7 @@ interface RedEnvelope {
   flip: number; // For 3D flip effect (-1 to 1)
   flipSpeed: number;
   velocityY: number; // For bounce effect
+  velocityX: number; // For wind trail effect
   hue: number; // Color variation (0-20 for red shades)
   swayPhase: number;
   swaySpeed: number;
@@ -48,6 +60,17 @@ export default function RedEnvelopeEffect({
   const envelopesRef = useRef<RedEnvelope[]>([]);
   const sparklesRef = useRef<Sparkle[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  
+  // Mouse state for wind trail effect
+  const mouseRef = useRef<MouseState>({
+    x: 0,
+    y: 0,
+    lastX: 0,
+    lastY: 0,
+    velocityX: 0,
+    velocityY: 0,
+    isActive: false,
+  });
 
   // Default settings if not provided
   const settings = redEnvelopeSettings || {
@@ -95,10 +118,37 @@ export default function RedEnvelopeEffect({
       flip: Math.random() * 2 - 1, // -1 to 1
       flipSpeed: (Math.random() - 0.5) * 0.05,
       velocityY: (Math.random() * 0.8 + 0.2) * settings.fallSpeed, // Slower initial velocity
+      velocityX: 0, // For wind trail effect
       hue: Math.random() * 20, // 0-20 for red color variations
       swayPhase: Math.random() * Math.PI * 2, // Random starting phase for sway
       swaySpeed: Math.random() * 1 + 0.5, // Different sway speeds
     });
+
+    // Mouse event handlers for wind trail effect
+    const handleMouseMove = (e: MouseEvent) => {
+      const mouse = mouseRef.current;
+      mouse.lastX = mouse.x;
+      mouse.lastY = mouse.y;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      mouse.velocityX = mouse.x - mouse.lastX;
+      mouse.velocityY = mouse.y - mouse.lastY;
+    };
+
+    const handleMouseEnter = () => {
+      mouseRef.current.isActive = true;
+    };
+
+    const handleMouseLeave = () => {
+      mouseRef.current.isActive = false;
+      mouseRef.current.velocityX = 0;
+      mouseRef.current.velocityY = 0;
+    };
+
+    // Add mouse event listeners
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseenter', handleMouseEnter);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
 
     // Check if we need to re-initialize or update existing
     // If envelopes array is empty, initialize it full
@@ -311,6 +361,28 @@ export default function RedEnvelopeEffect({
 
         envelope.y += envelope.velocityY;
         
+        // Wind trail effect - envelopes follow mouse movement
+        if (mouseRef.current.isActive) {
+          const mouse = mouseRef.current;
+          const dx = envelope.x - mouse.x;
+          const dy = envelope.y - mouse.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const windTrailRadius = 150; // Radius of wind trail influence
+          
+          if (distance < windTrailRadius && distance > 0) {
+            // Strength decreases with distance
+            const strength = (windTrailRadius - distance) / windTrailRadius;
+            // Apply mouse velocity to envelope (wind trail effect)
+            envelope.velocityX += mouse.velocityX * strength * 0.15;
+            // Add slight vertical push too
+            envelope.velocityY += mouse.velocityY * strength * 0.05;
+          }
+        }
+        
+        // Apply horizontal velocity with friction
+        envelope.x += envelope.velocityX;
+        envelope.velocityX *= 0.95; // Friction to slow down
+        
         // Swaying motion (Sine wave)
         const sway = Math.sin(time * (envelope.swaySpeed || 1) + (envelope.swayPhase || 0));
         envelope.x += envelope.wind + sway * 0.5; // Combine constant wind with swaying
@@ -334,6 +406,7 @@ export default function RedEnvelopeEffect({
           envelope.x = Math.random() * canvas.width;
           envelope.rotation = Math.random() * 360;
           envelope.velocityY = (Math.random() * 0.8 + 0.2) * settings.fallSpeed;
+          envelope.velocityX = 0; // Reset horizontal velocity
           envelope.flip = Math.random() * 2 - 1;
           envelope.hue = Math.random() * 20;
           // Reset sway properties
@@ -355,6 +428,9 @@ export default function RedEnvelopeEffect({
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseenter', handleMouseEnter);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -364,7 +440,8 @@ export default function RedEnvelopeEffect({
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-[9999]"
+      className="fixed inset-0 z-[9999]"
+      style={{ pointerEvents: 'auto' }}
     />
   );
 }
