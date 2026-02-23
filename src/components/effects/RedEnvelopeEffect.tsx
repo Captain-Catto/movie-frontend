@@ -91,6 +91,8 @@ export default function RedEnvelopeEffect({
   const MOBILE_MIN_MOVEMENT = 3;
   const MOBILE_MAX_POINTER_VELOCITY = 18;
   const MOBILE_FRICTION = 0.92;
+  const MOBILE_SWIPE_BOOST = 1.33;
+  const MOBILE_SWIPE_SPEED_THRESHOLD = 10;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -446,14 +448,21 @@ export default function RedEnvelopeEffect({
           const isTouchPointer = mouse.pointerType === 'touch';
           const windTrailRadius = isTouchPointer ? MOBILE_WIND_RADIUS : 150;
           const pointerInfluence = isTouchPointer ? MOBILE_WIND_INFLUENCE : 1;
+          const pointerSpeed = Math.hypot(mouse.velocityX, mouse.velocityY);
+          const swipeBoost =
+            isTouchPointer && pointerSpeed >= MOBILE_SWIPE_SPEED_THRESHOLD
+              ? MOBILE_SWIPE_BOOST
+              : 1;
           
           if (distance < windTrailRadius && distance > 0) {
             // Strength decreases with distance
             const strength = (windTrailRadius - distance) / windTrailRadius;
             // Apply mouse velocity to envelope (wind trail effect)
-            envelope.velocityX += mouse.velocityX * strength * 0.12 * pointerInfluence;
+            envelope.velocityX +=
+              mouse.velocityX * strength * 0.12 * pointerInfluence * swipeBoost;
             // Add slight vertical push too
-            envelope.velocityY += mouse.velocityY * strength * 0.035 * pointerInfluence;
+            envelope.velocityY +=
+              mouse.velocityY * strength * 0.035 * pointerInfluence * swipeBoost;
           }
         }
 
