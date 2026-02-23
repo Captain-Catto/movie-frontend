@@ -127,8 +127,14 @@ const WatchPage = () => {
 
         const streamOptions =
           contentType === "tv" && season && episode
-            ? { season, episode, autoplay: true, autoNext: true }
-            : { autoplay: true };
+            ? {
+                season,
+                episode,
+                dsLang: "vi",
+                autoplay: true,
+                autoNext: true,
+              }
+            : { dsLang: "vi", autoplay: true };
 
         const [creditsResponse, recommendationsResponse, streamResponse] =
           await Promise.all([
