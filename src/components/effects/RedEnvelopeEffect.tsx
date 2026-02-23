@@ -24,6 +24,8 @@ interface MouseState {
   velocityX: number;
   velocityY: number;
   isActive: boolean;
+  pointerType: 'mouse' | 'touch' | 'pen' | 'unknown';
+  lastMoveAt: number;
 }
 
 interface RedEnvelope {
@@ -70,6 +72,8 @@ export default function RedEnvelopeEffect({
     velocityX: 0,
     velocityY: 0,
     isActive: false,
+    pointerType: 'unknown',
+    lastMoveAt: 0,
   });
 
   // Default settings if not provided
@@ -124,27 +128,95 @@ export default function RedEnvelopeEffect({
       swaySpeed: Math.random() * 1 + 0.5, // Different sway speeds
     });
 
-    // Mouse event handlers for wind trail effect
-    const handleMouseMove = (e: MouseEvent) => {
+    const clamp = (value: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, value));
+
+    const normalizePointerType = (
+      pointerType: string
+    ): MouseState['pointerType'] => {
+      if (pointerType === 'mouse' || pointerType === 'touch' || pointerType === 'pen') {
+        return pointerType;
+      }
+      return 'unknown';
+    };
+
+    const setPointerOrigin = (
+      x: number,
+      y: number,
+      pointerType: MouseState['pointerType']
+    ) => {
       const mouse = mouseRef.current;
+      mouse.x = x;
+      mouse.y = y;
+      mouse.lastX = x;
+      mouse.lastY = y;
+      mouse.velocityX = 0;
+      mouse.velocityY = 0;
+      mouse.pointerType = pointerType;
+      mouse.isActive = true;
+      mouse.lastMoveAt = performance.now();
+    };
+
+    const handlePointerDown = (e: PointerEvent) => {
+      setPointerOrigin(
+        e.clientX,
+        e.clientY,
+        normalizePointerType(e.pointerType)
+      );
+    };
+
+    // Pointer handlers for wind trail effect
+    const handlePointerMove = (e: PointerEvent) => {
+      const pointerType = normalizePointerType(e.pointerType);
+      const mouse = mouseRef.current;
+
+      // First move only initializes position to avoid a huge first velocity spike.
+      if (!mouse.isActive) {
+        setPointerOrigin(e.clientX, e.clientY, pointerType);
+        return;
+      }
+
+      const now = performance.now();
+      const dt = Math.max(now - mouse.lastMoveAt, 8);
+      const dx = e.clientX - mouse.x;
+      const dy = e.clientY - mouse.y;
+      const distance = Math.hypot(dx, dy);
+      const minMovement = pointerType === 'touch' ? 5 : 1;
+
       mouse.lastX = mouse.x;
       mouse.lastY = mouse.y;
       mouse.x = e.clientX;
       mouse.y = e.clientY;
-      mouse.velocityX = mouse.x - mouse.lastX;
-      mouse.velocityY = mouse.y - mouse.lastY;
-      mouse.isActive = true;
+      mouse.pointerType = pointerType;
+      mouse.lastMoveAt = now;
+
+      // Ignore tiny tap jitter on mobile to keep envelopes stable.
+      if (distance < minMovement) {
+        mouse.velocityX *= 0.5;
+        mouse.velocityY *= 0.5;
+        return;
+      }
+
+      const frameScale = 16 / dt;
+      const maxPointerVelocity = pointerType === 'touch' ? 20 : 35;
+      mouse.velocityX = clamp(dx * frameScale, -maxPointerVelocity, maxPointerVelocity);
+      mouse.velocityY = clamp(dy * frameScale, -maxPointerVelocity, maxPointerVelocity);
     };
 
-    const handleMouseInactive = () => {
-      mouseRef.current.isActive = false;
-      mouseRef.current.velocityX = 0;
-      mouseRef.current.velocityY = 0;
+    const handlePointerInactive = () => {
+      const mouse = mouseRef.current;
+      mouse.isActive = false;
+      mouse.velocityX = 0;
+      mouse.velocityY = 0;
+      mouse.lastMoveAt = 0;
     };
 
     // Listen on window so effect does not need pointer events on canvas.
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('blur', handleMouseInactive);
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('pointerup', handlePointerInactive);
+    window.addEventListener('pointercancel', handlePointerInactive);
+    window.addEventListener('blur', handlePointerInactive);
 
     // Check if we need to re-initialize or update existing
     // If envelopes array is empty, initialize it full
@@ -364,18 +436,25 @@ export default function RedEnvelopeEffect({
           const dy = envelope.y - mouse.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           const windTrailRadius = 150; // Radius of wind trail influence
+          const pointerInfluence = mouse.pointerType === 'touch' ? 0.45 : 1;
           
           if (distance < windTrailRadius && distance > 0) {
             // Strength decreases with distance
             const strength = (windTrailRadius - distance) / windTrailRadius;
             // Apply mouse velocity to envelope (wind trail effect)
-            envelope.velocityX += mouse.velocityX * strength * 0.15;
+            envelope.velocityX += mouse.velocityX * strength * 0.12 * pointerInfluence;
             // Add slight vertical push too
-            envelope.velocityY += mouse.velocityY * strength * 0.05;
+            envelope.velocityY += mouse.velocityY * strength * 0.035 * pointerInfluence;
           }
         }
-        
+
         // Apply horizontal velocity with friction
+        const maxHorizontalVelocity = 1.5 + settings.windStrength * 3;
+        envelope.velocityX = clamp(
+          envelope.velocityX,
+          -maxHorizontalVelocity,
+          maxHorizontalVelocity
+        );
         envelope.x += envelope.velocityX;
         envelope.velocityX *= 0.95; // Friction to slow down
         
@@ -395,6 +474,9 @@ export default function RedEnvelopeEffect({
           envelope.flip = -1;
           envelope.flipSpeed = Math.abs(envelope.flipSpeed);
         }
+
+        // Keep vertical motion stable after interaction impulses.
+        envelope.velocityY = clamp(envelope.velocityY, -0.6, maxVelocity);
 
         // Reset if out of bounds
         if (envelope.y > canvas.height + 20) {
@@ -424,8 +506,11 @@ export default function RedEnvelopeEffect({
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('blur', handleMouseInactive);
+      window.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerInactive);
+      window.removeEventListener('pointercancel', handlePointerInactive);
+      window.removeEventListener('blur', handlePointerInactive);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }

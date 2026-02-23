@@ -347,6 +347,10 @@ const WatchPage = () => {
   const formattedDuration = hasDuration
     ? formatWatchDuration(durationNumber, movieData.contentType)
     : "";
+  const episodePickerSeasons =
+    movieData.contentType === "tv"
+      ? Math.max(movieData.numberOfSeasons || 0, season, 1)
+      : 0;
 
   return (
     <Layout hideHeaderOnPlay={true} isPlaying={isPlaying}>
@@ -411,11 +415,11 @@ const WatchPage = () => {
         </div>
 
         {/* Episode Picker - TV Series only */}
-        {movieData.contentType === "tv" && movieData.numberOfSeasons && (
+        {movieData.contentType === "tv" && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
             <EpisodePicker
               tmdbId={movieData.tmdbId}
-              numberOfSeasons={movieData.numberOfSeasons}
+              numberOfSeasons={episodePickerSeasons}
               currentSeason={season}
               currentEpisode={episode}
               contentId={movieId}
