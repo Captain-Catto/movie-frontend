@@ -85,6 +85,13 @@ export default function RedEnvelopeEffect({
     quantity: 25,
   };
 
+  // Mobile tuning: keep wind effect, but constrain to avoid runaway motion.
+  const MOBILE_WIND_INFLUENCE = 0.65;
+  const MOBILE_WIND_RADIUS = 120;
+  const MOBILE_MIN_MOVEMENT = 3;
+  const MOBILE_MAX_POINTER_VELOCITY = 18;
+  const MOBILE_FRICTION = 0.92;
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -181,7 +188,7 @@ export default function RedEnvelopeEffect({
       const dx = e.clientX - mouse.x;
       const dy = e.clientY - mouse.y;
       const distance = Math.hypot(dx, dy);
-      const minMovement = pointerType === 'touch' ? 5 : 1;
+      const minMovement = pointerType === 'touch' ? MOBILE_MIN_MOVEMENT : 1;
 
       mouse.lastX = mouse.x;
       mouse.lastY = mouse.y;
@@ -198,7 +205,8 @@ export default function RedEnvelopeEffect({
       }
 
       const frameScale = 16 / dt;
-      const maxPointerVelocity = pointerType === 'touch' ? 20 : 35;
+      const maxPointerVelocity =
+        pointerType === 'touch' ? MOBILE_MAX_POINTER_VELOCITY : 35;
       mouse.velocityX = clamp(dx * frameScale, -maxPointerVelocity, maxPointerVelocity);
       mouse.velocityY = clamp(dy * frameScale, -maxPointerVelocity, maxPointerVelocity);
     };
@@ -435,8 +443,9 @@ export default function RedEnvelopeEffect({
           const dx = envelope.x - mouse.x;
           const dy = envelope.y - mouse.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
-          const windTrailRadius = 150; // Radius of wind trail influence
-          const pointerInfluence = mouse.pointerType === 'touch' ? 0.45 : 1;
+          const isTouchPointer = mouse.pointerType === 'touch';
+          const windTrailRadius = isTouchPointer ? MOBILE_WIND_RADIUS : 150;
+          const pointerInfluence = isTouchPointer ? MOBILE_WIND_INFLUENCE : 1;
           
           if (distance < windTrailRadius && distance > 0) {
             // Strength decreases with distance
@@ -450,13 +459,18 @@ export default function RedEnvelopeEffect({
 
         // Apply horizontal velocity with friction
         const maxHorizontalVelocity = 1.5 + settings.windStrength * 3;
+        const horizontalLimit =
+          mouseRef.current.pointerType === 'touch'
+            ? Math.max(1.1, maxHorizontalVelocity * 0.8)
+            : maxHorizontalVelocity;
         envelope.velocityX = clamp(
           envelope.velocityX,
-          -maxHorizontalVelocity,
-          maxHorizontalVelocity
+          -horizontalLimit,
+          horizontalLimit
         );
         envelope.x += envelope.velocityX;
-        envelope.velocityX *= 0.95; // Friction to slow down
+        envelope.velocityX *=
+          mouseRef.current.pointerType === 'touch' ? MOBILE_FRICTION : 0.95; // Friction to slow down
         
         // Swaying motion (Sine wave)
         const sway = Math.sin(time * (envelope.swaySpeed || 1) + (envelope.swayPhase || 0));
