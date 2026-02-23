@@ -106,10 +106,29 @@ const MovieDetailPageContent = () => {
         setLoading(true);
         setError(null);
 
-        // console.log("🎬 [MovieDetailPage] Calling apiService.getContentById with ID:", parseInt(movieId));
-        const contentResult = await apiService.getContentById(
-          parseInt(movieId)
-        );
+        const parsedTmdbId = parseInt(movieId);
+        let contentResult:
+          | {
+              content: Movie | TVSeries | null;
+              contentType: "movie" | "tv";
+              success: boolean;
+              message?: string;
+            }
+          | undefined;
+
+        const lookupResult = await apiService.lookupByTmdbId(parsedTmdbId);
+
+        if (lookupResult.success && lookupResult.data?.contentType === "tv") {
+          contentResult = await apiService.getTVByTmdbId(parsedTmdbId);
+        } else if (
+          lookupResult.success &&
+          lookupResult.data?.contentType === "movie"
+        ) {
+          contentResult = await apiService.getMovieByTmdbId(parsedTmdbId);
+        } else {
+          // Fallback for edge cases when lookup cannot classify content
+          contentResult = await apiService.getContentById(parsedTmdbId);
+        }
 
         // console.log("🎬 [MovieDetailPage] API Response:", {
         //   success: contentResult.success,
@@ -442,7 +461,13 @@ const MovieDetailPageContent = () => {
                 {/* Action Buttons */}
                 <div className="flex flex-wrap gap-4">
                   <Link
-                    href={`/watch/movie-${movieData.tmdbId || movieId}`}
+                    href={`/watch/${
+                      movieData.contentType === "tv" ? "tv" : "movie"
+                    }-${movieData.tmdbId || movieId}${
+                      movieData.contentType === "tv"
+                        ? "?season=1&episode=1"
+                        : ""
+                    }`}
                     onClick={() =>
                       analyticsService.trackClick(
                         String(movieData.tmdbId || movieId),

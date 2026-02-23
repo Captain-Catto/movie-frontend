@@ -109,8 +109,13 @@ const WatchPage = () => {
       try {
         setLoading(true);
 
-        const { tmdbId } = parseContentId(movieId);
-        const response = await apiService.getContentById(tmdbId);
+        const { tmdbId, type } = parseContentId(movieId);
+        const response =
+          type === "tv"
+            ? await apiService.getTVByTmdbId(tmdbId)
+            : type === "movie"
+            ? await apiService.getMovieByTmdbId(tmdbId)
+            : await apiService.getContentById(tmdbId);
 
         if (!response.success || !response.content) {
           throw new Error(response.message || "Content not found");
@@ -461,7 +466,9 @@ const WatchPage = () => {
                     <h2 className="heading-sm media-name text-4xl font-bold text-white mb-2">
                       <a
                         title={movieData.title}
-                        href={`/movie/${movieData.tmdbId}`}
+                        href={`/${
+                          movieData.contentType === "tv" ? "tv" : "movie"
+                        }/${movieData.tmdbId}`}
                         className="text-white hover:text-red-500"
                       >
                         {movieData.title}
@@ -593,7 +600,9 @@ const WatchPage = () => {
 
                     <a
                       className="text-primary text-red-500 hover:text-red-400 inline-flex items-center"
-                      href={`/movie/${movieData.tmdbId}`}
+                      href={`/${
+                        movieData.contentType === "tv" ? "tv" : "movie"
+                      }/${movieData.tmdbId}`}
                     >
                       {movieData.contentType === "tv" ? "Series" : "Movie"}{" "}
                       information
