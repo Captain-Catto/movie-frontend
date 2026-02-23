@@ -133,22 +133,18 @@ export default function RedEnvelopeEffect({
       mouse.y = e.clientY;
       mouse.velocityX = mouse.x - mouse.lastX;
       mouse.velocityY = mouse.y - mouse.lastY;
+      mouse.isActive = true;
     };
 
-    const handleMouseEnter = () => {
-      mouseRef.current.isActive = true;
-    };
-
-    const handleMouseLeave = () => {
+    const handleMouseInactive = () => {
       mouseRef.current.isActive = false;
       mouseRef.current.velocityX = 0;
       mouseRef.current.velocityY = 0;
     };
 
-    // Add mouse event listeners
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseenter', handleMouseEnter);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
+    // Listen on window so effect does not need pointer events on canvas.
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('blur', handleMouseInactive);
 
     // Check if we need to re-initialize or update existing
     // If envelopes array is empty, initialize it full
@@ -428,9 +424,8 @@ export default function RedEnvelopeEffect({
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseenter', handleMouseEnter);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('blur', handleMouseInactive);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -440,8 +435,8 @@ export default function RedEnvelopeEffect({
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-[9999]"
-      style={{ pointerEvents: 'auto' }}
+      className="fixed inset-0 pointer-events-none z-[9999]"
+      style={{ pointerEvents: 'none' }}
     />
   );
 }
