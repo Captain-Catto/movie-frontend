@@ -4,7 +4,7 @@ import type {
   EffectType as ApiEffectType,
   RedEnvelopeSettings as ApiRedEnvelopeSettings,
   SnowSettings as ApiSnowSettings
-} from '@/services/settings-api';
+} from '@/types/settings.types';
 
 export type EffectType = ApiEffectType;
 export type RedEnvelopeSettings = ApiRedEnvelopeSettings;

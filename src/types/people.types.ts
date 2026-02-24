@@ -1,8 +1,8 @@
 // People/Cast Types - Actor and crew member type definitions
 
-import { CastMember, CrewMember } from './api';
+import type { CastMember, CrewMember } from "./content.types";
+import type { MetadataInfo, Pagination } from "./api";
 
-// Person details
 export interface PersonDetails {
   id: number;
   tmdbId: number;
@@ -19,25 +19,20 @@ export interface PersonDetails {
   imdb_id?: string;
 }
 
-// Person credits
 export interface PersonCredits {
+  id: number;
   cast: CastMember[];
   crew: CrewMember[];
 }
 
-// Paginated person credits
 export interface PersonCreditsPaginated extends PersonCredits {
-  pagination: {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    limit: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
-  };
-  metadata: {
-    fromCache: boolean;
-    totalCastItems: number;
-    totalCrewItems: number;
-  };
+  pagination: Pagination;
+  metadata: MetadataInfo;
+}
+
+export interface PopularPeopleResponse {
+  page: number;
+  results: CastMember[];
+  total_pages: number;
+  total_results: number;
 }

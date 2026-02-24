@@ -3,6 +3,7 @@ import {
   mapTVSeriesToFrontend,
   mapTVSeriesToFrontendList,
 } from "../tvMapper";
+import type { TVSeries } from "@/types/content.types";
 
 describe("mapTVSeriesToFrontend", () => {
   const basicTVSeries = {

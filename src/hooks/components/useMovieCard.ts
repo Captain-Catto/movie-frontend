@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useWindowWidth } from '../useWindowWidth';
 import { FALLBACK_POSTER } from '@/constants/app.constants';
-import type { MovieCardData } from '@/types/movie';
+import type { MovieCardData } from "@/types/content.types";
 
 export interface UseMovieCardOptions {
   movie: MovieCardData;

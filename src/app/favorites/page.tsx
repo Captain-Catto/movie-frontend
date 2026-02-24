@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  favoritesService,
-  ProcessedFavorite,
-  SimpleFavoriteQueryParams,
-} from "@/services/favorites.service";
+import { favoritesService } from "@/services/favorites.service";
+import type { ProcessedFavorite, FavoriteQueryParams } from "@/types/favorites.types";
 import { Heart } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
@@ -39,7 +36,7 @@ const FavoritesPage = () => {
       setError(null);
 
       try {
-        const queryParams: SimpleFavoriteQueryParams = {
+        const queryParams: FavoriteQueryParams = {
           page: pageNum,
           limit: 20,
         };

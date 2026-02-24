@@ -1,7 +1,7 @@
 import axiosInstance from "@/lib/axios-instance";
 
-export type AnalyticsActionType = "view" | "click" | "play" | "complete";
-export type AnalyticsContentType = "movie" | "tv_series";
+type AnalyticsActionType = "view" | "click" | "play" | "complete";
+type AnalyticsContentType = "movie" | "tv_series";
 
 interface TrackEventParams {
   contentId: string;
@@ -12,31 +12,20 @@ interface TrackEventParams {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Analytics Service - Track user interactions
- */
 class AnalyticsService {
-  // Track events by unique key (contentId + actionType) to prevent true duplicates
   private trackingMap = new Map<string, number>();
-  private readonly DEBOUNCE_MS = 2000; // 2 seconds debounce per unique event
+  private readonly DEBOUNCE_MS = 2000;
 
-  /**
-   * Track an analytics event
-   */
   async trackEvent(params: TrackEventParams): Promise<void> {
-    // Create unique key for this event
     const eventKey = `${params.contentId}-${params.actionType}`;
     const now = Date.now();
     const lastTracked = this.trackingMap.get(eventKey);
 
-    // Prevent duplicate tracking of same event within debounce period
     if (lastTracked && now - lastTracked < this.DEBOUNCE_MS) {
-
       return;
     }
 
     try {
-      // Mark this event as tracked
       this.trackingMap.set(eventKey, now);
 
       const payload = {
@@ -48,33 +37,21 @@ class AnalyticsService {
         metadata: params.metadata || {},
       };
 
-
-
-      // Send to backend (non-blocking, don't await)
       axiosInstance
         .post("/analytics/track", payload)
-        .then((response) => {
+        .then(() => {
           // Event tracked
         })
         .catch((error) => {
           console.error("[Analytics] Failed to track event:", error);
-          console.error("[Analytics] Error details:", {
-            message: error.message,
-            status: error.response?.status,
-            data: error.response?.data,
-          });
         });
 
-      // Clean up old entries from map (prevent memory leak)
       this.cleanupTrackingMap();
     } catch (error) {
       console.error("[Analytics] Error in trackEvent:", error);
     }
   }
 
-  /**
-   * Clean up old entries from tracking map
-   */
   private cleanupTrackingMap(): void {
     const now = Date.now();
     for (const [key, timestamp] of this.trackingMap.entries()) {
@@ -84,9 +61,6 @@ class AnalyticsService {
     }
   }
 
-  /**
-   * Track VIEW event - when user views content detail page
-   */
   trackView(
     contentId: string,
     contentType: AnalyticsContentType,
@@ -100,9 +74,6 @@ class AnalyticsService {
     });
   }
 
-  /**
-   * Track CLICK event - when user clicks on content card
-   */
   trackClick(
     contentId: string,
     contentType: AnalyticsContentType,
@@ -116,9 +87,6 @@ class AnalyticsService {
     });
   }
 
-  /**
-   * Track PLAY event - when user starts playing content
-   */
   trackPlay(
     contentId: string,
     contentType: AnalyticsContentType,
@@ -134,9 +102,6 @@ class AnalyticsService {
     });
   }
 
-  /**
-   * Track COMPLETE event - when user finishes watching
-   */
   trackComplete(
     contentId: string,
     contentType: AnalyticsContentType,
@@ -153,5 +118,4 @@ class AnalyticsService {
   }
 }
 
-// Export singleton instance
 export const analyticsService = new AnalyticsService();

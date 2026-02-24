@@ -8,7 +8,7 @@ import { Pagination, Autoplay, EffectFade } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import HeroSkeleton from "@/components/ui/HeroSkeleton";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import GenreBadge from "@/components/ui/GenreBadge";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";

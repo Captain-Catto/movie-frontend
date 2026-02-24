@@ -15,10 +15,11 @@ import Container from "@/components/ui/Container";
 import { apiService } from "@/services/api";
 import { analyticsService } from "@/services/analytics.service";
 import { normalizeRatingValue } from "@/utils/rating";
-import { MovieDetail, Movie, TVSeries } from "@/types/movie";
+import { MovieDetail, Movie, TVSeries } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
-import { TMDB_ENGLISH_GENRE_MAP } from "@/types/genre";
+import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { formatWatchDuration } from "@/utils/watchContentMapper";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -32,6 +33,7 @@ const RecommendationsSection = lazy(
 const MovieDetailPageContent = () => {
   const params = useParams();
   const movieId = params.id as string;
+  const { language } = useLanguage();
   const [movieData, setMovieData] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -49,7 +51,7 @@ const MovieDetailPageContent = () => {
   const fetchCredits = async (movieId: number) => {
     try {
       setCreditsLoading(true);
-      const creditsResponse = await apiService.getMovieCredits(movieId);
+      const creditsResponse = await apiService.getMovieCredits(movieId, language);
       if (creditsResponse.success && creditsResponse.data) {
         const credits = creditsResponse.data;
 
@@ -119,15 +121,15 @@ const MovieDetailPageContent = () => {
         const lookupResult = await apiService.lookupByTmdbId(parsedTmdbId);
 
         if (lookupResult.success && lookupResult.data?.contentType === "tv") {
-          contentResult = await apiService.getTVByTmdbId(parsedTmdbId);
+          contentResult = await apiService.getTVByTmdbId(parsedTmdbId, language);
         } else if (
           lookupResult.success &&
           lookupResult.data?.contentType === "movie"
         ) {
-          contentResult = await apiService.getMovieByTmdbId(parsedTmdbId);
+          contentResult = await apiService.getMovieByTmdbId(parsedTmdbId, language);
         } else {
           // Fallback for edge cases when lookup cannot classify content
-          contentResult = await apiService.getContentById(parsedTmdbId);
+          contentResult = await apiService.getContentById(parsedTmdbId, language);
         }
 
         // console.log("🎬 [MovieDetailPage] API Response:", {
@@ -322,7 +324,7 @@ const MovieDetailPageContent = () => {
     } else {
       console.warn("⚠️ [MovieDetailPage] No movieId provided");
     }
-  }, [movieId]);
+  }, [movieId, language]);
 
   // console.log("🎨 [MovieDetailPage] Render - State:", {
   //   loading,

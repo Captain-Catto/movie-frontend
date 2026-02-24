@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mapMovieToFrontend, mapMoviesToFrontend } from "../movieMapper";
-import type { MovieInput } from "@/types/movie";
+import type { MovieInput, Movie } from "@/types/content.types";
 
 describe("mapMovieToFrontend", () => {
   const basicMovie: MovieInput = {

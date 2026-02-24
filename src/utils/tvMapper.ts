@@ -5,7 +5,7 @@ import {
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
-import { TVSeries, FrontendTVSeries } from "@/types/movie";
+import { TVSeries, FrontendTVSeries } from "@/types/content.types";
 
 export function mapTVSeriesToFrontend(
   series: Record<string, unknown>

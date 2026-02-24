@@ -47,7 +47,7 @@ export function useHydrationSafeRelativeTime(
     const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
 
     // Return a stable format like "Dec 6, 2025 at 2:30 PM"
-    return date.toLocaleString("en-US", {
+    return date.toLocaleString(undefined, {
       month: "short",
       day: "numeric",
       year: "numeric",

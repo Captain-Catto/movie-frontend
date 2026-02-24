@@ -10,16 +10,18 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
-import { TVDetail, Movie } from "@/types/movie";
+import { TVDetail, Movie } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
-import { TMDB_TV_ENGLISH_GENRE_MAP } from "@/types/genre";
+import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import RatingBadge from "@/components/ui/RatingBadge";
 import GenreBadge from "@/components/ui/GenreBadge";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
   TMDB_BACKDROP_SIZE,
   FALLBACK_POSTER,
+  getLocaleFromLanguage,
 } from "@/constants/app.constants";
 
 const RecommendationsSection = lazy(
@@ -30,6 +32,8 @@ const TVDetailPageContent = () => {
   const params = useParams();
   const tvIdParam = params.id as string;
   const numericTvId = Number(tvIdParam);
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
   const [tvData, setTVData] = useState<TVDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -43,7 +47,7 @@ const TVDetailPageContent = () => {
 
       // Try to get TV credits, fallback if endpoint doesn't exist
       try {
-        const creditsResponse = await apiService.getTVCredits(tvId);
+        const creditsResponse = await apiService.getTVCredits(tvId, language);
         if (creditsResponse.success && creditsResponse.data) {
           const credits = creditsResponse.data;
 
@@ -132,7 +136,7 @@ const TVDetailPageContent = () => {
           throw new Error("Invalid TV series ID");
         }
 
-        const response = await apiService.getTVSeriesById(numericTvId);
+        const response = await apiService.getTVSeriesById(numericTvId, language);
 
         if (response.success && response.data) {
           const tv = response.data as Movie & Record<string, unknown>;
@@ -345,7 +349,7 @@ const TVDetailPageContent = () => {
     };
 
     fetchTVData();
-  }, [numericTvId, tvIdParam]);
+  }, [numericTvId, tvIdParam, language]);
 
   // Helper functions
   const isLocalFallback = (path: string | null) =>
@@ -367,7 +371,7 @@ const TVDetailPageContent = () => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("en-US");
+    return new Date(dateString).toLocaleDateString(locale);
   };
 
   const formatRuntime = (runtimes: number[]) => {

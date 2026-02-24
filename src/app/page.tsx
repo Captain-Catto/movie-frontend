@@ -8,9 +8,10 @@ import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   HERO_MINIMUM_LOADING_TIME,
   HERO_MAXIMUM_TIMEOUT,
@@ -39,6 +40,7 @@ export default function Home() {
     topRated: false,
     upcoming: false,
   });
+  const { language } = useLanguage();
   const { breakpoint } = useWindowWidth();
   const responsiveLimit = useMemo(() => {
     if (breakpoint === "desktop") return 10;
@@ -60,7 +62,13 @@ export default function Home() {
       topRated: false,
       upcoming: false,
     });
-  }, [responsiveLimit]);
+    setLoadingStates({
+      nowPlaying: true,
+      popular: true,
+      topRated: true,
+      upcoming: true,
+    });
+  }, [responsiveLimit, language]);
 
   // Fetch hero section immediately (highest priority)
   useEffect(() => {
@@ -74,7 +82,11 @@ export default function Home() {
         );
 
         // Promise for data fetch
-        const dataPromise = apiService.getTrending();
+        const dataPromise = apiService.getTrending({
+          page: 1,
+          limit: responsiveLimit,
+          language,
+        });
 
         // Timeout promise for safety
         const timeoutPromise = new Promise<never>((_, reject) =>
@@ -118,7 +130,7 @@ export default function Home() {
     return () => {
       abortController.abort();
     };
-  }, [responsiveLimit]);
+  }, [responsiveLimit, language]);
 
   // Fetch Now Playing when visible
   useEffect(() => {
@@ -130,7 +142,7 @@ export default function Home() {
           const res = await apiService.getNowPlayingMovies({
             page: 1,
             limit: responsiveLimit,
-            language: "en-US",
+            language,
           });
           if (res.success && res.data) {
             setNowPlayingMovies(mapMoviesToFrontend(res.data));
@@ -144,7 +156,7 @@ export default function Home() {
 
       fetchNowPlaying();
     }
-  }, [nowPlayingVisible, fetched.nowPlaying, responsiveLimit]);
+  }, [nowPlayingVisible, fetched.nowPlaying, responsiveLimit, language]);
 
   // Fetch Popular when visible
   useEffect(() => {
@@ -156,7 +168,7 @@ export default function Home() {
           const res = await apiService.getPopularMovies({
             page: 1,
             limit: responsiveLimit,
-            language: "en-US",
+            language,
           });
           if (res.success && res.data) {
             setPopularMovies(mapMoviesToFrontend(res.data));
@@ -170,7 +182,7 @@ export default function Home() {
 
       fetchPopular();
     }
-  }, [popularVisible, fetched.popular, responsiveLimit]);
+  }, [popularVisible, fetched.popular, responsiveLimit, language]);
 
   // Fetch Top Rated when visible
   useEffect(() => {
@@ -182,7 +194,7 @@ export default function Home() {
           const res = await apiService.getTopRatedMovies({
             page: 1,
             limit: responsiveLimit,
-            language: "en-US",
+            language,
           });
           if (res.success && res.data) {
             setTopRatedMovies(mapMoviesToFrontend(res.data));
@@ -196,7 +208,7 @@ export default function Home() {
 
       fetchTopRated();
     }
-  }, [topRatedVisible, fetched.topRated, responsiveLimit]);
+  }, [topRatedVisible, fetched.topRated, responsiveLimit, language]);
 
   // Fetch Upcoming when visible
   useEffect(() => {
@@ -208,7 +220,7 @@ export default function Home() {
           const res = await apiService.getUpcomingMovies({
             page: 1,
             limit: responsiveLimit,
-            language: "en-US",
+            language,
           });
           if (res.success && res.data) {
             setUpcomingMovies(mapMoviesToFrontend(res.data));
@@ -222,7 +234,7 @@ export default function Home() {
 
       fetchUpcoming();
     }
-  }, [upcomingVisible, fetched.upcoming, responsiveLimit]);
+  }, [upcomingVisible, fetched.upcoming, responsiveLimit, language]);
 
   // Use fetched movies (no fallback - show skeleton when loading)
   const nowPlayingToDisplay = nowPlayingMovies;

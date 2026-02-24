@@ -20,7 +20,9 @@ import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
   FALLBACK_POSTER,
+  getDsLanguageFromLanguage,
 } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -49,6 +51,7 @@ const STREAM_LOAD_TIMEOUT_MS = 15000;
 const WatchPage = () => {
   const params = useParams();
   const searchParams = useSearchParams();
+  const { language } = useLanguage();
   const movieId = params.id as string;
   const [movieData, setMovieData] = useState<WatchContentData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,6 +106,7 @@ const WatchPage = () => {
   const episodeParam = parsePositiveInt(searchParams.get("episode"));
   const season = seasonParam ?? 1;
   const episode = episodeParam ?? 1;
+  const dsLang = getDsLanguageFromLanguage(language);
   const streamTmdbId = movieData?.tmdbId;
   const streamContentType = movieData?.contentType;
 
@@ -117,16 +121,16 @@ const WatchPage = () => {
         const { tmdbId, type } = parseContentId(movieId);
         const response =
           type === "tv"
-            ? await apiService.getTVByTmdbId(tmdbId)
+            ? await apiService.getTVByTmdbId(tmdbId, language)
             : type === "movie"
-            ? await apiService.getMovieByTmdbId(tmdbId)
-            : await apiService.getContentById(tmdbId);
+            ? await apiService.getMovieByTmdbId(tmdbId, language)
+            : await apiService.getContentById(tmdbId, language);
 
         if (!response.success || !response.content) {
           throw new Error(response.message || "Content not found");
         }
 
-        const mappedData = mapContentToWatchContent(response, movieId);
+        const mappedData = mapContentToWatchContent(response as unknown as Parameters<typeof mapContentToWatchContent>[0], movieId);
         setMovieData(mappedData);
         const contentType = response.contentType || mappedData.contentType;
         setError(null);
@@ -140,8 +144,8 @@ const WatchPage = () => {
         const [creditsResponse, recommendationsResponse] = await Promise.all([
           // Fetch credits
           contentType === "movie"
-            ? apiService.getMovieCredits(tmdbId)
-            : apiService.getTVCredits(tmdbId),
+            ? apiService.getMovieCredits(tmdbId, language)
+            : apiService.getTVCredits(tmdbId, language),
           // Fetch recommendations
           contentType === "movie"
             ? apiService.getMovieRecommendations(tmdbId, 1)
@@ -221,7 +225,7 @@ const WatchPage = () => {
       setStreamError(null);
       setActiveStreamIndex(0);
     }
-  }, [movieId]);
+  }, [movieId, language]);
 
   useEffect(() => {
     if (!streamTmdbId || !streamContentType) return;
@@ -233,11 +237,11 @@ const WatchPage = () => {
           ? {
               season,
               episode,
-              dsLang: "vi",
+              dsLang,
               autoplay: true,
               autoNext: true,
             }
-          : { dsLang: "vi", autoplay: true };
+          : { dsLang, autoplay: true };
 
       const streamResponse = await apiService.getStreamUrlByTmdbId(
         streamTmdbId,
@@ -274,7 +278,7 @@ const WatchPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [streamTmdbId, streamContentType, season, episode]);
+  }, [streamTmdbId, streamContentType, season, episode, dsLang]);
 
   useEffect(() => {
     if (!movieData || hasTrackedView) return;

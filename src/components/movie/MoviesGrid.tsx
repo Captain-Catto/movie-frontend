@@ -1,7 +1,7 @@
 "use client";
 
 import MovieCard from "./MovieCard";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { useLoading } from "@/hooks/useLoading";

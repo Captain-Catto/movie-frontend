@@ -3,9 +3,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  TMDB_MOVIE_ENGLISH_GENRE_MAP,
-  TMDB_TV_ENGLISH_GENRE_MAP,
-} from "@/types/genre";
+  TMDB_MOVIE_GENRE_MAP as TMDB_MOVIE_ENGLISH_GENRE_MAP,
+  TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP,
+} from "@/utils/genreMapping";
 import type { TableFilterOptions, TableFiltersProps } from "@/types/ui";
 
 export type { TableFilterOptions };

@@ -6,11 +6,10 @@ import MovieGrid from "@/components/movie/MovieGrid";
 import LinkPagination from "@/components/ui/LinkPagination";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
-import type { MovieCardData } from "@/types/movie";
-import { Movie } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
+import { Movie } from "@/types/content.types";
 import useMovieCategory from "@/hooks/useMovieCategory";
 import {
-  DEFAULT_LANGUAGE,
   DEFAULT_MOVIE_PAGE_SIZE,
   SKELETON_COUNT_MOVIE,
 } from "@/constants/app.constants";
@@ -23,7 +22,6 @@ function UpcomingPageContent() {
     mapper: (items) =>
       mapMoviesToFrontend(items as unknown as Movie[]) as MovieCardData[],
     defaultLimit: DEFAULT_MOVIE_PAGE_SIZE,
-    defaultLanguage: DEFAULT_LANGUAGE,
   });
 
   return (

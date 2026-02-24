@@ -1,70 +1,17 @@
 import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
 import { mapGenreIdsToNames } from "@/utils/genreMapping";
-
-export interface AddFavoriteDto {
-  contentId: string;
-  contentType: "movie" | "tv";
-}
-
-export interface Favorite {
-  id: number;
-  userid: number;
-  contentid: string;
-  contenttype: "movie" | "tv";
-  createdat: string;
-  // Movie/TV data from JOIN - API returns these field names
-  title?: string;
-  name?: string; // For TV shows
-  posterpath?: string;
-  backdroppath?: string;
-  overview?: string;
-  voteaverage?: string;
-  releasedate?: string;
-  firstairdate?: string;
-  genreids?: (number | string)[]; // Support both string and number for backend compatibility
-  genres?: string[];
-}
-
-export interface RawFavoritesResponse {
-  favorites: Favorite[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasMore: boolean;
-}
-
-export interface FavoritesResponse {
-  favorites: ProcessedFavorite[];
-  total: number;
-  page: number;
-  totalPages: number;
-  hasMore: boolean;
-}
-
-export interface ProcessedFavorite {
-  id: number;
-  title?: string;
-  name?: string;
-  poster_path?: string;
-  backdrop_path?: string;
-  overview?: string;
-  release_date?: string;
-  first_air_date?: string;
-  vote_average: number;
-  genre_ids: number[];
-  genres: string[];
-  media_type: "movie" | "tv";
-}
-
-export interface SimpleFavoriteQueryParams {
-  page?: number;
-  limit?: number;
-}
+import type {
+  AddFavoriteDto,
+  Favorite,
+  RawFavoritesResponse,
+  FavoritesResponse,
+  FavoriteQueryParams,
+} from "@/types/favorites.types";
 
 export const favoritesService = {
   async getUserFavorites(
-    params: SimpleFavoriteQueryParams = {}
+    params: FavoriteQueryParams = {}
   ): Promise<FavoritesResponse> {
     const { page = 1, limit = 20 } = params;
 
@@ -78,17 +25,13 @@ export const favoritesService = {
       throw new Error("No authentication token found. Please login again.");
     }
 
-
-
     const response = await axiosInstance.get<RawFavoritesResponse>(
       `/favorites?${queryParams.toString()}`
     );
 
     const data = response.data;
 
-    // Map genreIds to genre names for each favorite
     const favoritesWithGenres = data.favorites.map((favorite: Favorite) => {
-      // Map API response fields to expected interface fields
       const numericGenreIds = favorite.genreids
         ? favorite.genreids.map((id: string | number) =>
             typeof id === "string" ? parseInt(id, 10) : id
@@ -165,7 +108,6 @@ export const favoritesService = {
       throw new Error("No authentication token found. Please login again.");
     }
 
-    // Check current state first instead of try-add-first
     const isCurrentlyFavorite = await this.checkIsFavorite(
       data.contentId,
       data.contentType
@@ -173,11 +115,9 @@ export const favoritesService = {
 
     try {
       if (isCurrentlyFavorite) {
-        // Remove from favorites
         await this.removeFromFavorites(data.contentId, data.contentType);
         return { isFavorite: false, message: "Removed from favorites" };
       } else {
-        // Add to favorites
         await this.addToFavorites(data);
         return { isFavorite: true, message: "Added to favorites" };
       }
@@ -187,17 +127,11 @@ export const favoritesService = {
     }
   },
 
-  /**
-   * Get only favorite IDs - lightweight for initial load
-   * Returns array of {contentId, contentType}
-   */
   async getUserFavoriteIds(): Promise<Array<{ contentId: string; contentType: string }>> {
     const token = authStorage.getToken();
     if (!token) {
       throw new Error("No authentication token found. Please login again.");
     }
-
-
 
     type RawFavoriteId = {
       contentId?: string;
@@ -210,9 +144,6 @@ export const favoritesService = {
       "/favorites/ids"
     );
 
-    // console.log("[favoritesService] Favorite IDs response", response.data);
-
-    // Normalize casing from backend (contentid/contenttype vs contentId/contentType)
     const normalizedIds = response.data.ids.reduce<
       Array<{ contentId: string; contentType: string }>
     >((acc, item) => {
@@ -227,10 +158,6 @@ export const favoritesService = {
     return normalizedIds;
   },
 
-  /**
-   * Check if specific item is favorited - uses dedicated fast endpoint
-   * Much faster than fetching all favorites
-   */
   async checkIsFavorite(
     contentId: string,
     contentType: "movie" | "tv"
@@ -248,7 +175,7 @@ export const favoritesService = {
       return response.data.isFavorite;
     } catch (error) {
       console.error("Error checking favorite status:", error);
-      return false; // Default to false if check fails
+      return false;
     }
   },
 

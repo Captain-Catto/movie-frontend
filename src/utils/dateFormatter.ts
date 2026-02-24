@@ -4,6 +4,7 @@
  */
 
 import { formatDistanceToNow, format, isValid, parseISO } from 'date-fns';
+import { getLocaleFromLanguage } from '@/constants/app.constants';
 
 /**
  * Safely parse date string/Date object to Date
@@ -135,7 +136,7 @@ export const formatDateTimeVN = (dateInput: string | Date | null | undefined): s
   if (!date) return 'Không rõ thời gian';
 
   try {
-    return date.toLocaleString('vi-VN', {
+    return date.toLocaleString(getLocaleFromLanguage('vi'), {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',

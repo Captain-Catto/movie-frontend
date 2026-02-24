@@ -1,5 +1,7 @@
 // Notification Types and Interfaces
 
+import type { Pagination } from "./api";
+
 export interface NotificationAnalyticsSummary {
   totalTargetedUsers: number;
   deliveredCount: number;
@@ -31,12 +33,7 @@ export interface NotificationStats {
   totalUnread: number;
 }
 
-export interface PaginationMeta {
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-}
+export type PaginationMeta = Pagination;
 
 export interface NotificationFilters {
   type: "all" | "info" | "warning" | "success" | "error";

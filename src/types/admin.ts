@@ -1,5 +1,6 @@
 // Admin Panel Types - Admin dashboard and management interfaces
 
+
 // Dashboard statistics
 export interface DashboardStats {
   totalMovies: number;
@@ -12,15 +13,6 @@ export interface DashboardStats {
   syncStatus: string;
 }
 
-// Pagination metadata
-export interface PaginationMeta {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  limit: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
-}
 
 // Notification item
 export interface NotificationItem {
@@ -28,7 +20,7 @@ export interface NotificationItem {
   title: string;
   message: string;
   type: string;
-  status: 'pending' | 'sent' | 'failed';
+  status: "pending" | "sent" | "failed";
   createdAt: string;
   userId?: number;
   user?: {
@@ -42,7 +34,7 @@ export interface AdminUser {
   id: number;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   isActive: boolean;
   createdAt: string;
   lastLoginAt?: string;
@@ -53,26 +45,12 @@ export interface ContentItem {
   id: number;
   tmdbId: number;
   title: string;
-  type: 'movie' | 'tv';
-  status: 'active' | 'hidden' | 'archived';
+  type: "movie" | "tv";
+  status: "active" | "hidden" | "archived";
   isHidden: boolean;
   hiddenReason?: string;
   createdAt: string;
   lastUpdated: string;
-}
-
-// Analytics data
-export interface AnalyticsData {
-  totalViews: number;
-  uniqueVisitors: number;
-  popularContent: Array<{
-    id: number;
-    title: string;
-    views: number;
-    type: 'movie' | 'tv';
-  }>;
-  trafficSources: Record<string, number>;
-  conversionRate: number;
 }
 
 // SEO metrics
@@ -88,7 +66,7 @@ export interface SEOMetrics {
 
 // Sync options
 export interface SyncOptions {
-  target: 'all' | 'popular' | 'trending';
-  contentType?: 'movie' | 'tv' | 'both';
+  target: "all" | "popular" | "trending";
+  contentType?: "movie" | "tv" | "both";
   limit?: number;
 }

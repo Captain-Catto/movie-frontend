@@ -6,7 +6,7 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { analyticsService } from "@/services/analytics.service";
 
 interface MovieCardProps {

@@ -5,19 +5,20 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import {
-  DEFAULT_LANGUAGE,
   DEFAULT_BROWSE_PAGE_SIZE,
   FALLBACK_POSTER,
   SKELETON_COUNT_MOVIE,
 } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function MoviesPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { language } = useLanguage();
   const [movies, setMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +62,7 @@ function MoviesPageContent() {
         const response = await apiService.getMovies({
           page: currentPage,
           limit: DEFAULT_BROWSE_PAGE_SIZE,
-          language: DEFAULT_LANGUAGE,
+          language,
         });
 
         if (response.success && response.data) {
@@ -100,7 +101,7 @@ function MoviesPageContent() {
     };
 
     fetchMovies();
-  }, [currentPage]);
+  }, [currentPage, language]);
 
   if (loading) {
     return (

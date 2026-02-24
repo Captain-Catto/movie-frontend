@@ -6,7 +6,8 @@ import MovieGrid from "@/components/movie/MovieGrid";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
-import type { MovieCardData } from "@/types/movie";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { MovieCardData } from "@/types/content.types";
 
 interface TrendingSuggestionsProps {
   type: "movie" | "tv" | "all";
@@ -17,6 +18,7 @@ export default function TrendingSuggestions({
   type,
   title,
 }: TrendingSuggestionsProps) {
+  const { language } = useLanguage();
   const [items, setItems] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,12 +29,20 @@ export default function TrendingSuggestions({
         let data: MovieCardData[] = [];
 
         if (type === "movie") {
-          const res = await apiService.getPopularMovies({ page: 1, limit: 6 });
+          const res = await apiService.getPopularMovies({
+            page: 1,
+            limit: 6,
+            language,
+          });
           if (res.success && res.data) {
             data = mapMoviesToFrontend(res.data);
           }
         } else if (type === "tv") {
-          const res = await apiService.getPopularTVSeries({ page: 1, limit: 6 });
+          const res = await apiService.getPopularTVSeries({
+            page: 1,
+            limit: 6,
+            language,
+          });
           if (res.success && res.data) {
             // Helper to handle nested data structure if needed, consistent with TVSeriesSections
             const rawData =
@@ -46,7 +56,7 @@ export default function TrendingSuggestions({
           }
         } else {
           // "all" - use trending
-          const res = await apiService.getTrending();
+          const res = await apiService.getTrending({ page: 1, limit: 6, language });
           if (res.success && res.data) {
             data = mapTrendingDataToFrontend(res.data.slice(0, 6));
           }
@@ -61,7 +71,7 @@ export default function TrendingSuggestions({
     };
 
     fetchSuggestions();
-  }, [type]);
+  }, [type, language]);
 
   if (!loading && items.length === 0) return null;
 

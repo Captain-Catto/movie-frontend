@@ -3,9 +3,11 @@
 import { useCallback } from 'react';
 import { useAsyncQuery } from '../core/useAsyncQuery';
 import { apiService } from '@/services/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { mapMoviesToFrontend } from '@/utils/movieMapper';
-import { MovieCardData } from '@/types/movie';
-import type { MovieQuery, Movie } from '@/types/movie';
+import { MovieCardData } from "@/types/content.types";
+import type { ContentQuery, Movie } from "@/types/content.types";
+import type { Pagination } from "@/types/api";
 
 /**
  * Movie category types
@@ -39,15 +41,7 @@ export interface UseMoviesListOptions {
   enabled?: boolean;
 }
 
-/**
- * Pagination metadata
- */
-export interface PaginationMeta {
-  page: number;
-  totalPages: number;
-  total: number;
-  limit: number;
-}
+export type PaginationMeta = Pagination;
 
 /**
  * Return type for useMoviesList hook
@@ -105,14 +99,17 @@ export function useMoviesList(
     genre,
     year,
     sortBy,
-    language,
+    language: languageOption,
     enabled = true,
   } = options;
+
+  const { language: contextLanguage } = useLanguage();
+  const language = languageOption || contextLanguage;
 
   // Select API method based on category
   const fetchMovies = useCallback(async () => {
     // Build query object
-    const query: MovieQuery = {
+    const query: ContentQuery = {
       page,
       limit,
       ...(genre && { genre }),

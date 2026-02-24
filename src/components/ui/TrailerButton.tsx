@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Play, Loader2 } from "lucide-react";
 import TrailerModal from "./TrailerModal";
 import { apiService } from "@/services/api";
-import { Video } from "@/types/movie";
+import { Video } from "@/types/content.types";
 
 interface TrailerButtonProps {
   movieId: number;

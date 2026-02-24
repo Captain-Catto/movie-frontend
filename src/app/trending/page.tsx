@@ -5,11 +5,11 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { apiService } from "@/services/api";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import {
-  DEFAULT_LANGUAGE,
   DEFAULT_BROWSE_PAGE_SIZE,
   SKELETON_COUNT_BROWSE,
 } from "@/constants/app.constants";
@@ -18,6 +18,7 @@ import PageSkeleton from "@/components/ui/PageSkeleton";
 function TrendingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { language } = useLanguage();
   const [trending, setTrending] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +47,7 @@ function TrendingPageContent() {
         const response = await apiService.getTrending({
           page: currentPage,
           limit: DEFAULT_BROWSE_PAGE_SIZE,
-          language: DEFAULT_LANGUAGE,
+          language,
         });
 
         if (response.success && response.data) {
@@ -80,7 +81,7 @@ function TrendingPageContent() {
     };
 
     fetchTrending();
-  }, [currentPage]); // ✅ Add currentPage dependency
+  }, [currentPage, language]);
 
   const handleFilterChange = (filters: FilterOptions) => {
     // Navigate to browse page with filters, prioritize user-selected movieType

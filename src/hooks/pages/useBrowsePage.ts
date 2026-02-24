@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { usePagination } from '../core/usePagination';
 import { useMoviesList } from '../data/useMoviesList';
 import { useTVSeriesList } from '../data/useTVSeriesList';
-import { MovieCardData } from '@/types/movie';
+import { MovieCardData } from "@/types/content.types";
 import type { MovieCategory } from '../data/useMoviesList';
 import type { TVSeriesCategory } from '../data/useTVSeriesList';
 

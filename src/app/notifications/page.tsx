@@ -7,6 +7,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocaleFromLanguage } from "@/constants/app.constants";
 import { useRouter } from "next/navigation";
 
 interface NotificationItem {
@@ -28,6 +30,8 @@ interface NotificationItem {
 export default function NotificationsPage() {
   const router = useRouter();
   const { isLoading } = useAuth();
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -180,7 +184,7 @@ export default function NotificationsPage() {
             <div className="space-y-6">
               {sortedDateKeys.map((dateKey) => {
                 const day = new Date(dateKey);
-                const dayLabel = day.toLocaleDateString("vi-VN", {
+                const dayLabel = day.toLocaleDateString(locale, {
                   weekday: "long",
                   day: "2-digit",
                   month: "2-digit",

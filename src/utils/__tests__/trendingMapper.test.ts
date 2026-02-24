@@ -3,6 +3,7 @@ import {
   mapTrendingToFrontend,
   mapTrendingDataToFrontend,
 } from "../trendingMapper";
+import type { TrendingItem } from "@/types/content.types";
 
 describe("mapTrendingToFrontend", () => {
   const basicTrending = {
@@ -82,7 +83,7 @@ describe("mapTrendingToFrontend", () => {
       overview: "Test",
     };
 
-    expect(() => mapTrendingToFrontend(noId as unknown as Record<string, unknown>)).toThrow(
+    expect(() => mapTrendingToFrontend(noId as unknown as TrendingItem)).toThrow(
       /missing valid tmdbId/
     );
   });
@@ -93,7 +94,7 @@ describe("mapTrendingToFrontend", () => {
       title: "Test",
     };
 
-    expect(() => mapTrendingToFrontend(invalidId as unknown as Record<string, unknown>)).toThrow(
+    expect(() => mapTrendingToFrontend(invalidId as unknown as TrendingItem)).toThrow(
       /missing valid tmdbId/
     );
   });
@@ -177,7 +178,7 @@ describe("mapTrendingToFrontend", () => {
   it("should handle string voteAverage", () => {
     const stringRating = {
       ...basicTrending,
-      voteAverage: "8.5",
+      voteAverage: "8.5" as unknown as number,
     };
 
     const result = mapTrendingToFrontend(stringRating);

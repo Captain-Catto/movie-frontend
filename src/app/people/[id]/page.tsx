@@ -6,17 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import MovieCard from "@/components/movie/MovieCard";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { apiService } from "@/services/api";
 import Container from "@/components/ui/Container";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
   FALLBACK_POSTER,
   FALLBACK_PROFILE,
+  getLocaleFromLanguage,
 } from "@/constants/app.constants";
 
 interface PersonDetail {
@@ -73,6 +75,8 @@ interface PaginatedCrewCredits {
 const PersonDetailPage = () => {
   const params = useParams();
   const personId = params.id as string;
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
   const [personData, setPersonData] = useState<PersonDetail | null>(null);
   const [castCredits, setCastCredits] = useState<PaginatedCastCredits | null>(
     null
@@ -248,7 +252,7 @@ const PersonDetailPage = () => {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return null;
-    return new Date(dateString).toLocaleDateString("en-US");
+    return new Date(dateString).toLocaleDateString(locale);
   };
 
   const truncateBiography = (bio: string, maxLength: number = 300) => {

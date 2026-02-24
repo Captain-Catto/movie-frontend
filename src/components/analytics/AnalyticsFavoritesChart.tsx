@@ -1,3 +1,5 @@
+"use client";
+
 import {
   LineChart,
   Line,
@@ -10,6 +12,8 @@ import {
 } from "recharts";
 import { FavoriteStats } from "@/types/analytics.types";
 import { CHART_COLORS } from "@/types/analytics.types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocaleFromLanguage } from "@/constants/app.constants";
 
 interface AnalyticsFavoritesChartProps {
   favoriteStats: FavoriteStats | null;
@@ -18,6 +22,8 @@ interface AnalyticsFavoritesChartProps {
 export default function AnalyticsFavoritesChart({
   favoriteStats,
 }: AnalyticsFavoritesChartProps) {
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
   const hasTrendData = favoriteStats?.trend && favoriteStats.trend.length > 0;
 
   return (
@@ -39,7 +45,7 @@ export default function AnalyticsFavoritesChart({
               dataKey="date"
               stroke="#9CA3AF"
               tickFormatter={(value: string | number) =>
-                new Date(value).toLocaleDateString("en-US", {
+                new Date(value).toLocaleDateString(locale, {
                   month: "short",
                   day: "numeric",
                 })
@@ -53,7 +59,7 @@ export default function AnalyticsFavoritesChart({
                 borderRadius: "0.5rem",
                 color: "#F3F4F6",
               }}
-              labelFormatter={(value) => new Date(value).toLocaleDateString()}
+              labelFormatter={(value) => new Date(value).toLocaleDateString(locale)}
             />
             <Legend />
             <Line

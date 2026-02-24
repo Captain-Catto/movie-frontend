@@ -1,4 +1,4 @@
-import { FrontendMovie } from "@/types/movie";
+import { FrontendMovie } from "@/types/content.types";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { detectContentType } from "@/utils/contentType";

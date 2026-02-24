@@ -10,6 +10,22 @@ export const FALLBACK_PROFILE = "/images/no-avatar.svg";
 
 export const DEFAULT_LANGUAGE = "en-US";
 
+export const SUPPORTED_LANGUAGES = [
+  { code: "en-US", label: "English", flag: "🇺🇸" },
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+] as const;
+
+export type SupportedLanguageCode = (typeof SUPPORTED_LANGUAGES)[number]["code"];
+
+export const getLocaleFromLanguage = (language: string): string =>
+  language === "vi" ? "vi-VN" : "en-US";
+
+export const getTmdbLanguageFromLanguage = (language: string): string =>
+  language === "vi" ? "vi-VN" : "en-US";
+
+export const getDsLanguageFromLanguage = (language: string): string =>
+  language === "vi" ? "vi" : "en";
+
 // Page sizes
 export const DEFAULT_MOVIE_PAGE_SIZE = 20;
 export const DEFAULT_TV_PAGE_SIZE = 24;

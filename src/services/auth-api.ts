@@ -1,38 +1,13 @@
 import axiosInstance from "@/lib/axios-instance";
 import axios from "axios";
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  name: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    user: {
-      id: number;
-      email: string;
-      name: string;
-      image?: string;
-      role: string;
-    };
-    token?: string;
-    refreshToken?: string;
-  };
-  error?: string;
-}
+import type {
+  LoginCredentials,
+  RegisterData,
+  GoogleAuthData,
+  AuthResponse,
+} from "@/types/auth.types";
 
 class AuthApiService {
-  /**
-   * Login with email and password
-   */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.post("/auth/login", credentials);
@@ -42,9 +17,6 @@ class AuthApiService {
     }
   }
 
-  /**
-   * Register new user with email and password
-   */
   async register(userData: RegisterData): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.post("/auth/register", userData);
@@ -54,15 +26,7 @@ class AuthApiService {
     }
   }
 
-  /**
-   * Authenticate with Google OAuth data
-   */
-  async googleAuth(googleData: {
-    email: string;
-    name: string;
-    image?: string;
-    googleId: string;
-  }): Promise<AuthResponse> {
+  async googleAuth(googleData: GoogleAuthData): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.post("/auth/google", googleData);
       return response.data;
@@ -71,9 +35,6 @@ class AuthApiService {
     }
   }
 
-  /**
-   * Get current user profile
-   */
   async getProfile(token: string): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.get("/auth/me", {
@@ -109,6 +70,7 @@ class AuthApiService {
       return {
         success: false,
         message: msgArray || "API request failed",
+        data: undefined,
         error: data?.error || msgArray || error.message,
       };
     }
@@ -116,6 +78,7 @@ class AuthApiService {
     return {
       success: false,
       message: "Network error. Please try again.",
+      data: undefined,
       error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }

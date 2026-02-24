@@ -3,11 +3,12 @@
 import { useCallback } from 'react';
 import { useAsyncQuery } from '../core/useAsyncQuery';
 import { apiService } from '@/services/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { mapMoviesToFrontend } from '@/utils/movieMapper';
 import { mapTVSeriesToFrontendList } from '@/utils/tvMapper';
-import { MovieCardData } from '@/types/movie';
-import type { Movie, TVSeries } from '@/types/movie';
-import type { CreditsData } from '@/types/api';
+import { MovieCardData } from "@/types/content.types";
+import type { Movie, TVSeries } from "@/types/content.types";
+import type { Credits } from '@/types/content.types';
 
 /**
  * Video data from TMDB
@@ -28,7 +29,7 @@ export interface ContentDetailData {
   /** Content data (movie or TV show) */
   content: Movie | TVSeries | null;
   /** Credits (cast and crew) */
-  credits: CreditsData | null;
+  credits: Credits | null;
   /** Recommended content */
   recommendations: MovieCardData[];
   /** Videos (trailers, teasers, etc.) */
@@ -108,24 +109,26 @@ export function useContentDetail(
     enabled = true,
   } = options;
 
+  const { language } = useLanguage();
+
   // Fetch all data in parallel
   const fetchDetail = useCallback(async (): Promise<ContentDetailData> => {
     try {
       // Build promises array based on what to fetch
       const promises: Promise<unknown>[] = [];
 
-      // 1. Always fetch content
+      // 1. Always fetch content (with language for translations)
       const contentPromise =
         type === 'movie'
-          ? apiService.getMovieById(id)
-          : apiService.getTVSeriesById(id);
+          ? apiService.getMovieById(id, language)
+          : apiService.getTVSeriesById(id, language);
       promises.push(contentPromise);
 
       // 2. Fetch credits if enabled
       const creditsPromise = fetchCredits
         ? type === 'movie'
-          ? apiService.getMovieCredits(id)
-          : apiService.getTVCredits(id)
+          ? apiService.getMovieCredits(id, language)
+          : apiService.getTVCredits(id, language)
         : Promise.resolve({ success: true, data: null });
       promises.push(creditsPromise);
 
@@ -161,7 +164,7 @@ export function useContentDetail(
 
       // Extract and transform data
       const content = (contentRes.data as Movie | TVSeries) || null;
-      const credits = (creditsRes.data as CreditsData) || null;
+      const credits = (creditsRes.data as Credits) || null;
 
       // Map recommendations to frontend format
       let recommendationsData: unknown[] = [];
@@ -203,12 +206,12 @@ export function useContentDetail(
         ? error
         : new Error('Failed to fetch content detail');
     }
-  }, [id, type, fetchCredits, fetchRecommendations, fetchVideos]);
+  }, [id, type, language, fetchCredits, fetchRecommendations, fetchVideos]);
 
   // Use generic async query hook
   const { data, loading, error, refetch, isFetched } = useAsyncQuery({
     queryFn: fetchDetail,
-    dependencies: [id, type, fetchCredits, fetchRecommendations, fetchVideos],
+    dependencies: [id, type, language, fetchCredits, fetchRecommendations, fetchVideos],
     enabled,
   });
 

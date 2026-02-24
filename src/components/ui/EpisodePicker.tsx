@@ -3,8 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/services/api";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getDsLanguageFromLanguage } from "@/constants/app.constants";
 
 interface Episode {
+  id?: number;
   episode_number: number;
   name: string;
   air_date: string | null;
@@ -28,6 +31,8 @@ export default function EpisodePicker({
   contentId,
 }: EpisodePickerProps) {
   const router = useRouter();
+  const { language } = useLanguage();
+  const dsLang = getDsLanguageFromLanguage(language);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(currentSeason);
@@ -39,7 +44,7 @@ export default function EpisodePicker({
 
   useEffect(() => {
     seasonEpisodesCacheRef.current = {};
-  }, [tmdbId]);
+  }, [tmdbId, language]);
 
   useEffect(() => {
     const fetchEpisodes = async () => {
@@ -53,7 +58,8 @@ export default function EpisodePicker({
       try {
         const response = await apiService.getTVSeasonEpisodes(
           tmdbId,
-          selectedSeason
+          selectedSeason,
+          language
         );
         if (response.success && response.data?.episodes) {
           setEpisodes(response.data.episodes);
@@ -69,7 +75,7 @@ export default function EpisodePicker({
       }
     };
     fetchEpisodes();
-  }, [tmdbId, selectedSeason]);
+  }, [tmdbId, selectedSeason, language]);
 
   useEffect(() => {
     // Prefetch next episode stream URL in background for smoother sequential watching.
@@ -85,12 +91,12 @@ export default function EpisodePicker({
       .getStreamUrlByTmdbId(tmdbId, "tv", {
         season: selectedSeason,
         episode: nextEpisode,
-        dsLang: "vi",
+        dsLang,
         autoplay: true,
         autoNext: true,
       })
       .catch(() => undefined);
-  }, [tmdbId, selectedSeason, currentSeason, currentEpisode, episodes]);
+  }, [tmdbId, selectedSeason, currentSeason, currentEpisode, episodes, dsLang]);
 
   const handleSeasonChange = (newSeason: number) => {
     if (newSeason === currentSeason && currentEpisode === 1) return;
@@ -143,13 +149,18 @@ export default function EpisodePicker({
         </div>
       ) : episodes.length > 0 ? (
         <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-10 gap-2">
-          {episodes.map((ep) => {
+          {episodes.map((ep, index) => {
             const isActive =
               selectedSeason === currentSeason &&
               ep.episode_number === currentEpisode;
+            const episodeKey =
+              ep.id !== undefined
+                ? `${selectedSeason}-${ep.id}`
+                : `${selectedSeason}-${ep.episode_number}-${ep.air_date ?? "na"}-${index}`;
+
             return (
               <button
-                key={ep.episode_number}
+                key={episodeKey}
                 onClick={() => handleEpisodeClick(ep.episode_number)}
                 title={ep.name}
                 className={`h-10 rounded text-sm font-medium transition-colors ${

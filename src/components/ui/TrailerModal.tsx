@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Play } from "lucide-react";
-import { Video } from "@/types/movie";
+import { Video } from "@/types/content.types";
 
 interface TrailerModalProps {
   isOpen: boolean;

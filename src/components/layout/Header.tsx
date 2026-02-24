@@ -8,6 +8,7 @@ import { NotificationDropdown } from "@/components/notifications/NotificationDro
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import UserMenu from "@/components/layout/UserMenu";
+import LanguageSelector from "@/components/layout/LanguageSelector";
 import { HeartIcon, Search } from "lucide-react";
 
 interface HeaderProps {
@@ -150,6 +151,9 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   </svg>
                 </button>
 
+                {/* Language Selector */}
+                <LanguageSelector />
+
                 {/* Profile (desktop dropdown) */}
                 <div className="flex-shrink-0">
                   {isHydrated && isAuthenticated ? (
@@ -286,6 +290,10 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   >
                     <Search size={16} />
                   </button>
+                </div>
+
+                <div className="flex justify-end w-full">
+                  <LanguageSelector />
                 </div>
               </div>
 

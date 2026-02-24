@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Upload, CheckCircle, AlertCircle, Film, Cloud } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocaleFromLanguage } from "@/constants/app.constants";
 
 interface UploadedMovie {
   id: string;
@@ -15,6 +17,8 @@ interface UploadedMovie {
 }
 
 export default function MovieUploader() {
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -185,7 +189,7 @@ export default function MovieUploader() {
             </div>
             <div>
               <strong>Uploaded at:</strong>{" "}
-              {new Date(uploadedMovie.uploadDate).toLocaleString("en-US")}
+              {new Date(uploadedMovie.uploadDate).toLocaleString(locale)}
             </div>
             <div className="flex items-center">
               <Cloud className="mr-1 text-blue-400" size={16} />

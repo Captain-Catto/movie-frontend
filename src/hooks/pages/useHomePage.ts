@@ -6,7 +6,8 @@ import { useWindowWidth } from '../useWindowWidth';
 import { useMoviesList } from '../data/useMoviesList';
 import { apiService } from '@/services/api';
 import { mapTrendingDataToFrontend } from '@/utils/trendingMapper';
-import { MovieCardData } from '@/types/movie';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { MovieCardData } from "@/types/content.types";
 
 /**
  * Movie section data with ref for lazy loading
@@ -74,6 +75,7 @@ export interface UseHomePageResult {
  * ```
  */
 export function useHomePage(): UseHomePageResult {
+  const { language } = useLanguage();
   const [heroMovies, setHeroMovies] = useState<MovieCardData[]>([]);
   const [fetchedSections, setFetchedSections] = useState({
     nowPlaying: false,
@@ -100,7 +102,7 @@ export function useHomePage(): UseHomePageResult {
       topRated: false,
       upcoming: false,
     });
-  }, [responsiveLimit]);
+  }, [responsiveLimit, language]);
 
   // Intersection observers for lazy loading
   const [nowPlayingRef, nowPlayingVisible] = useIntersectionObserver();
@@ -112,7 +114,11 @@ export function useHomePage(): UseHomePageResult {
   useEffect(() => {
     const fetchHero = async () => {
       try {
-        const response = await apiService.getTrending();
+        const response = await apiService.getTrending({
+          page: 1,
+          limit: responsiveLimit,
+          language,
+        });
         if (response.success && response.data) {
           const heroData = mapTrendingDataToFrontend(
             response.data.slice(0, responsiveLimit)
@@ -125,7 +131,7 @@ export function useHomePage(): UseHomePageResult {
     };
 
     fetchHero();
-  }, [responsiveLimit]);
+  }, [responsiveLimit, language]);
 
   // Now Playing section - lazy loaded
   const nowPlaying = useMoviesList({

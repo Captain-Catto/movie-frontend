@@ -3,9 +3,9 @@
 import { useMemo } from 'react';
 import { useContentDetail } from '../data/useContentDetail';
 import { useFavorites } from '../state/useFavorites';
-import type { MovieCardData } from '@/types/movie';
-import type { Movie, TVSeries } from '@/types/movie';
-import type { CastMember, CrewMember, CreditsData } from '@/types/api';
+import type { MovieCardData } from "@/types/content.types";
+import type { Movie, TVSeries } from "@/types/content.types";
+import type { CastMember, CrewMember, Credits } from '@/types/content.types';
 
 /**
  * Processed detail page data with derived fields
@@ -16,7 +16,7 @@ export interface ProcessedDetailData {
   /** Content type */
   type: 'movie' | 'tv';
   /** Credits data */
-  credits: CreditsData | null;
+  credits: Credits | null;
   /** Director info */
   director: { id: number; name: string } | null;
   /** Country */

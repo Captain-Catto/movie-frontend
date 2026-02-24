@@ -3,9 +3,10 @@
 import { useCallback } from 'react';
 import { useAsyncQuery } from '../core/useAsyncQuery';
 import { apiService } from '@/services/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { mapTVSeriesToFrontendList } from '@/utils/tvMapper';
-import { MovieCardData } from '@/types/movie';
-import type { MovieQuery, TVSeries } from '@/types/movie';
+import { MovieCardData } from "@/types/content.types";
+import type { ContentQuery, TVSeries } from "@/types/content.types";
 import type { PaginationMeta } from './useMoviesList';
 
 /**
@@ -91,14 +92,17 @@ export function useTVSeriesList(
     genre,
     year,
     sortBy,
-    language,
+    language: languageOption,
     enabled = true,
   } = options;
+
+  const { language: contextLanguage } = useLanguage();
+  const language = languageOption || contextLanguage;
 
   // Select API method based on category
   const fetchTVSeries = useCallback(async () => {
     // Build query object
-    const query: MovieQuery = {
+    const query: ContentQuery = {
       page,
       limit,
       ...(genre && { genre }),

@@ -3,12 +3,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MovieQuery } from "@/types/movie";
-import type { MovieCardData } from "@/types/movie";
-import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_MOVIE_PAGE_SIZE,
-} from "@/constants/app.constants";
+import { ContentQuery } from "@/types/content.types";
+import type { MovieCardData } from "@/types/content.types";
+import { DEFAULT_MOVIE_PAGE_SIZE } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type CategoryResponse = {
   success: boolean;
@@ -24,14 +22,14 @@ type CategoryResponse = {
 
 type UseMovieCategoryOptions<Response extends CategoryResponse> = {
   basePath?: string;
-  fetcher: (query: MovieQuery) => Promise<Response>;
+  fetcher: (query: ContentQuery) => Promise<Response>;
   mapper: (items: Array<Record<string, unknown>>) => MovieCardData[];
   defaultLimit?: number;
   defaultLanguage?: string;
-  additionalQuery?: Partial<MovieQuery>;
+  additionalQuery?: Partial<ContentQuery>;
 };
 
-const EMPTY_QUERY: Partial<MovieQuery> = {};
+const EMPTY_QUERY: Partial<ContentQuery> = {};
 
 const normalizePagination = (pagination?: Record<string, unknown>) => {
   const totalPages =
@@ -81,9 +79,11 @@ export function useMovieCategory<Response extends CategoryResponse>({
   fetcher,
   mapper,
   defaultLimit = DEFAULT_MOVIE_PAGE_SIZE,
-  defaultLanguage = DEFAULT_LANGUAGE,
+  defaultLanguage,
   additionalQuery,
 }: UseMovieCategoryOptions<Response>) {
+  const { language: contextLanguage } = useLanguage();
+  const resolvedLanguage = defaultLanguage || contextLanguage;
   const searchParams = useSearchParams();
   const router = useRouter();
   const fetcherRef = useRef(fetcher);
@@ -112,10 +112,10 @@ export function useMovieCategory<Response extends CategoryResponse>({
     () => ({
       page: currentPage,
       limit: defaultLimit,
-      language: defaultLanguage,
+      language: resolvedLanguage,
       ...normalizedAdditionalQuery,
     }),
-    [normalizedAdditionalQuery, currentPage, defaultLanguage, defaultLimit]
+    [normalizedAdditionalQuery, currentPage, resolvedLanguage, defaultLimit]
   );
 
   const [movies, setMovies] = useState<MovieCardData[]>([]);

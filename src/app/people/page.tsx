@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import PeopleGrid from "@/components/people/PeopleGrid";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getTmdbLanguageFromLanguage } from "@/constants/app.constants";
 
 export interface PersonData {
   id: number;
@@ -25,47 +27,54 @@ const TMDB_API_KEY = "3fd2be6f0c70a2a598f084ddfb75487c";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
 
 const PeoplePage = () => {
+  const { language } = useLanguage();
   const [people, setPeople] = useState<PersonData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchPeople = async (pageNum: number = 1, reset: boolean = false) => {
-    try {
-      if (pageNum === 1) setLoading(true);
+  const fetchPeople = useCallback(
+    async (pageNum: number = 1, reset: boolean = false) => {
+      try {
+        if (pageNum === 1) setLoading(true);
+        const tmdbLanguage = getTmdbLanguageFromLanguage(language);
 
-      const response = await fetch(
-        `${TMDB_BASE_URL}/person/popular?api_key=${TMDB_API_KEY}&language=en-US&page=${pageNum}`
-      );
+        const response = await fetch(
+          `${TMDB_BASE_URL}/person/popular?api_key=${TMDB_API_KEY}&language=${encodeURIComponent(
+            tmdbLanguage
+          )}&page=${pageNum}`
+        );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data?.results) {
-        if (reset || pageNum === 1) {
-          setPeople(data.results);
-        } else {
-          setPeople((prev) => [...prev, ...data.results]);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        setHasMore(pageNum < data.total_pages && pageNum < 10);
-        setError(null);
+        const data = await response.json();
+
+        if (data?.results) {
+          if (reset || pageNum === 1) {
+            setPeople(data.results);
+          } else {
+            setPeople((prev) => [...prev, ...data.results]);
+          }
+
+          setHasMore(pageNum < data.total_pages && pageNum < 10);
+          setError(null);
+        }
+      } catch (err) {
+        console.error("Error fetching people:", err);
+        setError("Failed to load people. Please try again later.");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Error fetching people:", err);
-      setError("Failed to load people. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [language]
+  );
 
   useEffect(() => {
     fetchPeople(1, true);
-  }, []);
+  }, [fetchPeople]);
 
   const handleLoadMore = () => {
     if (!loading && hasMore) {

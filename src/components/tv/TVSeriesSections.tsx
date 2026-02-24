@@ -4,11 +4,12 @@ import MovieGrid from "@/components/movie/MovieGrid";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
-import type { MovieCardData } from "@/types/movie";
-import { DEFAULT_LANGUAGE } from "@/constants/app.constants";
+import type { MovieCardData } from "@/types/content.types";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 
 export default function TVSeriesSections() {
+  const { language } = useLanguage();
   const [onTheAirTVSeries, setOnTheAirTVSeries] = useState<MovieCardData[]>([]);
   const [popularTVSeries, setPopularTVSeries] = useState<MovieCardData[]>([]);
   const [topRatedTVSeries, setTopRatedTVSeries] = useState<MovieCardData[]>([]);
@@ -31,6 +32,19 @@ export default function TVSeriesSections() {
   const [onTheAirRef, onTheAirVisible] = useIntersectionObserver();
   const [popularRef, popularVisible] = useIntersectionObserver();
   const [topRatedRef, topRatedVisible] = useIntersectionObserver();
+
+  useEffect(() => {
+    setFetched({
+      onTheAir: false,
+      popular: false,
+      topRated: false,
+    });
+    setLoadingStates({
+      onTheAir: true,
+      popular: true,
+      topRated: true,
+    });
+  }, [language]);
 
   // Helper function to convert API response to array
   const toRecordArray = (data: unknown): Array<Record<string, unknown>> => {
@@ -56,7 +70,7 @@ export default function TVSeriesSections() {
           const res = await apiService.getOnTheAirTVSeries({
             page: 1,
             limit: 6,
-            language: DEFAULT_LANGUAGE,
+            language,
           });
           if (res.success && res.data) {
             const mappedTVSeries = toRecordArray(res.data).map((tv) =>
@@ -73,7 +87,7 @@ export default function TVSeriesSections() {
 
       fetchOnTheAir();
     }
-  }, [onTheAirVisible, fetched.onTheAir]);
+  }, [onTheAirVisible, fetched.onTheAir, language]);
 
   // Fetch Popular when visible
   useEffect(() => {
@@ -85,7 +99,7 @@ export default function TVSeriesSections() {
           const res = await apiService.getPopularTVSeries({
             page: 1,
             limit: 6,
-            language: DEFAULT_LANGUAGE,
+            language,
           });
           if (res.success && res.data) {
             const mappedTVSeries = toRecordArray(res.data).map((tv) =>
@@ -102,7 +116,7 @@ export default function TVSeriesSections() {
 
       fetchPopular();
     }
-  }, [popularVisible, fetched.popular]);
+  }, [popularVisible, fetched.popular, language]);
 
   // Fetch Top Rated when visible
   useEffect(() => {
@@ -114,7 +128,7 @@ export default function TVSeriesSections() {
           const res = await apiService.getTopRatedTVSeries({
             page: 1,
             limit: 6,
-            language: DEFAULT_LANGUAGE,
+            language,
           });
           if (res.success && res.data) {
             const mappedTVSeries = toRecordArray(res.data).map((tv) =>
@@ -131,7 +145,7 @@ export default function TVSeriesSections() {
 
       fetchTopRated();
     }
-  }, [topRatedVisible, fetched.topRated]);
+  }, [topRatedVisible, fetched.topRated, language]);
 
   // Use API data (show skeleton when loading)
   const onTheAirToDisplay = onTheAirTVSeries;

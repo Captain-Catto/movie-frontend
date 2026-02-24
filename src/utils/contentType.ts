@@ -1,4 +1,4 @@
-import { ContentType } from "@/types/content";
+import { ContentType } from "@/types/content.types";
 
 type Candidate = Record<string, unknown> | null | undefined;
 

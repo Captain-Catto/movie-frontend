@@ -1,4 +1,4 @@
-import { Movie, FrontendMovie, MovieInput } from "@/types/movie";
+import { Movie, FrontendMovie, MovieInput } from "@/types/content.types";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,

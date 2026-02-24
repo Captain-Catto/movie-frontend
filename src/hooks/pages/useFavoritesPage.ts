@@ -6,7 +6,8 @@ import { usePagination } from '../core/usePagination';
 import { apiService } from '@/services/api';
 import { mapMovieToFrontend } from '@/utils/movieMapper';
 import { mapTVSeriesToFrontend } from '@/utils/tvMapper';
-import type { MovieCardData } from '@/types/movie';
+import { useLanguage } from '@/contexts/LanguageContext';
+import type { MovieCardData } from "@/types/content.types";
 
 export interface UseFavoritesPageOptions {
   itemsPerPage?: number;
@@ -85,6 +86,7 @@ export interface UseFavoritesPageResult {
  */
 export function useFavoritesPage(options: UseFavoritesPageOptions = {}): UseFavoritesPageResult {
   const { itemsPerPage = 24 } = options;
+  const { language } = useLanguage();
 
   const { favoriteKeys, toggleFavorite, clearAllFavorites: clearAll, loadFavorites } = useFavorites();
   const { page, goToPage, nextPage, prevPage } = usePagination({ basePath: '/favorites', initialPage: 1 });
@@ -127,12 +129,12 @@ export function useFavoritesPage(options: UseFavoritesPageOptions = {}): UseFavo
       const promises = parsedFavorites.map(async ({ id, type }) => {
         try {
           if (type === 'movie') {
-            const response = await apiService.getMovieById(id);
+            const response = await apiService.getMovieById(id, language);
             if (response.success && response.data) {
               return mapMovieToFrontend(response.data as unknown as Record<string, unknown>);
             }
           } else if (type === 'tv') {
-            const response = await apiService.getTVSeriesById(id);
+            const response = await apiService.getTVSeriesById(id, language);
             if (response.success && response.data) {
               return mapTVSeriesToFrontend(response.data as unknown as Record<string, unknown>);
             }
@@ -155,7 +157,7 @@ export function useFavoritesPage(options: UseFavoritesPageOptions = {}): UseFavo
     } finally {
       setLoading(false);
     }
-  }, [parsedFavorites]);
+  }, [parsedFavorites, language]);
 
   /**
    * Load favorites on mount and when favoriteKeys change

@@ -1,18 +1,25 @@
-import {
+import type { ApiResponse } from "@/types/api";
+import type {
   Movie,
-  MovieResponse,
-  MovieQuery,
-  TrendingResponse,
   TVSeries,
-  TVSeriesResponse,
-} from "@/types/movie";
-import {
-  CastMember,
-  CrewMember,
-  CreditsData,
-  PaginationData,
-  MetadataInfo,
-} from "@/types/api";
+  TrendingItem,
+  Credits,
+  ContentQuery,
+  ContentType,
+  ContentByIdResponse,
+  StreamData,
+  ContentLookup,
+  UploadedMovie,
+  Video,
+  Season,
+} from "@/types/content.types";
+import type {
+  PersonDetails,
+  PersonCredits,
+  PopularPeopleResponse,
+} from "@/types/people.types";
+import type { CastMember, CrewMember } from "@/types/content.types";
+import type { Pagination, MetadataInfo } from "@/types/api";
 import { DEFAULT_LANGUAGE } from "@/constants/app.constants";
 
 export const API_BASE_URL =
@@ -115,11 +122,15 @@ class ApiService {
     return data;
   }
 
-  async getMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+  // ===========================
+  // Movie Endpoints
+  // ===========================
+
+  async getMovies(query: ContentQuery = {}): Promise<ApiResponse<Movie[]>> {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
-      genres: query.genre, // ✅ Fix: use "genres" not "genre"
+      genres: query.genre,
       year: query.year,
       language: query.language,
       sortBy: query.sortBy,
@@ -127,204 +138,150 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/movies${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<MovieResponse>(url);
+    return this.fetchWithCache<ApiResponse<Movie[]>>(url);
   }
 
-  // New category-specific movie endpoints
-  async getNowPlayingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getNowPlayingMovies(query: ContentQuery = {}): Promise<ApiResponse<Movie[]>> {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
       language: query.language,
-      genres: query.genre, // ✅ Add genre parameter
-      year: query.year, // ✅ Add year parameter
-      sortBy: query.sortBy, // ✅ Add sortBy parameter
+      genres: query.genre,
+      year: query.year,
+      sortBy: query.sortBy,
     });
 
-    const url = `${API_BASE_URL}/movies/now-playing${
-      params ? `?${params}` : ""
-    }`;
-    return this.fetchWithCache<MovieResponse>(url);
+    const url = `${API_BASE_URL}/movies/now-playing${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<Movie[]>>(url);
   }
 
-  async getPopularMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getPopularMovies(query: ContentQuery = {}): Promise<ApiResponse<Movie[]>> {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
       language: query.language,
-      genres: query.genre, // ✅ Add genre parameter
-      year: query.year, // ✅ Add year parameter
-      sortBy: query.sortBy, // ✅ Add sortBy parameter
+      genres: query.genre,
+      year: query.year,
+      sortBy: query.sortBy,
     });
 
     const url = `${API_BASE_URL}/movies/popular${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<MovieResponse>(url);
+    return this.fetchWithCache<ApiResponse<Movie[]>>(url);
   }
 
-  async getTopRatedMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getTopRatedMovies(query: ContentQuery = {}): Promise<ApiResponse<Movie[]>> {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
       language: query.language,
-      genres: query.genre, // ✅ Add genre parameter
-      year: query.year, // ✅ Add year parameter
-      sortBy: query.sortBy, // ✅ Add sortBy parameter
+      genres: query.genre,
+      year: query.year,
+      sortBy: query.sortBy,
     });
 
-    const url = `${API_BASE_URL}/movies/top-rated${
-      params ? `?${params}` : ""
-    }`;
-    return this.fetchWithCache<MovieResponse>(url);
+    const url = `${API_BASE_URL}/movies/top-rated${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<Movie[]>>(url);
   }
 
-  async getUpcomingMovies(query: MovieQuery = {}): Promise<MovieResponse> {
+  async getUpcomingMovies(query: ContentQuery = {}): Promise<ApiResponse<Movie[]>> {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
       language: query.language,
-      genres: query.genre, // ✅ Add genre parameter
-      year: query.year, // ✅ Add year parameter
-      sortBy: query.sortBy, // ✅ Add sortBy parameter
+      genres: query.genre,
+      year: query.year,
+      sortBy: query.sortBy,
     });
 
-    const url = `${API_BASE_URL}/movies/upcoming${
-      params ? `?${params}` : ""
-    }`;
-    return this.fetchWithCache<MovieResponse>(url);
+    const url = `${API_BASE_URL}/movies/upcoming${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<Movie[]>>(url);
   }
 
-  async getMovieById(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data: Movie;
-    error?: string;
-  }> {
-    const url = `${API_BASE_URL}/movies/${id}`;
-    return this.fetchWithCache<{
-      success: boolean;
-      message: string;
-      data: TVSeries;
-      error?: string;
-    }>(url);
+  async getMovieById(id: number, language?: string): Promise<ApiResponse<Movie>> {
+    const params = this.buildQueryParams({ language });
+    const url = `${API_BASE_URL}/movies/${id}${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<Movie>>(url);
   }
 
   async getMovieCredits(
     id: number,
     language: string = DEFAULT_LANGUAGE
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: CreditsData;
-    error?: string;
-  }> {
+  ): Promise<ApiResponse<Credits>> {
     const params = this.buildQueryParams({ language });
     const url = `${API_BASE_URL}/movies/${id}/credits${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling(url);
+    return this.fetchWithErrorHandling<ApiResponse<Credits>>(url);
   }
 
   async getTVCredits(
     id: number,
     language: string = DEFAULT_LANGUAGE
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: CreditsData;
-    error?: string;
-  }> {
+  ): Promise<ApiResponse<Credits>> {
     const params = this.buildQueryParams({ language });
     const url = `${API_BASE_URL}/tv/${id}/credits${params ? `?${params}` : ""}`;
-    return this.fetchWithErrorHandling(url);
+    return this.fetchWithErrorHandling<ApiResponse<Credits>>(url);
   }
 
   async getTVSeasonEpisodes(
     tvId: number,
     seasonNumber: number,
     language: string = DEFAULT_LANGUAGE
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: {
-      season_number: number;
-      name: string;
-      episodes: Array<{
-        episode_number: number;
-        name: string;
-        overview: string;
-        air_date: string | null;
-        still_path: string | null;
-        runtime: number | null;
-        vote_average: number;
-      }>;
-    };
-    error?: string;
-  }> {
+  ): Promise<ApiResponse<Season>> {
     const params = this.buildQueryParams({ language });
     const url = `${API_BASE_URL}/tv/${tvId}/seasons/${seasonNumber}/episodes${
       params ? `?${params}` : ""
     }`;
-    return this.fetchWithCache(url, undefined, 5 * 60 * 1000);
+    return this.fetchWithCache<ApiResponse<Season>>(url, undefined, 5 * 60 * 1000);
   }
 
-  async getMovieVideos(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data: {
-      id: number;
-      results: Array<{
-        id: string;
-        iso_639_1: string;
-        iso_3166_1: string;
-        key: string;
-        name: string;
-        site: string;
-        size: number;
-        type: string;
-        official: boolean;
-        published_at: string;
-      }>;
-    };
-    error?: string;
-  }> {
+  async getMovieVideos(id: number): Promise<ApiResponse<{ id: number; results: Video[] }>> {
     const url = `${API_BASE_URL}/movies/${id}/videos`;
-    return this.fetchWithErrorHandling(url);
+    return this.fetchWithErrorHandling<ApiResponse<{ id: number; results: Video[] }>>(url);
   }
 
-  async getTVVideos(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data: {
-      id: number;
-      results: Array<{
-        id: string;
-        iso_639_1: string;
-        iso_3166_1: string;
-        key: string;
-        name: string;
-        site: string;
-        size: number;
-        type: string;
-        official: boolean;
-        published_at: string;
-      }>;
-    };
-    error?: string;
-  }> {
+  async getTVVideos(id: number): Promise<ApiResponse<{ id: number; results: Video[] }>> {
     const url = `${API_BASE_URL}/tv/${id}/videos`;
-    return this.fetchWithErrorHandling(url);
+    return this.fetchWithErrorHandling<ApiResponse<{ id: number; results: Video[] }>>(url);
   }
 
-  async getTrending(query: MovieQuery = {}): Promise<TrendingResponse> {
-    const params = this.buildQueryParams({
-      page: query.page,
-      limit: query.limit,
-      language: query.language,
+  async syncMovies(): Promise<ApiResponse<null>> {
+    const url = `${API_BASE_URL}/movies/sync`;
+    return this.fetchWithErrorHandling<ApiResponse<null>>(url, {
+      method: "POST",
     });
-
-    const url = `${API_BASE_URL}/trending${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<TrendingResponse>(url);
   }
 
-  async getTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
+  async getSyncStats(): Promise<ApiResponse<Record<string, unknown>>> {
+    const url = `${API_BASE_URL}/movies/stats/sync`;
+    return this.fetchWithErrorHandling<ApiResponse<Record<string, unknown>>>(url);
+  }
+
+  async getMovieRecommendations(
+    id: number,
+    page: number = 1
+  ): Promise<ApiResponse<Movie[]>> {
+    const params = this.buildQueryParams({ page });
+    const url = `${API_BASE_URL}/movies/${id}/recommendations${
+      params ? `?${params}` : ""
+    }`;
+    return this.fetchWithErrorHandling<ApiResponse<Movie[]>>(url);
+  }
+
+  // ===========================
+  // TV Series Endpoints
+  // ===========================
+
+  async getTVRecommendations(
+    id: number,
+    page: number = 1
+  ): Promise<ApiResponse<Movie[]>> {
+    const params = this.buildQueryParams({ page });
+    const url = `${API_BASE_URL}/tv/${id}/recommendations${
+      params ? `?${params}` : ""
+    }`;
+    return this.fetchWithErrorHandling<ApiResponse<Movie[]>>(url);
+  }
+
+  async getTVSeries(query: ContentQuery = {}): Promise<ApiResponse<TVSeries[]>> {
     const params = this.buildQueryParams({
       page: query.page,
       limit: query.limit,
@@ -336,122 +293,85 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/tv${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<TVSeriesResponse>(url);
+    return this.fetchWithCache<ApiResponse<TVSeries[]>>(url);
   }
 
-  async getTVSeriesById(id: number): Promise<{
-    success: boolean;
-    message: string;
-    data: TVSeries;
-    error?: string;
-  }> {
-    const url = `${API_BASE_URL}/tv/${id}`;
-    return this.fetchWithErrorHandling(url);
+  async getTVSeriesById(id: number, language?: string): Promise<ApiResponse<TVSeries>> {
+    const params = this.buildQueryParams({ language });
+    const url = `${API_BASE_URL}/tv/${id}${params ? `?${params}` : ""}`;
+    return this.fetchWithErrorHandling<ApiResponse<TVSeries>>(url);
   }
 
-  async syncMovies(): Promise<{
-    success: boolean;
-    message: string;
-    data: null;
-    error?: string;
-  }> {
-    const url = `${API_BASE_URL}/movies/sync`;
-    return this.fetchWithErrorHandling(url, {
-      method: "POST",
+  async getOnTheAirTVSeries(query: ContentQuery = {}): Promise<ApiResponse<TVSeries[]>> {
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
     });
+
+    const url = `${API_BASE_URL}/tv/on-the-air${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<TVSeries[]>>(url);
   }
 
-  async getSyncStats(): Promise<{
-    success: boolean;
-    message: string;
-    data: Record<string, unknown>;
-    error?: string;
-  }> {
-    const url = `${API_BASE_URL}/movies/stats/sync`;
-    return this.fetchWithErrorHandling(url);
+  async getPopularTVSeries(query: ContentQuery = {}): Promise<ApiResponse<TVSeries[]>> {
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
+
+    const url = `${API_BASE_URL}/tv/popular-tv${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<TVSeries[]>>(url);
   }
 
-  async getMovieRecommendations(
-    id: number,
-    page: number = 1
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: Movie[];
-    error?: string;
-  }> {
-    const params = this.buildQueryParams({ page });
-    const url = `${API_BASE_URL}/movies/${id}/recommendations${
-      params ? `?${params}` : ""
-    }`;
-    return this.fetchWithErrorHandling(url);
+  async getTopRatedTVSeries(query: ContentQuery = {}): Promise<ApiResponse<TVSeries[]>> {
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
+
+    const url = `${API_BASE_URL}/tv/top-rated-tv${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<TVSeries[]>>(url);
   }
 
-  async getTVRecommendations(
-    id: number,
-    page: number = 1
-  ): Promise<{
-    success: boolean;
-    message: string;
-    data: Movie[];
-    error?: string;
-  }> {
-    const params = this.buildQueryParams({ page });
-    const url = `${API_BASE_URL}/tv/${id}/recommendations${
-      params ? `?${params}` : ""
-    }`;
-    return this.fetchWithErrorHandling(url);
+  // ===========================
+  // Trending Endpoints
+  // ===========================
+
+  async getTrending(query: ContentQuery = {}): Promise<ApiResponse<TrendingItem[]>> {
+    const params = this.buildQueryParams({
+      page: query.page,
+      limit: query.limit,
+      language: query.language,
+    });
+
+    const url = `${API_BASE_URL}/trending${params ? `?${params}` : ""}`;
+    return this.fetchWithCache<ApiResponse<TrendingItem[]>>(url);
   }
 
-  // People API methods
-  async getPopularPeople(page: number = 1): Promise<{
-    page: number;
-    results: CastMember[];
-    total_pages: number;
-    total_results: number;
-  }> {
+  // ===========================
+  // People Endpoints
+  // ===========================
+
+  async getPopularPeople(page: number = 1): Promise<PopularPeopleResponse> {
     const params = this.buildQueryParams({ page });
     const url = `${API_BASE_URL}/people/popular${params ? `?${params}` : ""}`;
-    const response = await this.fetchWithErrorHandling<{
-      success: boolean;
-      message: string;
-      data: {
-        page: number;
-        results: CastMember[];
-        total_pages: number;
-        total_results: number;
-      };
-    }>(url);
+    const response = await this.fetchWithErrorHandling<ApiResponse<PopularPeopleResponse>>(url);
 
     return response.data;
   }
 
-  async getPersonDetails(id: number): Promise<CastMember & { biography?: string; birthday?: string; deathday?: string; place_of_birth?: string }> {
+  async getPersonDetails(id: number): Promise<PersonDetails> {
     const url = `${API_BASE_URL}/people/${id}`;
-    const response = await this.fetchWithErrorHandling<{
-      success: boolean;
-      message: string;
-      data: CastMember & { biography?: string; birthday?: string; deathday?: string; place_of_birth?: string };
-    }>(url);
+    const response = await this.fetchWithErrorHandling<ApiResponse<PersonDetails>>(url);
 
     return response.data;
   }
 
-  async getPersonCredits(id: number): Promise<{
-    id: number;
-    cast: CastMember[];
-    crew: CrewMember[];
-  }> {
+  async getPersonCredits(id: number): Promise<PersonCredits> {
     const url = `${API_BASE_URL}/people/${id}/credits`;
-    const response = await this.fetchWithErrorHandling<{
-      success: boolean;
-      message: string;
-      data: {
-        id: number;
-        cast: CastMember[];
-        crew: CrewMember[];
-      };
-    }>(url);
+    const response = await this.fetchWithErrorHandling<ApiResponse<PersonCredits>>(url);
 
     return response.data;
   }
@@ -465,23 +385,19 @@ class ApiService {
   ): Promise<{
     cast: CastMember[];
     crew: CrewMember[];
-    pagination: PaginationData;
+    pagination: Pagination;
     metadata: MetadataInfo;
   }> {
     const params = this.buildQueryParams({ page, limit, mediaType, sortBy });
     const url = `${API_BASE_URL}/people/${id}/credits/paginated${
       params ? `?${params}` : ""
     }`;
-    const response = await this.fetchWithErrorHandling<{
-      success: boolean;
-      message: string;
-      data: {
-        cast: CastMember[];
-        crew: CrewMember[];
-        pagination: PaginationData;
-        metadata: MetadataInfo;
-      };
-    }>(url);
+    const response = await this.fetchWithErrorHandling<ApiResponse<{
+      cast: CastMember[];
+      crew: CrewMember[];
+      pagination: Pagination;
+      metadata: MetadataInfo;
+    }>>(url);
 
     return response.data;
   }
@@ -494,22 +410,18 @@ class ApiService {
     sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
   ): Promise<{
     cast: CastMember[];
-    pagination: PaginationData;
+    pagination: Pagination;
     metadata: MetadataInfo & { totalCastItems: number };
   }> {
     const params = this.buildQueryParams({ page, limit, mediaType, sortBy });
     const url = `${API_BASE_URL}/people/${id}/credits/cast/paginated${
       params ? `?${params}` : ""
     }`;
-    const response = await this.fetchWithErrorHandling<{
-      success: boolean;
-      message: string;
-      data: {
-        cast: CastMember[];
-        pagination: PaginationData;
-        metadata: MetadataInfo & { totalCastItems: number };
-      };
-    }>(url);
+    const response = await this.fetchWithErrorHandling<ApiResponse<{
+      cast: CastMember[];
+      pagination: Pagination;
+      metadata: MetadataInfo & { totalCastItems: number };
+    }>>(url);
 
     return response.data;
   }
@@ -522,63 +434,38 @@ class ApiService {
     sortBy: "release_date" | "popularity" | "vote_average" = "release_date"
   ): Promise<{
     crew: CrewMember[];
-    pagination: PaginationData;
+    pagination: Pagination;
     metadata: MetadataInfo & { totalCrewItems: number };
   }> {
     const params = this.buildQueryParams({ page, limit, mediaType, sortBy });
     const url = `${API_BASE_URL}/people/${id}/credits/crew/paginated${
       params ? `?${params}` : ""
     }`;
-    const response = await this.fetchWithErrorHandling<{
-      success: boolean;
-      message: string;
-      data: {
-        crew: CrewMember[];
-        pagination: PaginationData;
-        metadata: MetadataInfo & { totalCrewItems: number };
-      };
-    }>(url);
+    const response = await this.fetchWithErrorHandling<ApiResponse<{
+      crew: CrewMember[];
+      pagination: Pagination;
+      metadata: MetadataInfo & { totalCrewItems: number };
+    }>>(url);
 
     return response.data;
   }
 
-  async getContentById(id: number): Promise<{
-    content: Movie | TVSeries | null;
-    contentType: "movie" | "tv";
-    success: boolean;
-    message?: string;
-  }> {
-    // console.log("📡 [ApiService] getContentById called with ID:", id);
+  // ===========================
+  // Content (Generic) Endpoints
+  // ===========================
 
+  async getContentById(id: number, language?: string): Promise<ContentByIdResponse> {
+    const params = this.buildQueryParams({ language });
     try {
-      // Try movie first (usually faster response)
-      const movieUrl = `${API_BASE_URL}/movies/${id}`;
-      // console.log("📡 [ApiService] Trying movie endpoint:", movieUrl);
-
-      const movieResponse = await this.fetchWithErrorHandling<{
-        success: boolean;
-        message: string;
-        data: Movie;
-      }>(movieUrl);
-
-      // console.log("📡 [ApiService] Movie response:", {
-      //   success: movieResponse.success,
-      //   hasData: !!movieResponse.data,
-      //   message: movieResponse.message,
-      // });
+      const movieUrl = `${API_BASE_URL}/movies/${id}${params ? `?${params}` : ""}`;
+      const movieResponse = await this.fetchWithErrorHandling<ApiResponse<Movie>>(movieUrl);
 
       if (movieResponse.success && movieResponse.data) {
         const content = movieResponse.data;
-        // Validate it's actually a movie by checking movie-specific fields
         if (
           content.title &&
           (content.releaseDate !== undefined || content.tmdbId !== undefined)
         ) {
-          // console.log("✅ [ApiService] Found as MOVIE:", {
-          //   id: content.id,
-          //   title: content.title,
-          //   tmdbId: content.tmdbId,
-          // });
           return {
             content: movieResponse.data,
             contentType: "movie",
@@ -587,39 +474,19 @@ class ApiService {
         }
       }
     } catch {
-      // console.log("⚠️ [ApiService] Movie endpoint failed:", movieError);
       // Movie failed, try TV
     }
 
     try {
-      // Try TV series
-      const tvUrl = `${API_BASE_URL}/tv/${id}`;
-      // console.log("📡 [ApiService] Trying TV endpoint:", tvUrl);
-
-      const tvResponse = await this.fetchWithErrorHandling<{
-        success: boolean;
-        message: string;
-        data: TVSeries;
-      }>(tvUrl);
-
-      // console.log("📡 [ApiService] TV response:", {
-      //   success: tvResponse.success,
-      //   hasData: !!tvResponse.data,
-      //   message: tvResponse.message,
-      // });
+      const tvUrl = `${API_BASE_URL}/tv/${id}${params ? `?${params}` : ""}`;
+      const tvResponse = await this.fetchWithErrorHandling<ApiResponse<TVSeries>>(tvUrl);
 
       if (tvResponse.success && tvResponse.data) {
         const content = tvResponse.data;
-        // Validate it's actually a TV series by checking TV-specific fields
         if (
           content.title &&
           (content.firstAirDate !== undefined || content.tmdbId !== undefined)
         ) {
-          // console.log("✅ [ApiService] Found as TV SERIES:", {
-          //   id: content.id,
-          //   title: content.title,
-          //   tmdbId: content.tmdbId,
-          // });
           return {
             content: tvResponse.data,
             contentType: "tv",
@@ -628,7 +495,7 @@ class ApiService {
         }
       }
     } catch {
-      // console.log("⚠️ [ApiService] TV endpoint failed");
+      // TV also failed
     }
 
     console.error("❌ [ApiService] Content not found in both movie and TV databases");
@@ -642,7 +509,7 @@ class ApiService {
 
   async getStreamUrlByTmdbId(
     tmdbId: number,
-    contentType: "movie" | "tv",
+    contentType: ContentType,
     options?: {
       season?: number;
       episode?: number;
@@ -650,17 +517,7 @@ class ApiService {
       autoplay?: boolean;
       autoNext?: boolean;
     }
-  ): Promise<{
-    success: boolean;
-    data?: {
-      provider: string;
-      tmdbId: number;
-      contentType: "movie" | "tv";
-      url: string;
-      fallbackUrls: string[];
-    };
-    message?: string;
-  }> {
+  ): Promise<ApiResponse<StreamData | undefined>> {
     try {
       const params = this.buildQueryParams({
         contentType,
@@ -677,17 +534,9 @@ class ApiService {
         params ? `?${params}` : ""
       }`;
 
-      const response = await this.fetchWithCache<{
-        success: boolean;
-        message: string;
-        data: {
-          provider: string;
-          tmdbId: number;
-          contentType: "movie" | "tv";
-          url: string;
-          fallbackUrls: string[];
-        } | null;
-      }>(url, undefined, 60 * 1000);
+      const response = await this.fetchWithCache<ApiResponse<StreamData | null>>(
+        url, undefined, 60 * 1000
+      );
 
       return {
         success: response.success,
@@ -698,33 +547,16 @@ class ApiService {
       console.error("Get stream URL by TMDB ID failed:", error);
       return {
         success: false,
+        data: undefined,
         message: `Failed to get stream URL for TMDB ID ${tmdbId}: ${error}`,
       };
     }
   }
 
-  async lookupByTmdbId(tmdbId: number): Promise<{
-    success: boolean;
-    data?: {
-      internalId: number;
-      tmdbId: number;
-      contentType: "movie" | "tv";
-      redirectUrl: string;
-    };
-    message?: string;
-  }> {
+  async lookupByTmdbId(tmdbId: number): Promise<ApiResponse<ContentLookup | undefined>> {
     try {
       const url = `${API_BASE_URL}/content/lookup/tmdb/${tmdbId}`;
-      const response = await this.fetchWithErrorHandling<{
-        success: boolean;
-        message: string;
-        data: {
-          internalId: number;
-          tmdbId: number;
-          contentType: "movie" | "tv";
-          redirectUrl: string;
-        } | null;
-      }>(url);
+      const response = await this.fetchWithErrorHandling<ApiResponse<ContentLookup | null>>(url);
 
       return {
         success: response.success,
@@ -735,24 +567,18 @@ class ApiService {
       console.error("Lookup by TMDB ID failed:", error);
       return {
         success: false,
+        data: undefined,
         message: `Failed to lookup TMDB ID ${tmdbId}: ${error}`,
       };
     }
   }
 
-  // Specific content type fetching methods
-  async getMovieByTmdbId(tmdbId: number): Promise<{
-    content: Movie | null;
-    contentType: "movie";
-    success: boolean;
-    message?: string;
-  }> {
+  async getMovieByTmdbId(tmdbId: number, language?: string): Promise<ContentByIdResponse> {
     try {
-      const movieResponse = await this.fetchWithErrorHandling<{
-        success: boolean;
-        message: string;
-        data: Movie;
-      }>(`${API_BASE_URL}/movies/${tmdbId}`);
+      const params = this.buildQueryParams({ language });
+      const movieResponse = await this.fetchWithErrorHandling<ApiResponse<Movie>>(
+        `${API_BASE_URL}/movies/${tmdbId}${params ? `?${params}` : ""}`
+      );
 
       if (movieResponse.success && movieResponse.data) {
         return {
@@ -778,18 +604,12 @@ class ApiService {
     }
   }
 
-  async getTVByTmdbId(tmdbId: number): Promise<{
-    content: TVSeries | null;
-    contentType: "tv";
-    success: boolean;
-    message?: string;
-  }> {
+  async getTVByTmdbId(tmdbId: number, language?: string): Promise<ContentByIdResponse> {
     try {
-      const tvResponse = await this.fetchWithErrorHandling<{
-        success: boolean;
-        message: string;
-        data: TVSeries;
-      }>(`${API_BASE_URL}/tv/${tmdbId}`);
+      const params = this.buildQueryParams({ language });
+      const tvResponse = await this.fetchWithErrorHandling<ApiResponse<TVSeries>>(
+        `${API_BASE_URL}/tv/${tmdbId}${params ? `?${params}` : ""}`
+      );
 
       if (tvResponse.success && tvResponse.data) {
         return {
@@ -815,28 +635,14 @@ class ApiService {
     }
   }
 
-  // Movie Upload APIs
-  async getUploadedMovies(): Promise<{
-    success: boolean;
-    message: string;
-    data: Array<{
-      id: string;
-      title: string;
-      description: string;
-      year: number;
-      genre: string;
-      duration: string;
-      s3Key: string;
-      streamUrl: string;
-      posterUrl?: string;
-      uploadDate: string;
-      fileSize: number;
-      originalName: string;
-    }>;
-  }> {
+  // ===========================
+  // Movie Upload Endpoints
+  // ===========================
+
+  async getUploadedMovies(): Promise<ApiResponse<UploadedMovie[]>> {
     try {
       const url = `${API_BASE_URL}/movie-upload/movies`;
-      return await this.fetchWithErrorHandling(url);
+      return await this.fetchWithErrorHandling<ApiResponse<UploadedMovie[]>>(url);
     } catch (error) {
       console.error("Failed to get uploaded movies:", error);
       return {
@@ -847,27 +653,10 @@ class ApiService {
     }
   }
 
-  async getUploadedMovie(id: string): Promise<{
-    success: boolean;
-    message: string;
-    data: {
-      id: string;
-      title: string;
-      description: string;
-      year: number;
-      genre: string;
-      duration: string;
-      s3Key: string;
-      streamUrl: string;
-      posterUrl?: string;
-      uploadDate: string;
-      fileSize: number;
-      originalName: string;
-    } | null;
-  }> {
+  async getUploadedMovie(id: string): Promise<ApiResponse<UploadedMovie | null>> {
     try {
       const url = `${API_BASE_URL}/movie-upload/movie/${id}`;
-      return await this.fetchWithErrorHandling(url);
+      return await this.fetchWithErrorHandling<ApiResponse<UploadedMovie | null>>(url);
     } catch (error) {
       console.error("Failed to get uploaded movie:", error);
       return {
@@ -876,42 +665,6 @@ class ApiService {
         data: null,
       };
     }
-  }
-
-  // TV Series Category Methods
-  async getOnTheAirTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = this.buildQueryParams({
-      page: query.page,
-      limit: query.limit,
-      language: query.language,
-    });
-
-    const url = `${API_BASE_URL}/tv/on-the-air${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<TVSeriesResponse>(url);
-  }
-
-  async getPopularTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = this.buildQueryParams({
-      page: query.page,
-      limit: query.limit,
-      language: query.language,
-    });
-
-    const url = `${API_BASE_URL}/tv/popular-tv${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<TVSeriesResponse>(url);
-  }
-
-  async getTopRatedTVSeries(query: MovieQuery = {}): Promise<TVSeriesResponse> {
-    const params = this.buildQueryParams({
-      page: query.page,
-      limit: query.limit,
-      language: query.language,
-    });
-
-    const url = `${API_BASE_URL}/tv/top-rated-tv${
-      params ? `?${params}` : ""
-    }`;
-    return this.fetchWithCache<TVSeriesResponse>(url);
   }
 }
 

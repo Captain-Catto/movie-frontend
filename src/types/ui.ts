@@ -1,6 +1,6 @@
 // UI Component Props - Centralized prop type definitions
 
-import { Movie, TVSeries } from './movie';
+import { Movie, TVSeries } from './content.types';
 
 // Pagination component props
 export interface PaginationProps {

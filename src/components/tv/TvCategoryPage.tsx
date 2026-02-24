@@ -5,14 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { apiService } from "@/services/api";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
-import type { TVSeriesResponse } from "@/types";
-import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_TV_PAGE_SIZE,
-} from "@/constants/app.constants";
+import type { ApiResponse } from "@/types/api";
+import type { TVSeries } from "@/types/content.types";
+import { DEFAULT_TV_PAGE_SIZE } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type CategoryKey = "on-the-air" | "popular" | "top-rated";
 
@@ -28,7 +27,7 @@ const fetchers: Record<
     page?: number;
     limit?: number;
     language?: string;
-  }) => Promise<TVSeriesResponse>
+  }) => Promise<ApiResponse<TVSeries[]>>
 > = {
   "on-the-air": apiService.getOnTheAirTVSeries.bind(apiService),
   popular: apiService.getPopularTVSeries.bind(apiService),
@@ -42,6 +41,7 @@ const TvCategoryPage = ({
 }: TvCategoryPageProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { language } = useLanguage();
 
   const initialPage = useMemo(() => {
     const pageParam = searchParams.get("page");
@@ -66,36 +66,31 @@ const TvCategoryPage = ({
         const response = await fetchers[category]({
           page: currentPage,
           limit: DEFAULT_TV_PAGE_SIZE,
-          language: DEFAULT_LANGUAGE,
+          language,
         });
 
         if (!response.success) {
           throw new Error(response.message || "Failed to fetch TV series.");
         }
 
-        const payload = response.data as
-          | Record<string, unknown>
-          | Array<Record<string, unknown>>;
-        const seriesArray: Array<Record<string, unknown>> = Array.isArray(
-          payload
-        )
-          ? payload
-          : (payload?.data as Array<Record<string, unknown>>) || [];
+        // response.data is TVSeries[] (flat array from API)
+        // Backend may also return nested { data: TVSeries[], pagination } in some cases
+        const rawData = response.data as unknown;
+        const seriesArray = Array.isArray(rawData)
+          ? rawData
+          : ((rawData as Record<string, unknown>)?.data as unknown[]) || [];
 
-        const mapped = seriesArray.map((item: Record<string, unknown>) =>
-          mapTVSeriesToFrontend(item)
+        const mapped = seriesArray.map((item) =>
+          mapTVSeriesToFrontend(item as Record<string, unknown>)
         );
         setTvShows(mapped);
 
-        const pagination =
-          !Array.isArray(payload) && payload && "pagination" in payload
-            ? ((payload as Record<string, unknown>).pagination as
-                | { totalPages?: number }
-                | undefined)
-            : undefined;
+        // Get pagination from response root or nested data
+        const paginationSource = response.pagination
+          ?? (!Array.isArray(rawData) ? (rawData as Record<string, unknown>)?.pagination as { totalPages?: number } | undefined : undefined);
         setTotalPages(
-          pagination?.totalPages && Number.isFinite(pagination.totalPages)
-            ? Number(pagination.totalPages)
+          paginationSource?.totalPages && Number.isFinite(paginationSource.totalPages)
+            ? Number(paginationSource.totalPages)
             : 1
         );
       } catch (err) {
@@ -109,7 +104,7 @@ const TvCategoryPage = ({
     };
 
     fetchData();
-  }, [category, currentPage]);
+  }, [category, currentPage, language]);
 
   const handlePageChange = (page: number) => {
     const safePage = Math.max(1, page);

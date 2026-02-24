@@ -6,12 +6,12 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
 import MovieCard from "@/components/movie/MovieCard";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { Pagination } from "@/components/ui/Pagination";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  DEFAULT_LANGUAGE,
   DEFAULT_BROWSE_PAGE_SIZE,
   SKELETON_COUNT_BROWSE,
 } from "@/constants/app.constants";
@@ -19,6 +19,7 @@ import {
 function BrowsePageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { language } = useLanguage();
   const [movies, setMovies] = useState<MovieCardData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +90,7 @@ function BrowsePageContent() {
         } = {
           page,
           limit: paginationInfo.limit || DEFAULT_BROWSE_PAGE_SIZE,
-          language: DEFAULT_LANGUAGE,
+          language,
         };
 
         if (filters.countries?.length) {
@@ -245,7 +246,7 @@ function BrowsePageContent() {
         setLoading(false);
       }
     },
-    [paginationInfo.limit]
+    [paginationInfo.limit, language]
   );
 
   const handleFilterChange = (filters: FilterOptions) => {

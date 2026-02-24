@@ -1,3 +1,5 @@
+"use client";
+
 import {
   LineChart,
   Line,
@@ -10,12 +12,17 @@ import {
 } from "recharts";
 import { ViewStats } from "@/types/analytics.types";
 import { CHART_COLORS } from "@/types/analytics.types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocaleFromLanguage } from "@/constants/app.constants";
 
 interface AnalyticsViewChartProps {
   viewStats: ViewStats[];
 }
 
 export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProps) {
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
       <h2 className="text-xl font-bold text-white mb-2">Views Over Time</h2>
@@ -30,7 +37,7 @@ export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProp
               dataKey="date"
               stroke="#9CA3AF"
               tickFormatter={(value: string | number) =>
-                new Date(value).toLocaleDateString("en-US", {
+                new Date(value).toLocaleDateString(locale, {
                   month: "short",
                   day: "numeric",
                 })
@@ -44,7 +51,7 @@ export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProp
                 borderRadius: "0.5rem",
                 color: "#F3F4F6",
               }}
-              labelFormatter={(value) => new Date(value).toLocaleDateString()}
+              labelFormatter={(value) => new Date(value).toLocaleDateString(locale)}
             />
             <Legend />
             <Line

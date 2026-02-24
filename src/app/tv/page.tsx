@@ -5,16 +5,15 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MoviesGrid from "@/components/movie/MoviesGrid";
 import MovieFilters, { FilterOptions } from "@/components/movie/MovieFilters";
-import type { MovieCardData } from "@/types/movie";
+import type { MovieCardData } from "@/types/content.types";
 import { apiService } from "@/services/api";
 import {
-  DEFAULT_LANGUAGE,
   DEFAULT_TV_PAGE_SIZE,
   SKELETON_COUNT_TV,
 } from "@/constants/app.constants";
 import useMovieCategory from "@/hooks/useMovieCategory";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
-import { TVSeries } from "@/types/movie";
+import { TVSeries } from "@/types/content.types";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 
 function TVShowsPageContent() {
@@ -34,7 +33,6 @@ function TVShowsPageContent() {
         items as unknown as TVSeries[]
       ) as MovieCardData[],
     defaultLimit: DEFAULT_TV_PAGE_SIZE,
-    defaultLanguage: DEFAULT_LANGUAGE,
   });
 
   const handleFilterChange = (filters: FilterOptions) => {
