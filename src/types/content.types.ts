@@ -89,17 +89,28 @@ export interface VideosResponse {
 // ===========================
 
 export interface Episode {
-  episode_number: number;
+  id: number;
+  episodeNumber: number;
+  episodeType?: string | null;
   name: string;
   overview: string;
-  air_date: string | null;
-  still_path: string | null;
+  airDate: string | null;
+  productionCode?: string | null;
   runtime: number | null;
-  vote_average: number;
+  seasonNumber: number;
+  showId: number;
+  stillPath: string | null;
+  voteAverage: number;
+  voteCount: number;
 }
 
 export interface Season {
-  season_number: number;
+  id?: number | string;
+  airDate?: string | null;
+  overview?: string;
+  posterPath?: string | null;
+  seasonNumber: number;
+  voteAverage?: number;
   name: string;
   episodes: Episode[];
 }

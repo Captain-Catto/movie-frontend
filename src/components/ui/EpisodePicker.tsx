@@ -5,15 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiService } from "@/services/api";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getDsLanguageFromLanguage } from "@/constants/app.constants";
-
-interface Episode {
-  id?: number;
-  episode_number: number;
-  name: string;
-  air_date: string | null;
-  still_path: string | null;
-  runtime: number | null;
-}
+import type { Episode } from "@/types/content.types";
 
 interface EpisodePickerProps {
   tmdbId: number;
@@ -62,9 +54,18 @@ export default function EpisodePicker({
           language
         );
         if (response.success && response.data?.episodes) {
-          setEpisodes(response.data.episodes);
+          const normalizedEpisodes = response.data.episodes.map((episode, index) => ({
+            ...episode,
+            episodeNumber:
+              Number.isInteger(episode.episodeNumber) && episode.episodeNumber > 0
+                ? episode.episodeNumber
+                : index + 1,
+            name: episode.name || `Episode ${episode.episodeNumber || index + 1}`,
+          }));
+
+          setEpisodes(normalizedEpisodes);
           seasonEpisodesCacheRef.current[selectedSeason] =
-            response.data.episodes;
+            normalizedEpisodes;
         } else {
           setEpisodes([]);
         }
@@ -83,7 +84,7 @@ export default function EpisodePicker({
 
     const nextEpisode = currentEpisode + 1;
     const hasNextEpisode = episodes.some(
-      (ep) => ep.episode_number === nextEpisode
+      (ep) => ep.episodeNumber === nextEpisode
     );
     if (!hasNextEpisode) return;
 
@@ -152,16 +153,16 @@ export default function EpisodePicker({
           {episodes.map((ep, index) => {
             const isActive =
               selectedSeason === currentSeason &&
-              ep.episode_number === currentEpisode;
+              ep.episodeNumber === currentEpisode;
             const episodeKey =
               ep.id !== undefined
                 ? `${selectedSeason}-${ep.id}`
-                : `${selectedSeason}-${ep.episode_number}-${ep.air_date ?? "na"}-${index}`;
+                : `${selectedSeason}-${ep.episodeNumber}-${ep.airDate ?? "na"}-${index}`;
 
             return (
               <button
                 key={episodeKey}
-                onClick={() => handleEpisodeClick(ep.episode_number)}
+                onClick={() => handleEpisodeClick(ep.episodeNumber)}
                 title={ep.name}
                 className={`h-10 rounded text-sm font-medium transition-colors ${
                   isActive
@@ -169,7 +170,7 @@ export default function EpisodePicker({
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white"
                 }`}
               >
-                {ep.episode_number}
+                {ep.episodeNumber}
               </button>
             );
           })}
