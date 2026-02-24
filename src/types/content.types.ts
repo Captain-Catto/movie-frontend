@@ -143,6 +143,8 @@ export interface Movie {
   id: number;
   tmdbId: number;
   title: string;
+  originalTitle?: string | null;
+  defaultTitle?: string | null;
   overview: string;
   posterUrl?: string | null;
   posterPath?: string | null;

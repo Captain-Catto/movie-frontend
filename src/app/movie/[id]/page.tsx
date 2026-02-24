@@ -174,7 +174,11 @@ const MovieDetailPageContent = () => {
             const transformedMovieData = {
               id: movieContent.id,
               title: movieContent.title,
-              aliasTitle: movieContent.title || movieContent.title,
+              aliasTitle:
+                movieContent.defaultTitle &&
+                movieContent.defaultTitle !== movieContent.title
+                  ? movieContent.defaultTitle
+                  : "",
               rating: normalizeRatingValue(
                 movieContent.voteAverage ??
                   (movieContent as { vote_average?: number | string })
@@ -402,9 +406,12 @@ const MovieDetailPageContent = () => {
                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
                   {movieData.title}
                 </h1>
-                <h2 className="text-xl text-yellow-400 mb-6">
-                  {movieData.aliasTitle}
-                </h2>
+                {movieData.aliasTitle &&
+                  movieData.aliasTitle !== movieData.title && (
+                    <h2 className="text-xl text-yellow-400 mb-6">
+                      {movieData.aliasTitle}
+                    </h2>
+                  )}
 
                 {/** Precompute rating once to allow zero to show */}
                 {(() => {
