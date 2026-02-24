@@ -34,11 +34,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Load from localStorage on mount
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
+    const normalizedStored =
+      stored === "vi" ? "vi-VN" : stored;
     if (
-      stored &&
-      SUPPORTED_LANGUAGES.some((l) => l.code === stored)
+      normalizedStored &&
+      SUPPORTED_LANGUAGES.some((l) => l.code === normalizedStored)
     ) {
-      setLanguageState(stored as SupportedLanguageCode);
+      setLanguageState(normalizedStored as SupportedLanguageCode);
+      if (stored === "vi") {
+        localStorage.setItem(STORAGE_KEY, "vi-VN");
+      }
     }
   }, []);
 
@@ -52,7 +57,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       value={{
         language,
         setLanguage,
-        isVietnamese: language === "vi",
+        isVietnamese: language.startsWith("vi"),
       }}
     >
       {children}

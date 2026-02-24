@@ -136,7 +136,7 @@ export const formatDateTimeVN = (dateInput: string | Date | null | undefined): s
   if (!date) return 'Không rõ thời gian';
 
   try {
-    return date.toLocaleString(getLocaleFromLanguage('vi'), {
+    return date.toLocaleString(getLocaleFromLanguage("vi-VN"), {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
