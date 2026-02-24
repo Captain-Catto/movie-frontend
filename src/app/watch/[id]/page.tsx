@@ -103,11 +103,16 @@ const WatchPage = () => {
   const episodeParam = parsePositiveInt(searchParams.get("episode"));
   const season = seasonParam ?? 1;
   const episode = episodeParam ?? 1;
+  const streamTmdbId = movieData?.tmdbId;
+  const streamContentType = movieData?.contentType;
 
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
         setLoading(true);
+        setStreamCandidates([]);
+        setStreamError(null);
+        setActiveStreamIndex(0);
 
         const { tmdbId, type } = parseContentId(movieId);
         const response =
@@ -132,34 +137,16 @@ const WatchPage = () => {
         setCreditsLoading(true);
         setRecommendationsLoading(true);
 
-        const streamOptions =
-          contentType === "tv"
-            ? {
-                season,
-                episode,
-                dsLang: "vi",
-                autoplay: true,
-                autoNext: true,
-              }
-            : { dsLang: "vi", autoplay: true };
-
-        const [creditsResponse, recommendationsResponse, streamResponse] =
-          await Promise.all([
-            // Fetch credits
-            contentType === "movie"
-              ? apiService.getMovieCredits(tmdbId)
-              : apiService.getTVCredits(tmdbId),
-            // Fetch recommendations
-            contentType === "movie"
-              ? apiService.getMovieRecommendations(tmdbId, 1)
-              : apiService.getTVRecommendations(tmdbId, 1),
-            // Fetch streaming embed URL
-            apiService.getStreamUrlByTmdbId(
-              tmdbId,
-              contentType === "tv" ? "tv" : "movie",
-              streamOptions
-            ),
-          ]);
+        const [creditsResponse, recommendationsResponse] = await Promise.all([
+          // Fetch credits
+          contentType === "movie"
+            ? apiService.getMovieCredits(tmdbId)
+            : apiService.getTVCredits(tmdbId),
+          // Fetch recommendations
+          contentType === "movie"
+            ? apiService.getMovieRecommendations(tmdbId, 1)
+            : apiService.getTVRecommendations(tmdbId, 1),
+        ]);
 
         // Set credits
         if (creditsResponse.success) {
@@ -216,21 +203,6 @@ const WatchPage = () => {
           setRecommendations(mappedRecommendations);
         }
         setRecommendationsLoading(false);
-
-        if (streamResponse.success && streamResponse.data?.url) {
-          const candidates = [
-            streamResponse.data.url,
-            ...(streamResponse.data.fallbackUrls || []),
-          ]
-            .filter((url) => !!url)
-            .filter((url, index, all) => all.indexOf(url) === index);
-
-          setStreamCandidates(candidates);
-          setActiveStreamIndex(0);
-        } else {
-          setStreamCandidates([]);
-          setStreamError("No stream source available right now.");
-        }
       } catch (err) {
         console.error("Error fetching content data:", err);
         setError("Unable to load content information");
@@ -249,7 +221,60 @@ const WatchPage = () => {
       setStreamError(null);
       setActiveStreamIndex(0);
     }
-  }, [movieId, season, episode]);
+  }, [movieId]);
+
+  useEffect(() => {
+    if (!streamTmdbId || !streamContentType) return;
+
+    let cancelled = false;
+    const fetchStreamUrl = async () => {
+      const streamOptions =
+        streamContentType === "tv"
+          ? {
+              season,
+              episode,
+              dsLang: "vi",
+              autoplay: true,
+              autoNext: true,
+            }
+          : { dsLang: "vi", autoplay: true };
+
+      const streamResponse = await apiService.getStreamUrlByTmdbId(
+        streamTmdbId,
+        streamContentType === "tv" ? "tv" : "movie",
+        streamOptions
+      );
+
+      if (cancelled) return;
+
+      if (streamResponse.success && streamResponse.data?.url) {
+        const candidates = [
+          streamResponse.data.url,
+          ...(streamResponse.data.fallbackUrls || []),
+        ]
+          .filter((url) => !!url)
+          .filter((url, index, all) => all.indexOf(url) === index);
+
+        setStreamCandidates(candidates);
+        setStreamError(null);
+        setActiveStreamIndex(0);
+      } else {
+        setStreamCandidates([]);
+        setStreamError("No stream source available right now.");
+      }
+    };
+
+    fetchStreamUrl().catch((err) => {
+      if (cancelled) return;
+      console.error("Error fetching stream URL:", err);
+      setStreamCandidates([]);
+      setStreamError("Unable to fetch stream source.");
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [streamTmdbId, streamContentType, season, episode]);
 
   useEffect(() => {
     if (!movieData || hasTrackedView) return;

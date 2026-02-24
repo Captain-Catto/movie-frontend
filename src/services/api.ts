@@ -262,7 +262,7 @@ class ApiService {
     const url = `${API_BASE_URL}/tv/${tvId}/seasons/${seasonNumber}/episodes${
       params ? `?${params}` : ""
     }`;
-    return this.fetchWithErrorHandling(url);
+    return this.fetchWithCache(url, undefined, 5 * 60 * 1000);
   }
 
   async getMovieVideos(id: number): Promise<{
@@ -677,7 +677,7 @@ class ApiService {
         params ? `?${params}` : ""
       }`;
 
-      const response = await this.fetchWithErrorHandling<{
+      const response = await this.fetchWithCache<{
         success: boolean;
         message: string;
         data: {
@@ -687,7 +687,7 @@ class ApiService {
           url: string;
           fallbackUrls: string[];
         } | null;
-      }>(url);
+      }>(url, undefined, 60 * 1000);
 
       return {
         success: response.success,
