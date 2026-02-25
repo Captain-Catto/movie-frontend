@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { SearchResult } from "@/types/search";
 import { API_BASE_URL } from "@/services/api";
 import { useDebounce } from "./core/useDebounce";
+import { analyticsService } from "@/services/analytics.service";
 
 interface UseSearchReturn {
   query: string;
@@ -96,6 +97,13 @@ export const useSearch = (): UseSearchReturn => {
           const updateResults = () => {
             if (pageNum === 1) {
               setResults(processedResults);
+              // Track search analytics on first page of results
+              if (processedResults.length > 0) {
+                analyticsService.trackSearch(
+                  searchQuery.trim(),
+                  pagination.total || processedResults.length
+                );
+              }
             } else {
               setResults((prev) => [...prev, ...processedResults]);
             }

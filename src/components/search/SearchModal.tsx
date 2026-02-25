@@ -85,8 +85,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     // ✅ Save to recent searches when user clicks a search result
     if (query.trim().length >= 2) {
       handleSearch(query);
-      // Track search analytics
-      analyticsService.trackSearch(query.trim(), results.length);
     }
   };
 
