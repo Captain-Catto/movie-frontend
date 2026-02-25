@@ -1,11 +1,13 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import PeopleGrid from "@/components/people/PeopleGrid";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { getTmdbLanguageFromLanguage } from "@/constants/app.constants";
+import LinkPagination from "@/components/ui/LinkPagination";
+import { apiService } from "@/services/api";
+import type { CastMember } from "@/types/content.types";
+import {
+  parsePageParam,
+  type SearchParamsRecord,
+} from "@/lib/category-page-data";
 
 export interface PersonData {
   id: number;
@@ -22,67 +24,75 @@ export interface PersonData {
   popularity: number;
 }
 
-// TMDB API configuration
-const TMDB_API_KEY = "3fd2be6f0c70a2a598f084ddfb75487c";
-const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+interface PeoplePageProps {
+  searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
+}
 
-const PeoplePage = () => {
-  const { language } = useLanguage();
-  const [people, setPeople] = useState<PersonData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+const normalizeKnownFor = (
+  knownFor: unknown
+): Array<{
+  id: number;
+  title?: string;
+  name?: string;
+  media_type: "movie" | "tv";
+  poster_path: string | null;
+}> => {
+  if (!Array.isArray(knownFor)) return [];
 
-  const fetchPeople = useCallback(
-    async (pageNum: number = 1, reset: boolean = false) => {
-      try {
-        if (pageNum === 1) setLoading(true);
-        const tmdbLanguage = getTmdbLanguageFromLanguage(language);
+  return knownFor.map((item) => {
+    const record =
+      item && typeof item === "object"
+        ? (item as Record<string, unknown>)
+        : ({} as Record<string, unknown>);
+    const mediaType = record.media_type === "tv" ? "tv" : "movie";
 
-        const response = await fetch(
-          `${TMDB_BASE_URL}/person/popular?api_key=${TMDB_API_KEY}&language=${encodeURIComponent(
-            tmdbLanguage
-          )}&page=${pageNum}`
-        );
+    return {
+      id: typeof record.id === "number" ? record.id : 0,
+      title: typeof record.title === "string" ? record.title : undefined,
+      name: typeof record.name === "string" ? record.name : undefined,
+      media_type: mediaType,
+      poster_path:
+        typeof record.poster_path === "string" ? record.poster_path : null,
+    };
+  });
+};
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+const mapCastMemberToPerson = (person: CastMember): PersonData => {
+  const record = person as Record<string, unknown>;
 
-        const data = await response.json();
-
-        if (data?.results) {
-          if (reset || pageNum === 1) {
-            setPeople(data.results);
-          } else {
-            setPeople((prev) => [...prev, ...data.results]);
-          }
-
-          setHasMore(pageNum < data.total_pages && pageNum < 10);
-          setError(null);
-        }
-      } catch (err) {
-        console.error("Error fetching people:", err);
-        setError("Failed to load people. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [language]
-  );
-
-  useEffect(() => {
-    fetchPeople(1, true);
-  }, [fetchPeople]);
-
-  const handleLoadMore = () => {
-    if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      fetchPeople(nextPage, false);
-    }
+  return {
+    id: person.id,
+    name: person.name,
+    profile_path: person.profile_path ?? null,
+    known_for_department:
+      typeof person.known_for_department === "string"
+        ? person.known_for_department
+        : "Artist",
+    known_for: normalizeKnownFor(record.known_for),
+    popularity: typeof person.popularity === "number" ? person.popularity : 0,
   };
+};
+
+const PeoplePage = async ({ searchParams }: PeoplePageProps) => {
+  const params = searchParams ? await searchParams : undefined;
+  const currentPage = parsePageParam(params?.page);
+
+  let people: PersonData[] = [];
+  let totalPages = 1;
+  let error: string | null = null;
+
+  try {
+    const response = await apiService.getPopularPeople(currentPage);
+    people = Array.isArray(response.results)
+      ? response.results.map(mapCastMemberToPerson)
+      : [];
+    totalPages =
+      typeof response.total_pages === "number" && response.total_pages > 0
+        ? response.total_pages
+        : 1;
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Failed to load people.";
+  }
 
   return (
     <Layout>
@@ -103,12 +113,17 @@ const PeoplePage = () => {
             </div>
           )}
 
-          <PeopleGrid
-            people={people}
-            loading={loading}
-            onLoadMore={handleLoadMore}
-            hasMore={hasMore}
-          />
+          <PeopleGrid people={people} loading={false} />
+
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center">
+              <LinkPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                basePath="/people"
+              />
+            </div>
+          )}
         </Container>
       </div>
     </Layout>
