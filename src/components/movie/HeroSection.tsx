@@ -216,15 +216,21 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
                     {/* Genre Tags */}
                     <div className="hl-tags mb-4 flex flex-wrap gap-2">
-                      {movie.genres?.map((genre, genreIndex) => (
-                        <GenreBadge
-                          key={genreIndex}
-                          genre={genre}
-                          genreId={movie.genreIds?.[genreIndex]}
-                          contentType={contentType}
-                          variant="hero"
-                        />
-                      ))}
+                      {movie.genres?.map((genre, genreIndex) => {
+                        const genreId = movie.genreIds?.[genreIndex];
+                        if (typeof genreId !== "number") {
+                          return null;
+                        }
+                        return (
+                          <GenreBadge
+                            key={`${genreId}-${genreIndex}`}
+                            genre={genre}
+                            genreId={genreId}
+                            contentType={contentType}
+                            variant="hero"
+                          />
+                        );
+                      })}
                     </div>
 
                     {/* Description */}

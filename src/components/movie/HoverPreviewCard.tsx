@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { analyticsService } from "@/services/analytics.service";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocalizedGenreNameById } from "@/utils/genreMapping";
 
 interface HoverPreviewCardProps {
   title: string;
@@ -55,6 +59,7 @@ export function HoverPreviewCard({
   className,
   placement = "center",
 }: HoverPreviewCardProps) {
+  const { language } = useLanguage();
   const displayRating =
     typeof rating === "number"
       ? rating > 0
@@ -185,7 +190,12 @@ export function HoverPreviewCard({
           {genreIds && genreIds.length > 0
             ? genreIds.slice(0, 3).map((id, idx) => {
                 const name = genreNames?.[idx];
-                const label = name || `Genre ${id}`;
+                const localizedName = getLocalizedGenreNameById(
+                  id,
+                  language,
+                  contentType
+                );
+                const label = localizedName || name || `Genre ${id}`;
                 return (
                   <Link
                     key={id}

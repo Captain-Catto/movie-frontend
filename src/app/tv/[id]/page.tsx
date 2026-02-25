@@ -12,7 +12,7 @@ import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
 import { TVDetail, Movie } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
-import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import { getLocalizedGenreNameById } from "@/utils/genreMapping";
 import RatingBadge from "@/components/ui/RatingBadge";
 import GenreBadge from "@/components/ui/GenreBadge";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -312,7 +312,9 @@ const TVDetailPageContent = () => {
             posterPath,
             backdropPath,
             genres: rawGenreIds
-              .map((genreId) => TMDB_TV_ENGLISH_GENRE_MAP[genreId])
+              .map((genreId) =>
+                getLocalizedGenreNameById(genreId, language, "tv")
+              )
               .filter((genre): genre is string => Boolean(genre)),
             genreIds: rawGenreIds,
             numberOfEpisodes,
@@ -465,9 +467,12 @@ const TVDetailPageContent = () => {
                 <div className="flex flex-wrap justify-start gap-2 mb-4 sm:mb-6 md:mb-8">
                   {tvData.genres.map((genre: string, index: number) => {
                     const genreId = tvData.genreIds?.[index];
+                    if (typeof genreId !== "number") {
+                      return null;
+                    }
                     return (
                       <GenreBadge
-                        key={index}
+                        key={`${genreId}-${index}`}
                         genre={genre}
                         genreId={genreId}
                         contentType="tv"

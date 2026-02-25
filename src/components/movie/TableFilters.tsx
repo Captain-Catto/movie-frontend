@@ -3,10 +3,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  TMDB_MOVIE_GENRE_MAP as TMDB_MOVIE_ENGLISH_GENRE_MAP,
-  TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP,
+  getLocalizedGenreMap,
 } from "@/utils/genreMapping";
 import type { TableFilterOptions, TableFiltersProps } from "@/types/ui";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export type { TableFilterOptions };
 
@@ -18,6 +18,8 @@ const TableFilters = ({
   initialFilters,
 }: TableFiltersProps) => {
   const router = useRouter();
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const [filters, setFilters] = useState<TableFilterOptions>({
     countries: [],
     movieType: "",
@@ -46,51 +48,81 @@ const TableFilters = ({
     }
   }, [initialFilters]);
 
-  const countries = [
-    { value: "", label: "All" },
-    { value: "US", label: "United States" },
-    { value: "KR", label: "South Korea" },
-    { value: "JP", label: "Japan" },
-    { value: "CN", label: "China" },
-    { value: "VN", label: "Vietnam" },
-  ];
+  const labels = useMemo(
+    () =>
+      isVietnamese
+        ? {
+            all: "Tat ca",
+            filters: "Bo loc",
+            country: "Quoc gia",
+            type: "Loai",
+            genre: "The loai",
+            year: "Nam",
+            sortBy: "Sap xep",
+            selectedYears: "Nam da chon",
+            applyFilters: "Ap dung",
+            close: "Dong",
+            customYearPlaceholder: "Nhap nam + Enter",
+          }
+        : {
+            all: "All",
+            filters: "Filters",
+            country: "Country",
+            type: "Type",
+            genre: "Genre",
+            year: "Year",
+            sortBy: "Sort by",
+            selectedYears: "Selected years",
+            applyFilters: "Apply Filters",
+            close: "Close",
+            customYearPlaceholder: "Enter year + Enter",
+          },
+    [isVietnamese]
+  );
 
-  const movieTypes = [
-    { value: "", label: "All" },
-    { value: "movie", label: "Movie" },
-    { value: "tv", label: "TV Series" },
-    { value: "trending", label: "Trending" },
-  ];
+  const countries = useMemo(
+    () => [
+      { value: "", label: labels.all },
+      { value: "US", label: isVietnamese ? "My" : "United States" },
+      { value: "KR", label: isVietnamese ? "Han Quoc" : "South Korea" },
+      { value: "JP", label: isVietnamese ? "Nhat Ban" : "Japan" },
+      { value: "CN", label: isVietnamese ? "Trung Quoc" : "China" },
+      { value: "VN", label: isVietnamese ? "Viet Nam" : "Vietnam" },
+    ],
+    [isVietnamese, labels.all]
+  );
+
+  const movieTypes = useMemo(
+    () => [
+      { value: "", label: labels.all },
+      { value: "movie", label: isVietnamese ? "Phim le" : "Movie" },
+      { value: "tv", label: isVietnamese ? "Phim bo" : "TV Series" },
+      { value: "trending", label: "Trending" },
+    ],
+    [isVietnamese, labels.all]
+  );
 
   // Dynamically get genres based on selected movie type
   const genres = useMemo(() => {
-    let genreMap = {};
-
-    if (filters.movieType === "movie") {
-      genreMap = TMDB_MOVIE_ENGLISH_GENRE_MAP;
-    } else if (filters.movieType === "tv") {
-      genreMap = TMDB_TV_ENGLISH_GENRE_MAP;
-    } else {
-      // If no type selected or "All", show both movie and TV genres
-      genreMap = {
-        ...TMDB_MOVIE_ENGLISH_GENRE_MAP,
-        ...TMDB_TV_ENGLISH_GENRE_MAP,
-      };
-    }
+    const mapType =
+      filters.movieType === "movie" || filters.movieType === "tv"
+        ? filters.movieType
+        : undefined;
+    const genreMap = getLocalizedGenreMap(language, mapType);
 
     return [
-      { value: "", label: "All" },
+      { value: "", label: labels.all },
       ...Object.entries(genreMap)
         .map(([id, name]) => ({
           value: id,
           label: name as string,
         }))
-        .sort((a, b) => a.label.localeCompare(b.label)),
+        .sort((a, b) => a.label.localeCompare(b.label, language)),
     ];
-  }, [filters.movieType]);
+  }, [filters.movieType, labels.all, language]);
 
   const years = [
-    { value: "", label: "All" },
+    { value: "", label: labels.all },
     { value: "2025", label: "2025" },
     { value: "2024", label: "2024" },
     { value: "2023", label: "2023" },
@@ -110,12 +142,21 @@ const TableFilters = ({
   ];
 
   const sortOptions = [
-    { value: "popularity", label: "Popular" },
-    { value: "latest", label: "Latest" },
-    { value: "top_rated", label: "Top Rated" },
-    { value: "updated", label: "Recently Updated" },
-    { value: "imdb", label: "IMDb Score" },
-    { value: "views", label: "Most Viewed" },
+    {
+      value: "popularity",
+      label: isVietnamese ? "Pho bien" : "Popular",
+    },
+    { value: "latest", label: isVietnamese ? "Moi nhat" : "Latest" },
+    {
+      value: "top_rated",
+      label: isVietnamese ? "Danh gia cao" : "Top Rated",
+    },
+    {
+      value: "updated",
+      label: isVietnamese ? "Cap nhat gan day" : "Recently Updated",
+    },
+    { value: "imdb", label: isVietnamese ? "Diem IMDb" : "IMDb Score" },
+    { value: "views", label: isVietnamese ? "Xem nhieu" : "Most Viewed" },
   ];
 
   const handleMultiFilterClick = (
@@ -238,7 +279,7 @@ const TableFilters = ({
                 d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
               />
             </svg>
-            <h3 className="text-white font-small text-xs">Filters</h3>
+            <h3 className="text-white font-small text-xs">{labels.filters}</h3>
           </div>
         </div>
       )}
@@ -248,7 +289,7 @@ const TableFilters = ({
         {/* Country */}
         <div className="fe-row mb-4">
           <div className="fe-name text-white font-medium mb-2 min-w-[100px]">
-            Country:
+            {labels.country}:
           </div>
           <div className="fe-results flex flex-wrap gap-2">
             {countries.map((country) => (
@@ -275,7 +316,7 @@ const TableFilters = ({
 
         {/* Movie Type */}
         <div className="fe-row mb-4">
-          <div className="fe-name text-white font-medium mb-2">Type:</div>
+          <div className="fe-name text-white font-medium mb-2">{labels.type}:</div>
           <div className="fe-results flex flex-wrap gap-2">
             {movieTypes.map((type) => (
               <div
@@ -295,7 +336,7 @@ const TableFilters = ({
 
         {/* Genre */}
         <div className="fe-row mb-4">
-          <div className="fe-name text-white font-medium mb-2">Genre:</div>
+          <div className="fe-name text-white font-medium mb-2">{labels.genre}:</div>
           <div className="fe-results flex flex-wrap gap-2 max-h-32 overflow-y-auto">
             {genres.map((genre) => (
               <div
@@ -320,7 +361,7 @@ const TableFilters = ({
         {/* Release Year */}
         <div className="fe-row mb-4">
           <div className="fe-name text-white font-medium mb-2">
-            Year:
+            {labels.year}:
           </div>
           <div className="fe-results flex flex-wrap gap-2 items-center">
             {years.map((year) => (
@@ -345,7 +386,7 @@ const TableFilters = ({
                 <input
                   type="text"
                   maxLength={4}
-                  placeholder="Enter year + Enter"
+                  placeholder={labels.customYearPlaceholder}
                   value={filters.customYear}
                   onChange={handleCustomYearChange}
                   onKeyPress={handleCustomYearSubmit}
@@ -373,7 +414,9 @@ const TableFilters = ({
           {/* Selected Years Display */}
           {filters.years.length > 0 && (
             <div className="mt-3">
-              <div className="text-sm text-gray-400 mb-2">Selected years:</div>
+              <div className="text-sm text-gray-400 mb-2">
+                {labels.selectedYears}:
+              </div>
               <div className="flex flex-wrap gap-2">
                 {filters.years.map((selectedYear) => (
                   <span
@@ -396,7 +439,9 @@ const TableFilters = ({
 
         {/* Sort By */}
         <div className="fe-row mb-6">
-          <div className="fe-name text-white font-medium mb-2">Sort by:</div>
+          <div className="fe-name text-white font-medium mb-2">
+            {labels.sortBy}:
+          </div>
           <div className="fe-results flex flex-wrap gap-2">
             {sortOptions.map((option) => (
               <div
@@ -423,7 +468,7 @@ const TableFilters = ({
               onClick={handleApplyFilters}
               className="btn bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-medium transition-colors flex items-center space-x-2 cursor-pointer"
             >
-              <span>Apply Filters</span>
+              <span>{labels.applyFilters}</span>
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -444,7 +489,7 @@ const TableFilters = ({
                 onClick={onClose}
                 className="btn bg-transparent border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white px-4 py-2 rounded-full font-medium transition-colors cursor-pointer"
               >
-                Close
+                {labels.close}
               </button>
             )}
           </div>

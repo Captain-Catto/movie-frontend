@@ -17,7 +17,7 @@ import { analyticsService } from "@/services/analytics.service";
 import { normalizeRatingValue } from "@/utils/rating";
 import { MovieDetail, Movie, TVSeries } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
-import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import { getLocalizedGenreNameById } from "@/utils/genreMapping";
 import { formatWatchDuration } from "@/utils/watchContentMapper";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -163,8 +163,10 @@ const MovieDetailPageContent = () => {
             // Transform Backend Movie API data
             const genreNames =
               movieContent.genreIds
-                ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
-                .filter(Boolean) || [];
+                ?.map((id: number) =>
+                  getLocalizedGenreNameById(id, language, "movie")
+                )
+                .filter((name): name is string => Boolean(name)) || [];
 
             // console.log("🎥 [MovieDetailPage] Genre mapping:", {
             //   genreIds: movieContent.genreIds,
@@ -240,8 +242,10 @@ const MovieDetailPageContent = () => {
             // Transform Backend TV Series API data
             const genreNames =
               tvContent.genreIds
-                ?.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
-                .filter(Boolean) || [];
+                ?.map((id: number) =>
+                  getLocalizedGenreNameById(id, language, "tv")
+                )
+                .filter((name): name is string => Boolean(name)) || [];
 
             // console.log("📺 [MovieDetailPage] Genre mapping:", {
             //   genreIds: tvContent.genreIds,
@@ -455,9 +459,12 @@ const MovieDetailPageContent = () => {
                 <div className="flex flex-wrap gap-2 mb-8">
                   {movieData.genres?.map((genre: string, index: number) => {
                     const genreId = movieData.genreIds?.[index];
+                    if (typeof genreId !== "number") {
+                      return null;
+                    }
                     return (
                       <GenreBadge
-                        key={index}
+                        key={`${genreId}-${index}`}
                         genre={genre}
                         genreId={genreId}
                         contentType={movieData.contentType || "movie"}

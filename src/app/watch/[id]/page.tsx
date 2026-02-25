@@ -588,15 +588,22 @@ const WatchPage = () => {
                       {/* Genres */}
                       {movieData.genres.length > 0 && (
                         <div className="hl-tags flex flex-wrap gap-2">
-                        {movieData.genres.map((genre, index) => (
-                          <GenreBadge
-                            key={index}
-                            genre={genre}
-                            contentType={movieData.contentType}
-                            className="bg-gray-600 hover:text-red-400"
-                            variant="hero"
-                          />
-                        ))}
+                        {movieData.genres.map((genre, index) => {
+                          const genreId = movieData.genreIds?.[index];
+                          if (typeof genreId !== "number") {
+                            return null;
+                          }
+                          return (
+                            <GenreBadge
+                              key={`${genreId}-${index}`}
+                              genre={genre}
+                              genreId={genreId}
+                              contentType={movieData.contentType}
+                              className="bg-gray-600 hover:text-red-400"
+                              variant="hero"
+                            />
+                          );
+                        })}
                         </div>
                       )}
                     </div>

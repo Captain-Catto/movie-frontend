@@ -6,7 +6,7 @@ import {
   TMDB_ORIGINAL_SIZE,
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
-import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
+import { mapGenreIdsToNames } from "@/utils/genreMapping";
 import { detectContentType } from "@/utils/contentType";
 import { normalizeRatingFromSource } from "./rating";
 
@@ -69,6 +69,7 @@ export interface WatchContentData {
   releaseDate: string;
   rating: number;
   duration?: number;
+  genreIds: number[];
   genres: string[];
   posterImage: string;
   backgroundImage: string;
@@ -103,6 +104,7 @@ export function mapMovieToWatchContent(
     movie
   );
   const duration = normalizeMovieDuration(movie);
+  const genreIds = normalizeGenreIds(movie.genreIds || movie.genre_ids || []);
 
   return {
     id: movieId,
@@ -114,7 +116,8 @@ export function mapMovieToWatchContent(
     releaseDate: movie.releaseDate || movie.release_date || "",
     rating,
     duration,
-    genres: mapGenreIds(movie.genreIds || movie.genre_ids || []),
+    genreIds,
+    genres: mapGenreIdsToNames(genreIds, "en-US", "movie"),
     posterImage:
       movie.posterUrl ||
       (movie.poster_path
@@ -147,6 +150,7 @@ export function mapTVToWatchContent(
     tv
   );
   const duration = normalizeTVDuration(tv);
+  const genreIds = normalizeGenreIds(tv.genreIds || tv.genre_ids || []);
 
   return {
     id: movieId,
@@ -157,7 +161,8 @@ export function mapTVToWatchContent(
     releaseDate: tv.firstAirDate || tv.first_air_date || "",
     rating,
     duration,
-    genres: mapGenreIds(tv.genreIds || tv.genre_ids || []),
+    genreIds,
+    genres: mapGenreIdsToNames(genreIds, "en-US", "tv"),
     posterImage:
       tv.posterUrl ||
       (tv.poster_path
@@ -200,15 +205,11 @@ export function mapContentToWatchContent(
   }
 }
 
-/**
- * Helper function to map genre IDs to genre names
- */
-function mapGenreIds(genreIds: (string | number)[]): string[] {
-  if (!genreIds || !Array.isArray(genreIds)) return [];
-
+function normalizeGenreIds(genreIds: (string | number)[]): number[] {
+  if (!Array.isArray(genreIds)) return [];
   return genreIds
-    .map((id: string | number) => TMDB_ENGLISH_GENRE_MAP[Number(id)])
-    .filter(Boolean);
+    .map((id: string | number) => Number(id))
+    .filter((id) => Number.isInteger(id) && id > 0);
 }
 
 /**
