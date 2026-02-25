@@ -13,6 +13,7 @@ interface CategoryListingPageProps {
   currentPage: number;
   basePath: string;
   emptyMessage: string;
+  totalItemsLabel?: string;
   error?: string | null;
 }
 
@@ -25,6 +26,7 @@ export default function CategoryListingPage({
   currentPage,
   basePath,
   emptyMessage,
+  totalItemsLabel = "items",
   error,
 }: CategoryListingPageProps) {
   return (
@@ -36,7 +38,9 @@ export default function CategoryListingPage({
             {description ? (
               <p className="text-gray-400">{description}</p>
             ) : (
-              <p className="text-gray-400">{total > 0 && `${total} items`}</p>
+              <p className="text-gray-400">
+                {total > 0 && `${total} ${totalItemsLabel}`}
+              </p>
             )}
           </div>
 

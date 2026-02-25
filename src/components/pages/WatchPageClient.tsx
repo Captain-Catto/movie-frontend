@@ -19,6 +19,7 @@ import {
   type WatchPageCredits,
   type WatchPageRecommendationItem,
 } from "@/lib/detail-page-data";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -51,6 +52,34 @@ const WatchPageClient = ({
   initialSeason,
   initialEpisode,
 }: WatchPageClientProps) => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = {
+    unableToLoad: isVietnamese
+      ? "Không thể tải dữ liệu trang xem."
+      : "Unable to load watch page data.",
+    fallbackSource: isVietnamese ? "Nguồn dự phòng" : "Fallback source",
+    tvSeries: isVietnamese ? "Phim bộ" : "TV Series",
+    movie: isVietnamese ? "Phim lẻ" : "Movie",
+    season: isVietnamese ? "mùa" : "Season",
+    seasons: isVietnamese ? "mùa" : "Seasons",
+    episode: isVietnamese ? "tập" : "Episode",
+    episodes: isVietnamese ? "tập" : "Episodes",
+    createdBy: isVietnamese ? "Tạo bởi:" : "Created by:",
+    seriesInfo: isVietnamese ? "Thông tin series" : "Series information",
+    movieInfo: isVietnamese ? "Thông tin phim" : "Movie information",
+    cast: isVietnamese ? "Diễn viên" : "Cast",
+    noCast: isVietnamese
+      ? "Không có thông tin diễn viên"
+      : "No cast information available",
+    youMayAlsoLike: isVietnamese ? "Có thể bạn cũng thích" : "You May Also Like",
+    noRecommendations: isVietnamese
+      ? "Không có gợi ý liên quan"
+      : "No movie recommendations available",
+    notAvailable: isVietnamese ? "Không có" : "N/A",
+    posterAltFallback: isVietnamese ? "Poster phim" : "Movie poster",
+  };
+
   const {
     movieData,
     loading,
@@ -100,7 +129,7 @@ const WatchPageClient = ({
       <Layout>
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
-            {error || "Unable to load watch page data."}
+            {error || labels.unableToLoad}
           </div>
         </div>
       </Layout>
@@ -128,7 +157,7 @@ const WatchPageClient = ({
                   />
                   {activeStreamIndex > 0 && (
                     <div className="absolute top-4 left-4 px-3 py-1 rounded bg-black/70 text-xs text-white">
-                      Fallback source {activeStreamIndex + 1}/
+                      {labels.fallbackSource} {activeStreamIndex + 1}/
                       {streamCandidates.length}
                     </div>
                   )}
@@ -251,8 +280,8 @@ const WatchPageClient = ({
                             }`}
                           >
                             {movieData.contentType === "tv"
-                              ? "TV Series"
-                              : "Movie"}
+                              ? labels.tvSeries
+                              : labels.movie}
                           </span>
                         </div>
                         <div className="tag-classic">
@@ -284,14 +313,18 @@ const WatchPageClient = ({
                           <>
                             {movieData.numberOfSeasons && (
                               <span className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                                {movieData.numberOfSeasons} Season
-                                {movieData.numberOfSeasons > 1 ? "s" : ""}
+                                {movieData.numberOfSeasons}{" "}
+                                {movieData.numberOfSeasons > 1
+                                  ? labels.seasons
+                                  : labels.season}
                               </span>
                             )}
                             {movieData.numberOfEpisodes && (
                               <span className="bg-purple-600 text-white px-2 py-1 rounded text-sm">
-                                {movieData.numberOfEpisodes} Episode
-                                {movieData.numberOfEpisodes > 1 ? "s" : ""}
+                                {movieData.numberOfEpisodes}{" "}
+                                {movieData.numberOfEpisodes > 1
+                                  ? labels.episodes
+                                  : labels.episode}
                               </span>
                             )}
                             {movieData.status && (
@@ -347,7 +380,7 @@ const WatchPageClient = ({
                       movieData.created_by.length > 0 && (
                         <div className="creators mb-4">
                           <h4 className="text-sm font-medium text-gray-400 mb-2">
-                            Created by:
+                            {labels.createdBy}
                           </h4>
                           <div className="flex flex-wrap gap-2">
                             {movieData.created_by.map((creator, index) => (
@@ -370,8 +403,9 @@ const WatchPageClient = ({
                         movieData.contentType === "tv" ? "tv" : "movie"
                       }/${movieData.tmdbId}`}
                     >
-                      {movieData.contentType === "tv" ? "Series" : "Movie"}{" "}
-                      information
+                      {movieData.contentType === "tv"
+                        ? labels.seriesInfo
+                        : labels.movieInfo}
                       <svg
                         className="w-4 h-4 ml-1"
                         fill="currentColor"
@@ -424,7 +458,9 @@ const WatchPageClient = ({
             <div className="lg:col-span-1 space-y-8">
               {/* Cast & Crew */}
               <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-white mb-4">Cast</h3>
+                <h3 className="text-xl font-bold text-white mb-4">
+                  {labels.cast}
+                </h3>
                 {creditsLoading ? (
                   <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
@@ -487,7 +523,7 @@ const WatchPageClient = ({
                   </div>
                 ) : (
                   <p className="text-gray-400 text-sm">
-                    No cast information available
+                    {labels.noCast}
                   </p>
                 )}
               </div>
@@ -495,7 +531,7 @@ const WatchPageClient = ({
               {/* Recommendations */}
               <div className="bg-gray-800 rounded-lg p-6">
                 <h3 className="text-xl font-bold text-white mb-4">
-                  You May Also Like
+                  {labels.youMayAlsoLike}
                 </h3>
                 {recommendationsLoading ? (
                   <div className="space-y-4">
@@ -528,7 +564,7 @@ const WatchPageClient = ({
                                   ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.poster_path}`
                                   : FALLBACK_POSTER
                               }
-                              alt={item.title || item.name || "Movie poster"}
+                              alt={item.title || item.name || labels.posterAltFallback}
                               width={64}
                               height={96}
                               className="object-cover"
@@ -558,7 +594,7 @@ const WatchPageClient = ({
                               ? new Date(
                                   item.release_date || item.first_air_date || ""
                                 ).getFullYear()
-                              : "N/A"}
+                              : labels.notAvailable}
                           </p>
                           {item.vote_average &&
                             parseFloat(String(item.vote_average)) > 0 && (
@@ -580,7 +616,7 @@ const WatchPageClient = ({
                   </div>
                 ) : (
                   <p className="text-gray-400 text-sm">
-                    No movie recommendations available
+                    {labels.noRecommendations}
                   </p>
                 )}
               </div>

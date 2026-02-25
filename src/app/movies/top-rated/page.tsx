@@ -21,6 +21,7 @@ export default async function TopRatedPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let movies: MovieCardData[] = [];
   let totalPages = 1;
@@ -50,14 +51,25 @@ export default async function TopRatedPage({
 
   return (
     <CategoryListingPage
-      title="Top Rated Movies"
-      description={total > 0 ? `${total} top rated movies` : ""}
+      title={isVietnamese ? "Phim đánh giá cao" : "Top Rated Movies"}
+      description={
+        total > 0
+          ? isVietnamese
+            ? `${total} phim đánh giá cao`
+            : `${total} top rated movies`
+          : ""
+      }
       total={total}
       items={movies}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/movies/top-rated"
-      emptyMessage="No top rated movies found"
+      emptyMessage={
+        isVietnamese
+          ? "Không tìm thấy phim đánh giá cao"
+          : "No top rated movies found"
+      }
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

@@ -21,6 +21,7 @@ export default async function TopRatedTVPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let tvShows: MovieCardData[] = [];
   let totalPages = 1;
@@ -50,14 +51,23 @@ export default async function TopRatedTVPage({
 
   return (
     <CategoryListingPage
-      title="Top Rated TV Shows"
-      description="Critically acclaimed series with outstanding ratings from viewers."
+      title={isVietnamese ? "Phim bộ đánh giá cao" : "Top Rated TV Shows"}
+      description={
+        isVietnamese
+          ? "Các series được giới phê bình và khán giả đánh giá nổi bật."
+          : "Critically acclaimed series with outstanding ratings from viewers."
+      }
       total={total}
       items={tvShows}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/tv/top-rated"
-      emptyMessage="No top rated TV shows found"
+      emptyMessage={
+        isVietnamese
+          ? "Không tìm thấy phim bộ đánh giá cao"
+          : "No top rated TV shows found"
+      }
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

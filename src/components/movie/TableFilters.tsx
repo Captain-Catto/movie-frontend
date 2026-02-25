@@ -52,18 +52,18 @@ const TableFilters = ({
     () =>
       isVietnamese
         ? {
-            all: "Tat ca",
-            filters: "Bo loc",
-            country: "Quoc gia",
-            type: "Loai",
-            trending: "Thinh hanh",
-            genre: "The loai",
-            year: "Nam",
-            sortBy: "Sap xep",
-            selectedYears: "Nam da chon",
-            applyFilters: "Ap dung",
-            close: "Dong",
-            customYearPlaceholder: "Nhap nam + Enter",
+            all: "Tất cả",
+            filters: "Bộ lọc",
+            country: "Quốc gia",
+            type: "Loại",
+            trending: "Thịnh hành",
+            genre: "Thể loại",
+            year: "Năm",
+            sortBy: "Sắp xếp",
+            selectedYears: "Năm đã chọn",
+            applyFilters: "Áp dụng",
+            close: "Đóng",
+            customYearPlaceholder: "Nhập năm + Enter",
           }
         : {
             all: "All",
@@ -85,11 +85,11 @@ const TableFilters = ({
   const countries = useMemo(
     () => [
       { value: "", label: labels.all },
-      { value: "US", label: isVietnamese ? "My" : "United States" },
-      { value: "KR", label: isVietnamese ? "Han Quoc" : "South Korea" },
-      { value: "JP", label: isVietnamese ? "Nhat Ban" : "Japan" },
-      { value: "CN", label: isVietnamese ? "Trung Quoc" : "China" },
-      { value: "VN", label: isVietnamese ? "Viet Nam" : "Vietnam" },
+      { value: "US", label: isVietnamese ? "Mỹ" : "United States" },
+      { value: "KR", label: isVietnamese ? "Hàn Quốc" : "South Korea" },
+      { value: "JP", label: isVietnamese ? "Nhật Bản" : "Japan" },
+      { value: "CN", label: isVietnamese ? "Trung Quốc" : "China" },
+      { value: "VN", label: isVietnamese ? "Việt Nam" : "Vietnam" },
     ],
     [isVietnamese, labels.all]
   );
@@ -97,8 +97,8 @@ const TableFilters = ({
   const movieTypes = useMemo(
     () => [
       { value: "", label: labels.all },
-      { value: "movie", label: isVietnamese ? "Phim le" : "Movie" },
-      { value: "tv", label: isVietnamese ? "Phim bo" : "TV Series" },
+      { value: "movie", label: isVietnamese ? "Phim lẻ" : "Movie" },
+      { value: "tv", label: isVietnamese ? "Phim bộ" : "TV Series" },
       { value: "trending", label: labels.trending },
     ],
     [isVietnamese, labels.all, labels.trending]
@@ -146,19 +146,19 @@ const TableFilters = ({
   const sortOptions = [
     {
       value: "popularity",
-      label: isVietnamese ? "Pho bien" : "Popular",
+      label: isVietnamese ? "Phổ biến" : "Popular",
     },
-    { value: "latest", label: isVietnamese ? "Moi nhat" : "Latest" },
+    { value: "latest", label: isVietnamese ? "Mới nhất" : "Latest" },
     {
       value: "top_rated",
-      label: isVietnamese ? "Danh gia cao" : "Top Rated",
+      label: isVietnamese ? "Đánh giá cao" : "Top Rated",
     },
     {
       value: "updated",
-      label: isVietnamese ? "Cap nhat gan day" : "Recently Updated",
+      label: isVietnamese ? "Cập nhật gần đây" : "Recently Updated",
     },
-    { value: "imdb", label: isVietnamese ? "Diem IMDb" : "IMDb Score" },
-    { value: "views", label: isVietnamese ? "Xem nhieu" : "Most Viewed" },
+    { value: "imdb", label: isVietnamese ? "Điểm IMDb" : "IMDb Score" },
+    { value: "views", label: isVietnamese ? "Xem nhiều" : "Most Viewed" },
   ];
 
   const handleMultiFilterClick = (

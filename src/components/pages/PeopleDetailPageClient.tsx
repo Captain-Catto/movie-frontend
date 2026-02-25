@@ -9,6 +9,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { usePersonDetailPageClient } from "@/hooks/pages/usePersonDetailPageClient";
 import type { CastMember, CrewMember } from "@/types/content.types";
 import type { PersonDetailData } from "@/lib/people-detail-page-data";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PeopleDetailPageClientProps {
   personId: string;
@@ -25,6 +26,9 @@ const PeopleDetailPageClient = ({
   initialCrewCredits,
   initialError,
 }: PeopleDetailPageClientProps) => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const {
     personData,
     loading,
@@ -65,7 +69,10 @@ const PeopleDetailPageClient = ({
       <Layout>
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
-            {initialError || "Unable to load person details."}
+            {initialError ||
+              (isVietnamese
+                ? "Không thể tải thông tin nhân vật."
+                : "Unable to load person details.")}
           </div>
         </div>
       </Layout>
@@ -101,7 +108,7 @@ const PeopleDetailPageClient = ({
                 {formattedBirthday && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                      Date of Birth
+                      {isVietnamese ? "Ngày sinh" : "Date of Birth"}
                     </h3>
                     <p className="text-white">{formattedBirthday}</p>
                   </div>
@@ -110,7 +117,7 @@ const PeopleDetailPageClient = ({
                 {personData.place_of_birth && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                      Place of Birth
+                      {isVietnamese ? "Nơi sinh" : "Place of Birth"}
                     </h3>
                     <p className="text-white">{personData.place_of_birth}</p>
                   </div>
@@ -119,7 +126,7 @@ const PeopleDetailPageClient = ({
                 {formattedDeathday && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                      Date of Death
+                      {isVietnamese ? "Ngày mất" : "Date of Death"}
                     </h3>
                     <p className="text-white">{formattedDeathday}</p>
                   </div>
@@ -127,7 +134,9 @@ const PeopleDetailPageClient = ({
               </div>
 
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Biography</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">
+                  {isVietnamese ? "Tiểu sử" : "Biography"}
+                </h3>
                 <div className="text-gray-300 leading-relaxed whitespace-pre-line">
                   {personData.biography ? (
                     <>
@@ -137,12 +146,22 @@ const PeopleDetailPageClient = ({
                           onClick={toggleBiography}
                           className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block cursor-pointer"
                         >
-                          {showFullBio ? "Show less" : "Read more"}
+                          {showFullBio
+                            ? isVietnamese
+                              ? "Thu gọn"
+                              : "Show less"
+                            : isVietnamese
+                            ? "Xem thêm"
+                            : "Read more"}
                         </button>
                       )}
                     </>
                   ) : (
-                    <p className="text-gray-400 italic">Biography not available yet</p>
+                    <p className="text-gray-400 italic">
+                      {isVietnamese
+                        ? "Tiểu sử hiện chưa có"
+                        : "Biography not available yet"}
+                    </p>
                   )}
                 </div>
               </div>
@@ -152,7 +171,9 @@ const PeopleDetailPageClient = ({
 
         <Container>
           <div className="border-t border-gray-700 pt-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Filmography</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              {isVietnamese ? "Danh mục phim" : "Filmography"}
+            </h2>
 
             <div className="flex space-x-4 mb-6">
               <button
@@ -163,7 +184,7 @@ const PeopleDetailPageClient = ({
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                Acting ({castTotalItems})
+                {isVietnamese ? "Diễn xuất" : "Acting"} ({castTotalItems})
               </button>
               <button
                 onClick={() => handleTabChange("crew")}
@@ -173,7 +194,7 @@ const PeopleDetailPageClient = ({
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                Crew ({crewTotalItems})
+                {isVietnamese ? "Đoàn phim" : "Crew"} ({crewTotalItems})
               </button>
             </div>
 
@@ -200,8 +221,13 @@ const PeopleDetailPageClient = ({
             {currentItems.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-gray-400">
-                  No {activeTab === "cast" ? "acting credits" : "crew credits"}{" "}
-                  available
+                  {isVietnamese
+                    ? `Không có ${
+                        activeTab === "cast" ? "vai diễn" : "vai trò đoàn phim"
+                      }`
+                    : `No ${
+                        activeTab === "cast" ? "acting credits" : "crew credits"
+                      } available`}
                 </p>
               </div>
             )}

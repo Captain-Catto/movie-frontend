@@ -18,6 +18,7 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   const { items: movies, totalPages, error } = await getMoviesPageData(
     currentPage,
@@ -28,7 +29,9 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
     <Layout>
       <Container withHeaderOffset>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-8">🎬 Movies</h1>
+          <h1 className="text-3xl font-bold text-white mb-8">
+            {isVietnamese ? "🎬 Phim lẻ" : "🎬 Movies"}
+          </h1>
 
           {/* Filter Component */}
           <div className="mb-8">
@@ -37,7 +40,7 @@ export default async function MoviesPage({ searchParams }: MoviesPageProps) {
 
           {error && (
             <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-              Error: {error}
+              {isVietnamese ? "Lỗi:" : "Error:"} {error}
             </div>
           )}
         </div>

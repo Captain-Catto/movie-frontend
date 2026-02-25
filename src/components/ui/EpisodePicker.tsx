@@ -1,6 +1,7 @@
 "use client";
 
 import { useEpisodePicker } from "@/hooks/components/useEpisodePicker";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface EpisodePickerProps {
   tmdbId: number;
@@ -17,6 +18,9 @@ export default function EpisodePicker({
   currentEpisode,
   contentId,
 }: EpisodePickerProps) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const {
     episodes,
     loading,
@@ -35,7 +39,9 @@ export default function EpisodePicker({
   return (
     <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-white">Episodes</h3>
+        <h3 className="text-lg font-bold text-white">
+          {isVietnamese ? "Tập phim" : "Episodes"}
+        </h3>
         <select
           value={selectedSeason}
           onChange={(e) => changeSeason(Number(e.target.value))}
@@ -43,7 +49,7 @@ export default function EpisodePicker({
         >
           {seasonOptions.map((s) => (
             <option key={s} value={s}>
-              Season {s}
+              {isVietnamese ? `Mùa ${s}` : `Season ${s}`}
             </option>
           ))}
         </select>
@@ -86,7 +92,9 @@ export default function EpisodePicker({
           })}
         </div>
       ) : (
-        <p className="text-gray-400 text-sm">No episodes available</p>
+        <p className="text-gray-400 text-sm">
+          {isVietnamese ? "Không có tập phim khả dụng" : "No episodes available"}
+        </p>
       )}
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PaginationProps {
   currentPage: number;
@@ -21,6 +22,18 @@ export function Pagination({
   showPages = 5,
   className = "",
 }: PaginationProps) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = {
+    pagination: isVietnamese ? "Phân trang" : "Pagination",
+    previousPage: isVietnamese ? "Trang trước" : "Previous page",
+    page: isVietnamese ? "Trang" : "Page",
+    goTo: isVietnamese ? "Đến" : "Go to",
+    jumpToPageTitle: isVietnamese
+      ? `Đi đến trang (1-${totalPages})`
+      : `Jump to page (1-${totalPages})`,
+  };
+
   const [isInputMode, setIsInputMode] = useState(false);
   const [inputValue, setInputValue] = useState(currentPage.toString());
   const [desktopInputMode, setDesktopInputMode] = useState(false);
@@ -101,7 +114,7 @@ export function Pagination({
   return (
     <nav
       className={classNames("flex items-center justify-center", className)}
-      aria-label="Pagination"
+      aria-label={labels.pagination}
     >
       <div className="flex items-center space-x-1">
         {/* Previous Page */}
@@ -114,7 +127,7 @@ export function Pagination({
               ? "text-gray-500 cursor-not-allowed bg-gray-800"
               : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white cursor-pointer"
           )}
-          aria-label="Previous page"
+          aria-label={labels.previousPage}
         >
           &lt;
         </button>
@@ -124,7 +137,7 @@ export function Pagination({
           {isInputMode ? (
             <form onSubmit={handleInputSubmit} className="flex items-center">
               <span className="text-sm font-medium text-gray-300 mr-2">
-                Page
+                {labels.page}
               </span>
               <input
                 type="number"
@@ -147,7 +160,7 @@ export function Pagination({
               className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
             >
               <span>
-                Page {currentPage} / {totalPages}
+                {labels.page} {currentPage} / {totalPages}
               </span>
             </button>
           )}
@@ -200,7 +213,7 @@ export function Pagination({
                       className="flex items-center"
                     >
                       <span className="text-xs font-medium text-gray-400 mr-1">
-                        Go to
+                        {labels.goTo}
                       </span>
                       <input
                         type="number"
@@ -222,7 +235,7 @@ export function Pagination({
                         setDesktopInputValue("");
                       }}
                       className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
-                      title={`Jump to page (1-${totalPages})`}
+                      title={labels.jumpToPageTitle}
                     >
                       ...
                     </button>

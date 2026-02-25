@@ -31,6 +31,7 @@ export function useMovieDetailPageClient({
   initialError,
 }: UseMovieDetailPageClientOptions): UseMovieDetailPageClientResult {
   const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const [movieData, setMovieData] = useState<MovieDetail | null>(initialMovieData);
   const [loading, setLoading] = useState(() => !initialMovieData && !initialError);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -62,7 +63,7 @@ export function useMovieDetailPageClient({
         if (!Number.isFinite(parsedTmdbId) || parsedTmdbId <= 0) {
           setMovieData(null);
           setContentType(null);
-          setError("Invalid content ID");
+          setError(isVietnamese ? "ID nội dung không hợp lệ" : "Invalid content ID");
           return;
         }
 
@@ -79,7 +80,13 @@ export function useMovieDetailPageClient({
           );
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        setError(
+          err instanceof Error
+            ? err.message
+            : isVietnamese
+            ? "Đã xảy ra lỗi"
+            : "An error occurred"
+        );
         setMovieData(null);
         setContentType(null);
       } finally {
@@ -91,7 +98,7 @@ export function useMovieDetailPageClient({
     if (movieId) {
       fetchMovieData();
     }
-  }, [movieId, language, initialLanguage]);
+  }, [movieId, language, initialLanguage, isVietnamese]);
 
   return {
     movieData,

@@ -74,18 +74,21 @@ const truncateBiography = (bio: string, maxLength: number = BIO_TRUNCATE_LENGTH)
     : `${truncated}...`;
 };
 
-const mapKnownForDepartment = (department?: string): string => {
+const mapKnownForDepartment = (
+  department: string | undefined,
+  isVietnamese: boolean
+): string => {
   switch (department) {
     case "Acting":
-      return "Actor";
+      return isVietnamese ? "Diễn viên" : "Actor";
     case "Directing":
-      return "Director";
+      return isVietnamese ? "Đạo diễn" : "Director";
     case "Writing":
-      return "Writer";
+      return isVietnamese ? "Biên kịch" : "Writer";
     case "Production":
-      return "Producer";
+      return isVietnamese ? "Nhà sản xuất" : "Producer";
     default:
-      return department || "Artist";
+      return department || (isVietnamese ? "Nghệ sĩ" : "Artist");
   }
 };
 
@@ -97,6 +100,7 @@ export function usePersonDetailPageClient({
   initialError,
 }: UsePersonDetailPageClientOptions): UsePersonDetailPageClientResult {
   const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const locale = getLocaleFromLanguage(language);
 
   const [personData, setPersonData] = useState<PersonDetailData | null>(
@@ -140,7 +144,7 @@ export function usePersonDetailPageClient({
       setPersonData(null);
       setCastCredits([]);
       setCrewCredits([]);
-      setError("Invalid person ID");
+      setError(isVietnamese ? "ID nhân vật không hợp lệ" : "Invalid person ID");
       setLoading(false);
       return;
     }
@@ -157,14 +161,20 @@ export function usePersonDetailPageClient({
         setPersonData(null);
         setCastCredits([]);
         setCrewCredits([]);
-        setError(err instanceof Error ? err.message : "Unable to load actor information");
+        setError(
+          err instanceof Error
+            ? err.message
+            : isVietnamese
+            ? "Không thể tải thông tin diễn viên"
+            : "Unable to load actor information"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchPersonData();
-  }, [personId]);
+  }, [personId, isVietnamese]);
 
   const castTotalItems = castCredits.length;
   const crewTotalItems = crewCredits.length;
@@ -222,7 +232,7 @@ export function usePersonDetailPageClient({
     biographyText,
     canToggleBiography,
     profileImage: getPersonProfileImage(personData?.profile_path),
-    knownForText: mapKnownForDepartment(personData?.known_for_department),
+    knownForText: mapKnownForDepartment(personData?.known_for_department, isVietnamese),
     formattedBirthday: formatDate(personData?.birthday ?? null),
     formattedDeathday: formatDate(personData?.deathday ?? null),
     castTotalItems,

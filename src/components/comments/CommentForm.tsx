@@ -5,8 +5,12 @@ import Image from "next/image";
 import { Loader2 } from "lucide-react";
 import { CommentFormProps } from "@/types/comment.types";
 import { useCommentForm } from "@/hooks/components/useCommentForm";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function CommentForm(props: CommentFormProps) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const {
     textareaRef,
     content,
@@ -30,7 +34,11 @@ export function CommentForm(props: CommentFormProps) {
   if (!isAuthenticated) {
     return (
       <div className="my-area bg-gray-800 rounded-lg p-4">
-        <div className="text-center text-gray-400">Please login to comment</div>
+        <div className="text-center text-gray-400">
+          {isVietnamese
+            ? "Vui lòng đăng nhập để bình luận"
+            : "Please login to comment"}
+        </div>
       </div>
     );
   }
@@ -49,9 +57,11 @@ export function CommentForm(props: CommentFormProps) {
           />
         </div>
         <div className="info">
-          <small className="text-gray-400 text-xs block">Commenting as</small>
+          <small className="text-gray-400 text-xs block">
+            {isVietnamese ? "Bình luận với tư cách" : "Commenting as"}
+          </small>
           <span className="text-white text-sm font-medium">
-            {user?.name || "User"}
+            {user?.name || (isVietnamese ? "Người dùng" : "User")}
           </span>
         </div>
       </div>
@@ -64,7 +74,10 @@ export function CommentForm(props: CommentFormProps) {
             rows={4}
             cols={3}
             maxLength={1000}
-            placeholder={props.placeholder || "Write a comment"}
+            placeholder={
+              props.placeholder ||
+              (isVietnamese ? "Viết bình luận" : "Write a comment")
+            }
             value={content}
             onChange={handleContentChange}
             disabled={isSubmitting || checking}
@@ -78,7 +91,7 @@ export function CommentForm(props: CommentFormProps) {
               {loadingMentions ? (
                 <div className="p-3 text-center text-gray-400 text-sm">
                   <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" />
-                  Searching...
+                  {isVietnamese ? "Đang tìm..." : "Searching..."}
                 </div>
               ) : mentionUsers.length > 0 ? (
                 <ul className="py-1">
@@ -102,11 +115,13 @@ export function CommentForm(props: CommentFormProps) {
                 </ul>
               ) : mentionQuery.length >= 2 ? (
                 <div className="p-3 text-center text-gray-400 text-sm">
-                  No users found
+                  {isVietnamese ? "Không tìm thấy người dùng" : "No users found"}
                 </div>
               ) : (
                 <div className="p-3 text-center text-gray-400 text-sm">
-                  Enter at least 2 characters to search
+                  {isVietnamese
+                    ? "Nhập ít nhất 2 ký tự để tìm"
+                    : "Enter at least 2 characters to search"}
                 </div>
               )}
             </div>
@@ -123,7 +138,7 @@ export function CommentForm(props: CommentFormProps) {
               onClick={handleCancel}
               disabled={isSubmitting || checking}
             >
-              <span>Cancel</span>
+              <span>{isVietnamese ? "Hủy" : "Cancel"}</span>
             </button>
           )}
 
@@ -139,7 +154,15 @@ export function CommentForm(props: CommentFormProps) {
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>{props.editingComment ? "Update" : "Send"}</span>
+                <span>
+                  {props.editingComment
+                    ? isVietnamese
+                      ? "Cập nhật"
+                      : "Update"
+                    : isVietnamese
+                    ? "Gửi"
+                    : "Send"}
+                </span>
                 <div className="inc-icon icon-20">
                   <svg
                     fill="none"

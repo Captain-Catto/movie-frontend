@@ -4,12 +4,14 @@ interface SectionHeaderProps {
   title: string;
   href?: string;
   showViewMore?: boolean;
+  viewMoreLabel?: string;
 }
 
 export default function SectionHeader({
   title,
   href,
   showViewMore = true,
+  viewMoreLabel = "View More",
 }: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-6">
@@ -19,7 +21,7 @@ export default function SectionHeader({
           href={href}
           className="flex items-center text-gray-300 hover:text-white transition-colors group"
         >
-          <span className="text-sm font-medium">View More</span>
+          <span className="text-sm font-medium">{viewMoreLabel}</span>
           <svg
             className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"
             fill="none"

@@ -4,6 +4,7 @@ import React from "react";
 import { SearchResult } from "@/types/search";
 import SearchResultItem from "./SearchResultItem";
 import { Search } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -22,6 +23,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({
   onClose,
   onResultClick,
 }) => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   // Ensure results is always an array
   const safeResults = Array.isArray(results) ? results : [];
 
@@ -59,9 +63,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <div className="text-center">
           <Search className="w-12 h-12 text-gray-600 mx-auto mb-3" />
           <h3 className="text-gray-400 font-medium mb-1">
-            No results found
+            {isVietnamese ? "Không tìm thấy kết quả" : "No results found"}
           </h3>
-          <p className="text-gray-500 text-sm">Try searching with different keywords</p>
+          <p className="text-gray-500 text-sm">
+            {isVietnamese
+              ? "Hãy thử tìm bằng từ khóa khác"
+              : "Try searching with different keywords"}
+          </p>
         </div>
       </div>
     );
@@ -76,7 +84,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-2 text-sm text-gray-300">
               <div className="w-4 h-4 border-2 border-gray-400 border-t-red-500 rounded-full animate-spin"></div>
-              <span>Updating...</span>
+              <span>{isVietnamese ? "Đang cập nhật..." : "Updating..."}</span>
             </div>
           </div>
         </div>
@@ -87,7 +95,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         {safeResults.length > 0 && (
           <div className="mb-4">
             <p className="text-sm text-gray-400">
-              Found {safeResults.length} result{safeResults.length !== 1 ? 's' : ''}
+              {isVietnamese
+                ? `Tìm thấy ${safeResults.length} kết quả`
+                : `Found ${safeResults.length} result${
+                    safeResults.length !== 1 ? "s" : ""
+                  }`}
             </p>
           </div>
         )}
@@ -118,7 +130,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
               onClick={onLoadMore}
               className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer"
             >
-              Load more
+              {isVietnamese ? "Xem thêm" : "Load more"}
             </button>
           </div>
         )}

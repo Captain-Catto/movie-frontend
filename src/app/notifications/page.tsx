@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
-import { formatRelativeTime } from "@/utils/dateFormatter";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
@@ -27,16 +26,82 @@ interface NotificationItem {
   };
 }
 
+const getRelativeTimeLabel = (date: Date, isVietnamese: boolean): string => {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const minutes = Math.floor(diffMs / (1000 * 60));
+  const hours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (minutes < 1) return isVietnamese ? "Vừa xong" : "just now";
+  if (minutes < 60) {
+    return isVietnamese
+      ? `${minutes} phút trước`
+      : `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+  }
+  if (hours < 24) {
+    return isVietnamese
+      ? `${hours} giờ trước`
+      : `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  }
+  if (days < 7) {
+    return isVietnamese
+      ? `${days} ngày trước`
+      : `${days} day${days > 1 ? "s" : ""} ago`;
+  }
+
+  return date.toLocaleDateString(isVietnamese ? "vi-VN" : "en-US");
+};
+
 export default function NotificationsPage() {
   const router = useRouter();
   const { isLoading } = useAuth();
   const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const locale = getLocaleFromLanguage(language);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const labels = {
+    fallbackTitle: isVietnamese ? "Thông báo" : "Notification",
+    noNotificationsFound: isVietnamese
+      ? "Không tìm thấy thông báo"
+      : "No notifications found",
+    cannotLoadNotifications: isVietnamese
+      ? "Không thể tải thông báo. Vui lòng thử lại."
+      : "Unable to load notifications. Please try again.",
+    pageTitle: isVietnamese ? "Thông báo" : "Notifications",
+    pageSubtitle: isVietnamese
+      ? "Cập nhật mới nhất cho tài khoản của bạn."
+      : "Latest updates for your account.",
+    notificationsCount: (count: number) =>
+      isVietnamese
+        ? `${count} thông báo`
+        : `${count} notification${count === 1 ? "" : "s"}`,
+    noNotifications: isVietnamese ? "Không có thông báo" : "No notifications",
+    showAll: isVietnamese ? "Hiện tất cả" : "Show all",
+    unreadOnly: isVietnamese ? "Chỉ chưa đọc" : "Unread only",
+    loading: isVietnamese ? "Đang tải thông báo..." : "Loading notifications...",
+    noNotificationsYet: isVietnamese ? "Chưa có thông báo" : "No notifications yet",
+    noNotificationsDesc: isVietnamese
+      ? "Khi có cập nhật mới, thông báo sẽ xuất hiện tại đây."
+      : "When there are new updates, notifications will appear here.",
+    noUnread: isVietnamese ? "Không có thông báo chưa đọc" : "No unread notifications",
+    noUnreadDesc: isVietnamese
+      ? 'Bạn đã đọc hết thông báo. Chuyển sang "Hiện tất cả" để xem lịch sử.'
+      : 'You\'ve read all notifications. Switch to "Show all" to view history.',
+    new: isVietnamese ? "Mới" : "New",
+  };
+
+  const typeLabels: Record<NotificationItem["type"], string> = {
+    info: isVietnamese ? "Thông tin" : "Info",
+    success: isVietnamese ? "Thành công" : "Success",
+    warning: isVietnamese ? "Cảnh báo" : "Warning",
+    error: isVietnamese ? "Lỗi" : "Error",
+    system: isVietnamese ? "Hệ thống" : "System",
+  };
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -52,7 +117,7 @@ export default function NotificationsPage() {
           const items = response.data.data.notifications.map(
             (n: Partial<NotificationItem>) => ({
               id: n.id ?? crypto.randomUUID(),
-              title: n.title ?? "Notification",
+              title: n.title ?? labels.fallbackTitle,
               message: n.message ?? "",
               type: (n.type as NotificationItem["type"]) || "info",
               createdAt: n.createdAt ?? new Date().toISOString(),
@@ -63,12 +128,12 @@ export default function NotificationsPage() {
           setNotifications(items);
           setIsEmpty(items.length === 0);
         } else {
-          setError("No notifications found");
+          setError(labels.noNotificationsFound);
           setIsEmpty(true);
         }
       } catch (err) {
         console.error("Failed to load notifications:", err);
-        setError("Unable to load notifications. Please try again.");
+        setError(labels.cannotLoadNotifications);
         setIsEmpty(true);
       } finally {
         setLoading(false);
@@ -76,7 +141,7 @@ export default function NotificationsPage() {
     };
 
     fetchNotifications();
-  }, []);
+  }, [labels.cannotLoadNotifications, labels.fallbackTitle, labels.noNotificationsFound]);
 
   const badgeStyles: Record<NotificationItem["type"], string> = {
     info: "bg-blue-900/50 text-blue-200 border border-blue-700/60",
@@ -119,16 +184,16 @@ export default function NotificationsPage() {
           <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-2xl border border-gray-800 shadow-xl p-6 mb-8">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold text-white">Notifications</h1>
+                <h1 className="text-2xl font-semibold text-white">{labels.pageTitle}</h1>
                 <p className="text-gray-400 text-sm mt-1">
-                  Latest updates for your account.
+                  {labels.pageSubtitle}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-400">
                   {notifications.length > 0
-                    ? `${notifications.length} notifications`
-                    : "No notifications"}
+                    ? labels.notificationsCount(notifications.length)
+                    : labels.noNotifications}
                 </span>
                 <button
                   onClick={() => setShowUnreadOnly((v) => !v)}
@@ -138,7 +203,7 @@ export default function NotificationsPage() {
                       : "bg-gray-800 border-gray-700 text-gray-200 hover:bg-gray-750"
                   }`}
                 >
-                  {showUnreadOnly ? "Show all" : "Unread only"}
+                  {showUnreadOnly ? labels.showAll : labels.unreadOnly}
                 </button>
               </div>
             </div>
@@ -146,7 +211,7 @@ export default function NotificationsPage() {
 
           {loading || isLoading ? (
             <div className="text-gray-300 bg-gray-800 border border-gray-700 rounded-lg p-4">
-              Loading notifications...
+              {labels.loading}
             </div>
           ) : null}
 
@@ -161,19 +226,19 @@ export default function NotificationsPage() {
               {isEmpty ? (
                 <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300 min-h-[300px] flex flex-col items-center justify-center">
                   <div className="text-lg font-semibold text-white mb-2">
-                    No notifications yet
+                    {labels.noNotificationsYet}
                   </div>
                   <p className="text-sm text-gray-400">
-                    When there are new updates, notifications will appear here.
+                    {labels.noNotificationsDesc}
                   </p>
                 </div>
               ) : filteredEmpty ? (
                 <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center text-gray-300 min-h-[300px] flex flex-col items-center justify-center">
                   <div className="text-lg font-semibold text-white mb-2">
-                    No unread notifications
+                    {labels.noUnread}
                   </div>
                   <p className="text-sm text-gray-400">
-                    You&apos;ve read all notifications. Switch to &quot;Show all&quot; to view history.
+                    {labels.noUnreadDesc}
                   </p>
                 </div>
               ) : null}
@@ -229,7 +294,7 @@ export default function NotificationsPage() {
                               badgeStyles[notif.type]
                             }`}
                           >
-                            {notif.type}
+                            {typeLabels[notif.type]}
                           </div>
 
                           {/* Content */}
@@ -239,7 +304,7 @@ export default function NotificationsPage() {
                                 {notif.title}
                               </h3>
                               <div className="text-xs text-gray-500 whitespace-nowrap">
-                                {formatRelativeTime(new Date(notif.createdAt))}
+                                {getRelativeTimeLabel(new Date(notif.createdAt), isVietnamese)}
                               </div>
                             </div>
 
@@ -252,7 +317,7 @@ export default function NotificationsPage() {
                               <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 rounded-md">
                                 <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
                                 <span className="text-xs text-blue-300 font-medium">
-                                  New
+                                  {labels.new}
                                 </span>
                               </div>
                             )}

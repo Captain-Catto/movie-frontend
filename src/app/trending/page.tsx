@@ -18,6 +18,7 @@ export default async function TrendingPage({ searchParams }: TrendingPageProps) 
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   const { items: trending, totalPages, error } = await getTrendingPageData(
     currentPage,
@@ -28,12 +29,14 @@ export default async function TrendingPage({ searchParams }: TrendingPageProps) 
     <Layout>
       <Container withHeaderOffset>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-8">🔥 Trending</h1>
+          <h1 className="text-3xl font-bold text-white mb-8">
+            {isVietnamese ? "🔥 Thịnh hành" : "🔥 Trending"}
+          </h1>
           <MovieFilters className="mb-8" />
 
           {error && (
             <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-4">
-              Error: {error}
+              {isVietnamese ? "Lỗi:" : "Error:"} {error}
             </div>
           )}
         </div>

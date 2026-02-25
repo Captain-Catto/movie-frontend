@@ -80,6 +80,21 @@ export function useWatchPage({
 }: UseWatchPageOptions): UseWatchPageResult {
   const searchParams = useSearchParams();
   const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const messages = {
+    loadContentFailed: isVietnamese
+      ? "Không thể tải thông tin nội dung"
+      : "Unable to load content information",
+    fetchStreamFailed: isVietnamese
+      ? "Không thể lấy nguồn phát."
+      : "Unable to fetch stream source.",
+    noStreamAvailable: isVietnamese
+      ? "Hiện chưa có nguồn phát phù hợp."
+      : "No stream source available right now.",
+    loadStreamFailed: isVietnamese
+      ? "Không thể tải nguồn phát từ các nhà cung cấp hiện có."
+      : "Unable to load stream from available providers.",
+  };
 
   const [movieData, setMovieData] = useState<WatchContentData | null>(
     initialMovieData
@@ -165,12 +180,12 @@ export function useWatchPage({
         setStreamError(result.streamError);
         setError(result.error);
       } catch {
-        setError("Unable to load content information");
+        setError(messages.loadContentFailed);
         setMovieData(null);
         setCredits(null);
         setRecommendations([]);
         setStreamCandidates([]);
-        setStreamError("Unable to fetch stream source.");
+        setStreamError(messages.fetchStreamFailed);
       } finally {
         setCreditsLoading(false);
         setRecommendationsLoading(false);
@@ -186,7 +201,7 @@ export function useWatchPage({
       setStreamError(null);
       setActiveStreamIndex(0);
     }
-  }, [movieId, language, initialLanguage, season, episode]);
+  }, [movieId, language, initialLanguage, season, episode, messages.fetchStreamFailed, messages.loadContentFailed]);
 
   useEffect(() => {
     if (!streamTmdbId || !streamContentType) return;
@@ -229,14 +244,14 @@ export function useWatchPage({
         setActiveStreamIndex(0);
       } else {
         setStreamCandidates([]);
-        setStreamError("No stream source available right now.");
+        setStreamError(messages.noStreamAvailable);
       }
     };
 
     fetchStreamUrl().catch(() => {
       if (cancelled) return;
       setStreamCandidates([]);
-      setStreamError("Unable to fetch stream source.");
+      setStreamError(messages.fetchStreamFailed);
     });
 
     return () => {
@@ -252,6 +267,8 @@ export function useWatchPage({
     initialSeason,
     initialEpisode,
     language,
+    messages.fetchStreamFailed,
+    messages.noStreamAvailable,
   ]);
 
   useEffect(() => {
@@ -280,10 +297,10 @@ export function useWatchPage({
         setStreamError(null);
         return prev + 1;
       }
-      setStreamError("Unable to load stream from available providers.");
+      setStreamError(messages.loadStreamFailed);
       return prev;
     });
-  }, [clearStreamTimeout, streamCandidates.length]);
+  }, [clearStreamTimeout, streamCandidates.length, messages.loadStreamFailed]);
 
   const handleStreamLoadSuccess = useCallback(() => {
     clearStreamTimeout();

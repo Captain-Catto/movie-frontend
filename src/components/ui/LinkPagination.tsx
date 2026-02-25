@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LinkPaginationProps {
   currentPage: number;
@@ -18,6 +19,13 @@ export default function LinkPagination({
   showPages = 5,
   className = "",
 }: LinkPaginationProps) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = {
+    previous: isVietnamese ? "Trước" : "Previous",
+    next: isVietnamese ? "Tiếp" : "Next",
+  };
+
   const getVisiblePages = () => {
     const pages = [];
     const half = Math.floor(showPages / 2);
@@ -71,11 +79,11 @@ export default function LinkPagination({
           href={getPageUrl(currentPage - 1)}
           className="px-3 py-2 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors"
         >
-          Previous
+          {labels.previous}
         </Link>
       ) : (
         <span className="px-3 py-2 text-sm bg-gray-800 text-gray-500 rounded-md cursor-not-allowed">
-          Previous
+          {labels.previous}
         </span>
       )}
 
@@ -130,11 +138,11 @@ export default function LinkPagination({
           href={getPageUrl(currentPage + 1)}
           className="px-3 py-2 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-colors"
         >
-          Next
+          {labels.next}
         </Link>
       ) : (
         <span className="px-3 py-2 text-sm bg-gray-800 text-gray-500 rounded-md cursor-not-allowed">
-          Next
+          {labels.next}
         </span>
       )}
     </nav>

@@ -13,9 +13,12 @@ import { useEffect, useRef, useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
 import type { StoredUser } from "@/lib/auth-storage";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading, checkAuth } = useAuth();
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
@@ -35,7 +38,61 @@ export default function AccountPage() {
   }, [user?.image]);
 
   const avatarSrc = avatarUrl || user?.image || FALLBACK_PROFILE;
-  const displayName = user?.name || "User";
+  const displayName = user?.name || (isVietnamese ? "Người dùng" : "User");
+
+  const labels = {
+    pleaseLogin: isVietnamese ? "Vui lòng đăng nhập" : "Please login",
+    needLogin: isVietnamese
+      ? "Bạn cần đăng nhập để xem thông tin tài khoản"
+      : "You need to login to view account information",
+    imageSize: isVietnamese ? "Ảnh phải nhỏ hơn 5MB" : "Image must be smaller than 5MB",
+    uploadFailed: isVietnamese ? "Tải ảnh thất bại" : "Image upload failed",
+    updateImageFailed: isVietnamese
+      ? "Cập nhật ảnh thất bại"
+      : "Image update failed",
+    userUnavailable: isVietnamese
+      ? "Không có thông tin người dùng. Vui lòng tải lại trang"
+      : "User info not available. Please reload the page",
+    avatarUpdated: isVietnamese
+      ? "Cập nhật ảnh đại diện thành công"
+      : "Avatar updated successfully",
+    uploadRetry: isVietnamese
+      ? "Không thể tải ảnh lên. Vui lòng thử lại"
+      : "Unable to upload image. Please try again",
+    passwordMismatch: isVietnamese
+      ? "Mật khẩu xác nhận không khớp"
+      : "Confirm password does not match",
+    missingInput: isVietnamese
+      ? "Vui lòng nhập tên hoặc mật khẩu mới"
+      : "Please enter a name or new password",
+    updateSuccess: isVietnamese ? "Cập nhật thành công" : "Update successful",
+    updateFailed: isVietnamese ? "Cập nhật thất bại" : "Update failed",
+    accountTitle: isVietnamese ? "👤 Tài khoản của bạn" : "👤 Your Account",
+    changeAvatar: isVietnamese ? "Đổi ảnh đại diện" : "Change avatar",
+    uploading: isVietnamese ? "Đang tải lên..." : "Uploading...",
+    change: isVietnamese ? "Đổi" : "Change",
+    role: isVietnamese ? "Vai trò" : "Role",
+    admin: isVietnamese ? "Quản trị viên" : "Administrator",
+    user: isVietnamese ? "Người dùng" : "User",
+    status: isVietnamese ? "Trạng thái" : "Status",
+    active: isVietnamese ? "Hoạt động" : "Active",
+    settings: isVietnamese ? "Cài đặt tài khoản" : "Account Settings",
+    displayName: isVietnamese ? "Tên hiển thị" : "Display name",
+    newPassword: isVietnamese ? "Mật khẩu mới" : "New password",
+    keepCurrent: isVietnamese
+      ? "Để trống nếu muốn giữ mật khẩu hiện tại"
+      : "Leave blank to keep current",
+    confirmPassword: isVietnamese ? "Xác nhận mật khẩu" : "Confirm password",
+    repeatNewPassword: isVietnamese ? "Nhập lại mật khẩu mới" : "Repeat new password",
+    saving: isVietnamese ? "Đang lưu..." : "Saving...",
+    saveChanges: isVietnamese ? "Lưu thay đổi" : "Save changes",
+    changePassword: isVietnamese ? "Đổi mật khẩu" : "Change Password",
+    updatePassword: isVietnamese ? "Cập nhật mật khẩu của bạn" : "Update your password",
+    notifications: isVietnamese ? "Thông báo" : "Notifications",
+    manageNotifications: isVietnamese
+      ? "Quản lý tùy chọn thông báo"
+      : "Manage notification preferences",
+  };
 
   if (isLoading) {
     return <AccountSkeleton />;
@@ -48,10 +105,10 @@ export default function AccountPage() {
         <main>
           <Container size="narrow" withHeaderOffset className="text-center pb-12">
             <h1 className="text-4xl font-bold text-white mb-6">
-              Please login
+              {labels.pleaseLogin}
             </h1>
             <p className="text-gray-400">
-              You need to login to view account information
+              {labels.needLogin}
             </p>
           </Container>
         </main>
@@ -70,7 +127,7 @@ export default function AccountPage() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setAvatarError("Image must be smaller than 5MB");
+      setAvatarError(labels.imageSize);
       e.target.value = "";
       return;
     }
@@ -89,7 +146,7 @@ export default function AccountPage() {
 
       const uploadUrl = uploadRes.data?.url;
       if (!uploadRes.data?.success || !uploadUrl) {
-        throw new Error(uploadRes.data?.message || "Image upload failed");
+        throw new Error(uploadRes.data?.message || labels.uploadFailed);
       }
 
       const profileRes = await axiosInstance.put("/auth/profile", {
@@ -97,30 +154,28 @@ export default function AccountPage() {
       });
 
       if (!profileRes.data?.success) {
-        throw new Error(profileRes.data?.message || "Image update failed");
+        throw new Error(profileRes.data?.message || labels.updateImageFailed);
       }
 
       if (!user?.id || !user.email) {
-        throw new Error("User info not available. Please reload the page");
+        throw new Error(labels.userUnavailable);
       }
 
       const updatedUser: StoredUser = {
         id: user.id,
         email: user.email,
-        name: user.name || "User",
+        name: user.name || labels.user,
         role: user.role,
         googleId: user.googleId,
         image: uploadUrl,
       };
       authStorage.setUser(updatedUser);
       setAvatarUrl(uploadUrl);
-      setFormSuccess("Avatar updated successfully");
+      setFormSuccess(labels.avatarUpdated);
       checkAuth();
     } catch (error: unknown) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Unable to upload image. Please try again";
+        error instanceof Error ? error.message : labels.uploadRetry;
       setAvatarError(message);
     } finally {
       setUploadingAvatar(false);
@@ -133,7 +188,7 @@ export default function AccountPage() {
     setFormSuccess("");
 
     if (form.password && form.password !== form.confirmPassword) {
-      setFormError("Confirm password does not match");
+      setFormError(labels.passwordMismatch);
       return;
     }
 
@@ -144,13 +199,13 @@ export default function AccountPage() {
       if (form.password.trim()) payload.password = form.password.trim();
 
       if (Object.keys(payload).length === 0) {
-        setFormError("Please enter a name or new password");
+        setFormError(labels.missingInput);
         return;
       }
 
       const res = await axiosInstance.put("/auth/profile", payload);
       if (res.data?.success) {
-        setFormSuccess("Update successful");
+        setFormSuccess(labels.updateSuccess);
         setForm({ name: "", password: "", confirmPassword: "" });
         if (user) {
           const updatedUser = { ...user, ...(payload.name ? { name: payload.name } : {}) };
@@ -158,7 +213,7 @@ export default function AccountPage() {
           checkAuth();
         }
       } else {
-        setFormError(res.data?.message || "Update failed");
+        setFormError(res.data?.message || labels.updateFailed);
       }
     } catch (error: unknown) {
       const backendMessage =
@@ -173,7 +228,7 @@ export default function AccountPage() {
           : Array.isArray(backendMessage)
           ? backendMessage.join(", ")
           : undefined;
-      setFormError(msg || "Update failed");
+      setFormError(msg || labels.updateFailed);
     } finally {
       setSaving(false);
     }
@@ -186,7 +241,7 @@ export default function AccountPage() {
       <main>
         <Container size="narrow" withHeaderOffset className="pb-12">
           <h1 className="text-4xl font-bold text-white mb-8">
-            👤 Your Account
+            {labels.accountTitle}
           </h1>
 
           {/* Profile Card */}
@@ -195,7 +250,7 @@ export default function AccountPage() {
               <div
                 className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-gray-600 cursor-pointer group"
                 onClick={handleAvatarClick}
-                title="Change avatar"
+                title={labels.changeAvatar}
               >
                 <Image
                   src={avatarSrc}
@@ -209,11 +264,11 @@ export default function AccountPage() {
                   }}
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white">
-                  {uploadingAvatar ? "Uploading..." : "Change"}
+                  {uploadingAvatar ? labels.uploading : labels.change}
                 </div>
                 {uploadingAvatar && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-white text-xs">Uploading...</span>
+                    <span className="text-white text-xs">{labels.uploading}</span>
                   </div>
                 )}
               </div>
@@ -236,14 +291,14 @@ export default function AccountPage() {
 
                 <div className="grid grid-cols-2 gap-4 mt-6">
                   <div className="bg-gray-700/50 rounded-lg p-4">
-                    <p className="text-gray-400 text-sm mb-1">Role</p>
+                    <p className="text-gray-400 text-sm mb-1">{labels.role}</p>
                     <p className="text-white font-medium">
-                      {user?.role === "admin" ? "Administrator" : "User"}
+                      {user?.role === "admin" ? labels.admin : labels.user}
                     </p>
                   </div>
                   <div className="bg-gray-700/50 rounded-lg p-4">
-                    <p className="text-gray-400 text-sm mb-1">Status</p>
-                    <p className="text-green-400 font-medium">Active</p>
+                    <p className="text-gray-400 text-sm mb-1">{labels.status}</p>
+                    <p className="text-green-400 font-medium">{labels.active}</p>
                   </div>
                 </div>
               </div>
@@ -253,7 +308,7 @@ export default function AccountPage() {
           {/* Account Settings */}
           <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700">
             <h3 className="text-xl font-bold text-white mb-6">
-              Account Settings
+              {labels.settings}
             </h3>
 
             <form onSubmit={handleUpdateProfile} className="space-y-4 mb-6">
@@ -269,7 +324,7 @@ export default function AccountPage() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Display name</label>
+                  <label className="text-sm text-gray-300">{labels.displayName}</label>
                   <input
                     type="text"
                     value={form.name}
@@ -294,20 +349,22 @@ export default function AccountPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">New password</label>
+                  <label className="text-sm text-gray-300">{labels.newPassword}</label>
                   <input
                     type="password"
                     value={form.password}
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, password: e.target.value }))
                     }
-                    placeholder="Leave blank to keep current"
+                    placeholder={labels.keepCurrent}
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
                     disabled={saving}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Confirm password</label>
+                  <label className="text-sm text-gray-300">
+                    {labels.confirmPassword}
+                  </label>
                   <input
                     type="password"
                     value={form.confirmPassword}
@@ -317,7 +374,7 @@ export default function AccountPage() {
                         confirmPassword: e.target.value,
                       }))
                     }
-                    placeholder="Repeat new password"
+                    placeholder={labels.repeatNewPassword}
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600"
                     disabled={saving}
                   />
@@ -329,7 +386,7 @@ export default function AccountPage() {
                 disabled={saving}
                 className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
               >
-                {saving ? "Saving..." : "Save changes"}
+                {saving ? labels.saving : labels.saveChanges}
               </button>
             </form>
 
@@ -340,9 +397,9 @@ export default function AccountPage() {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium mb-1">Change Password</p>
+                    <p className="font-medium mb-1">{labels.changePassword}</p>
                     <p className="text-sm text-gray-400">
-                      Update your password
+                      {labels.updatePassword}
                     </p>
                   </div>
                   <span className="text-gray-400">→</span>
@@ -355,9 +412,9 @@ export default function AccountPage() {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-medium mb-1">Notifications</p>
+                    <p className="font-medium mb-1">{labels.notifications}</p>
                     <p className="text-sm text-gray-400">
-                      Manage notification preferences
+                      {labels.manageNotifications}
                     </p>
                   </div>
                   <span className="text-gray-400">→</span>

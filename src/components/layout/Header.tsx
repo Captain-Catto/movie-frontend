@@ -10,6 +10,7 @@ import { useIsHydrated } from "@/hooks/useIsHydrated";
 import UserMenu from "@/components/layout/UserMenu";
 import LanguageSelector from "@/components/layout/LanguageSelector";
 import { HeartIcon, Search } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   hideOnPlay?: boolean;
@@ -25,7 +26,31 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [hasScrolled, setHasScrolled] = useState(false);
 
   const { user, isAuthenticated, logout } = useAuth();
+  const { language } = useLanguage();
   const isHydrated = useIsHydrated();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
+  const labels = {
+    home: isVietnamese ? "Trang chủ" : "Home",
+    trending: isVietnamese ? "Thịnh hành" : "Trending",
+    movies: isVietnamese ? "Phim lẻ" : "Movies",
+    browse: isVietnamese ? "Duyệt" : "Browse",
+    tvSeries: isVietnamese ? "Phim bộ" : "TV Series",
+    actors: isVietnamese ? "Diễn viên" : "Actors",
+    search: isVietnamese ? "Tìm kiếm" : "Search",
+    login: isVietnamese ? "Đăng nhập" : "Login",
+    loginSignUp: isVietnamese ? "Đăng nhập / Đăng ký" : "Login / Sign up",
+    closeMenu: isVietnamese ? "Đóng menu" : "Close menu",
+    openMenu: isVietnamese ? "Mở menu" : "Open menu",
+    close: isVietnamese ? "Đóng" : "Close",
+    accountAria: isVietnamese ? "Đi tới tài khoản" : "Go to account",
+    profileAlt: isVietnamese ? "Hồ sơ" : "Profile",
+    defaultUser: isVietnamese ? "Người dùng" : "User",
+    guest: isVietnamese ? "Khách" : "Guest",
+    signedIn: isVietnamese ? "Đã đăng nhập" : "Signed in",
+    notSignedIn: isVietnamese ? "Chưa đăng nhập" : "Not signed in",
+    favorites: isVietnamese ? "Yêu thích" : "Favorites",
+  };
 
   // Handle play state - hide header when playing (unless user has scrolled)
   useEffect(() => {
@@ -76,12 +101,12 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const handleAuthSuccess = () => {};
 
   const navigationItems = [
-    { href: "/", label: "Home" },
-    { href: "/trending", label: "Trending" },
-    { href: "/movies", label: "Movies" },
-    { href: "/browse", label: "Browse" },
-    { href: "/tv", label: "TV Series" },
-    { href: "/people", label: "Actors" },
+    { href: "/", label: labels.home },
+    { href: "/trending", label: labels.trending },
+    { href: "/movies", label: labels.movies },
+    { href: "/browse", label: labels.browse },
+    { href: "/tv", label: labels.tvSeries },
+    { href: "/people", label: labels.actors },
   ];
 
   return (
@@ -132,7 +157,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                 <button
                   className="p-1 hover:text-red-500 transition-colors text-white flex-shrink-0 cursor-pointer"
                   onClick={handleSearchClick}
-                  title="Search"
+                  title={labels.search}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -161,9 +186,9 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   ) : isHydrated ? (
                     <button
                       onClick={handleAuthModalOpen}
-                      className="text-white hover:text-red-500 transition-colors text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 rounded bg-red-600 hover:bg-red-700 whitespace-nowrap cursor-pointer"
-                    >
-                      Login
+                    className="text-white hover:text-red-500 transition-colors text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 rounded bg-red-600 hover:bg-red-700 whitespace-nowrap cursor-pointer"
+                  >
+                      {labels.login}
                     </button>
                   ) : (
                     <div className="w-16 sm:w-20 h-8 sm:h-10" />
@@ -175,7 +200,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
               <button
                 className="lg:hidden p-2 hover:text-red-500 transition-colors text-white relative z-50 flex-shrink-0 cursor-pointer"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                aria-label={isMenuOpen ? labels.closeMenu : labels.openMenu}
                 aria-expanded={isMenuOpen}
               >
                 <div className="w-6 h-5 flex flex-col justify-center items-center">
@@ -210,10 +235,10 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
           <div className="min-h-screen h-screen overflow-y-auto px-4 pt-16 pb-6 relative z-[210] pointer-events-auto flex flex-col gap-3">
             <button
               onClick={() => setIsMenuOpen(false)}
-              aria-label="Close menu"
+              aria-label={labels.closeMenu}
               className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors cursor-pointer"
             >
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{labels.close}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="18"
@@ -237,14 +262,14 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   href={isAuthenticated ? "/account" : "#"}
                   onClick={() => isAuthenticated && setIsMenuOpen(false)}
                   className="flex flex-row-reverse items-center gap-3 w-full"
-                  aria-label="Go to account"
+                  aria-label={labels.accountAria}
                 >
                   <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
                     {isHydrated && isAuthenticated && user?.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={user.image}
-                        alt={user.name || "Profile"}
+                        alt={user.name || labels.profileAlt}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -258,13 +283,13 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   <div className="flex flex-col items-end text-right">
                     <span className="text-white text-lg font-semibold leading-tight">
                       {isHydrated && isAuthenticated
-                        ? user?.name || "User"
-                        : "Guest"}
+                        ? user?.name || labels.defaultUser
+                        : labels.guest}
                     </span>
                     <span className="text-gray-400 text-sm leading-tight">
                       {isHydrated && isAuthenticated
-                        ? user?.email || "Signed in"
-                        : "Not signed in"}
+                        ? user?.email || labels.signedIn
+                        : labels.notSignedIn}
                     </span>
                   </div>
                 </Link>
@@ -275,7 +300,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   <Link
                     href="/favorites"
                     className="p-2 text-white hover:text-red-500 transition-colors inline-flex items-center justify-center"
-                    aria-label="Favorites"
+                    aria-label={labels.favorites}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <HeartIcon size={16}></HeartIcon>
@@ -286,7 +311,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                       handleSearchClick();
                     }}
                     className="p-2 text-white hover:text-red-500 transition-colors inline-flex items-center justify-center cursor-pointer"
-                    aria-label="Search"
+                    aria-label={labels.search}
                   >
                     <Search size={16} />
                   </button>
@@ -305,7 +330,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   }}
                   className="w-full bg-red-600 hover:bg-red-700 text-white text-center font-semibold py-3 rounded-lg transition-colors text-lg cursor-pointer"
                 >
-                  Login / Sign up
+                  {labels.loginSignUp}
                 </button>
               )}
 

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { type SyntheticEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -7,12 +9,16 @@ import {
   TMDB_POSTER_SIZE,
   FALLBACK_PROFILE,
 } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface PersonCardProps {
   person: PersonData;
 }
 
 const PersonCard = ({ person }: PersonCardProps) => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const getProfileImage = () => {
     const imageUrl = person.profile_path
       ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${person.profile_path}`
@@ -23,15 +29,15 @@ const PersonCard = ({ person }: PersonCardProps) => {
   const getKnownForText = () => {
     switch (person.known_for_department) {
       case "Acting":
-        return "Actor";
+        return isVietnamese ? "Diễn viên" : "Actor";
       case "Directing":
-        return "Director";
+        return isVietnamese ? "Đạo diễn" : "Director";
       case "Writing":
-        return "Writer";
+        return isVietnamese ? "Biên kịch" : "Writer";
       case "Production":
-        return "Production";
+        return isVietnamese ? "Sản xuất" : "Production";
       default:
-        return person.known_for_department || "Artist";
+        return person.known_for_department || (isVietnamese ? "Nghệ sĩ" : "Artist");
     }
   };
 

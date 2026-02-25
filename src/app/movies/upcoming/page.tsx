@@ -21,6 +21,7 @@ export default async function UpcomingPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let movies: MovieCardData[] = [];
   let totalPages = 1;
@@ -50,14 +51,23 @@ export default async function UpcomingPage({
 
   return (
     <CategoryListingPage
-      title="Upcoming Movies"
-      description={total > 0 ? `${total} upcoming movies` : ""}
+      title={isVietnamese ? "Phim sắp chiếu" : "Upcoming Movies"}
+      description={
+        total > 0
+          ? isVietnamese
+            ? `${total} phim sắp chiếu`
+            : `${total} upcoming movies`
+          : ""
+      }
       total={total}
       items={movies}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/movies/upcoming"
-      emptyMessage="No upcoming movies found"
+      emptyMessage={
+        isVietnamese ? "Không tìm thấy phim sắp chiếu" : "No upcoming movies found"
+      }
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

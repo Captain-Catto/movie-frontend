@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Film, Tv, Grid3X3 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SearchTabsProps {
   selectedType: "movie" | "tv" | "all";
@@ -12,20 +13,23 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   selectedType,
   onTypeChange,
 }) => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const tabs = [
     {
       id: "all" as const,
-      label: "All",
+      label: isVietnamese ? "Tất cả" : "All",
       icon: Grid3X3,
     },
     {
       id: "movie" as const,
-      label: "Movies",
+      label: isVietnamese ? "Phim lẻ" : "Movies",
       icon: Film,
     },
     {
       id: "tv" as const,
-      label: "TV Series",
+      label: isVietnamese ? "Phim bộ" : "TV Series",
       icon: Tv,
     },
   ];

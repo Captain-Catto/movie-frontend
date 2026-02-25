@@ -30,6 +30,7 @@ export function useTVDetailPageClient({
 }: UseTVDetailPageClientOptions): UseTVDetailPageClientResult {
   const numericTvId = Number(tvIdParam);
   const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const [tvData, setTVData] = useState<TVDetail | null>(initialTVData);
   const [loading, setLoading] = useState(() => !initialTVData && !initialError);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -56,7 +57,9 @@ export function useTVDetailPageClient({
         setError(null);
 
         if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
-          throw new Error("Invalid TV series ID");
+          throw new Error(
+            isVietnamese ? "ID phim bộ không hợp lệ" : "Invalid TV series ID"
+          );
         }
 
         const result = await getTVDetailPageDataByTmdbId(numericTvId, language);
@@ -71,7 +74,13 @@ export function useTVDetailPageClient({
           );
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        setError(
+          err instanceof Error
+            ? err.message
+            : isVietnamese
+            ? "Lỗi không xác định"
+            : "Unknown error"
+        );
         setTVData(null);
       } finally {
         setLoading(false);
@@ -80,7 +89,7 @@ export function useTVDetailPageClient({
     };
 
     fetchTVData();
-  }, [numericTvId, tvIdParam, language, initialLanguage]);
+  }, [numericTvId, tvIdParam, language, initialLanguage, isVietnamese]);
 
   return {
     tvData,

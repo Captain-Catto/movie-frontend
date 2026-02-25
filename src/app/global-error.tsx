@@ -1,11 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 export default function GlobalError({
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [isVietnamese, setIsVietnamese] = useState(false);
+
+  useEffect(() => {
+    const cookie = document.cookie;
+    setIsVietnamese(
+      cookie.includes("preferred-language=vi-VN") ||
+        cookie.includes("preferred-language=vi")
+    );
+  }, []);
+
   return (
     <html>
       <body>
@@ -14,10 +26,12 @@ export default function GlobalError({
             <div className="mb-8">
               <div className="text-6xl mb-4">💥</div>
               <h2 className="text-3xl font-bold text-white mb-4">
-                Critical Error
+                {isVietnamese ? "Lỗi nghiêm trọng" : "Critical Error"}
               </h2>
               <p className="text-gray-400 text-lg mb-4">
-                A critical error occurred. Please refresh the page.
+                {isVietnamese
+                  ? "Đã xảy ra lỗi nghiêm trọng. Vui lòng tải lại trang."
+                  : "A critical error occurred. Please refresh the page."}
               </p>
             </div>
 
@@ -26,7 +40,7 @@ export default function GlobalError({
                 onClick={reset}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
-                Refresh Page
+                {isVietnamese ? "Tải lại trang" : "Refresh Page"}
               </button>
             </div>
           </div>

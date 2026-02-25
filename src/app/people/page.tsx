@@ -6,6 +6,7 @@ import {
   parsePageParam,
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
+import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getPeoplePageData } from "@/lib/public-page-data";
 
 interface PeoplePageProps {
@@ -15,6 +16,8 @@ interface PeoplePageProps {
 const PeoplePage = async ({ searchParams }: PeoplePageProps) => {
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
+  const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   const { items: people, totalPages, error } = await getPeoplePageData(
     currentPage
@@ -26,10 +29,12 @@ const PeoplePage = async ({ searchParams }: PeoplePageProps) => {
         <Container withHeaderOffset>
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">
-              Actors & Directors
+              {isVietnamese ? "Diễn viên & Đạo diễn" : "Actors & Directors"}
             </h1>
             <p className="text-gray-400">
-              Explore a whole world of actors and filmmakers
+              {isVietnamese
+                ? "Khám phá thế giới diễn viên và nhà làm phim"
+                : "Explore a whole world of actors and filmmakers"}
             </p>
           </div>
 

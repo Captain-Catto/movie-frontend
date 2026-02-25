@@ -10,6 +10,7 @@ import { ToastContainer } from "@/components/toast/ToastContainer";
 import { InitialPageLoader } from "@/components/loading/InitialPageLoader";
 import { TopLineLoader } from "@/components/loading/TopLineLoader";
 import EffectManager from "@/components/effects/EffectManager";
+import { getServerPreferredLanguage } from "@/lib/server-language";
 
 export const metadata: Metadata = {
   title: {
@@ -66,13 +67,20 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const language = await getServerPreferredLanguage();
+  const htmlLang = language.toLowerCase().startsWith("vi") ? "vi" : "en";
+
   return (
-    <html lang="en" data-scroll-behavior="smooth" className="overflow-x-hidden">
+    <html
+      lang={htmlLang}
+      data-scroll-behavior="smooth"
+      className="overflow-x-hidden"
+    >
       <body
         className={`${inter.variable} ${roboto.variable} antialiased overflow-x-hidden`}
       >

@@ -13,6 +13,7 @@ import GenreBadge from "@/components/ui/GenreBadge";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 import { analyticsService } from "@/services/analytics.service";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Import Swiper styles
 import "swiper/css";
@@ -27,6 +28,8 @@ interface HeroSectionProps {
 }
 
 const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const [activeIndex, setActiveIndex] = useState(0);
   const swiperRef = useRef<SwiperType | null>(null);
   const { breakpoint } = useWindowWidth();
@@ -186,7 +189,13 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                       {/* Media Type */}
                       <div className="tag-media-type">
                         <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold">
-                          {movie.href.includes("/tv/") ? "TV Series" : "Movie"}
+                          {movie.href.includes("/tv/")
+                            ? isVietnamese
+                              ? "Phim bộ"
+                              : "TV Series"
+                            : isVietnamese
+                            ? "Phim lẻ"
+                            : "Movie"}
                         </span>
                       </div>
 

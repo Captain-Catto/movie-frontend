@@ -20,6 +20,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const { currentPage, fetchType, currentFilters, paginationQuery } =
     parseBrowsePageParams(params);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   const { items: movies, totalPages, error } = await getBrowsePageData({
     currentPage,
@@ -42,7 +43,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
         {error && (
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-6">
-            Error: {error}
+            {isVietnamese ? "Lỗi:" : "Error:"} {error}
           </div>
         )}
 
@@ -69,11 +70,17 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 />
               </svg>
               <h3 className="text-lg font-medium text-white mb-2">
-                No movies found
+                {isVietnamese ? "Không tìm thấy nội dung" : "No movies found"}
               </h3>
-              <p>No movies found with the current filters.</p>
+              <p>
+                {isVietnamese
+                  ? "Không có nội dung phù hợp với bộ lọc hiện tại."
+                  : "No movies found with the current filters."}
+              </p>
               <p className="text-sm mt-2">
-                Try changing the filters to see different results.
+                {isVietnamese
+                  ? "Hãy thử thay đổi bộ lọc để xem kết quả khác."
+                  : "Try changing the filters to see different results."}
               </p>
             </div>
           </div>

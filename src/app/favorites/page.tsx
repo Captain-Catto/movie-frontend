@@ -12,6 +12,7 @@ import { favoriteToMovieCardData } from "./utils/favoriteHelpers";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import { SKELETON_COUNT_MOVIE } from "@/constants/app.constants";
 import { Pagination } from "@/components/ui/Pagination";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState<ProcessedFavorite[]>([]);
@@ -22,6 +23,8 @@ const FavoritesPage = () => {
   const [, setTotal] = useState(0);
   const [, setHasMore] = useState(true);
   const { isAuthenticated } = useAuth();
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   // Fetch favorites
   const fetchFavorites = useCallback(
@@ -50,12 +53,16 @@ const FavoritesPage = () => {
         setTotal(favData.total);
       } catch (err) {
         console.error("Error fetching favorites:", err);
-        setError("Failed to load favorites. Please try again.");
+        setError(
+          isVietnamese
+            ? "Không thể tải danh sách yêu thích. Vui lòng thử lại."
+            : "Failed to load favorites. Please try again."
+        );
       } finally {
         setLoading(false);
       }
     },
-    [isAuthenticated]
+    [isAuthenticated, isVietnamese]
   );
 
   // Initial load
@@ -75,9 +82,13 @@ const FavoritesPage = () => {
         <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
           <div className="text-center">
             <Heart className="mx-auto mb-4 text-red-500" size={64} />
-            <h1 className="text-2xl font-bold mb-2">Your Favorites</h1>
+            <h1 className="text-2xl font-bold mb-2">
+              {isVietnamese ? "Danh sách yêu thích" : "Your Favorites"}
+            </h1>
             <p className="text-gray-400">
-              Please login to view your favorite movies
+              {isVietnamese
+                ? "Vui lòng đăng nhập để xem phim yêu thích"
+                : "Please login to view your favorite movies"}
             </p>
           </div>
         </div>
@@ -88,7 +99,10 @@ const FavoritesPage = () => {
   if (loading) {
     return (
       <Layout>
-        <PageSkeleton title="My Favorites" items={SKELETON_COUNT_MOVIE} />
+        <PageSkeleton
+          title={isVietnamese ? "Yêu thích của tôi" : "My Favorites"}
+          items={SKELETON_COUNT_MOVIE}
+        />
       </Layout>
     );
   }
@@ -103,7 +117,7 @@ const FavoritesPage = () => {
               onClick={() => fetchFavorites(1)}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
             >
-              Retry
+              {isVietnamese ? "Thử lại" : "Retry"}
             </button>
           </div>
         </div>
@@ -117,9 +131,13 @@ const FavoritesPage = () => {
         <Container withHeaderOffset>
           <div className="flex items-center gap-3 mb-8">
             <Heart className="text-red-500 fill-current" size={32} />
-            <h1 className="text-3xl font-bold">My Favorites</h1>
+            <h1 className="text-3xl font-bold">
+              {isVietnamese ? "Yêu thích của tôi" : "My Favorites"}
+            </h1>
             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
-              {favorites.length} movie{favorites.length !== 1 ? "s" : ""}
+              {isVietnamese
+                ? `${favorites.length} phim`
+                : `${favorites.length} movie${favorites.length !== 1 ? "s" : ""}`}
             </span>
           </div>
 
@@ -127,10 +145,12 @@ const FavoritesPage = () => {
             <div className="text-center py-16">
               <Heart className="mx-auto mb-4 text-gray-600" size={64} />
               <h2 className="text-xl font-semibold mb-2 text-gray-400">
-                No favorites yet
+                {isVietnamese ? "Chưa có mục yêu thích" : "No favorites yet"}
               </h2>
               <p className="text-gray-500">
-                Start adding movies to your favorites!
+                {isVietnamese
+                  ? "Hãy thêm phim vào danh sách yêu thích!"
+                  : "Start adding movies to your favorites!"}
               </p>
             </div>
           ) : (

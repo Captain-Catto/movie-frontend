@@ -21,6 +21,7 @@ export default async function NowPlayingPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let movies: MovieCardData[] = [];
   let totalPages = 1;
@@ -50,14 +51,21 @@ export default async function NowPlayingPage({
 
   return (
     <CategoryListingPage
-      title="Now Playing Movies"
-      description={total > 0 ? `${total} movies now playing in theaters` : ""}
+      title={isVietnamese ? "Phim đang chiếu" : "Now Playing Movies"}
+      description={
+        total > 0
+          ? isVietnamese
+            ? `${total} phim đang chiếu ngoài rạp`
+            : `${total} movies now playing in theaters`
+          : ""
+      }
       total={total}
       items={movies}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/movies/now-playing"
-      emptyMessage="No movies found"
+      emptyMessage={isVietnamese ? "Không tìm thấy phim" : "No movies found"}
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

@@ -21,6 +21,7 @@ export default async function PopularTVPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let tvShows: MovieCardData[] = [];
   let totalPages = 1;
@@ -50,14 +51,23 @@ export default async function PopularTVPage({
 
   return (
     <CategoryListingPage
-      title="Popular TV Shows"
-      description="Discover the TV shows audiences are watching and talking about the most."
+      title={isVietnamese ? "Phim bộ phổ biến" : "Popular TV Shows"}
+      description={
+        isVietnamese
+          ? "Khám phá các phim bộ được khán giả xem và bàn luận nhiều nhất."
+          : "Discover the TV shows audiences are watching and talking about the most."
+      }
       total={total}
       items={tvShows}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/tv/popular"
-      emptyMessage="No popular TV shows found"
+      emptyMessage={
+        isVietnamese
+          ? "Không tìm thấy phim bộ phổ biến"
+          : "No popular TV shows found"
+      }
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

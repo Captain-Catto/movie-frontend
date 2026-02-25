@@ -15,6 +15,8 @@ import { analyticsService } from "@/services/analytics.service";
 import type { MovieDetail } from "@/types/content.types";
 import type { CastMember } from "@/types";
 import { useMovieDetailPageClient } from "@/hooks/pages/useMovieDetailPageClient";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLocaleFromLanguage } from "@/constants/app.constants";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -40,6 +42,9 @@ const MovieDetailPageClient = ({
   initialContentType,
   initialError,
 }: MovieDetailPageClientProps) => {
+  const { language } = useLanguage();
+  const locale = getLocaleFromLanguage(language);
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const {
     movieData,
     loading,
@@ -53,6 +58,93 @@ const MovieDetailPageClient = ({
     initialContentType,
     initialError,
   });
+
+  const labels = {
+    unknown: isVietnamese ? "Không rõ" : "Unknown",
+    unknownTitle: isVietnamese ? "Không rõ tiêu đề" : "Unknown Title",
+    loadingContent: isVietnamese
+      ? "Không thể tải nội dung."
+      : "Unable to load content.",
+    errorPrefix: isVietnamese ? "Lỗi:" : "Error:",
+    watchNow: isVietnamese ? "Xem ngay" : "Watch Now",
+    overview: isVietnamese ? "Tổng quan" : "Overview",
+    cast: isVietnamese ? "Diễn viên" : "Cast",
+    contentInfo: isVietnamese ? "Thông tin phim" : "Movie Info",
+    director: isVietnamese ? "Đạo diễn:" : "Director:",
+    country: isVietnamese ? "Quốc gia:" : "Country:",
+    releaseYear: isVietnamese ? "Năm phát hành:" : "Release Year:",
+    runtime: isVietnamese ? "Thời lượng:" : "Runtime:",
+    runtimeEpisode: isVietnamese ? "Thời lượng/tập:" : "Runtime/Episode:",
+    quality: isVietnamese ? "Chất lượng:" : "Quality:",
+    language: isVietnamese ? "Ngôn ngữ:" : "Language:",
+    status: isVietnamese ? "Trạng thái:" : "Status:",
+    youMightAlsoLike: isVietnamese ? "Có thể bạn cũng thích" : "You Might Also Like",
+    notAvailable: isVietnamese ? "Không có" : "N/A",
+  };
+
+  const getLocalizedCountryName = (countryCodeOrName: string) => {
+    const trimmed = countryCodeOrName.trim();
+    if (!trimmed) return labels.unknown;
+
+    if (/^[A-Za-z]{2}$/.test(trimmed)) {
+      try {
+        const regionNames = new Intl.DisplayNames([locale], { type: "region" });
+        return regionNames.of(trimmed.toUpperCase()) || trimmed.toUpperCase();
+      } catch {
+        return trimmed.toUpperCase();
+      }
+    }
+
+    return trimmed;
+  };
+
+  const getLocalizedLanguageName = (languageCodeOrName: string | undefined) => {
+    if (!languageCodeOrName) return labels.notAvailable;
+
+    const raw = languageCodeOrName.trim();
+    if (!raw) return labels.notAvailable;
+
+    if (/^[A-Za-z]{2,3}$/.test(raw)) {
+      try {
+        const languageNames = new Intl.DisplayNames([locale], { type: "language" });
+        const localized = languageNames.of(raw.toLowerCase());
+        return localized
+          ? localized.charAt(0).toUpperCase() + localized.slice(1)
+          : raw.toUpperCase();
+      } catch {
+        return raw.toUpperCase();
+      }
+    }
+
+    if (isVietnamese && raw.toLowerCase() === "vietsub") {
+      return "Phụ đề Việt";
+    }
+
+    return raw;
+  };
+
+  const getLocalizedStatus = (status: string | undefined) => {
+    if (!status) return labels.unknown;
+
+    if (!isVietnamese) return status;
+
+    switch (status) {
+      case "Released":
+        return "Đã phát hành";
+      case "Rumored":
+        return "Tin đồn";
+      case "Planned":
+        return "Đã lên kế hoạch";
+      case "In Production":
+        return "Đang sản xuất";
+      case "Post Production":
+        return "Hậu kỳ";
+      case "Canceled":
+        return "Đã hủy";
+      default:
+        return status;
+    }
+  };
 
   // console.log("🎨 [MovieDetailPage] Render - State:", {
   //   loading,
@@ -76,7 +168,7 @@ const MovieDetailPageClient = ({
       <Layout>
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
-            {error || "Unable to load content."}
+            {error || labels.loadingContent}
           </div>
         </div>
       </Layout>
@@ -94,7 +186,7 @@ const MovieDetailPageClient = ({
       <div className="min-h-screen">
         {error && (
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 mx-4 rounded mb-4">
-            Error: {error}
+            {labels.errorPrefix} {error}
           </div>
         )}
 
@@ -232,14 +324,14 @@ const MovieDetailPageClient = ({
                         clipRule="evenodd"
                       />
                     </svg>
-                    Watch Now
+                    {labels.watchNow}
                   </Link>
 
                   <FavoriteButton
                     movie={{
                       id: movieData.id,
                       tmdbId: movieData.tmdbId,
-                      title: movieData.title || "Unknown Title",
+                      title: movieData.title || labels.unknownTitle,
                       overview: movieData.description,
                       poster_path: movieData.posterImage,
                       backdrop_path: movieData.backgroundImage,
@@ -266,7 +358,7 @@ const MovieDetailPageClient = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-6">Overview</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">{labels.overview}</h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
                   {movieData.description}
@@ -277,7 +369,7 @@ const MovieDetailPageClient = ({
               {(movieData.cast && movieData.cast.length > 0) ||
               creditsLoading ? (
                 <>
-                  <h3 className="text-2xl font-bold text-white mb-6">Cast</h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">{labels.cast}</h3>
                   {creditsLoading ? (
                     <CastSkeleton />
                   ) : (
@@ -326,12 +418,10 @@ const MovieDetailPageClient = ({
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
-                <h3 className="text-xl font-bold text-white mb-4">
-                  Movie Info
-                </h3>
+                <h3 className="text-xl font-bold text-white mb-4">{labels.contentInfo}</h3>
                 <div className="space-y-3 text-gray-300">
                   <div>
-                    <span className="text-gray-500">Director:</span>
+                    <span className="text-gray-500">{labels.director}</span>
                     <span className="ml-2">
                       {creditsLoading ? (
                         <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
@@ -343,14 +433,14 @@ const MovieDetailPageClient = ({
                           {movieData.director.name}
                         </Link>
                       ) : (
-                        "Unknown"
+                        labels.unknown
                       )}
                     </span>
                   </div>
                   {(movieData.cast && movieData.cast.length > 0) ||
                   creditsLoading ? (
                     <div>
-                      <span className="text-gray-500">Cast:</span>
+                      <span className="text-gray-500">{labels.cast}:</span>
                       <div className="mt-1">
                         {creditsLoading ? (
                           <div className="flex flex-wrap gap-2">
@@ -378,41 +468,43 @@ const MovieDetailPageClient = ({
                     </div>
                   ) : null}
                   <div>
-                    <span className="text-gray-500">Country:</span>
+                    <span className="text-gray-500">{labels.country}</span>
                     <span className="ml-2">
                       {creditsLoading ? (
                         <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
                       ) : (
-                        movieData.country || "Unknown"
+                        getLocalizedCountryName(movieData.country || labels.unknown)
                       )}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Release Year:</span>
+                    <span className="text-gray-500">{labels.releaseYear}</span>
                     <span className="ml-2">{movieData.year}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">
                       {movieData.contentType === "tv"
-                        ? "Runtime/Episode:"
-                        : "Runtime:"}
+                        ? labels.runtimeEpisode
+                        : labels.runtime}
                     </span>
                     <span className="ml-2">{movieData.runtime}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Quality:</span>
+                    <span className="text-gray-500">{labels.quality}</span>
                     <span className="ml-2">{movieData.quality}</span>
                   </div>
                   {movieData.language && (
                     <div>
-                      <span className="text-gray-500">Language:</span>
-                      <span className="ml-2">{movieData.language}</span>
+                      <span className="text-gray-500">{labels.language}</span>
+                      <span className="ml-2">
+                        {getLocalizedLanguageName(movieData.language)}
+                      </span>
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-500">Status:</span>
+                    <span className="text-gray-500">{labels.status}</span>
                     <span className="ml-2 text-green-500">
-                      {movieData.status}
+                      {getLocalizedStatus(movieData.status)}
                     </span>
                   </div>
                 </div>
@@ -428,7 +520,7 @@ const MovieDetailPageClient = ({
               <section className="py-12 max-w-6xl mx-auto">
                 <div className="container mx-auto px-4 pt-16">
                   <h2 className="text-3xl font-bold text-white mb-8">
-                    You Might Also Like
+                    {labels.youMightAlsoLike}
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {Array.from({ length: 12 }).map((_, index) => (

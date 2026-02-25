@@ -19,6 +19,7 @@ export default async function PopularPage({ searchParams }: PopularPageProps) {
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let movies: MovieCardData[] = [];
   let totalPages = 1;
@@ -48,14 +49,23 @@ export default async function PopularPage({ searchParams }: PopularPageProps) {
 
   return (
     <CategoryListingPage
-      title="Popular Movies"
-      description={total > 0 ? `${total} popular movies` : ""}
+      title={isVietnamese ? "Phim phổ biến" : "Popular Movies"}
+      description={
+        total > 0
+          ? isVietnamese
+            ? `${total} phim phổ biến`
+            : `${total} popular movies`
+          : ""
+      }
       total={total}
       items={movies}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/movies/popular"
-      emptyMessage="No popular movies found"
+      emptyMessage={
+        isVietnamese ? "Không tìm thấy phim phổ biến" : "No popular movies found"
+      }
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

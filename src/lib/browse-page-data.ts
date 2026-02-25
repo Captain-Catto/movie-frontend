@@ -61,11 +61,11 @@ export function getBrowsePageTitleByLanguage(
 
   switch (fetchType) {
     case "tv":
-      return isVietnamese ? "📺 Duyet Phim Bo" : "📺 Browse TV Series";
+      return isVietnamese ? "📺 Duyệt Phim Bộ" : "📺 Browse TV Series";
     case "trending":
-      return isVietnamese ? "🔥 Duyet Thinh Hanh" : "🔥 Browse Trending";
+      return isVietnamese ? "🔥 Duyệt Thịnh Hành" : "🔥 Browse Trending";
     default:
-      return isVietnamese ? "🎬 Duyet Phim Le" : "🎬 Browse Movies";
+      return isVietnamese ? "🎬 Duyệt Phim Lẻ" : "🎬 Browse Movies";
   }
 }
 

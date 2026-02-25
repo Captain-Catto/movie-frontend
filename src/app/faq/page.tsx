@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const faqs = [
+const faqsEn = [
   {
     question: "How do I create an account?",
     answer:
@@ -81,6 +82,84 @@ const faqs = [
   },
 ];
 
+const faqsVi = [
+  {
+    question: "Làm sao để tạo tài khoản?",
+    answer:
+      'Nhấn nút "Đăng nhập" ở góc trên bên phải, sau đó chọn "Đăng ký". Bạn cũng có thể đăng ký nhanh bằng tài khoản Google.',
+  },
+  {
+    question: "MovieStream có miễn phí không?",
+    answer:
+      "Có. MovieStream cung cấp nhiều nội dung miễn phí. Một số nội dung cao cấp có thể yêu cầu gói trả phí trong tương lai.",
+  },
+  {
+    question: "Tôi có thể xem trên thiết bị nào?",
+    answer:
+      "Bạn có thể xem trên mọi thiết bị có trình duyệt web như máy tính, laptop, tablet và điện thoại. Hỗ trợ các trình duyệt phổ biến như Chrome, Firefox, Safari và Edge.",
+  },
+  {
+    question: "Làm sao để tìm phim?",
+    answer:
+      "Nhấn biểu tượng tìm kiếm trên thanh điều hướng hoặc dùng Ctrl+K (Cmd+K trên Mac) để mở modal tìm kiếm. Bạn có thể tìm theo tên và lọc theo phim lẻ/phim bộ.",
+  },
+  {
+    question: "Tôi có thể tải phim để xem offline không?",
+    answer:
+      "Hiện tại chưa hỗ trợ xem offline. Nội dung cần được phát trực tuyến khi có kết nối internet.",
+  },
+  {
+    question: "Làm sao để thêm phim vào yêu thích?",
+    answer:
+      "Nhấn biểu tượng trái tim trên thẻ phim/phim bộ để thêm vào danh sách yêu thích. Bạn có thể xem toàn bộ trong trang tài khoản.",
+  },
+  {
+    question: "Có những mức chất lượng video nào?",
+    answer:
+      "Chất lượng video phụ thuộc vào thiết bị và tốc độ mạng. Trình phát sẽ tự điều chỉnh để có trải nghiệm phù hợp.",
+  },
+  {
+    question: "Tôi có thể theo dõi tập đã xem của phim bộ không?",
+    answer:
+      "Hiện tại việc theo dõi tập đã xem hoạt động trong luồng xem phim bộ. Trang Continue Watching riêng đang được phát triển.",
+  },
+  {
+    question: "Tôi có thể đánh giá và nhận xét phim không?",
+    answer:
+      "Có. Bạn có thể đánh giá và bình luận ở trang chi tiết nội dung.",
+  },
+  {
+    question: "Bao lâu thì có nội dung mới?",
+    answer:
+      "Kho nội dung được cập nhật thường xuyên. Hãy theo dõi trang chủ và mục thịnh hành để xem nội dung mới nhất.",
+  },
+  {
+    question: "Tôi quên mật khẩu thì làm sao?",
+    answer:
+      'Nhấn "Quên mật khẩu" ở trang đăng nhập và làm theo hướng dẫn để đặt lại mật khẩu qua email.',
+  },
+  {
+    question: "Làm sao để xóa tài khoản?",
+    answer:
+      "Vui lòng liên hệ đội ngũ hỗ trợ qua support@moviestream.com. Chúng tôi sẽ xử lý trong vòng 48 giờ.",
+  },
+  {
+    question: "Vì sao video không phát?",
+    answer:
+      "Hãy thử tải lại trang, xóa cache trình duyệt hoặc kiểm tra kết nối mạng. Nếu vẫn lỗi, vui lòng liên hệ hỗ trợ.",
+  },
+  {
+    question: "Tôi có thể đổi email không?",
+    answer:
+      "Có. Bạn có thể cập nhật email trong phần cài đặt tài khoản và xác minh email mới sau khi thay đổi.",
+  },
+  {
+    question: "Làm sao để báo cáo nội dung không phù hợp?",
+    answer:
+      "Nếu gặp nội dung không phù hợp, vui lòng gửi email tới support@moviestream.com kèm thông tin chi tiết.",
+  },
+];
+
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -107,15 +186,21 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 export default function FAQPage() {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const faqs = isVietnamese ? faqsVi : faqsEn;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Frequently Asked Questions
+            {isVietnamese ? "Câu hỏi thường gặp" : "Frequently Asked Questions"}
           </h1>
           <p className="text-gray-400 text-lg">
-            Find answers to common questions about MovieStream
+            {isVietnamese
+              ? "Tìm câu trả lời cho các thắc mắc phổ biến về MovieStream"
+              : "Find answers to common questions about MovieStream"}
           </p>
         </div>
 
@@ -128,17 +213,18 @@ export default function FAQPage() {
         <div className="mt-12 text-center">
           <div className="bg-gray-800 border border-gray-700 rounded-lg p-8">
             <h2 className="text-2xl font-semibold text-white mb-4">
-              Still have questions?
+              {isVietnamese ? "Vẫn còn thắc mắc?" : "Still have questions?"}
             </h2>
             <p className="text-gray-400 mb-6">
-              Can&apos;t find the answer you&apos;re looking for? Feel free to
-              reach out to our support team.
+              {isVietnamese
+                ? "Nếu chưa tìm thấy câu trả lời, hãy liên hệ đội ngũ hỗ trợ của chúng tôi."
+                : "Can&apos;t find the answer you&apos;re looking for? Feel free to reach out to our support team."}
             </p>
             <a
               href="mailto:support@moviestream.com"
               className="inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors"
             >
-              Contact Support
+              {isVietnamese ? "Liên hệ hỗ trợ" : "Contact Support"}
             </a>
           </div>
         </div>

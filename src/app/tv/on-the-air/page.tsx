@@ -21,6 +21,7 @@ export default async function OnTheAirTVPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let tvShows: MovieCardData[] = [];
   let totalPages = 1;
@@ -50,14 +51,23 @@ export default async function OnTheAirTVPage({
 
   return (
     <CategoryListingPage
-      title="Currently Airing TV Shows"
-      description="Stay current with series that are actively broadcasting new episodes."
+      title={isVietnamese ? "Phim bộ đang phát sóng" : "Currently Airing TV Shows"}
+      description={
+        isVietnamese
+          ? "Theo dõi các series đang phát sóng tập mới."
+          : "Stay current with series that are actively broadcasting new episodes."
+      }
       total={total}
       items={tvShows}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/tv/on-the-air"
-      emptyMessage="No currently airing TV shows found"
+      emptyMessage={
+        isVietnamese
+          ? "Không tìm thấy phim bộ đang phát sóng"
+          : "No currently airing TV shows found"
+      }
+      totalItemsLabel={isVietnamese ? "mục" : "items"}
       error={error}
     />
   );

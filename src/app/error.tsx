@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Error({
   error,
@@ -10,6 +11,9 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   useEffect(() => {
     console.error("Error caught by error boundary:", error);
   }, [error]);
@@ -20,10 +24,12 @@ export default function Error({
         <div className="mb-8">
           <div className="text-6xl mb-4">⚠️</div>
           <h2 className="text-3xl font-bold text-white mb-4">
-            Something Went Wrong
+            {isVietnamese ? "Đã xảy ra lỗi" : "Something Went Wrong"}
           </h2>
           <p className="text-gray-400 text-lg mb-4">
-            We encountered an unexpected error. Please try again.
+            {isVietnamese
+              ? "Đã có lỗi không mong muốn. Vui lòng thử lại."
+              : "We encountered an unexpected error. Please try again."}
           </p>
           {process.env.NODE_ENV === "development" && (
             <div className="mt-4 p-4 bg-gray-800 rounded-lg text-left">
@@ -32,7 +38,7 @@ export default function Error({
               </p>
               {error.digest && (
                 <p className="text-gray-500 text-xs mt-2">
-                  Error ID: {error.digest}
+                  {isVietnamese ? "Mã lỗi:" : "Error ID:"} {error.digest}
                 </p>
               )}
             </div>
@@ -44,13 +50,13 @@ export default function Error({
             onClick={reset}
             className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            Try Again
+            {isVietnamese ? "Thử lại" : "Try Again"}
           </button>
           <Link
             href="/"
             className="inline-block w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            Go Back Home
+            {isVietnamese ? "Về trang chủ" : "Go Back Home"}
           </Link>
         </div>
       </div>

@@ -12,12 +12,16 @@ import {
 import { useComments } from "@/hooks/use-comments";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function CommentSection({
   movieId,
   tvSeriesId,
   className = "",
 }: CommentSectionProps) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const [sortBy] = useState<CommentSortOption>("newest");
 
   const {
@@ -98,7 +102,7 @@ export function CommentSection({
           <CommentForm
             movieId={movieId}
             tvSeriesId={tvSeriesId}
-            placeholder="Write a comment"
+            placeholder={isVietnamese ? "Viết bình luận" : "Write a comment"}
             onSubmit={handleCommentSubmit}
             className="mb-6"
           />
@@ -109,7 +113,9 @@ export function CommentSection({
           {loading && (!comments || comments.length === 0) ? (
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
-              <p className="text-gray-400 mt-3">Loading comments...</p>
+              <p className="text-gray-400 mt-3">
+                {isVietnamese ? "Đang tải bình luận..." : "Loading comments..."}
+              </p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
@@ -140,16 +146,26 @@ export function CommentSection({
                     className="primary-text text-red-500 cursor-pointer hover:text-red-400 block text-center"
                     onClick={loadMore}
                   >
-                    {loading ? "Loading..." : "Load more comments..."}
+                    {loading
+                      ? isVietnamese
+                        ? "Đang tải..."
+                        : "Loading..."
+                      : isVietnamese
+                      ? "Xem thêm bình luận..."
+                      : "Load more comments..."}
                   </a>
                 </div>
               )}
             </>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-400 text-lg mb-2">No comments yet</p>
+              <p className="text-gray-400 text-lg mb-2">
+                {isVietnamese ? "Chưa có bình luận" : "No comments yet"}
+              </p>
               <p className="text-gray-500 text-sm">
-                Be the first to share your thoughts!
+                {isVietnamese
+                  ? "Hãy là người đầu tiên chia sẻ cảm nghĩ của bạn!"
+                  : "Be the first to share your thoughts!"}
               </p>
             </div>
           )}

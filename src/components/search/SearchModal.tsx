@@ -10,6 +10,7 @@ import RecentSearches from "./RecentSearches";
 import SearchTabs from "./SearchTabs";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { useSearch } from "@/hooks/useSearch";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   const {
     searches: recentSearches,
@@ -112,7 +115,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <div className="flex items-center space-x-2">
             <SearchIcon className="w-5 h-5 text-gray-400" />
-            <h2 className="text-lg font-semibold text-white">Search</h2>
+            <h2 className="text-lg font-semibold text-white">
+              {isVietnamese ? "Tìm kiếm" : "Search"}
+            </h2>
           </div>
           <button
             onClick={onClose}

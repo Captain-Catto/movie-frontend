@@ -1,6 +1,36 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
+  const labels = {
+    tagline: isVietnamese
+      ? "Trải nghiệm giải trí đa dạng với kho phim phong phú của chúng tôi."
+      : "Experience great entertainment with our diverse movie collection.",
+    quickLinks: isVietnamese ? "Liên kết nhanh" : "Quick Links",
+    home: isVietnamese ? "Trang chủ" : "Home",
+    newReleases: isVietnamese ? "Mới phát hành" : "New Releases",
+    movies: isVietnamese ? "Phim lẻ" : "Movies",
+    tvSeries: isVietnamese ? "Phim bộ" : "TV Series",
+    trending: isVietnamese ? "Thịnh hành" : "Trending",
+    categories: isVietnamese ? "Thể loại" : "Categories",
+    action: isVietnamese ? "Hành động" : "Action",
+    romance: isVietnamese ? "Lãng mạn" : "Romance",
+    comedy: isVietnamese ? "Hài" : "Comedy",
+    animation: isVietnamese ? "Hoạt hình" : "Animation",
+    horror: isVietnamese ? "Kinh dị" : "Horror",
+    contact: isVietnamese ? "Liên hệ" : "Contact",
+    copyright: isVietnamese
+      ? "© 2024 MovieStream. Bảo lưu mọi quyền."
+      : "© 2024 MovieStream. All rights reserved.",
+    terms: isVietnamese ? "Điều khoản sử dụng" : "Terms of Use",
+    privacy: isVietnamese ? "Chính sách bảo mật" : "Privacy Policy",
+  };
+
   return (
     <footer className="bg-gray-900 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -16,7 +46,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-gray-400">
-              Experience great entertainment with our diverse movie collection.
+              {labels.tagline}
             </p>
             <div className="flex space-x-4">
               <Link
@@ -104,7 +134,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-white">
-              Quick Links
+              {labels.quickLinks}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -112,7 +142,7 @@ const Footer = () => {
                   href="/"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Home
+                  {labels.home}
                 </Link>
               </li>
               <li>
@@ -120,7 +150,7 @@ const Footer = () => {
                   href="/browse?sort=latest"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  New Releases
+                  {labels.newReleases}
                 </Link>
               </li>
               <li>
@@ -128,7 +158,7 @@ const Footer = () => {
                   href="/movies"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Movies
+                  {labels.movies}
                 </Link>
               </li>
               <li>
@@ -136,7 +166,7 @@ const Footer = () => {
                   href="/tv"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  TV Series
+                  {labels.tvSeries}
                 </Link>
               </li>
               <li>
@@ -144,7 +174,7 @@ const Footer = () => {
                   href="/trending"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Trending
+                  {labels.trending}
                 </Link>
               </li>
             </ul>
@@ -152,14 +182,16 @@ const Footer = () => {
 
           {/* Categories */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Categories</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">
+              {labels.categories}
+            </h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/browse?type=movie&genres=28"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Action
+                  {labels.action}
                 </Link>
               </li>
               <li>
@@ -167,7 +199,7 @@ const Footer = () => {
                   href="/browse?type=movie&genres=10749"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Romance
+                  {labels.romance}
                 </Link>
               </li>
               <li>
@@ -175,7 +207,7 @@ const Footer = () => {
                   href="/browse?type=movie&genres=35"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Comedy
+                  {labels.comedy}
                 </Link>
               </li>
               <li>
@@ -183,7 +215,7 @@ const Footer = () => {
                   href="/browse?type=movie&genres=16"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Animation
+                  {labels.animation}
                 </Link>
               </li>
               <li>
@@ -191,7 +223,7 @@ const Footer = () => {
                   href="/browse?type=movie&genres=27"
                   className="text-gray-400 hover:text-red-500 transition-colors"
                 >
-                  Horror
+                  {labels.horror}
                 </Link>
               </li>
             </ul>
@@ -199,7 +231,9 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-white">Contact</h3>
+            <h3 className="text-lg font-semibold mb-4 text-white">
+              {labels.contact}
+            </h3>
             <ul className="space-y-4">
               <li className="flex items-center text-gray-400">
                 <svg
@@ -244,20 +278,20 @@ const Footer = () => {
         <div className="pt-8 border-t border-gray-800">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-gray-400 text-sm">
-              © 2024 MovieStream. All rights reserved.
+              {labels.copyright}
             </p>
             <div className="flex space-x-6">
               <Link
                 href="/terms"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
-                Terms of Use
+                {labels.terms}
               </Link>
               <Link
                 href="/privacy"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
-                Privacy Policy
+                {labels.privacy}
               </Link>
               <Link
                 href="/faq"

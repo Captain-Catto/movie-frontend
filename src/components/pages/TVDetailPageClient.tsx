@@ -46,7 +46,38 @@ const TVDetailPageClient = ({
     initialError,
   });
   const locale = getLocaleFromLanguage(language);
+  const isVietnamese = language.toLowerCase().startsWith("vi");
   const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const labels = {
+    seriesInfo: isVietnamese ? "Thông Tin Series" : "Series Info",
+    createdBy: isVietnamese ? "Tạo bởi:" : "Created by:",
+    cast: isVietnamese ? "Diễn viên:" : "Cast:",
+    country: isVietnamese ? "Quốc gia:" : "Country:",
+    firstAirDate: isVietnamese ? "Ngày phát sóng đầu:" : "First Air Date:",
+    lastAirDate: isVietnamese ? "Ngày phát sóng cuối:" : "Last Air Date:",
+    seasons: isVietnamese ? "Số mùa:" : "Seasons:",
+    episodes: isVietnamese ? "Số tập:" : "Episodes:",
+    runtimePerEpisode: isVietnamese
+      ? "Thời lượng/tập:"
+      : "Runtime/Episode:",
+    language: isVietnamese ? "Ngôn ngữ:" : "Language:",
+    status: isVietnamese ? "Trạng thái:" : "Status:",
+    loading: isVietnamese ? "Đang tải..." : "Loading...",
+    unknown: isVietnamese ? "Không rõ" : "Unknown",
+    notAvailable: isVietnamese ? "Không có" : "N/A",
+    unableToLoad: isVietnamese
+      ? "Không thể tải chi tiết phim bộ."
+      : "Unable to load TV series details.",
+    tvSeriesTag: isVietnamese ? "Phim bộ" : "TV Series",
+    watchSeries: isVietnamese ? "Xem phim bộ" : "Watch Series",
+    overview: isVietnamese ? "Tổng quan" : "Overview",
+    readMore: isVietnamese ? "Xem thêm" : "Read more",
+    showLess: isVietnamese ? "Thu gọn" : "Show less",
+    noDescription: isVietnamese ? "Chưa có mô tả." : "No description available.",
+    youMayAlsoLike: isVietnamese ? "Có thể bạn cũng thích" : "You May Also Like",
+    minutesPerEpisode: isVietnamese ? "phút/tập" : "min/ep",
+  };
 
   // Helper functions
   const isLocalFallback = (path: string | null) =>
@@ -67,16 +98,64 @@ const TVDetailPageClient = ({
   };
 
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return labels.notAvailable;
     return new Date(dateString).toLocaleDateString(locale);
   };
 
   const formatRuntime = (runtimes: number[]) => {
-    if (!runtimes || runtimes.length === 0) return "N/A";
+    if (!runtimes || runtimes.length === 0) return labels.notAvailable;
     const avgRuntime = Math.round(
       runtimes.reduce((a, b) => a + b, 0) / runtimes.length
     );
-    return `${avgRuntime} min/ep`;
+    return `${avgRuntime} ${labels.minutesPerEpisode}`;
+  };
+
+  const getLocalizedCountryName = (countryCodeOrName: string) => {
+    const trimmed = countryCodeOrName.trim();
+    if (!trimmed) return labels.unknown;
+
+    if (/^[A-Za-z]{2}$/.test(trimmed)) {
+      try {
+        const regionNames = new Intl.DisplayNames([locale], { type: "region" });
+        return regionNames.of(trimmed.toUpperCase()) || trimmed.toUpperCase();
+      } catch {
+        return trimmed.toUpperCase();
+      }
+    }
+
+    return trimmed;
+  };
+
+  const getLocalizedLanguageName = (languageCode: string | undefined) => {
+    if (!languageCode) return labels.notAvailable;
+
+    try {
+      const languageNames = new Intl.DisplayNames([locale], { type: "language" });
+      const localized = languageNames.of(languageCode.toLowerCase());
+      return localized
+        ? localized.charAt(0).toUpperCase() + localized.slice(1)
+        : languageCode.toUpperCase();
+    } catch {
+      return languageCode.toUpperCase();
+    }
+  };
+
+  const getLocalizedStatus = (status: string | undefined) => {
+    if (!status) return labels.unknown;
+
+    if (!isVietnamese) {
+      if (status === "Returning Series") return "On Air";
+      if (status === "Ended") return "Ended";
+      if (status === "Canceled") return "Canceled";
+      if (status === "In Production") return "In Production";
+      return status;
+    }
+
+    if (status === "Returning Series") return "Đang phát sóng";
+    if (status === "Ended") return "Đã kết thúc";
+    if (status === "Canceled") return "Đã hủy";
+    if (status === "In Production") return "Đang sản xuất";
+    return status;
   };
 
   if (loading) {
@@ -92,7 +171,7 @@ const TVDetailPageClient = ({
       <Layout>
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
-            {error || "Unable to load TV series details."}
+            {error || labels.unableToLoad}
           </div>
         </div>
       </Layout>
@@ -153,7 +232,7 @@ const TVDetailPageClient = ({
                     showZero={true}
                   />
                   <span className="bg-red-600 text-white px-3 py-1 rounded-full font-semibold">
-                    TV Series
+                    {labels.tvSeriesTag}
                   </span>
                   <span className="text-gray-300">
                     {formatDate(tvData.firstAirDate)}
@@ -202,7 +281,7 @@ const TVDetailPageClient = ({
                         clipRule="evenodd"
                       />
                     </svg>
-                    Watch Series
+                    {labels.watchSeries}
                   </Link>
 
                   <FavoriteButton
@@ -236,7 +315,9 @@ const TVDetailPageClient = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-6">Overview</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">
+                {labels.overview}
+              </h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
                   {tvData.overview ? (
@@ -249,12 +330,12 @@ const TVDetailPageClient = ({
                           onClick={() => setShowFullDescription(true)}
                           className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors cursor-pointer"
                         >
-                          Read more
+                          {labels.readMore}
                         </button>
                       </>
                     )
                   ) : (
-                    "No description available."
+                    labels.noDescription
                   )}
                 </p>
                 {showFullDescription &&
@@ -264,7 +345,7 @@ const TVDetailPageClient = ({
                       onClick={() => setShowFullDescription(false)}
                       className="mt-2 text-red-400 hover:text-red-300 font-medium transition-colors cursor-pointer"
                     >
-                      Show less
+                      {labels.showLess}
                     </button>
                   )}
               </div>
@@ -272,7 +353,9 @@ const TVDetailPageClient = ({
               {/* Cast Section */}
               {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                 <>
-                  <h3 className="text-2xl font-bold text-white mb-6">Cast</h3>
+                  <h3 className="text-2xl font-bold text-white mb-6">
+                    {labels.cast.replace(":", "")}
+                  </h3>
                   {creditsLoading ? (
                     <CastSkeleton />
                   ) : (
@@ -315,11 +398,11 @@ const TVDetailPageClient = ({
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
                 <h3 className="text-xl font-bold text-white mb-4">
-                  Series Info
+                  {labels.seriesInfo}
                 </h3>
                 <div className="space-y-3 text-gray-300">
                   <div>
-                    <span className="text-gray-500">Created by:</span>
+                    <span className="text-gray-500">{labels.createdBy}</span>
                     <div className="mt-1">
                       {tvData.createdBy && tvData.createdBy.length > 0 ? (
                         tvData.createdBy.map((creator, index: number) => (
@@ -333,7 +416,7 @@ const TVDetailPageClient = ({
                         ))
                       ) : creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                          Loading...
+                          {labels.loading}
                         </span>
                       ) : tvData.creator ? (
                         <Link
@@ -343,17 +426,17 @@ const TVDetailPageClient = ({
                           {tvData.creator.name}
                         </Link>
                       ) : (
-                        "Unknown"
+                        labels.unknown
                       )}
                     </div>
                   </div>
                   {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                     <div>
-                      <span className="text-gray-500">Cast:</span>
+                      <span className="text-gray-500">{labels.cast}</span>
                       <div className="mt-1">
                         {creditsLoading ? (
                           <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                            Loading...
+                            {labels.loading}
                           </span>
                         ) : (
                           tvData.cast
@@ -372,7 +455,7 @@ const TVDetailPageClient = ({
                     </div>
                   ) : null}
                   <div>
-                    <span className="text-gray-500">Country:</span>
+                    <span className="text-gray-500">{labels.country}</span>
                     <div className="mt-1">
                       {tvData.productionCountries &&
                       tvData.productionCountries.length > 0 ? (
@@ -382,7 +465,9 @@ const TVDetailPageClient = ({
                               key={index}
                               className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"
                             >
-                              {country.name || country.iso_3166_1}
+                              {country.name
+                                ? getLocalizedCountryName(country.name)
+                                : getLocalizedCountryName(country.iso_3166_1)}
                             </span>
                           )
                         )
@@ -394,28 +479,28 @@ const TVDetailPageClient = ({
                               key={index}
                               className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"
                             >
-                              {country}
+                              {getLocalizedCountryName(country)}
                             </span>
                           )
                         )
                       ) : creditsLoading ? (
                         <span className="animate-pulse bg-gray-600 rounded px-2 py-1">
-                          Loading...
+                          {labels.loading}
                         </span>
                       ) : (
-                        tvData.country || "Unknown"
+                        getLocalizedCountryName(tvData.country || labels.unknown)
                       )}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">First Air Date:</span>
+                    <span className="text-gray-500">{labels.firstAirDate}</span>
                     <span className="ml-2">
                       {formatDate(tvData.firstAirDate)}
                     </span>
                   </div>
                   {tvData.lastAirDate && (
                     <div>
-                      <span className="text-gray-500">Last Air Date:</span>
+                      <span className="text-gray-500">{labels.lastAirDate}</span>
                       <span className="ml-2">
                         {formatDate(tvData.lastAirDate)}
                       </span>
@@ -423,44 +508,38 @@ const TVDetailPageClient = ({
                   )}
 
                   <div>
-                    <span className="text-gray-500">Seasons:</span>
+                    <span className="text-gray-500">{labels.seasons}</span>
                     <span className="ml-2">
-                      {tvData.numberOfSeasons || "N/A"}
+                      {tvData.numberOfSeasons || labels.notAvailable}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Episodes:</span>
+                    <span className="text-gray-500">{labels.episodes}</span>
                     <span className="ml-2">
-                      {tvData.numberOfEpisodes || "N/A"}
+                      {tvData.numberOfEpisodes || labels.notAvailable}
                     </span>
                   </div>
                   {tvData.episodeRunTime &&
                     tvData.episodeRunTime.length > 0 && (
                       <div>
-                        <span className="text-gray-500">Runtime/Episode:</span>
+                        <span className="text-gray-500">
+                          {labels.runtimePerEpisode}
+                        </span>
                         <span className="ml-2">
                           {formatRuntime(tvData.episodeRunTime)}
                         </span>
                       </div>
                     )}
                   <div>
-                    <span className="text-gray-500">Language:</span>
+                    <span className="text-gray-500">{labels.language}</span>
                     <span className="ml-2">
-                      {tvData.originalLanguage?.toUpperCase() || "N/A"}
+                      {getLocalizedLanguageName(tvData.originalLanguage)}
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Status:</span>
+                    <span className="text-gray-500">{labels.status}</span>
                     <span className="ml-2 text-green-500">
-                      {tvData.status === "Returning Series"
-                        ? "On Air"
-                        : tvData.status === "Ended"
-                        ? "Ended"
-                        : tvData.status === "Canceled"
-                        ? "Canceled"
-                        : tvData.status === "In Production"
-                        ? "In Production"
-                        : tvData.status || "Unknown"}
+                      {getLocalizedStatus(tvData.status)}
                     </span>
                   </div>
                 </div>
@@ -476,7 +555,7 @@ const TVDetailPageClient = ({
               <section className="py-12 max-w-6xl mx-auto">
                 <div className="container mx-auto px-4">
                   <h2 className="text-3xl font-bold text-white mb-8">
-                    You May Also Like
+                    {labels.youMayAlsoLike}
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {Array.from({ length: 12 }).map((_, index) => (

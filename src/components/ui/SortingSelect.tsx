@@ -1,5 +1,7 @@
 "use client";
 
+import { useLanguage } from "@/contexts/LanguageContext";
+
 interface SortingSelectProps {
   value: string;
   onChange: (sortBy: string) => void;
@@ -11,24 +13,29 @@ export default function SortingSelect({
   onChange,
   className = "",
 }: SortingSelectProps) {
+  const { language } = useLanguage();
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   const sortOptions = [
     {
       value: "popularity",
-      label: "🔥 Trending Now",
+      label: isVietnamese ? "🔥 Đang thịnh hành" : "🔥 Trending Now",
     },
     {
       value: "top_rated",
-      label: "⭐ Top Rated",
+      label: isVietnamese ? "⭐ Đánh giá cao" : "⭐ Top Rated",
     },
     {
       value: "latest",
-      label: "🆕 Latest Releases",
+      label: isVietnamese ? "🆕 Mới phát hành" : "🆕 Latest Releases",
     },
   ];
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <label className="text-gray-300 text-sm font-medium">Sort by:</label>
+      <label className="text-gray-300 text-sm font-medium">
+        {isVietnamese ? "Sắp xếp:" : "Sort by:"}
+      </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
