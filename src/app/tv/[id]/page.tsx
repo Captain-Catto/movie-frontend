@@ -10,6 +10,8 @@ import TrailerButton from "@/components/ui/TrailerButton";
 import CastSkeleton from "@/components/ui/CastSkeleton";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import { apiService } from "@/services/api";
+import { analyticsService } from "@/services/analytics.service";
+import { usePageDuration } from "@/hooks/usePageDuration";
 import { TVDetail, Movie } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
 import { getLocalizedGenreNameById } from "@/utils/genreMapping";
@@ -39,6 +41,14 @@ const TVDetailPageContent = () => {
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullDescription, setShowFullDescription] = useState(false);
+
+  // Track time on page
+  usePageDuration({
+    contentId: tvIdParam,
+    contentType: "tv_series",
+    contentTitle: tvData?.title,
+    enabled: !!tvData && !loading,
+  });
 
   // Function to fetch credits after basic TV data is loaded
   const fetchCredits = async (tvId: number) => {
@@ -336,6 +346,13 @@ const TVDetailPageContent = () => {
           };
 
           setTVData(processedTVData);
+
+          // Track VIEW analytics
+          analyticsService.trackView(
+            String(tmdbId),
+            "tv_series",
+            processedTVData.title
+          );
 
           // Fetch additional credits data
           await fetchCredits(tmdbId);

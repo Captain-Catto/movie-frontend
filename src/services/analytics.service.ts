@@ -1,6 +1,6 @@
 import axiosInstance from "@/lib/axios-instance";
 
-type AnalyticsActionType = "view" | "click" | "play" | "complete";
+type AnalyticsActionType = "view" | "click" | "play" | "complete" | "search";
 type AnalyticsContentType = "movie" | "tv_series";
 
 interface TrackEventParams {
@@ -115,6 +115,38 @@ class AnalyticsService {
       contentTitle,
       duration,
     });
+  }
+
+  trackSearch(query: string, resultsCount: number): void {
+    this.trackEvent({
+      contentId: "search",
+      contentType: "movie",
+      actionType: "search",
+      contentTitle: query,
+      metadata: { query, resultsCount },
+    });
+  }
+
+  trackDuration(
+    contentId: string,
+    contentType: AnalyticsContentType,
+    durationSeconds: number,
+    contentTitle?: string
+  ): void {
+    const payload = {
+      contentId,
+      contentType,
+      actionType: "view",
+      contentTitle,
+      duration: durationSeconds,
+      metadata: { type: "page_duration" },
+    };
+
+    axiosInstance
+      .post("/analytics/track", payload)
+      .catch((error) => {
+        console.error("[Analytics] Failed to track duration:", error);
+      });
   }
 }
 

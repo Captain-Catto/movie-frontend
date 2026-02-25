@@ -14,6 +14,7 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import { apiService } from "@/services/api";
 import { analyticsService } from "@/services/analytics.service";
+import { usePageDuration } from "@/hooks/usePageDuration";
 import { normalizeRatingValue } from "@/utils/rating";
 import { MovieDetail, Movie, TVSeries } from "@/types/content.types";
 import type { CastMember, CrewMember } from "@/types";
@@ -39,6 +40,14 @@ const MovieDetailPageContent = () => {
   const [creditsLoading, setCreditsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contentType, setContentType] = useState<"movie" | "tv" | null>(null);
+
+  // Track time on page
+  usePageDuration({
+    contentId: movieId,
+    contentType: contentType === "tv" ? "tv_series" : "movie",
+    contentTitle: movieData?.title,
+    enabled: !!movieData && !loading,
+  });
 
   // Component mount log (commented for production)
   // useEffect(() => {

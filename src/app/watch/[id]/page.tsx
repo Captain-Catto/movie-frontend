@@ -16,6 +16,7 @@ import {
 } from "@/utils/watchContentMapper";
 import type { CastMember } from "@/types";
 import { analyticsService } from "@/services/analytics.service";
+import { usePageDuration } from "@/hooks/usePageDuration";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -70,6 +71,14 @@ const WatchPage = () => {
   const [streamError, setStreamError] = useState<string | null>(null);
   const streamLoadingRef = useRef(false);
   const streamTimeoutRef = useRef<number | null>(null);
+
+  // Track time on watch page
+  usePageDuration({
+    contentId: movieId,
+    contentType: movieData?.contentType === "tv" ? "tv_series" : "movie",
+    contentTitle: movieData?.title,
+    enabled: !!movieData && !loading,
+  });
 
   // Parse prefixed ID (movie-123 or tv-456 or plain 123)
   const parseContentId = (

@@ -10,6 +10,7 @@ import RecentSearches from "./RecentSearches";
 import SearchTabs from "./SearchTabs";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { useSearch } from "@/hooks/useSearch";
+import { analyticsService } from "@/services/analytics.service";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -84,6 +85,8 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     // ✅ Save to recent searches when user clicks a search result
     if (query.trim().length >= 2) {
       handleSearch(query);
+      // Track search analytics
+      analyticsService.trackSearch(query.trim(), results.length);
     }
   };
 

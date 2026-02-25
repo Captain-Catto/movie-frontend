@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
 
@@ -34,6 +35,7 @@ interface UserLog {
 }
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "banned">("all");
@@ -460,21 +462,29 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {user.isActive ? (
+                        <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => setBanModal({ open: true, user })}
-                            className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            onClick={() => router.push(`/admin/users/${user.id}`)}
+                            className="cursor-pointer px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
                           >
-                            Ban
+                            Chi tiết
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => handleUnbanUser(user.id)}
-                            className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
-                          >
-                            Unban
-                          </button>
-                        )}
+                          {user.isActive ? (
+                            <button
+                              onClick={() => setBanModal({ open: true, user })}
+                              className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            >
+                              Ban
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUnbanUser(user.id)}
+                              className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                            >
+                              Unban
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
