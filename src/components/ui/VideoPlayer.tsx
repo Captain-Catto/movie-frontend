@@ -152,26 +152,30 @@ export default function VideoPlayer({
 
   // Hide controls after mouse inactivity
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const handleMouseMove = () => {
       setShowControls(true);
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       timeoutId = setTimeout(() => {
         if (isPlaying) setShowControls(false);
       }, 3000);
     };
 
+    const handleMouseLeave = () => setShowControls(false);
+
     const playerElement = videoRef.current?.parentElement;
     playerElement?.addEventListener("mousemove", handleMouseMove);
-    playerElement?.addEventListener("mouseleave", () => setShowControls(false));
+    playerElement?.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       playerElement?.removeEventListener("mousemove", handleMouseMove);
-      playerElement?.removeEventListener("mouseleave", () =>
-        setShowControls(false)
-      );
-      clearTimeout(timeoutId);
+      playerElement?.removeEventListener("mouseleave", handleMouseLeave);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, [isPlaying]);
 

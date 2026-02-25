@@ -1,22 +1,64 @@
-"use client";
+import CategoryListingPage from "@/components/content/CategoryListingPage";
+import { DEFAULT_TV_PAGE_SIZE } from "@/constants/app.constants";
+import {
+  extractCategoryItems,
+  extractCategoryPagination,
+  parsePageParam,
+  type SearchParamsRecord,
+} from "@/lib/category-page-data";
+import { getServerPreferredLanguage } from "@/lib/server-language";
+import { apiService } from "@/services/api";
+import type { MovieCardData, TVSeries } from "@/types/content.types";
+import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
 
-import { Suspense } from "react";
-import TvCategoryPage from "@/components/tv/TvCategoryPage";
-import PageSkeleton from "@/components/ui/PageSkeleton";
-import { SKELETON_COUNT_TV } from "@/constants/app.constants";
+interface OnTheAirTVPageProps {
+  searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
+}
 
-export default function OnTheAirTVPage() {
+export default async function OnTheAirTVPage({
+  searchParams,
+}: OnTheAirTVPageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const currentPage = parsePageParam(params?.page);
+  const language = await getServerPreferredLanguage();
+
+  let tvShows: MovieCardData[] = [];
+  let totalPages = 1;
+  let total = 0;
+  let error: string | null = null;
+
+  try {
+    const response = await apiService.getOnTheAirTVSeries({
+      page: currentPage,
+      limit: DEFAULT_TV_PAGE_SIZE,
+      language,
+    });
+
+    if (!response.success) {
+      throw new Error(response.message || "Failed to fetch currently airing TV shows");
+    }
+
+    const items = extractCategoryItems(response.data);
+    tvShows = mapTVSeriesToFrontendList(items as TVSeries[]);
+
+    const pagination = extractCategoryPagination(response, tvShows.length);
+    totalPages = pagination.totalPages;
+    total = pagination.total;
+  } catch (err) {
+    error = err instanceof Error ? err.message : "Unknown error";
+  }
+
   return (
-    <Suspense
-      fallback={
-        <PageSkeleton title="Currently Airing TV Shows" items={SKELETON_COUNT_TV} />
-      }
-    >
-      <TvCategoryPage
-        category="on-the-air"
-        title="Currently Airing TV Shows"
-        description="Stay current with series that are actively broadcasting new episodes."
-      />
-    </Suspense>
+    <CategoryListingPage
+      title="Currently Airing TV Shows"
+      description="Stay current with series that are actively broadcasting new episodes."
+      total={total}
+      items={tvShows}
+      totalPages={totalPages}
+      currentPage={currentPage}
+      basePath="/tv/on-the-air"
+      emptyMessage="No currently airing TV shows found"
+      error={error}
+    />
   );
 }

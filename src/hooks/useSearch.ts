@@ -32,15 +32,26 @@ export const useSearch = (): UseSearchReturn => {
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
 
-  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const minLoadingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const minLoadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchStartTimeRef = useRef<number>(0);
+  const activeRequestIdRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Use debounce hook instead of manual implementation
   const debouncedQuery = useDebounce(query, 600);
 
   const searchAPI = useCallback(
     async (searchQuery: string, searchType: string, pageNum: number = 1) => {
+      activeRequestIdRef.current += 1;
+      const requestId = activeRequestIdRef.current;
+
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       // Clear any pending loading timers
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current);
@@ -68,10 +79,14 @@ export const useSearch = (): UseSearchReturn => {
           params.append("type", searchType);
         }
 
-        const response = await fetch(
-          `${API_BASE_URL}/search?${params.toString()}`
-        );
+        const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`, {
+          signal: controller.signal,
+        });
         const data = await response.json();
+
+        if (requestId !== activeRequestIdRef.current) {
+          return;
+        }
 
         if (data.success && data.data) {
           // Handle nested data structure from backend
@@ -95,6 +110,10 @@ export const useSearch = (): UseSearchReturn => {
 
           // Function to update results
           const updateResults = () => {
+            if (requestId !== activeRequestIdRef.current) {
+              return;
+            }
+
             if (pageNum === 1) {
               setResults(processedResults);
               // Track search analytics on first page of results
@@ -138,6 +157,14 @@ export const useSearch = (): UseSearchReturn => {
           setHasMore(false);
         }
       } catch (error) {
+        if (requestId !== activeRequestIdRef.current) {
+          return;
+        }
+
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
         console.error("Search error:", error);
         if (loadingTimerRef.current) {
           clearTimeout(loadingTimerRef.current);
@@ -157,6 +184,10 @@ export const useSearch = (): UseSearchReturn => {
   useEffect(() => {
     // Clear results immediately if query is too short
     if (debouncedQuery.trim().length < 2) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
       setResults([]);
       setHasMore(false);
       setPage(1);
@@ -184,6 +215,9 @@ export const useSearch = (): UseSearchReturn => {
       }
       if (minLoadingTimerRef.current) {
         clearTimeout(minLoadingTimerRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
     };
   }, []);

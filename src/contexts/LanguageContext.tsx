@@ -15,6 +15,14 @@ import {
 } from "@/constants/app.constants";
 
 const STORAGE_KEY = "preferred-language";
+const COOKIE_KEY = "preferred-language";
+const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // 1 year
+
+function setLanguageCookie(lang: SupportedLanguageCode) {
+  document.cookie = `${COOKIE_KEY}=${encodeURIComponent(
+    lang
+  )}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
+}
 
 interface LanguageContextValue {
   language: SupportedLanguageCode;
@@ -41,15 +49,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       SUPPORTED_LANGUAGES.some((l) => l.code === normalizedStored)
     ) {
       setLanguageState(normalizedStored as SupportedLanguageCode);
+      setLanguageCookie(normalizedStored as SupportedLanguageCode);
       if (stored === "vi") {
         localStorage.setItem(STORAGE_KEY, "vi-VN");
       }
+      return;
     }
+
+    setLanguageCookie(DEFAULT_LANGUAGE as SupportedLanguageCode);
   }, []);
 
   const setLanguage = useCallback((lang: SupportedLanguageCode) => {
     setLanguageState(lang);
     localStorage.setItem(STORAGE_KEY, lang);
+    setLanguageCookie(lang);
   }, []);
 
   return (
