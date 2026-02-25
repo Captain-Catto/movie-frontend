@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { SUPPORTED_LANGUAGES } from "@/constants/app.constants";
 
 export default function LanguageSelector() {
   const { language, setLanguage } = useLanguage();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,8 +54,14 @@ export default function LanguageSelector() {
             <button
               key={lang.code}
               onClick={() => {
+                if (language === lang.code) {
+                  setIsOpen(false);
+                  return;
+                }
+
                 setLanguage(lang.code);
                 setIsOpen(false);
+                router.refresh();
               }}
               className={`w-full flex items-center gap-2 px-3 py-2 text-sm transition-colors cursor-pointer ${
                 language === lang.code
