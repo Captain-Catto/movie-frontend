@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useWindowWidth, Breakpoint } from "../useWindowWidth";
+import { useWindowWidth } from "../useWindowWidth";
 
 describe("useWindowWidth", () => {
   const originalInnerWidth = window.innerWidth;

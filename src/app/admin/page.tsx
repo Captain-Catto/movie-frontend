@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
 
@@ -221,7 +222,7 @@ export default function AdminDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <a
+          <Link
             href="/admin/content"
             className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-blue-500 transition-colors cursor-pointer"
           >
@@ -240,9 +241,9 @@ export default function AdminDashboard() {
             <p className="text-gray-400 text-sm">
               View and manage all movies and TV series
             </p>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/admin/users"
             className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-green-500 transition-colors cursor-pointer"
           >
@@ -261,9 +262,9 @@ export default function AdminDashboard() {
             <p className="text-gray-400 text-sm">
               View and manage registered users
             </p>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/admin/analytics"
             className="bg-gray-800 rounded-lg p-6 border border-gray-700 hover:border-purple-500 transition-colors cursor-pointer"
           >
@@ -282,7 +283,7 @@ export default function AdminDashboard() {
             <p className="text-gray-400 text-sm">
               View platform statistics and insights
             </p>
-          </a>
+          </Link>
         </div>
       </div>
   );

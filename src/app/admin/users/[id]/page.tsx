@@ -439,7 +439,7 @@ export default function AdminUserDetailPage() {
                     </span>
                   )}
                   {item.ipAddress && <span>IP: {item.ipAddress}</span>}
-                  {item.metadata?.contentType && (
+                  {Boolean(item.metadata?.contentType) && (
                     <span className="uppercase">
                       {String(item.metadata.contentType)}
                     </span>
