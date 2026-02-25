@@ -50,13 +50,22 @@ const normalizeFetchType = (value: string): BrowseFetchType => {
 };
 
 export function getBrowsePageTitle(fetchType: BrowseFetchType): string {
+  return getBrowsePageTitleByLanguage(fetchType, "en-US");
+}
+
+export function getBrowsePageTitleByLanguage(
+  fetchType: BrowseFetchType,
+  language: string
+): string {
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+
   switch (fetchType) {
     case "tv":
-      return "📺 Browse TV Series";
+      return isVietnamese ? "📺 Duyet Phim Bo" : "📺 Browse TV Series";
     case "trending":
-      return "🔥 Browse Trending";
+      return isVietnamese ? "🔥 Duyet Thinh Hanh" : "🔥 Browse Trending";
     default:
-      return "🎬 Browse Movies";
+      return isVietnamese ? "🎬 Duyet Phim Le" : "🎬 Browse Movies";
   }
 }
 

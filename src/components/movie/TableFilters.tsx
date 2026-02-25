@@ -56,6 +56,7 @@ const TableFilters = ({
             filters: "Bo loc",
             country: "Quoc gia",
             type: "Loai",
+            trending: "Thinh hanh",
             genre: "The loai",
             year: "Nam",
             sortBy: "Sap xep",
@@ -69,6 +70,7 @@ const TableFilters = ({
             filters: "Filters",
             country: "Country",
             type: "Type",
+            trending: "Trending",
             genre: "Genre",
             year: "Year",
             sortBy: "Sort by",
@@ -97,9 +99,9 @@ const TableFilters = ({
       { value: "", label: labels.all },
       { value: "movie", label: isVietnamese ? "Phim le" : "Movie" },
       { value: "tv", label: isVietnamese ? "Phim bo" : "TV Series" },
-      { value: "trending", label: "Trending" },
+      { value: "trending", label: labels.trending },
     ],
-    [isVietnamese, labels.all]
+    [isVietnamese, labels.all, labels.trending]
   );
 
   // Dynamically get genres based on selected movie type

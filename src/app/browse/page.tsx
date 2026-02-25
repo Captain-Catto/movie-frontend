@@ -7,7 +7,7 @@ import { getServerPreferredLanguage } from "@/lib/server-language";
 import type { SearchParamsRecord } from "@/lib/category-page-data";
 import {
   getBrowsePageData,
-  getBrowsePageTitle,
+  getBrowsePageTitleByLanguage,
   parseBrowsePageParams,
 } from "@/lib/browse-page-data";
 
@@ -32,7 +32,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
     <Layout>
       <Container withHeaderOffset>
         <h1 className="text-3xl font-bold text-white mb-8">
-          {getBrowsePageTitle(fetchType)}
+          {getBrowsePageTitleByLanguage(fetchType, language)}
         </h1>
 
         {/* Filter Component */}
