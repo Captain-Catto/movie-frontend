@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Layout from "@/components/layout/Layout";
 import TrendingSuggestions from "@/components/movie/TrendingSuggestions";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getNotFoundUiMessages } from "@/lib/ui-messages";
@@ -9,7 +8,6 @@ export default async function NotFound() {
   const labels = getNotFoundUiMessages(language);
 
   return (
-    <Layout>
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4 py-20">
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
@@ -44,6 +42,5 @@ export default async function NotFound() {
         />
       </div>
     </div>
-    </Layout>
   );
 }

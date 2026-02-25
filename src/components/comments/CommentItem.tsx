@@ -2,7 +2,17 @@
 
 import React from "react";
 import Image from "next/image";
-import { BiLike, BiDislike, BiSolidLike, BiSolidDislike } from "react-icons/bi";
+import {
+  AtSign,
+  ChevronDown,
+  ChevronUp,
+  Infinity,
+  Pencil,
+  Reply,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+} from "lucide-react";
 import { CommentItemProps } from "@/types/comment.types";
 import CommentForm from "./CommentForm";
 import { RelativeTime } from "@/utils/hydration-safe-date";
@@ -64,7 +74,7 @@ export function CommentItem(props: CommentItemProps) {
             <span className="text-white text-sm font-medium">
               {currentComment.user?.name || labels.anonymous}
               {isAdmin && (
-                <i className="fa-solid fa-infinity text-primary ms-2 text-red-500"></i>
+                <Infinity className="text-primary ms-2 text-red-500 inline-block w-4 h-4" />
               )}
             </span>
           </div>
@@ -107,7 +117,7 @@ export function CommentItem(props: CommentItemProps) {
                     key={mention.id}
                     className="mention-badge inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs"
                   >
-                    <i className="fa-solid fa-at text-xs"></i>
+                    <AtSign className="text-xs w-3 h-3" />
                     {mention.name}
                   </span>
                 ))}
@@ -127,11 +137,11 @@ export function CommentItem(props: CommentItemProps) {
               }`}
               onClick={() => void handleSelfLike()}
             >
-              {currentComment.userLike === true ? (
-                <BiSolidLike className="w-4 h-4" />
-              ) : (
-                <BiLike className="w-4 h-4" />
-              )}
+              <ThumbsUp
+                className={`w-4 h-4 ${
+                  currentComment.userLike === true ? "fill-current" : ""
+                }`}
+              />
               {currentComment.likesCount > 0 && (
                 <span className="text-xs">{currentComment.likesCount}</span>
               )}
@@ -145,11 +155,11 @@ export function CommentItem(props: CommentItemProps) {
               }`}
               onClick={() => void handleSelfDislike()}
             >
-              {currentComment.userLike === false ? (
-                <BiSolidDislike className="w-4 h-4" />
-              ) : (
-                <BiDislike className="w-4 h-4" />
-              )}
+              <ThumbsDown
+                className={`w-4 h-4 ${
+                  currentComment.userLike === false ? "fill-current" : ""
+                }`}
+              />
               {currentComment.dislikesCount > 0 && (
                 <span className="text-xs">{currentComment.dislikesCount}</span>
               )}
@@ -162,7 +172,7 @@ export function CommentItem(props: CommentItemProps) {
               className="btn btn-xs btn-basic btn-comment px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
               onClick={() => setShowReplyForm((prev) => !prev)}
             >
-              <i className="fa-solid fa-reply text-xs"></i>
+              <Reply className="text-xs w-3 h-3" />
               <span className="text-xs">{labels.reply}</span>
             </button>
           )}
@@ -176,7 +186,7 @@ export function CommentItem(props: CommentItemProps) {
                   onClick={() => setIsEditing(true)}
                   disabled={isEditing}
                 >
-                  <i className="fa-solid fa-pen text-xs"></i>
+                  <Pencil className="text-xs w-3 h-3" />
                   <span className="text-xs">{labels.edit}</span>
                 </button>
               )}
@@ -185,7 +195,7 @@ export function CommentItem(props: CommentItemProps) {
                 className="btn btn-xs btn-basic btn-menu px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
                 onClick={() => void handleSelfDelete()}
               >
-                <i className="fa-solid fa-trash text-xs"></i>
+                <Trash2 className="text-xs w-3 h-3" />
                 <span className="text-xs">{labels.delete}</span>
               </button>
             </div>
@@ -212,11 +222,11 @@ export function CommentItem(props: CommentItemProps) {
               className="text-primary text-red-500 cursor-pointer text-sm flex items-center gap-1 hover:text-red-400"
               onClick={() => void handleToggleReplies()}
             >
-              <i
-                className={`fa-solid ${
-                  showReplies ? "fa-angle-up" : "fa-angle-down"
-                } text-xs`}
-              ></i>
+              {showReplies ? (
+                <ChevronUp className="text-xs w-3 h-3" />
+              ) : (
+                <ChevronDown className="text-xs w-3 h-3" />
+              )}
               {loadingReplies
                 ? labels.loading
                 : showReplies

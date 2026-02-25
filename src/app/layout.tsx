@@ -1,15 +1,7 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { inter, roboto } from "@/lib/fonts";
 import "./globals.css";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import { ReduxProvider } from "@/components/providers/ReduxProvider";
-import { AuthLoader } from "@/components/auth/AuthLoader";
-import { FavoritesLoader } from "@/components/favorites/FavoritesLoader";
-import { ToastContainer } from "@/components/toast/ToastContainer";
-import { InitialPageLoader } from "@/components/loading/InitialPageLoader";
-import { TopLineLoader } from "@/components/loading/TopLineLoader";
-import EffectManager from "@/components/effects/EffectManager";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getRootSeoUiMessages, resolveUiLocale } from "@/lib/ui-messages";
 
@@ -87,17 +79,7 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${roboto.variable} antialiased overflow-x-hidden`}
       >
-        <ReduxProvider>
-          <Suspense fallback={null}>
-            <TopLineLoader />
-          </Suspense>
-          <InitialPageLoader />
-          <AuthLoader />
-          <FavoritesLoader />
-          <ToastContainer />
-          <EffectManager />
-          {children}
-        </ReduxProvider>
+        <LanguageProvider>{children}</LanguageProvider>
       </body>
     </html>
   );

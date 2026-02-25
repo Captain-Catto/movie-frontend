@@ -30,6 +30,8 @@ const PAGE_TYPE_OPTIONS = [
   "custom",
 ];
 
+const LOCALE_OPTIONS = ["vi", "en"] as const;
+
 interface SeoStats {
   totalPages: number;
   activePages: number;
@@ -37,6 +39,49 @@ interface SeoStats {
   avgTitleLength: number;
   avgDescriptionLength: number;
 }
+
+const mapSeoRecord = (item: unknown): SeoMetadata => {
+  const record = item as Record<string, unknown>;
+  const getString = (key: string, fallback = "") => {
+    const value = record[key];
+    return typeof value === "string" ? value : fallback;
+  };
+  const getBoolean = (key: string): boolean | undefined => {
+    const value = record[key];
+    return typeof value === "boolean" ? value : undefined;
+  };
+
+  const rawKeywords = record["keywords"];
+  const keywordsArray = Array.isArray(rawKeywords)
+    ? rawKeywords
+    : typeof rawKeywords === "string"
+    ? rawKeywords
+        .replace(/[{}]/g, "")
+        .split(/[;,]/)
+        .map((k) => k.trim())
+        .filter(Boolean)
+    : [];
+
+  return {
+    id: Number(record["id"] || 0),
+    pageType: getString("pageType") || getString("page_type"),
+    path: getString("pageSlug") || getString("page_slug") || getString("path"),
+    locale: (getString("locale") || "vi").toLowerCase(),
+    title: getString("title"),
+    description: getString("description"),
+    keywords: keywordsArray,
+    ogTitle: getString("ogTitle") || getString("og_title"),
+    ogDescription: getString("ogDescription") || getString("og_description"),
+    ogImage: getString("ogImage") || getString("og_image"),
+    twitterTitle: getString("twitterTitle") || getString("twitter_title"),
+    twitterDescription:
+      getString("twitterDescription") || getString("twitter_description"),
+    twitterImage: getString("twitterImage") || getString("twitter_image"),
+    isActive: getBoolean("isActive") ?? getBoolean("is_active") ?? true,
+    createdAt: getString("createdAt") || getString("created_at"),
+    updatedAt: getString("updatedAt") || getString("updated_at"),
+  };
+};
 
 const REFRESH_INTERVAL_MS = 30_000;
 const STATUS_COLORS = ["#22c55e", "#ef4444"];
@@ -61,6 +106,7 @@ export default function AdminSeoPage() {
   const [formData, setFormData] = useState({
     pageType: "",
     path: "",
+    locale: "vi",
     title: "",
     description: "",
     keywords: "",
@@ -76,6 +122,30 @@ export default function AdminSeoPage() {
   const [filter, setFilter] = useState<"all" | "active" | "inactive">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const [resolvePath, setResolvePath] = useState("/");
+  const [resolveLocale, setResolveLocale] = useState<"vi" | "en">("vi");
+  const [resolveLoading, setResolveLoading] = useState(false);
+  const [resolveResult, setResolveResult] = useState<SeoMetadata | null>(null);
+
+  const revalidateSeoCache = useCallback(
+    async (path?: string, locale?: string) => {
+      try {
+        await fetch("/api/revalidate/seo", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            path,
+            locale,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to revalidate SEO cache:", error);
+      }
+    },
+    []
+  );
 
   const fetchSeoData = useCallback(async () => {
     if (!adminApi.isAuthenticated) {
@@ -97,54 +167,7 @@ export default function AdminSeoPage() {
           ? ((payload as { data: unknown[] }).data as unknown[])
           : [];
 
-        const normalized = rawItems.map((item: unknown) => {
-          const record = item as Record<string, unknown>;
-          const getString = (key: string, fallback = "") => {
-            const value = record[key];
-            return typeof value === "string" ? value : fallback;
-          };
-          const getBoolean = (key: string): boolean | undefined => {
-            const value = record[key];
-            return typeof value === "boolean" ? value : undefined;
-          };
-
-          const rawKeywords = record["keywords"];
-          const keywordsArray = Array.isArray(rawKeywords)
-            ? rawKeywords
-            : typeof rawKeywords === "string"
-            ? rawKeywords
-                .replace(/[{}]/g, "")
-                .split(/[;,]/)
-                .map((k) => k.trim())
-                .filter(Boolean)
-            : [];
-
-          return {
-            id: record["id"] as number,
-            pageType: getString("pageType") || getString("page_type"),
-            path:
-              getString("pageSlug") ||
-              getString("page_slug") ||
-              getString("path"),
-            title: getString("title"),
-            description: getString("description"),
-            keywords: keywordsArray,
-            ogTitle: getString("ogTitle") || getString("og_title"),
-            ogDescription:
-              getString("ogDescription") || getString("og_description"),
-            ogImage: getString("ogImage") || getString("og_image"),
-            twitterTitle:
-              getString("twitterTitle") || getString("twitter_title"),
-            twitterDescription:
-              getString("twitterDescription") ||
-              getString("twitter_description"),
-            twitterImage:
-              getString("twitterImage") || getString("twitter_image"),
-            isActive: getBoolean("isActive") ?? getBoolean("is_active") ?? true,
-            createdAt: getString("createdAt") || getString("created_at"),
-            updatedAt: getString("updatedAt") || getString("updated_at"),
-          } as SeoMetadata;
-        });
+        const normalized = rawItems.map(mapSeoRecord);
 
         setSeoData(normalized);
       }
@@ -229,6 +252,7 @@ export default function AdminSeoPage() {
       resetForm();
       fetchSeoData();
       fetchStats();
+      await revalidateSeoCache(formData.path, formData.locale);
       showSuccess(
         "Saved",
         editModal.isNew ? "Created SEO metadata" : "Updated SEO metadata"
@@ -258,6 +282,7 @@ export default function AdminSeoPage() {
       if (response.success) {
         fetchSeoData();
         fetchStats();
+        await revalidateSeoCache();
         showSuccess("Deleted", "SEO metadata removed");
       } else {
         const msg = response.error || "Failed to delete SEO metadata";
@@ -283,6 +308,7 @@ export default function AdminSeoPage() {
       if (response.success) {
         fetchSeoData();
         fetchStats();
+        await revalidateSeoCache();
         showSuccess("Toggled", "SEO status updated");
       } else {
         const msg = response.error || "Failed to toggle SEO status";
@@ -308,6 +334,7 @@ export default function AdminSeoPage() {
       if (response.success) {
         fetchSeoData();
         fetchStats();
+        await revalidateSeoCache();
         showSuccess("Defaults created", "Default SEO entries set up");
       } else {
         const msg = response.error || "Failed to setup defaults";
@@ -327,6 +354,7 @@ export default function AdminSeoPage() {
       setFormData({
         pageType: seo.pageType,
         path: seo.path,
+        locale: seo.locale || "vi",
         title: seo.title,
         description: seo.description,
         keywords: seo.keywords.join(", "),
@@ -348,6 +376,7 @@ export default function AdminSeoPage() {
     setFormData({
       pageType: "",
       path: "",
+      locale: "vi",
       title: "",
       description: "",
       keywords: "",
@@ -366,6 +395,56 @@ export default function AdminSeoPage() {
     fetchStats();
   }, [fetchSeoData, fetchStats]);
 
+  const handleResolvePreview = async () => {
+    const normalizedPath = resolvePath.trim();
+    if (!normalizedPath) {
+      showError("Resolve failed", "Path is required");
+      return;
+    }
+
+    try {
+      setResolveLoading(true);
+      setResolveResult(null);
+      const response = await adminApi.get<
+        SeoMetadata | { data?: SeoMetadata | null } | null
+      >(
+        `/seo/resolve?path=${encodeURIComponent(
+          normalizedPath
+        )}&locale=${encodeURIComponent(resolveLocale)}`
+      );
+
+      if (!response.success) {
+        const message = response.error || "Failed to resolve SEO metadata";
+        showError("Resolve failed", message);
+        return;
+      }
+
+      const payload = response.data as
+        | SeoMetadata
+        | { data?: SeoMetadata | null }
+        | null;
+      const raw =
+        payload && typeof payload === "object" && "data" in payload
+          ? (payload as { data?: unknown }).data
+          : payload;
+
+      if (!raw || typeof raw !== "object") {
+        showSuccess("Resolve", "No SEO metadata found for this path/locale");
+        return;
+      }
+
+      setResolveResult(mapSeoRecord(raw));
+      showSuccess("Resolve", "SEO metadata resolved");
+    } catch (error) {
+      showError(
+        "Resolve failed",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    } finally {
+      setResolveLoading(false);
+    }
+  };
+
   const exportSeoData = (format: "csv" | "excel") => {
     if (!seoData.length) {
       const message = "No SEO data to export";
@@ -383,6 +462,7 @@ export default function AdminSeoPage() {
     const headers = [
       "Page Type",
       "Path",
+      "Locale",
       "Title",
       "Description",
       "Keywords",
@@ -399,6 +479,7 @@ export default function AdminSeoPage() {
     const rows = seoData.map((item) => [
       escapeValue(item.pageType),
       escapeValue(item.path),
+      escapeValue(item.locale || "vi"),
       escapeValue(item.title),
       escapeValue(item.description),
       escapeValue(Array.isArray(item.keywords) ? item.keywords.join(", ") : ""),
@@ -470,7 +551,8 @@ export default function AdminSeoPage() {
           searchTerm === "" ||
           seo.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           seo.path.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          seo.pageType.toLowerCase().includes(searchTerm.toLowerCase());
+          seo.pageType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (seo.locale || "vi").toLowerCase().includes(searchTerm.toLowerCase());
 
         return matchesFilter && matchesSearch;
       })
@@ -715,6 +797,55 @@ export default function AdminSeoPage() {
         </div>
       </div>
 
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3">
+        <h3 className="text-base font-semibold text-white">SEO Resolve Test</h3>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            value={resolvePath}
+            onChange={(e) => setResolvePath(e.target.value)}
+            placeholder="/movies hoặc /movie/[id]"
+            className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 min-w-[220px]"
+          />
+          <select
+            value={resolveLocale}
+            onChange={(e) => setResolveLocale(e.target.value as "vi" | "en")}
+            className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2"
+          >
+            {LOCALE_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt.toUpperCase()}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleResolvePreview}
+            disabled={resolveLoading}
+            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
+          >
+            {resolveLoading ? "Resolving..." : "Resolve"}
+          </button>
+        </div>
+        {resolveResult && (
+          <div className="rounded-md border border-gray-700 bg-gray-900 p-3 text-sm text-gray-200">
+            <p>
+              <span className="text-gray-400">Path:</span> {resolveResult.path}
+            </p>
+            <p>
+              <span className="text-gray-400">Locale:</span>{" "}
+              {resolveResult.locale.toUpperCase()}
+            </p>
+            <p>
+              <span className="text-gray-400">Title:</span> {resolveResult.title}
+            </p>
+            <p>
+              <span className="text-gray-400">Description:</span>{" "}
+              {resolveResult.description}
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* SEO Data Table */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg shadow overflow-hidden">
           <table className="min-w-full">
@@ -722,6 +853,9 @@ export default function AdminSeoPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Page
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  Locale
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Title
@@ -740,13 +874,13 @@ export default function AdminSeoPage() {
             <tbody className="bg-gray-800 border border-gray-700 divide-y divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center">
+                  <td colSpan={6} className="px-6 py-4 text-center">
                     Loading...
                   </td>
                 </tr>
               ) : filteredSeoData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center">
+                  <td colSpan={6} className="px-6 py-4 text-center">
                     No SEO data found
                   </td>
                 </tr>
@@ -760,6 +894,11 @@ export default function AdminSeoPage() {
                         </div>
                         <div className="text-sm text-gray-400">{seo.path}</div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex rounded-full bg-slate-700 px-2 py-1 text-xs font-medium text-slate-100">
+                        {(seo.locale || "vi").toUpperCase()}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-white max-w-xs truncate">
@@ -834,7 +973,7 @@ export default function AdminSeoPage() {
               </h2>
 
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-white">
                       Page Type
@@ -869,8 +1008,26 @@ export default function AdminSeoPage() {
                         setFormData({ ...formData, path: e.target.value })
                       }
                       className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
-                      placeholder="e.g., /movie/:id"
+                      placeholder="e.g., /movie/[id]"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-white">
+                      Locale
+                    </label>
+                    <select
+                      value={formData.locale}
+                      onChange={(e) =>
+                        setFormData({ ...formData, locale: e.target.value })
+                      }
+                      className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
+                    >
+                      {LOCALE_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt.toUpperCase()}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

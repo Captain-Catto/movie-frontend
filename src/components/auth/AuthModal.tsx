@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
-import { FcGoogle } from "react-icons/fc";
+import { Chrome } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAuthModalUiMessages } from "@/lib/ui-messages";
@@ -193,7 +193,7 @@ export default function AuthModal({
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
             >
-              <FcGoogle className="w-5 h-5 mr-2" />
+              <Chrome className="w-5 h-5 mr-2 text-[#4285f4]" />
               {isGoogleLoading ? labels.processing : labels.loginWithGoogle}
             </Button>
           </TabsContent>
@@ -222,7 +222,7 @@ export default function AuthModal({
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
             >
-              <FcGoogle className="w-5 h-5 mr-2" />
+              <Chrome className="w-5 h-5 mr-2 text-[#4285f4]" />
               {isGoogleLoading ? labels.processing : labels.registerWithGoogle}
             </Button>
           </TabsContent>

@@ -8,7 +8,7 @@ import { Heart } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MovieCard from "@/components/movie/MovieCard";
-import { favoriteToMovieCardData } from "@/app/favorites/utils/favoriteHelpers";
+import { favoriteToMovieCardData } from "@/lib/favorites/favorite-helpers";
 import PageSkeleton from "@/components/ui/PageSkeleton";
 import { SKELETON_COUNT_MOVIE } from "@/constants/app.constants";
 import { Pagination } from "@/components/ui/Pagination";

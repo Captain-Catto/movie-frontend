@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
@@ -6,10 +6,14 @@ import {
 } from "@/constants/app.constants";
 
 const LANGUAGE_COOKIE_KEY = "preferred-language";
+const LANGUAGE_HEADER_KEY = "x-preferred-language";
 
 export async function getServerPreferredLanguage(): Promise<SupportedLanguageCode> {
+  const headerStore = await headers();
   const cookieStore = await cookies();
-  const rawLanguage = cookieStore.get(LANGUAGE_COOKIE_KEY)?.value;
+  const rawLanguage =
+    headerStore.get(LANGUAGE_HEADER_KEY) ||
+    cookieStore.get(LANGUAGE_COOKIE_KEY)?.value;
   const normalized = rawLanguage === "vi" ? "vi-VN" : rawLanguage;
 
   if (

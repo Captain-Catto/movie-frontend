@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -167,7 +168,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
           ${className}
         `}
       >
-        <i className="far fa-heart text-lg"></i>
+        <Heart className="text-lg" />
         {!iconOnly && labels.loading}
       </button>
     );
@@ -209,11 +210,11 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
           : labels.titleAdd
       }
     >
-      <i
-        className={`${isFavorite ? "fas" : "far"} fa-heart ${
-          size === "compact" ? "text-sm" : "text-lg"
+      <Heart
+        className={`${size === "compact" ? "text-sm" : "text-lg"} ${
+          isFavorite ? "fill-current" : ""
         } ${isProcessing ? "animate-pulse" : ""}`}
-      ></i>
+      />
       {!iconOnly &&
         (isProcessing
           ? labels.processing

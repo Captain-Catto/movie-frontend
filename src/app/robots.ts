@@ -5,7 +5,14 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/account/", "/login", "/auth/"],
+      disallow: [
+        "/admin/",
+        "/account/",
+        "/favorites/",
+        "/notifications/",
+        "/login",
+        "/auth/",
+      ],
     },
     sitemap: "https://movie.lequangtridat.com/sitemap.xml",
   };
