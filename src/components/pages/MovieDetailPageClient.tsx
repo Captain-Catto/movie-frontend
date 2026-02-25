@@ -2,7 +2,6 @@
 
 import { lazy, Suspense } from "react";
 import type { SyntheticEvent } from "react";
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
@@ -73,7 +72,15 @@ const MovieDetailPageClient = ({
   }
 
   if (!movieData) {
-    notFound();
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
+            {error || "Unable to load content."}
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   // console.log("✨ [MovieDetailPage] Rendering movie detail page with data:", {

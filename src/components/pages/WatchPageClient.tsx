@@ -1,7 +1,6 @@
 "use client";
 
 import { lazy, Suspense } from "react";
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
@@ -97,7 +96,15 @@ const WatchPageClient = ({
   }
 
   if (error || !movieData) {
-    notFound();
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
+            {error || "Unable to load watch page data."}
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   return (

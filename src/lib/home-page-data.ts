@@ -7,7 +7,7 @@ import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
 const HOME_SECTION_LIMIT = 10;
 const HOME_TV_SECTION_LIMIT = 6;
 
-export interface HomePageData {
+export interface HomePageDataResult {
   heroMovies: MovieCardData[];
   nowPlayingMovies: MovieCardData[];
   popularMovies: MovieCardData[];
@@ -42,7 +42,9 @@ const toTVSeriesCards = (items: unknown): MovieCardData[] => {
   }
 };
 
-export async function getHomePageData(language: string): Promise<HomePageData> {
+export async function getHomePageData(
+  language: string
+): Promise<HomePageDataResult> {
   const [
     trendingRes,
     nowPlayingRes,

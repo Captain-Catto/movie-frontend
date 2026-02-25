@@ -12,7 +12,7 @@ import {
   type WatchContentData,
 } from "@/utils/watchContentMapper";
 import {
-  getWatchPageInitialByRouteId,
+  getWatchPageDataByRouteId,
   type WatchPageCredits,
   type WatchPageRecommendationItem,
 } from "@/lib/detail-page-data";
@@ -151,7 +151,7 @@ export function useWatchPage({
         setActiveStreamIndex(0);
         setError(null);
 
-        const result = await getWatchPageInitialByRouteId(
+        const result = await getWatchPageDataByRouteId(
           movieId,
           language,
           season,

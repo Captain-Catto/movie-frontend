@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { analyticsService } from "@/services/analytics.service";
-import { getTVDetailInitialByTmdbId } from "@/lib/detail-page-data";
+import { getTVDetailPageDataByTmdbId } from "@/lib/detail-page-data";
 import type { TVDetail } from "@/types/content.types";
 
 export interface UseTVDetailPageClientOptions {
@@ -59,7 +59,7 @@ export function useTVDetailPageClient({
           throw new Error("Invalid TV series ID");
         }
 
-        const result = await getTVDetailInitialByTmdbId(numericTvId, language);
+        const result = await getTVDetailPageDataByTmdbId(numericTvId, language);
         setTVData(result.tvData);
         setError(result.error);
 

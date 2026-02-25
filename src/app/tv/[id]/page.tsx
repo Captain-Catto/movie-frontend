@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import TVDetailPageClient from "@/components/pages/TVDetailPageClient";
 import { getServerPreferredLanguage } from "@/lib/server-language";
-import { getTVDetailInitialByTmdbId } from "@/lib/detail-page-data";
+import { getTVDetailPageDataByTmdbId } from "@/lib/detail-page-data";
 
 interface TVDetailPageProps {
   params: Promise<{ id: string }> | { id: string };
@@ -17,7 +17,7 @@ export default async function TVDetailPage({ params }: TVDetailPageProps) {
   }
 
   const language = await getServerPreferredLanguage();
-  const { tvData, error } = await getTVDetailInitialByTmdbId(
+  const { tvData, error } = await getTVDetailPageDataByTmdbId(
     parsedTmdbId,
     language
   );

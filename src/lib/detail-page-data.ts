@@ -25,13 +25,13 @@ interface ContentLookupResult {
   message?: string;
 }
 
-export interface MovieDetailInitialResult {
+export interface MovieDetailPageDataResult {
   movieData: MovieDetail | null;
   contentType: "movie" | "tv" | null;
   error: string | null;
 }
 
-export interface TVDetailInitialResult {
+export interface TVDetailPageDataResult {
   tvData: TVDetail | null;
   error: string | null;
 }
@@ -52,7 +52,7 @@ export interface WatchPageRecommendationItem {
   vote_average: number;
 }
 
-export interface WatchPageInitialResult {
+export interface WatchPageDataResult {
   movieData: WatchContentData | null;
   credits: WatchPageCredits | null;
   recommendations: WatchPageRecommendationItem[];
@@ -196,10 +196,10 @@ function mergeMovieCredits(detail: MovieDetail, credits: Credits): MovieDetail {
   };
 }
 
-export async function getMovieDetailInitialByTmdbId(
+export async function getMovieDetailPageDataByTmdbId(
   tmdbId: number,
   language: string
-): Promise<MovieDetailInitialResult> {
+): Promise<MovieDetailPageDataResult> {
   try {
     const contentResult = await lookupContentByTmdbId(tmdbId, language);
 
@@ -255,10 +255,10 @@ export async function getMovieDetailInitialByTmdbId(
   }
 }
 
-export async function getTVDetailInitialByTmdbId(
+export async function getTVDetailPageDataByTmdbId(
   tmdbId: number,
   language: string
-): Promise<TVDetailInitialResult> {
+): Promise<TVDetailPageDataResult> {
   const ensureNumber = (value: unknown, fallback = 0): number => {
     if (typeof value === "number" && Number.isFinite(value)) return value;
     if (typeof value === "string") {
@@ -470,12 +470,12 @@ const normalizeDuration = (value?: unknown): number | undefined => {
   return undefined;
 };
 
-export async function getWatchPageInitialByRouteId(
+export async function getWatchPageDataByRouteId(
   routeId: string,
   language: string,
   season: number,
   episode: number
-): Promise<WatchPageInitialResult> {
+): Promise<WatchPageDataResult> {
   try {
     const { tmdbId, type } = parseRouteContentId(routeId);
     if (!Number.isFinite(tmdbId) || tmdbId <= 0) {

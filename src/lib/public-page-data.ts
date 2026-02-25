@@ -6,16 +6,11 @@ import {
   getTVListData,
   getTrendingListData,
 } from "@/lib/content-list-data";
+import type { PageListDataResult } from "@/lib/page-data.types";
 import {
   DEFAULT_BROWSE_PAGE_SIZE,
   DEFAULT_TV_PAGE_SIZE,
 } from "@/constants/app.constants";
-
-interface PublicPageListResult<T> {
-  items: T[];
-  totalPages: number;
-  error: string | null;
-}
 
 const asKnownForItemArray = (knownFor: unknown): PersonKnownForItem[] => {
   if (!Array.isArray(knownFor)) {
@@ -58,7 +53,7 @@ const mapCastMemberToPersonData = (person: CastMember): PersonData => {
 export async function getMoviesPageData(
   currentPage: number,
   language: string
-): Promise<PublicPageListResult<MovieCardData>> {
+): Promise<PageListDataResult<MovieCardData>> {
   return getMovieListData({
     currentPage,
     limit: DEFAULT_BROWSE_PAGE_SIZE,
@@ -69,7 +64,7 @@ export async function getMoviesPageData(
 export async function getTVPageData(
   currentPage: number,
   language: string
-): Promise<PublicPageListResult<MovieCardData>> {
+): Promise<PageListDataResult<MovieCardData>> {
   return getTVListData({
     currentPage,
     limit: DEFAULT_TV_PAGE_SIZE,
@@ -80,7 +75,7 @@ export async function getTVPageData(
 export async function getTrendingPageData(
   currentPage: number,
   language: string
-): Promise<PublicPageListResult<MovieCardData>> {
+): Promise<PageListDataResult<MovieCardData>> {
   return getTrendingListData({
     currentPage,
     limit: DEFAULT_BROWSE_PAGE_SIZE,
@@ -90,7 +85,7 @@ export async function getTrendingPageData(
 
 export async function getPeoplePageData(
   currentPage: number
-): Promise<PublicPageListResult<PersonData>> {
+): Promise<PageListDataResult<PersonData>> {
   try {
     const response = await apiService.getPopularPeople(currentPage);
     const people = Array.isArray(response.results)

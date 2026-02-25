@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { analyticsService } from "@/services/analytics.service";
-import { getMovieDetailInitialByTmdbId } from "@/lib/detail-page-data";
+import { getMovieDetailPageDataByTmdbId } from "@/lib/detail-page-data";
 import type { MovieDetail } from "@/types/content.types";
 
 export interface UseMovieDetailPageClientOptions {
@@ -66,7 +66,7 @@ export function useMovieDetailPageClient({
           return;
         }
 
-        const result = await getMovieDetailInitialByTmdbId(parsedTmdbId, language);
+        const result = await getMovieDetailPageDataByTmdbId(parsedTmdbId, language);
         setMovieData(result.movieData);
         setContentType(result.contentType);
         setError(result.error);

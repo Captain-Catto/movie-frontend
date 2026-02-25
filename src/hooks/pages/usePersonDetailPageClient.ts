@@ -6,7 +6,7 @@ import {
   getLocaleFromLanguage,
 } from "@/constants/app.constants";
 import {
-  getPersonDetailInitialById,
+  getPersonDetailPageDataById,
   getPersonProfileImage,
   mapPersonCreditToMovieCardData,
   type PersonDetailData,
@@ -148,7 +148,7 @@ export function usePersonDetailPageClient({
     const fetchPersonData = async () => {
       try {
         setLoading(true);
-        const result = await getPersonDetailInitialById(parsedPersonId);
+        const result = await getPersonDetailPageDataById(parsedPersonId);
         setPersonData(result.personData);
         setCastCredits(result.castCredits);
         setCrewCredits(result.crewCredits);

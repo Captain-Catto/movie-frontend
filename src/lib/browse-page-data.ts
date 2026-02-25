@@ -8,14 +8,9 @@ import {
   getTVListData,
   getTrendingListData,
 } from "@/lib/content-list-data";
+import type { PageListDataResult } from "@/lib/page-data.types";
 
 export type BrowseFetchType = "movie" | "tv" | "trending";
-
-interface BrowsePageDataResult {
-  items: MovieCardData[];
-  totalPages: number;
-  error: string | null;
-}
 
 interface BrowsePageDataOptions {
   currentPage: number;
@@ -119,7 +114,7 @@ export async function getBrowsePageData({
   fetchType,
   language,
   filters,
-}: BrowsePageDataOptions): Promise<BrowsePageDataResult> {
+}: BrowsePageDataOptions): Promise<PageListDataResult<MovieCardData>> {
   const rawYear = filters.customYear || filters.years[0];
   const parsedYear = rawYear ? Number(rawYear) : undefined;
   const year = Number.isFinite(parsedYear) ? parsedYear : undefined;

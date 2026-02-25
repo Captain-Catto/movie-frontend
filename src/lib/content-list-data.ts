@@ -12,12 +12,9 @@ import {
   extractCategoryItems,
   extractCategoryPagination,
 } from "@/lib/category-page-data";
+import type { PageListDataResult } from "@/lib/page-data.types";
 
-export interface ContentListResult {
-  items: MovieCardData[];
-  totalPages: number;
-  error: string | null;
-}
+export type ContentListDataResult = PageListDataResult<MovieCardData>;
 
 interface BaseListOptions {
   currentPage: number;
@@ -73,7 +70,7 @@ export async function getMovieListData({
   genre,
   year,
   sortBy,
-}: MovieListOptions): Promise<ContentListResult> {
+}: MovieListOptions): Promise<ContentListDataResult> {
   try {
     const response = await apiService.getMovies({
       page: currentPage,
@@ -119,7 +116,7 @@ export async function getTVListData({
   genre,
   year,
   sortBy,
-}: TVListOptions): Promise<ContentListResult> {
+}: TVListOptions): Promise<ContentListDataResult> {
   try {
     const response = await apiService.getTVSeries({
       page: currentPage,
@@ -162,7 +159,7 @@ export async function getTrendingListData({
   limit,
   language,
   genres = [],
-}: TrendingListOptions): Promise<ContentListResult> {
+}: TrendingListOptions): Promise<ContentListDataResult> {
   try {
     const response = await apiService.getTrending({
       page: currentPage,

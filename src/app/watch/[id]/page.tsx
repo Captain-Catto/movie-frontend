@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import WatchPageClient from "@/components/pages/WatchPageClient";
 import { getServerPreferredLanguage } from "@/lib/server-language";
-import { getWatchPageInitialByRouteId } from "@/lib/detail-page-data";
+import { getWatchPageDataByRouteId } from "@/lib/detail-page-data";
 
 type SearchParamsValue = string | string[] | undefined;
 
@@ -36,7 +36,7 @@ export default async function WatchPage({ params, searchParams }: WatchPageProps
   const episode = parsePositiveInt(resolvedSearchParams?.episode, 1);
   const language = await getServerPreferredLanguage();
 
-  const initialData = await getWatchPageInitialByRouteId(
+  const initialData = await getWatchPageDataByRouteId(
     movieId,
     language,
     season,

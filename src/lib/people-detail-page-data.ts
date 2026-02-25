@@ -24,7 +24,7 @@ export interface PersonDetailData {
   popularity: number;
 }
 
-export interface PersonDetailInitialResult {
+export interface PersonDetailPageDataResult {
   personData: PersonDetailData | null;
   castCredits: CastMember[];
   crewCredits: CrewMember[];
@@ -135,9 +135,9 @@ export function getPersonProfileImage(profilePath: string | null | undefined): s
   return FALLBACK_PROFILE;
 }
 
-export async function getPersonDetailInitialById(
+export async function getPersonDetailPageDataById(
   personId: number
-): Promise<PersonDetailInitialResult> {
+): Promise<PersonDetailPageDataResult> {
   try {
     const personDetails = await apiService.getPersonDetails(personId);
     const personData = normalizePersonDetails(personDetails);

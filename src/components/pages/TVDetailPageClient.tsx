@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, Suspense, lazy } from "react";
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
@@ -89,7 +88,15 @@ const TVDetailPageClient = ({
   }
 
   if (error || !tvData) {
-    notFound();
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
+            {error || "Unable to load TV series details."}
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   return (

@@ -1,6 +1,5 @@
 "use client";
 
-import { notFound } from "next/navigation";
 import Image from "next/image";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
@@ -62,7 +61,15 @@ const PeopleDetailPageClient = ({
   }
 
   if (!personData) {
-    notFound();
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
+            {initialError || "Unable to load person details."}
+          </div>
+        </div>
+      </Layout>
+    );
   }
 
   return (

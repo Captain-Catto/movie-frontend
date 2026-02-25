@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { inter, roboto } from "@/lib/fonts";
 import "./globals.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -7,6 +8,7 @@ import { AuthLoader } from "@/components/auth/AuthLoader";
 import { FavoritesLoader } from "@/components/favorites/FavoritesLoader";
 import { ToastContainer } from "@/components/toast/ToastContainer";
 import { InitialPageLoader } from "@/components/loading/InitialPageLoader";
+import { TopLineLoader } from "@/components/loading/TopLineLoader";
 import EffectManager from "@/components/effects/EffectManager";
 
 export const metadata: Metadata = {
@@ -75,6 +77,9 @@ export default function RootLayout({
         className={`${inter.variable} ${roboto.variable} antialiased overflow-x-hidden`}
       >
         <ReduxProvider>
+          <Suspense fallback={null}>
+            <TopLineLoader />
+          </Suspense>
           <InitialPageLoader />
           <AuthLoader />
           <FavoritesLoader />

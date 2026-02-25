@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import PeopleDetailPageClient from "@/components/pages/PeopleDetailPageClient";
-import { getPersonDetailInitialById } from "@/lib/people-detail-page-data";
+import { getPersonDetailPageDataById } from "@/lib/people-detail-page-data";
 
 interface PersonDetailPageProps {
   params: Promise<{ id: string }> | { id: string };
@@ -16,7 +16,7 @@ export default async function PersonDetailPage({ params }: PersonDetailPageProps
   }
 
   const { personData, castCredits, crewCredits, error } =
-    await getPersonDetailInitialById(parsedPersonId);
+    await getPersonDetailPageDataById(parsedPersonId);
 
   if (!personData && !error) {
     notFound();
