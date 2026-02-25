@@ -4,6 +4,7 @@
  */
 
 import { formatDistanceToNow, format, isValid, parseISO } from 'date-fns';
+import { vi } from "date-fns/locale";
 import { getLocaleFromLanguage } from '@/constants/app.constants';
 
 /**
@@ -91,9 +92,13 @@ export const formatDateTimeWithZone = (dateInput: string | Date | null | undefin
  * Format as relative time ("2 hours ago", "just now", etc.) in user's timezone
  * @param dateInput - UTC date from backend
  */
-export const formatRelativeTime = (dateInput: string | Date | null | undefined): string => {
+export const formatRelativeTimeByLanguage = (
+  dateInput: string | Date | null | undefined,
+  language: string = "en-US"
+): string => {
   const date = parseDate(dateInput);
-  if (!date) return 'Unknown time';
+  const isVietnamese = language.toLowerCase().startsWith("vi");
+  if (!date) return isVietnamese ? "Không rõ thời gian" : "Unknown time";
 
   try {
     const now = new Date();
@@ -104,27 +109,43 @@ export const formatRelativeTime = (dateInput: string | Date | null | undefined):
 
     // Handle future dates
     if (diffInMinutes < 0) {
-      return 'just now';
+      return isVietnamese ? "Vừa xong" : "just now";
     }
 
     // Custom relative time for recent dates
     if (diffInMinutes < 1) {
-      return 'just now';
+      return isVietnamese ? "Vừa xong" : "just now";
     } else if (diffInMinutes < 60) {
-      return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+      return isVietnamese
+        ? `${diffInMinutes} phút trước`
+        : `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
     } else if (diffInHours < 24) {
-      return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+      return isVietnamese
+        ? `${diffInHours} giờ trước`
+        : `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
     } else if (diffInDays < 7) {
-      return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+      return isVietnamese
+        ? `${diffInDays} ngày trước`
+        : `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
     }
 
     // Use date-fns for older dates
-    return formatDistanceToNow(date, { addSuffix: true });
+    return formatDistanceToNow(date, {
+      addSuffix: true,
+      locale: isVietnamese ? vi : undefined,
+    });
   } catch (error) {
     console.error('❌ Relative time formatting error:', error);
-    return 'Unknown time';
+    return isVietnamese ? "Không rõ thời gian" : "Unknown time";
   }
 };
+
+/**
+ * Backward-compatible english relative time formatter
+ */
+export const formatRelativeTime = (
+  dateInput: string | Date | null | undefined
+): string => formatRelativeTimeByLanguage(dateInput, "en-US");
 
 /**
  * Format for Vietnamese locale (optional - legacy support)

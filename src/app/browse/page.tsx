@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import MovieFilters from "@/components/movie/MovieFilters";
 import MovieCard from "@/components/movie/MovieCard";
 import LinkPagination from "@/components/ui/LinkPagination";
+import StatusBanner from "@/components/ui/StatusBanner";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import type { SearchParamsRecord } from "@/lib/category-page-data";
 import {
@@ -10,6 +11,7 @@ import {
   getBrowsePageTitleByLanguage,
   parseBrowsePageParams,
 } from "@/lib/browse-page-data";
+import { getBrowseUiMessages, getCommonUiMessages } from "@/lib/ui-messages";
 
 interface BrowsePageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
@@ -20,7 +22,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const { currentPage, fetchType, currentFilters, paginationQuery } =
     parseBrowsePageParams(params);
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const common = getCommonUiMessages(language);
+  const browse = getBrowseUiMessages(language);
 
   const { items: movies, totalPages, error } = await getBrowsePageData({
     currentPage,
@@ -42,9 +45,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         </div>
 
         {error && (
-          <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-2 rounded mb-6">
-            {isVietnamese ? "Lỗi:" : "Error:"} {error}
-          </div>
+          <StatusBanner
+            className="mb-6"
+            message={`${common.errorPrefix} ${error}`}
+          />
         )}
 
         {movies.length > 0 ? (
@@ -70,18 +74,10 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
                 />
               </svg>
               <h3 className="text-lg font-medium text-white mb-2">
-                {isVietnamese ? "Không tìm thấy nội dung" : "No movies found"}
+                {browse.noResultsTitle}
               </h3>
-              <p>
-                {isVietnamese
-                  ? "Không có nội dung phù hợp với bộ lọc hiện tại."
-                  : "No movies found with the current filters."}
-              </p>
-              <p className="text-sm mt-2">
-                {isVietnamese
-                  ? "Hãy thử thay đổi bộ lọc để xem kết quả khác."
-                  : "Try changing the filters to see different results."}
-              </p>
+              <p>{browse.noResultsDescription}</p>
+              <p className="text-sm mt-2">{browse.changeFilterHint}</p>
             </div>
           </div>
         )}

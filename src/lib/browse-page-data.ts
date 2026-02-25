@@ -8,22 +8,18 @@ import {
   getTVListData,
   getTrendingListData,
 } from "@/lib/content-list-data";
-import type { PageListDataResult } from "@/lib/page-data.types";
-
-export type BrowseFetchType = "movie" | "tv" | "trending";
+import type {
+  BrowseFetchType,
+  BrowsePageParams,
+  PageListDataResult,
+} from "@/lib/page-data.types";
+import { getBrowseTitleByFetchType } from "@/lib/ui-messages";
 
 interface BrowsePageDataOptions {
   currentPage: number;
   fetchType: BrowseFetchType;
   language: string;
   filters: TableFilterOptions;
-}
-
-export interface BrowsePageParams {
-  currentPage: number;
-  fetchType: BrowseFetchType;
-  currentFilters: TableFilterOptions;
-  paginationQuery: Record<string, string | undefined>;
 }
 
 const firstParam = (
@@ -57,16 +53,7 @@ export function getBrowsePageTitleByLanguage(
   fetchType: BrowseFetchType,
   language: string
 ): string {
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-
-  switch (fetchType) {
-    case "tv":
-      return isVietnamese ? "📺 Duyệt Phim Bộ" : "📺 Browse TV Series";
-    case "trending":
-      return isVietnamese ? "🔥 Duyệt Thịnh Hành" : "🔥 Browse Trending";
-    default:
-      return isVietnamese ? "🎬 Duyệt Phim Lẻ" : "🎬 Browse Movies";
-  }
+  return getBrowseTitleByFetchType(fetchType, language);
 }
 
 export function parseBrowsePageParams(

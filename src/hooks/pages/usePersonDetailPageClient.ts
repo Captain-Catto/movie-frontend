@@ -9,8 +9,8 @@ import {
   getPersonDetailPageDataById,
   getPersonProfileImage,
   mapPersonCreditToMovieCardData,
-  type PersonDetailData,
 } from "@/lib/people-detail-page-data";
+import type { PersonDetailData } from "@/lib/page-data.types";
 import type {
   CastMember,
   CrewMember,

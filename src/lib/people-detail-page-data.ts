@@ -10,26 +10,11 @@ import type {
   CrewMember,
   MovieCardData,
 } from "@/types/content.types";
+import type {
+  PersonDetailData,
+  PersonDetailPageDataResult,
+} from "@/lib/page-data.types";
 import type { PersonDetails } from "@/types/people.types";
-
-export interface PersonDetailData {
-  id: number;
-  name: string;
-  biography: string;
-  birthday: string | null;
-  deathday: string | null;
-  place_of_birth: string | null;
-  profile_path: string | null;
-  known_for_department: string;
-  popularity: number;
-}
-
-export interface PersonDetailPageDataResult {
-  personData: PersonDetailData | null;
-  castCredits: CastMember[];
-  crewCredits: CrewMember[];
-  error: string | null;
-}
 
 const createCrewGroupKey = (crew: CrewMember): string => {
   const mediaType = crew.media_type === "tv" ? "tv" : "movie";

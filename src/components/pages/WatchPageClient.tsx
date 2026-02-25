@@ -2,6 +2,7 @@
 
 import { lazy, Suspense } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import DetailPageSkeleton from "@/components/ui/DetailPageSkeleton";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
@@ -18,8 +19,9 @@ import type { CastMember } from "@/types";
 import {
   type WatchPageCredits,
   type WatchPageRecommendationItem,
-} from "@/lib/detail-page-data";
+} from "@/lib/page-data.types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getWatchPageUiMessages } from "@/lib/ui-messages";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -53,32 +55,7 @@ const WatchPageClient = ({
   initialEpisode,
 }: WatchPageClientProps) => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-  const labels = {
-    unableToLoad: isVietnamese
-      ? "Không thể tải dữ liệu trang xem."
-      : "Unable to load watch page data.",
-    fallbackSource: isVietnamese ? "Nguồn dự phòng" : "Fallback source",
-    tvSeries: isVietnamese ? "Phim bộ" : "TV Series",
-    movie: isVietnamese ? "Phim lẻ" : "Movie",
-    season: isVietnamese ? "mùa" : "Season",
-    seasons: isVietnamese ? "mùa" : "Seasons",
-    episode: isVietnamese ? "tập" : "Episode",
-    episodes: isVietnamese ? "tập" : "Episodes",
-    createdBy: isVietnamese ? "Tạo bởi:" : "Created by:",
-    seriesInfo: isVietnamese ? "Thông tin series" : "Series information",
-    movieInfo: isVietnamese ? "Thông tin phim" : "Movie information",
-    cast: isVietnamese ? "Diễn viên" : "Cast",
-    noCast: isVietnamese
-      ? "Không có thông tin diễn viên"
-      : "No cast information available",
-    youMayAlsoLike: isVietnamese ? "Có thể bạn cũng thích" : "You May Also Like",
-    noRecommendations: isVietnamese
-      ? "Không có gợi ý liên quan"
-      : "No movie recommendations available",
-    notAvailable: isVietnamese ? "Không có" : "N/A",
-    posterAltFallback: isVietnamese ? "Poster phim" : "Movie poster",
-  };
+  const labels = getWatchPageUiMessages(language);
 
   const {
     movieData,
@@ -252,7 +229,7 @@ const WatchPageClient = ({
                 <div className="info lg:col-span-3 space-y-6">
                   <div>
                     <h2 className="heading-sm media-name text-4xl font-bold text-white mb-2">
-                      <a
+                      <Link
                         title={movieData.title}
                         href={`/${
                           movieData.contentType === "tv" ? "tv" : "movie"
@@ -260,7 +237,7 @@ const WatchPageClient = ({
                         className="text-white hover:text-red-500"
                       >
                         {movieData.title}
-                      </a>
+                      </Link>
                     </h2>
                     {movieData.aliasTitle &&
                       movieData.aliasTitle !== movieData.title && (
@@ -397,7 +374,7 @@ const WatchPageClient = ({
                         </div>
                       )}
 
-                    <a
+                    <Link
                       className="text-primary text-red-500 hover:text-red-400 inline-flex items-center"
                       href={`/${
                         movieData.contentType === "tv" ? "tv" : "movie"
@@ -417,7 +394,7 @@ const WatchPageClient = ({
                           clipRule="evenodd"
                         />
                       </svg>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -474,7 +451,7 @@ const WatchPageClient = ({
                   <div className="grid grid-cols-3 gap-3">
                     {credits.cast.slice(0, 9).map((actor: CastMember) => (
                       <div key={actor.id} className="text-center">
-                        <a href={`/people/${actor.id}`} className="block mb-2">
+                        <Link href={`/people/${actor.id}`} className="block mb-2">
                           <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-700 mx-auto">
                             {actor.profile_path ? (
                               <Image
@@ -504,14 +481,14 @@ const WatchPageClient = ({
                               </div>
                             )}
                           </div>
-                        </a>
+                        </Link>
                         <h4 className="text-white text-xs font-medium leading-tight">
-                          <a
+                          <Link
                             href={`/people/${actor.id}`}
                             className="hover:text-red-400 transition-colors"
                           >
                             {actor.name}
-                          </a>
+                          </Link>
                         </h4>
                         {actor.character && (
                           <p className="text-gray-400 text-xs mt-1 truncate">
@@ -549,7 +526,7 @@ const WatchPageClient = ({
                 ) : recommendations.length > 0 ? (
                   <div className="space-y-4">
                     {recommendations.map((item: WatchPageRecommendationItem) => (
-                      <a
+                      <Link
                         key={item.id}
                         href={`/${
                           movieData.contentType === "tv" ? "tv" : "movie"
@@ -611,7 +588,7 @@ const WatchPageClient = ({
                               </div>
                             )}
                         </div>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 ) : (

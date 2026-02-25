@@ -69,7 +69,11 @@ export function CommentItem(props: CommentItemProps) {
           </div>
           <div className="ch-logs">
             <div className="c-time text-gray-400 text-xs">
-              <RelativeTime date={currentComment.createdAt} className="inline" />
+              <RelativeTime
+                date={currentComment.createdAt}
+                className="inline"
+                language={language}
+              />
               {currentComment.isEdited && (
                 <span className="text-gray-500 ml-2">
                   ({isVietnamese ? "Đã chỉnh sửa" : "Edited"})
@@ -204,7 +208,8 @@ export function CommentItem(props: CommentItemProps) {
 
         {localReplyCount > 0 && (
           <div className="replies-wrap mt-3">
-            <a
+            <button
+              type="button"
               className="text-primary text-red-500 cursor-pointer text-sm flex items-center gap-1 hover:text-red-400"
               onClick={() => void handleToggleReplies()}
             >
@@ -224,7 +229,7 @@ export function CommentItem(props: CommentItemProps) {
                 : isVietnamese
                 ? `Xem tất cả trả lời (${localReplyCount})`
                 : `View all replies (${localReplyCount})`}
-            </a>
+            </button>
           </div>
         )}
 

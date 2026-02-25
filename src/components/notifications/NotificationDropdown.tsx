@@ -7,12 +7,14 @@ import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
 import { RelativeTime } from "@/utils/hydration-safe-date";
 import { useNotificationDropdown } from "@/hooks/components/useNotificationDropdown";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface NotificationDropdownProps {
   className?: string;
 }
 
 export function NotificationDropdown({ className }: NotificationDropdownProps) {
+  const { language } = useLanguage();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const {
     isOpen,
@@ -131,6 +133,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                       <RelativeTime
                         date={notification.createdAt}
                         className="text-xs text-gray-400 mt-1 block"
+                        language={language}
                       />
                     </div>
                     <div className="flex items-center space-x-1">

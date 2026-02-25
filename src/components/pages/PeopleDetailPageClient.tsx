@@ -8,8 +8,9 @@ import MovieCard from "@/components/movie/MovieCard";
 import { Pagination } from "@/components/ui/Pagination";
 import { usePersonDetailPageClient } from "@/hooks/pages/usePersonDetailPageClient";
 import type { CastMember, CrewMember } from "@/types/content.types";
-import type { PersonDetailData } from "@/lib/people-detail-page-data";
+import type { PersonDetailData } from "@/lib/page-data.types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getPeopleDetailUiMessages } from "@/lib/ui-messages";
 
 interface PeopleDetailPageClientProps {
   personId: string;
@@ -27,7 +28,7 @@ const PeopleDetailPageClient = ({
   initialError,
 }: PeopleDetailPageClientProps) => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getPeopleDetailUiMessages(language);
 
   const {
     personData,
@@ -69,10 +70,7 @@ const PeopleDetailPageClient = ({
       <Layout>
         <div className="min-h-screen flex items-center justify-center px-4">
           <div className="bg-red-900/20 border border-red-500 text-red-200 px-4 py-3 rounded">
-            {initialError ||
-              (isVietnamese
-                ? "Không thể tải thông tin nhân vật."
-                : "Unable to load person details.")}
+            {initialError || labels.unableToLoad}
           </div>
         </div>
       </Layout>
@@ -108,7 +106,7 @@ const PeopleDetailPageClient = ({
                 {formattedBirthday && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                      {isVietnamese ? "Ngày sinh" : "Date of Birth"}
+                      {labels.dateOfBirth}
                     </h3>
                     <p className="text-white">{formattedBirthday}</p>
                   </div>
@@ -117,7 +115,7 @@ const PeopleDetailPageClient = ({
                 {personData.place_of_birth && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                      {isVietnamese ? "Nơi sinh" : "Place of Birth"}
+                      {labels.placeOfBirth}
                     </h3>
                     <p className="text-white">{personData.place_of_birth}</p>
                   </div>
@@ -126,7 +124,7 @@ const PeopleDetailPageClient = ({
                 {formattedDeathday && (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-400 mb-1">
-                      {isVietnamese ? "Ngày mất" : "Date of Death"}
+                      {labels.dateOfDeath}
                     </h3>
                     <p className="text-white">{formattedDeathday}</p>
                   </div>
@@ -135,7 +133,7 @@ const PeopleDetailPageClient = ({
 
               <div>
                 <h3 className="text-xl font-semibold text-white mb-4">
-                  {isVietnamese ? "Tiểu sử" : "Biography"}
+                  {labels.biography}
                 </h3>
                 <div className="text-gray-300 leading-relaxed whitespace-pre-line">
                   {personData.biography ? (
@@ -146,21 +144,13 @@ const PeopleDetailPageClient = ({
                           onClick={toggleBiography}
                           className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block cursor-pointer"
                         >
-                          {showFullBio
-                            ? isVietnamese
-                              ? "Thu gọn"
-                              : "Show less"
-                            : isVietnamese
-                            ? "Xem thêm"
-                            : "Read more"}
+                          {showFullBio ? labels.showLess : labels.readMore}
                         </button>
                       )}
                     </>
                   ) : (
                     <p className="text-gray-400 italic">
-                      {isVietnamese
-                        ? "Tiểu sử hiện chưa có"
-                        : "Biography not available yet"}
+                      {labels.biographyNotAvailable}
                     </p>
                   )}
                 </div>
@@ -172,7 +162,7 @@ const PeopleDetailPageClient = ({
         <Container>
           <div className="border-t border-gray-700 pt-8">
             <h2 className="text-2xl font-bold text-white mb-6">
-              {isVietnamese ? "Danh mục phim" : "Filmography"}
+              {labels.filmography}
             </h2>
 
             <div className="flex space-x-4 mb-6">
@@ -184,7 +174,7 @@ const PeopleDetailPageClient = ({
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                {isVietnamese ? "Diễn xuất" : "Acting"} ({castTotalItems})
+                {labels.acting} ({castTotalItems})
               </button>
               <button
                 onClick={() => handleTabChange("crew")}
@@ -194,7 +184,7 @@ const PeopleDetailPageClient = ({
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
               >
-                {isVietnamese ? "Đoàn phim" : "Crew"} ({crewTotalItems})
+                {labels.crew} ({crewTotalItems})
               </button>
             </div>
 
@@ -221,13 +211,9 @@ const PeopleDetailPageClient = ({
             {currentItems.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-gray-400">
-                  {isVietnamese
-                    ? `Không có ${
-                        activeTab === "cast" ? "vai diễn" : "vai trò đoàn phim"
-                      }`
-                    : `No ${
-                        activeTab === "cast" ? "acting credits" : "crew credits"
-                      } available`}
+                  {activeTab === "cast"
+                    ? labels.noActingCredits
+                    : labels.noCrewCredits}
                 </p>
               </div>
             )}

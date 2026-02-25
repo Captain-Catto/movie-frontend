@@ -11,11 +11,11 @@ import {
   formatWatchDuration,
   type WatchContentData,
 } from "@/utils/watchContentMapper";
-import {
-  getWatchPageDataByRouteId,
-  type WatchPageCredits,
-  type WatchPageRecommendationItem,
-} from "@/lib/detail-page-data";
+import { getWatchPageDataByRouteId } from "@/lib/detail-page-data";
+import type {
+  WatchPageCredits,
+  WatchPageRecommendationItem,
+} from "@/lib/page-data.types";
 
 const STREAM_LOAD_TIMEOUT_MS = 15000;
 

@@ -3,20 +3,10 @@ import type { MovieCardData, TVSeries } from "@/types/content.types";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
+import type { HomePageData } from "@/lib/page-data.types";
 
 const HOME_SECTION_LIMIT = 10;
 const HOME_TV_SECTION_LIMIT = 6;
-
-export interface HomePageDataResult {
-  heroMovies: MovieCardData[];
-  nowPlayingMovies: MovieCardData[];
-  popularMovies: MovieCardData[];
-  topRatedMovies: MovieCardData[];
-  upcomingMovies: MovieCardData[];
-  onTheAirTVSeries: MovieCardData[];
-  popularTVSeries: MovieCardData[];
-  topRatedTVSeries: MovieCardData[];
-}
 
 const toMovieCards = (items: unknown): MovieCardData[] => {
   if (!Array.isArray(items)) {
@@ -44,7 +34,7 @@ const toTVSeriesCards = (items: unknown): MovieCardData[] => {
 
 export async function getHomePageData(
   language: string
-): Promise<HomePageDataResult> {
+): Promise<HomePageData> {
   const [
     trendingRes,
     nowPlayingRes,

@@ -7,6 +7,7 @@ import {
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
 import { getServerPreferredLanguage } from "@/lib/server-language";
+import { getCategoryListingUiMessages } from "@/lib/ui-messages";
 import { apiService } from "@/services/api";
 import type { MovieCardData, TVSeries } from "@/types/content.types";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
@@ -21,7 +22,6 @@ export default async function OnTheAirTVPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let tvShows: MovieCardData[] = [];
   let totalPages = 1;
@@ -48,26 +48,19 @@ export default async function OnTheAirTVPage({
   } catch (err) {
     error = err instanceof Error ? err.message : "Unknown error";
   }
+  const labels = getCategoryListingUiMessages("tv-on-the-air", language, total);
 
   return (
     <CategoryListingPage
-      title={isVietnamese ? "Phim bộ đang phát sóng" : "Currently Airing TV Shows"}
-      description={
-        isVietnamese
-          ? "Theo dõi các series đang phát sóng tập mới."
-          : "Stay current with series that are actively broadcasting new episodes."
-      }
+      title={labels.title}
+      description={labels.description}
       total={total}
       items={tvShows}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/tv/on-the-air"
-      emptyMessage={
-        isVietnamese
-          ? "Không tìm thấy phim bộ đang phát sóng"
-          : "No currently airing TV shows found"
-      }
-      totalItemsLabel={isVietnamese ? "mục" : "items"}
+      emptyMessage={labels.emptyMessage}
+      totalItemsLabel={labels.totalItemsLabel}
       error={error}
     />
   );

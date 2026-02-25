@@ -142,7 +142,8 @@ export function CommentSection({
               {/* Load More Button */}
               {hasMore && (
                 <div className="d-item py-3 more">
-                  <a
+                  <button
+                    type="button"
                     className="primary-text text-red-500 cursor-pointer hover:text-red-400 block text-center"
                     onClick={loadMore}
                   >
@@ -153,7 +154,7 @@ export function CommentSection({
                       : isVietnamese
                       ? "Xem thêm bình luận..."
                       : "Load more comments..."}
-                  </a>
+                  </button>
                 </div>
               )}
             </>

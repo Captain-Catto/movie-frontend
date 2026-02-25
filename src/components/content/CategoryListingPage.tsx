@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import MovieGrid from "@/components/movie/MovieGrid";
 import LinkPagination from "@/components/ui/LinkPagination";
 import type { MovieCardData } from "@/types/content.types";
+import StatusBanner from "@/components/ui/StatusBanner";
 
 interface CategoryListingPageProps {
   title: string;
@@ -45,9 +46,7 @@ export default function CategoryListingPage({
           </div>
 
           {error ? (
-            <div className="mb-6 rounded border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {error}
-            </div>
+            <StatusBanner className="mb-6" message={error} />
           ) : null}
 
           {items.length > 0 && (

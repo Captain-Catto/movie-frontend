@@ -14,11 +14,13 @@ import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
 import type { StoredUser } from "@/lib/auth-storage";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommonUiMessages } from "@/lib/ui-messages";
 
 export default function AccountPage() {
   const { user, isAuthenticated, isLoading, checkAuth } = useAuth();
   const { language } = useLanguage();
   const isVietnamese = language.toLowerCase().startsWith("vi");
+  const common = getCommonUiMessages(language);
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
@@ -84,8 +86,8 @@ export default function AccountPage() {
       : "Leave blank to keep current",
     confirmPassword: isVietnamese ? "Xác nhận mật khẩu" : "Confirm password",
     repeatNewPassword: isVietnamese ? "Nhập lại mật khẩu mới" : "Repeat new password",
-    saving: isVietnamese ? "Đang lưu..." : "Saving...",
-    saveChanges: isVietnamese ? "Lưu thay đổi" : "Save changes",
+    saving: common.saving,
+    saveChanges: common.saveChanges,
     changePassword: isVietnamese ? "Đổi mật khẩu" : "Change Password",
     updatePassword: isVietnamese ? "Cập nhật mật khẩu của bạn" : "Update your password",
     notifications: isVietnamese ? "Thông báo" : "Notifications",

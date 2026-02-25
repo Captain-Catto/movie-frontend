@@ -7,6 +7,7 @@ import {
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
 import { getServerPreferredLanguage } from "@/lib/server-language";
+import { getCategoryListingUiMessages } from "@/lib/ui-messages";
 import { apiService } from "@/services/api";
 import type { Movie, MovieCardData } from "@/types/content.types";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
@@ -21,7 +22,6 @@ export default async function TopRatedPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let movies: MovieCardData[] = [];
   let totalPages = 1;
@@ -48,28 +48,19 @@ export default async function TopRatedPage({
   } catch (err) {
     error = err instanceof Error ? err.message : "Unknown error";
   }
+  const labels = getCategoryListingUiMessages("movies-top-rated", language, total);
 
   return (
     <CategoryListingPage
-      title={isVietnamese ? "Phim đánh giá cao" : "Top Rated Movies"}
-      description={
-        total > 0
-          ? isVietnamese
-            ? `${total} phim đánh giá cao`
-            : `${total} top rated movies`
-          : ""
-      }
+      title={labels.title}
+      description={labels.description}
       total={total}
       items={movies}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/movies/top-rated"
-      emptyMessage={
-        isVietnamese
-          ? "Không tìm thấy phim đánh giá cao"
-          : "No top rated movies found"
-      }
-      totalItemsLabel={isVietnamese ? "mục" : "items"}
+      emptyMessage={labels.emptyMessage}
+      totalItemsLabel={labels.totalItemsLabel}
       error={error}
     />
   );

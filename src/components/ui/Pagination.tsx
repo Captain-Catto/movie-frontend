@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommonUiMessages } from "@/lib/ui-messages";
 
 interface PaginationProps {
   currentPage: number;
@@ -23,13 +24,14 @@ export function Pagination({
   className = "",
 }: PaginationProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const common = getCommonUiMessages(language);
   const labels = {
-    pagination: isVietnamese ? "Phân trang" : "Pagination",
-    previousPage: isVietnamese ? "Trang trước" : "Previous page",
-    page: isVietnamese ? "Trang" : "Page",
-    goTo: isVietnamese ? "Đến" : "Go to",
-    jumpToPageTitle: isVietnamese
+    pagination: common.page,
+    previousPage: `${common.previous} ${common.page.toLowerCase()}`,
+    nextPage: `${common.next} ${common.page.toLowerCase()}`,
+    page: common.page,
+    goTo: language.toLowerCase().startsWith("vi") ? "Đến" : "Go to",
+    jumpToPageTitle: language.toLowerCase().startsWith("vi")
       ? `Đi đến trang (1-${totalPages})`
       : `Jump to page (1-${totalPages})`,
   };
@@ -264,7 +266,7 @@ export function Pagination({
               ? "text-gray-500 cursor-not-allowed bg-gray-800"
               : "text-gray-300 bg-gray-700 hover:bg-gray-600 hover:text-white cursor-pointer"
           )}
-          aria-label="Trang sau"
+          aria-label={labels.nextPage}
         >
           &gt;
         </button>

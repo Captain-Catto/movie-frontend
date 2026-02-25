@@ -91,10 +91,14 @@ export async function getPeoplePageData(
     const people = Array.isArray(response.results)
       ? response.results.map(mapCastMemberToPersonData)
       : [];
-    const totalPages =
-      typeof response.total_pages === "number" && response.total_pages > 0
+    const responseRecord = response as unknown as Record<string, unknown>;
+    const totalPagesValue =
+      typeof response.total_pages === "number"
         ? response.total_pages
+        : typeof responseRecord.totalPages === "number"
+        ? responseRecord.totalPages
         : 1;
+    const totalPages = totalPagesValue > 0 ? totalPagesValue : 1;
 
     return {
       items: people,

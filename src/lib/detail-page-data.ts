@@ -4,9 +4,15 @@ import { getLocalizedGenreNameById } from "@/utils/genreMapping";
 import {
   formatWatchDuration,
   mapContentToWatchContent,
-  type WatchContentData,
 } from "@/utils/watchContentMapper";
 import { FALLBACK_POSTER, getDsLanguageFromLanguage } from "@/constants/app.constants";
+import type {
+  MovieDetailPageDataResult,
+  TVDetailPageDataResult,
+  WatchPageCredits,
+  WatchPageDataResult,
+  WatchPageRecommendationItem,
+} from "@/lib/page-data.types";
 import type {
   MovieDetail,
   TVDetail,
@@ -23,42 +29,6 @@ interface ContentLookupResult {
   contentType: "movie" | "tv";
   success: boolean;
   message?: string;
-}
-
-export interface MovieDetailPageDataResult {
-  movieData: MovieDetail | null;
-  contentType: "movie" | "tv" | null;
-  error: string | null;
-}
-
-export interface TVDetailPageDataResult {
-  tvData: TVDetail | null;
-  error: string | null;
-}
-
-export interface WatchPageCredits {
-  cast: CastMember[];
-  crew: unknown[];
-  runtime?: number | string;
-}
-
-export interface WatchPageRecommendationItem {
-  id: number;
-  title?: string;
-  name?: string;
-  poster_path: string | null;
-  release_date?: string;
-  first_air_date?: string;
-  vote_average: number;
-}
-
-export interface WatchPageDataResult {
-  movieData: WatchContentData | null;
-  credits: WatchPageCredits | null;
-  recommendations: WatchPageRecommendationItem[];
-  streamCandidates: string[];
-  streamError: string | null;
-  error: string | null;
 }
 
 async function lookupContentByTmdbId(

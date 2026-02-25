@@ -17,6 +17,7 @@ import type { CastMember } from "@/types";
 import { useMovieDetailPageClient } from "@/hooks/pages/useMovieDetailPageClient";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
+import { getMovieDetailUiMessages } from "@/lib/ui-messages";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -59,28 +60,7 @@ const MovieDetailPageClient = ({
     initialError,
   });
 
-  const labels = {
-    unknown: isVietnamese ? "Không rõ" : "Unknown",
-    unknownTitle: isVietnamese ? "Không rõ tiêu đề" : "Unknown Title",
-    loadingContent: isVietnamese
-      ? "Không thể tải nội dung."
-      : "Unable to load content.",
-    errorPrefix: isVietnamese ? "Lỗi:" : "Error:",
-    watchNow: isVietnamese ? "Xem ngay" : "Watch Now",
-    overview: isVietnamese ? "Tổng quan" : "Overview",
-    cast: isVietnamese ? "Diễn viên" : "Cast",
-    contentInfo: isVietnamese ? "Thông tin phim" : "Movie Info",
-    director: isVietnamese ? "Đạo diễn:" : "Director:",
-    country: isVietnamese ? "Quốc gia:" : "Country:",
-    releaseYear: isVietnamese ? "Năm phát hành:" : "Release Year:",
-    runtime: isVietnamese ? "Thời lượng:" : "Runtime:",
-    runtimeEpisode: isVietnamese ? "Thời lượng/tập:" : "Runtime/Episode:",
-    quality: isVietnamese ? "Chất lượng:" : "Quality:",
-    language: isVietnamese ? "Ngôn ngữ:" : "Language:",
-    status: isVietnamese ? "Trạng thái:" : "Status:",
-    youMightAlsoLike: isVietnamese ? "Có thể bạn cũng thích" : "You Might Also Like",
-    notAvailable: isVietnamese ? "Không có" : "N/A",
-  };
+  const labels = getMovieDetailUiMessages(language);
 
   const getLocalizedCountryName = (countryCodeOrName: string) => {
     const trimmed = countryCodeOrName.trim();

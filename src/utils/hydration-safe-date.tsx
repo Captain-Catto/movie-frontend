@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatRelativeTime as originalFormatRelativeTime } from "./dateFormatter";
+import { formatRelativeTimeByLanguage as originalFormatRelativeTime } from "./dateFormatter";
 
 /**
  * Hydration-safe relative time formatter hook.
@@ -33,9 +33,11 @@ import { formatRelativeTime as originalFormatRelativeTime } from "./dateFormatte
  * @see https://react.dev/reference/react-dom/client/hydrateRoot#handling-different-client-and-server-content
  */
 export function useHydrationSafeRelativeTime(
-  dateInput: string | Date | null | undefined
+  dateInput: string | Date | null | undefined,
+  language: string = "en-US"
 ): string {
   const [isHydrated, setIsHydrated] = useState(false);
+  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   useEffect(() => {
     setIsHydrated(true);
@@ -43,11 +45,11 @@ export function useHydrationSafeRelativeTime(
 
   // During SSR and first render, return stable ISO timestamp
   if (!isHydrated) {
-    if (!dateInput) return "Unknown time";
+    if (!dateInput) return isVietnamese ? "Không rõ thời gian" : "Unknown time";
     const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
 
     // Return a stable format like "Dec 6, 2025 at 2:30 PM"
-    return date.toLocaleString(undefined, {
+    return date.toLocaleString(isVietnamese ? "vi-VN" : "en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -57,7 +59,7 @@ export function useHydrationSafeRelativeTime(
   }
 
   // After hydration, use live relative time
-  return originalFormatRelativeTime(dateInput);
+  return originalFormatRelativeTime(dateInput, language);
 }
 
 /**
@@ -101,11 +103,13 @@ export function useHydrationSafeRelativeTime(
 export function RelativeTime({
   date,
   className,
+  language,
 }: {
   date: string | Date | null | undefined;
   className?: string;
+  language?: string;
 }) {
-  const formattedTime = useHydrationSafeRelativeTime(date);
+  const formattedTime = useHydrationSafeRelativeTime(date, language);
 
   return (
     <time suppressHydrationWarning className={className}>

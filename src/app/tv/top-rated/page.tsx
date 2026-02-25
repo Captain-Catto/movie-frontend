@@ -7,6 +7,7 @@ import {
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
 import { getServerPreferredLanguage } from "@/lib/server-language";
+import { getCategoryListingUiMessages } from "@/lib/ui-messages";
 import { apiService } from "@/services/api";
 import type { MovieCardData, TVSeries } from "@/types/content.types";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
@@ -21,7 +22,6 @@ export default async function TopRatedTVPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
 
   let tvShows: MovieCardData[] = [];
   let totalPages = 1;
@@ -48,26 +48,19 @@ export default async function TopRatedTVPage({
   } catch (err) {
     error = err instanceof Error ? err.message : "Unknown error";
   }
+  const labels = getCategoryListingUiMessages("tv-top-rated", language, total);
 
   return (
     <CategoryListingPage
-      title={isVietnamese ? "Phim bộ đánh giá cao" : "Top Rated TV Shows"}
-      description={
-        isVietnamese
-          ? "Các series được giới phê bình và khán giả đánh giá nổi bật."
-          : "Critically acclaimed series with outstanding ratings from viewers."
-      }
+      title={labels.title}
+      description={labels.description}
       total={total}
       items={tvShows}
       totalPages={totalPages}
       currentPage={currentPage}
       basePath="/tv/top-rated"
-      emptyMessage={
-        isVietnamese
-          ? "Không tìm thấy phim bộ đánh giá cao"
-          : "No top rated TV shows found"
-      }
-      totalItemsLabel={isVietnamese ? "mục" : "items"}
+      emptyMessage={labels.emptyMessage}
+      totalItemsLabel={labels.totalItemsLabel}
       error={error}
     />
   );

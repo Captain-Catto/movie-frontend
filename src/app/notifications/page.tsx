@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
 import { useRouter } from "next/navigation";
+import { getCommonUiMessages } from "@/lib/ui-messages";
+import { formatRelativeTimeByLanguage } from "@/utils/dateFormatter";
 
 interface NotificationItem {
   id: string | number;
@@ -26,38 +28,12 @@ interface NotificationItem {
   };
 }
 
-const getRelativeTimeLabel = (date: Date, isVietnamese: boolean): string => {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const minutes = Math.floor(diffMs / (1000 * 60));
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (minutes < 1) return isVietnamese ? "Vừa xong" : "just now";
-  if (minutes < 60) {
-    return isVietnamese
-      ? `${minutes} phút trước`
-      : `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
-  }
-  if (hours < 24) {
-    return isVietnamese
-      ? `${hours} giờ trước`
-      : `${hours} hour${hours > 1 ? "s" : ""} ago`;
-  }
-  if (days < 7) {
-    return isVietnamese
-      ? `${days} ngày trước`
-      : `${days} day${days > 1 ? "s" : ""} ago`;
-  }
-
-  return date.toLocaleDateString(isVietnamese ? "vi-VN" : "en-US");
-};
-
 export default function NotificationsPage() {
   const router = useRouter();
   const { isLoading } = useAuth();
   const { language } = useLanguage();
   const isVietnamese = language.toLowerCase().startsWith("vi");
+  const common = getCommonUiMessages(language);
   const locale = getLocaleFromLanguage(language);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,9 +57,9 @@ export default function NotificationsPage() {
         ? `${count} thông báo`
         : `${count} notification${count === 1 ? "" : "s"}`,
     noNotifications: isVietnamese ? "Không có thông báo" : "No notifications",
-    showAll: isVietnamese ? "Hiện tất cả" : "Show all",
-    unreadOnly: isVietnamese ? "Chỉ chưa đọc" : "Unread only",
-    loading: isVietnamese ? "Đang tải thông báo..." : "Loading notifications...",
+    showAll: common.showAll,
+    unreadOnly: common.unreadOnly,
+    loading: isVietnamese ? "Đang tải thông báo..." : common.loading,
     noNotificationsYet: isVietnamese ? "Chưa có thông báo" : "No notifications yet",
     noNotificationsDesc: isVietnamese
       ? "Khi có cập nhật mới, thông báo sẽ xuất hiện tại đây."
@@ -304,7 +280,10 @@ export default function NotificationsPage() {
                                 {notif.title}
                               </h3>
                               <div className="text-xs text-gray-500 whitespace-nowrap">
-                                {getRelativeTimeLabel(new Date(notif.createdAt), isVietnamese)}
+                                {formatRelativeTimeByLanguage(
+                                  new Date(notif.createdAt),
+                                  language
+                                )}
                               </div>
                             </div>
 

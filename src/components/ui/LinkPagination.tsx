@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommonUiMessages } from "@/lib/ui-messages";
 
 interface LinkPaginationProps {
   currentPage: number;
@@ -20,11 +21,7 @@ export default function LinkPagination({
   className = "",
 }: LinkPaginationProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-  const labels = {
-    previous: isVietnamese ? "Trước" : "Previous",
-    next: isVietnamese ? "Tiếp" : "Next",
-  };
+  const labels = getCommonUiMessages(language);
 
   const getVisiblePages = () => {
     const pages = [];

@@ -12,6 +12,7 @@ import type { TVDetail } from "@/types/content.types";
 import RatingBadge from "@/components/ui/RatingBadge";
 import GenreBadge from "@/components/ui/GenreBadge";
 import { useTVDetailPageClient } from "@/hooks/pages/useTVDetailPageClient";
+import { getTVDetailUiMessages } from "@/lib/ui-messages";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -48,36 +49,7 @@ const TVDetailPageClient = ({
   const locale = getLocaleFromLanguage(language);
   const isVietnamese = language.toLowerCase().startsWith("vi");
   const [showFullDescription, setShowFullDescription] = useState(false);
-
-  const labels = {
-    seriesInfo: isVietnamese ? "Thông Tin Series" : "Series Info",
-    createdBy: isVietnamese ? "Tạo bởi:" : "Created by:",
-    cast: isVietnamese ? "Diễn viên:" : "Cast:",
-    country: isVietnamese ? "Quốc gia:" : "Country:",
-    firstAirDate: isVietnamese ? "Ngày phát sóng đầu:" : "First Air Date:",
-    lastAirDate: isVietnamese ? "Ngày phát sóng cuối:" : "Last Air Date:",
-    seasons: isVietnamese ? "Số mùa:" : "Seasons:",
-    episodes: isVietnamese ? "Số tập:" : "Episodes:",
-    runtimePerEpisode: isVietnamese
-      ? "Thời lượng/tập:"
-      : "Runtime/Episode:",
-    language: isVietnamese ? "Ngôn ngữ:" : "Language:",
-    status: isVietnamese ? "Trạng thái:" : "Status:",
-    loading: isVietnamese ? "Đang tải..." : "Loading...",
-    unknown: isVietnamese ? "Không rõ" : "Unknown",
-    notAvailable: isVietnamese ? "Không có" : "N/A",
-    unableToLoad: isVietnamese
-      ? "Không thể tải chi tiết phim bộ."
-      : "Unable to load TV series details.",
-    tvSeriesTag: isVietnamese ? "Phim bộ" : "TV Series",
-    watchSeries: isVietnamese ? "Xem phim bộ" : "Watch Series",
-    overview: isVietnamese ? "Tổng quan" : "Overview",
-    readMore: isVietnamese ? "Xem thêm" : "Read more",
-    showLess: isVietnamese ? "Thu gọn" : "Show less",
-    noDescription: isVietnamese ? "Chưa có mô tả." : "No description available.",
-    youMayAlsoLike: isVietnamese ? "Có thể bạn cũng thích" : "You May Also Like",
-    minutesPerEpisode: isVietnamese ? "phút/tập" : "min/ep",
-  };
+  const labels = getTVDetailUiMessages(language);
 
   // Helper functions
   const isLocalFallback = (path: string | null) =>
