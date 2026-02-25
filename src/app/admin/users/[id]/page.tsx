@@ -414,11 +414,11 @@ export default function AdminUserDetailPage() {
                     </span>
                     {/* Duration badge */}
                     {item.metadata?.duration &&
-                      Number(item.metadata.duration) > 0 && (
+                      Number(item.metadata.duration) > 0 ? (
                         <span className="ml-2 text-xs bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded">
                           {formatDuration(Number(item.metadata.duration))}
                         </span>
-                      )}
+                      ) : null}
                   </div>
                   <span className="text-xs text-gray-500 whitespace-nowrap">
                     {new Date(item.createdAt).toLocaleString("vi-VN")}
