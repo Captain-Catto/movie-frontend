@@ -8,26 +8,27 @@
  * a complete page-level solution.
  */
 
-export { useHomePage } from './useHomePage';
-export type { UseHomePageResult, HomePageSections, MovieSection } from './useHomePage';
-
-export { useBrowsePage } from './useBrowsePage';
+export { useMovieDetailPageClient } from './useMovieDetailPageClient';
 export type {
-  UseBrowsePageResult,
-  BrowseFilters,
-  BrowseContentType,
-} from './useBrowsePage';
+  UseMovieDetailPageClientOptions,
+  UseMovieDetailPageClientResult,
+} from './useMovieDetailPageClient';
 
-export { useMovieDetailPage } from './useMovieDetailPage';
+export { useTVDetailPageClient } from './useTVDetailPageClient';
 export type {
-  UseMovieDetailPageOptions,
-  UseMovieDetailPageResult,
-  ProcessedDetailData,
-} from './useMovieDetailPage';
+  UseTVDetailPageClientOptions,
+  UseTVDetailPageClientResult,
+} from './useTVDetailPageClient';
 
-export { useFavoritesPage } from './useFavoritesPage';
+export { usePersonDetailPageClient } from './usePersonDetailPageClient';
 export type {
-  UseFavoritesPageOptions,
-  UseFavoritesPageResult,
-  FavoritesContentType,
-} from './useFavoritesPage';
+  PersonDetailTab,
+  UsePersonDetailPageClientOptions,
+  UsePersonDetailPageClientResult,
+} from './usePersonDetailPageClient';
+
+export { useWatchPage } from './useWatchPage';
+export type {
+  UseWatchPageOptions,
+  UseWatchPageResult,
+} from './useWatchPage';

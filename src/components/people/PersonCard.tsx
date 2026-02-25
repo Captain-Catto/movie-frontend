@@ -1,7 +1,7 @@
 import React, { type SyntheticEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import type { PersonData } from "@/app/people/page";
+import type { PersonData } from "@/types/people.types";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,

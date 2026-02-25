@@ -5,6 +5,7 @@ interface LinkPaginationProps {
   currentPage: number;
   totalPages: number;
   basePath: string;
+  queryParams?: Record<string, string | string[] | undefined>;
   showPages?: number;
   className?: string;
 }
@@ -13,6 +14,7 @@ export default function LinkPagination({
   currentPage,
   totalPages,
   basePath,
+  queryParams,
   showPages = 5,
   className = "",
 }: LinkPaginationProps) {
@@ -36,7 +38,27 @@ export default function LinkPagination({
   const visiblePages = getVisiblePages();
 
   const getPageUrl = (page: number) => {
-    return page === 1 ? basePath : `${basePath}?page=${page}`;
+    const params = new URLSearchParams();
+
+    if (queryParams) {
+      Object.entries(queryParams).forEach(([key, value]) => {
+        if (value === undefined || value === "") return;
+        if (Array.isArray(value)) {
+          value.filter(Boolean).forEach((item) => params.append(key, item));
+        } else {
+          params.set(key, value);
+        }
+      });
+    }
+
+    if (page > 1) {
+      params.set("page", String(page));
+    } else {
+      params.delete("page");
+    }
+
+    const query = params.toString();
+    return query ? `${basePath}?${query}` : basePath;
   };
 
   if (totalPages <= 1) return null;

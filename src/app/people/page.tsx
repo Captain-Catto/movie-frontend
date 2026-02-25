@@ -2,97 +2,23 @@ import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import PeopleGrid from "@/components/people/PeopleGrid";
 import LinkPagination from "@/components/ui/LinkPagination";
-import { apiService } from "@/services/api";
-import type { CastMember } from "@/types/content.types";
 import {
   parsePageParam,
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
-
-export interface PersonData {
-  id: number;
-  name: string;
-  profile_path: string | null;
-  known_for_department: string;
-  known_for: Array<{
-    id: number;
-    title?: string;
-    name?: string;
-    media_type: "movie" | "tv";
-    poster_path: string | null;
-  }>;
-  popularity: number;
-}
+import { getPeoplePageData } from "@/lib/public-page-data";
 
 interface PeoplePageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
 }
 
-const normalizeKnownFor = (
-  knownFor: unknown
-): Array<{
-  id: number;
-  title?: string;
-  name?: string;
-  media_type: "movie" | "tv";
-  poster_path: string | null;
-}> => {
-  if (!Array.isArray(knownFor)) return [];
-
-  return knownFor.map((item) => {
-    const record =
-      item && typeof item === "object"
-        ? (item as Record<string, unknown>)
-        : ({} as Record<string, unknown>);
-    const mediaType = record.media_type === "tv" ? "tv" : "movie";
-
-    return {
-      id: typeof record.id === "number" ? record.id : 0,
-      title: typeof record.title === "string" ? record.title : undefined,
-      name: typeof record.name === "string" ? record.name : undefined,
-      media_type: mediaType,
-      poster_path:
-        typeof record.poster_path === "string" ? record.poster_path : null,
-    };
-  });
-};
-
-const mapCastMemberToPerson = (person: CastMember): PersonData => {
-  const record = person as Record<string, unknown>;
-
-  return {
-    id: person.id,
-    name: person.name,
-    profile_path: person.profile_path ?? null,
-    known_for_department:
-      typeof person.known_for_department === "string"
-        ? person.known_for_department
-        : "Artist",
-    known_for: normalizeKnownFor(record.known_for),
-    popularity: typeof person.popularity === "number" ? person.popularity : 0,
-  };
-};
-
 const PeoplePage = async ({ searchParams }: PeoplePageProps) => {
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
 
-  let people: PersonData[] = [];
-  let totalPages = 1;
-  let error: string | null = null;
-
-  try {
-    const response = await apiService.getPopularPeople(currentPage);
-    people = Array.isArray(response.results)
-      ? response.results.map(mapCastMemberToPerson)
-      : [];
-    totalPages =
-      typeof response.total_pages === "number" && response.total_pages > 0
-        ? response.total_pages
-        : 1;
-  } catch (err) {
-    error = err instanceof Error ? err.message : "Failed to load people.";
-  }
+  const { items: people, totalPages, error } = await getPeoplePageData(
+    currentPage
+  );
 
   return (
     <Layout>

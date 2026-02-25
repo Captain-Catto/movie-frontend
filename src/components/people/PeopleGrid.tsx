@@ -2,7 +2,7 @@
 
 import PersonCard from "./PersonCard";
 import PersonCardSkeleton from "@/components/ui/PersonCardSkeleton";
-import type { PersonData } from "@/app/people/page";
+import type { PersonData } from "@/types/people.types";
 
 interface PeopleGridProps {
   people: PersonData[];

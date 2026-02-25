@@ -36,3 +36,20 @@ export interface PopularPeopleResponse {
   total_pages: number;
   total_results: number;
 }
+
+export interface PersonKnownForItem {
+  id: number;
+  title?: string;
+  name?: string;
+  media_type: "movie" | "tv";
+  poster_path: string | null;
+}
+
+export interface PersonData {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+  known_for: PersonKnownForItem[];
+  popularity: number;
+}
