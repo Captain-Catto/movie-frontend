@@ -10,7 +10,6 @@ import RecentSearches from "./RecentSearches";
 import SearchTabs from "./SearchTabs";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { useSearch } from "@/hooks/useSearch";
-import { analyticsService } from "@/services/analytics.service";
 
 interface SearchModalProps {
   isOpen: boolean;

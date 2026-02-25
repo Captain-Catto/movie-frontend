@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import type { SyntheticEvent } from "react";
 import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
@@ -57,56 +57,62 @@ const MovieDetailPageContent = () => {
   // }, []);
 
   // Function to fetch credits after basic movie data is loaded
-  const fetchCredits = async (movieId: number) => {
-    try {
-      setCreditsLoading(true);
-      const creditsResponse = await apiService.getMovieCredits(movieId, language);
-      if (creditsResponse.success && creditsResponse.data) {
-        const credits = creditsResponse.data;
-
-        // Find director from crew
-        const directorPerson = credits.crew?.find(
-          (person: CrewMember) =>
-            person.job === "Director" || person.job === "director"
+  const fetchCredits = useCallback(
+    async (movieId: number) => {
+      try {
+        setCreditsLoading(true);
+        const creditsResponse = await apiService.getMovieCredits(
+          movieId,
+          language
         );
-        const director = directorPerson
-          ? {
-              id: directorPerson.id,
-              name: directorPerson.name,
-            }
-          : null;
+        if (creditsResponse.success && creditsResponse.data) {
+          const credits = creditsResponse.data;
 
-        // Get country from production_countries
-        const country = credits.production_countries?.[0]?.name || "Unknown";
+          // Find director from crew
+          const directorPerson = credits.crew?.find(
+            (person: CrewMember) =>
+              person.job === "Director" || person.job === "director"
+          );
+          const director = directorPerson
+            ? {
+                id: directorPerson.id,
+                name: directorPerson.name,
+              }
+            : null;
 
-        // Update movieData with credits info
-        setMovieData((prevData: MovieDetail | null) => {
-          if (!prevData) return prevData;
-          return {
-            ...prevData,
-            director,
-            country,
-            cast:
-              credits.cast?.slice(0, 10)?.map((actor: CastMember) => ({
-                id: actor.id,
-                name: actor.name,
-                character: actor.character,
-                profile_path: actor.profile_path,
-              })) || [],
-            runtime: credits.runtime
-              ? formatWatchDuration(Number(credits.runtime), "movie")
-              : prevData.runtime,
-            status: credits.status || prevData.status,
-          };
-        });
+          // Get country from production_countries
+          const country = credits.production_countries?.[0]?.name || "Unknown";
+
+          // Update movieData with credits info
+          setMovieData((prevData: MovieDetail | null) => {
+            if (!prevData) return prevData;
+            return {
+              ...prevData,
+              director,
+              country,
+              cast:
+                credits.cast?.slice(0, 10)?.map((actor: CastMember) => ({
+                  id: actor.id,
+                  name: actor.name,
+                  character: actor.character,
+                  profile_path: actor.profile_path,
+                })) || [],
+              runtime: credits.runtime
+                ? formatWatchDuration(Number(credits.runtime), "movie")
+                : prevData.runtime,
+              status: credits.status || prevData.status,
+            };
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching credits:", error);
+        // Don't show error to user for credits, just keep "Loading..." or "Unknown"
+      } finally {
+        setCreditsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching credits:", error);
-      // Don't show error to user for credits, just keep "Loading..." or "Unknown"
-    } finally {
-      setCreditsLoading(false);
-    }
-  };
+    },
+    [language]
+  );
 
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -341,7 +347,7 @@ const MovieDetailPageContent = () => {
     } else {
       console.warn("⚠️ [MovieDetailPage] No movieId provided");
     }
-  }, [movieId, language]);
+  }, [movieId, language, fetchCredits]);
 
   // console.log("🎨 [MovieDetailPage] Render - State:", {
   //   loading,

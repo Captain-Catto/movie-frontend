@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useRef } from "react";
 import { useClickOutside } from "../useClickOutside";
 
 // Mock useIsHydrated to always return true in tests

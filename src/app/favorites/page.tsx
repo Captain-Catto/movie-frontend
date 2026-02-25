@@ -25,7 +25,7 @@ const FavoritesPage = () => {
 
   // Fetch favorites
   const fetchFavorites = useCallback(
-    async (pageNum: number = 1, append: boolean = false) => {
+    async (pageNum: number = 1) => {
       if (!isAuthenticated) return;
 
 
@@ -63,7 +63,7 @@ const FavoritesPage = () => {
     if (isAuthenticated) {
       // Only fetch local favorites data
 
-      fetchFavorites(1, false);
+      fetchFavorites(1);
     } else {
 
     }
@@ -100,7 +100,7 @@ const FavoritesPage = () => {
           <div className="text-center">
             <p className="text-red-500 mb-4">{error}</p>
             <button
-              onClick={() => fetchFavorites(1, false)}
+              onClick={() => fetchFavorites(1)}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
             >
               Retry
@@ -154,7 +154,7 @@ const FavoritesPage = () => {
                   <Pagination
                     currentPage={page}
                     totalPages={totalPages}
-                    onPageChange={(nextPage) => fetchFavorites(nextPage, false)}
+                    onPageChange={(nextPage) => fetchFavorites(nextPage)}
                   />
                 </div>
               )}

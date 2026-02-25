@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import {
@@ -244,12 +245,14 @@ export default function AdminUserDetailPage() {
       <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="relative w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {user.image ? (
-              <img
+              <Image
                 src={user.image}
-                alt={user.name}
-                className="w-full h-full object-cover"
+                alt={user.name || "User avatar"}
+                fill
+                sizes="64px"
+                className="object-cover"
               />
             ) : (
               <UserIcon className="w-8 h-8 text-gray-400" />

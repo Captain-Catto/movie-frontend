@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import MovieCard from "@/components/movie/MovieCard";
 import type { MovieCardData } from "@/types/content.types";

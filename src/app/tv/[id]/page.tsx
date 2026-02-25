@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, useCallback, Suspense, lazy } from "react";
 import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -51,45 +51,63 @@ const TVDetailPageContent = () => {
   });
 
   // Function to fetch credits after basic TV data is loaded
-  const fetchCredits = async (tvId: number) => {
-    try {
-      setCreditsLoading(true);
-
-      // Try to get TV credits, fallback if endpoint doesn't exist
+  const fetchCredits = useCallback(
+    async (tvId: number) => {
       try {
-        const creditsResponse = await apiService.getTVCredits(tvId, language);
-        if (creditsResponse.success && creditsResponse.data) {
-          const credits = creditsResponse.data;
+        setCreditsLoading(true);
 
-          // Find creator from crew
-          const creatorPerson =
-            credits.crew?.find(
-              (person: CrewMember) => person.job === "Creator"
-            ) || credits.created_by?.[0];
-          const creator = creatorPerson
-            ? {
-                id: creatorPerson.id,
-                name: creatorPerson.name,
-              }
-            : null;
+        // Try to get TV credits, fallback if endpoint doesn't exist
+        try {
+          const creditsResponse = await apiService.getTVCredits(tvId, language);
+          if (creditsResponse.success && creditsResponse.data) {
+            const credits = creditsResponse.data;
 
-          // Get country from origin_country
-          const country = credits.origin_country?.[0] || "Unknown";
+            // Find creator from crew
+            const creatorPerson =
+              credits.crew?.find(
+                (person: CrewMember) => person.job === "Creator"
+              ) || credits.created_by?.[0];
+            const creator = creatorPerson
+              ? {
+                  id: creatorPerson.id,
+                  name: creatorPerson.name,
+                }
+              : null;
 
-          // Update tvData with credits info
-          setTVData((prevData: TVDetail | null) => {
-            if (!prevData) return prevData;
-            return {
-              ...prevData,
-              creator,
-              country,
-              cast: credits.cast || [],
-              crew: credits.crew || [],
-            };
-          });
-        } else {
-          console.warn("Failed to fetch TV credits:", creditsResponse.message);
-          // Set default values if API fails
+            // Get country from origin_country
+            const country = credits.origin_country?.[0] || "Unknown";
+
+            // Update tvData with credits info
+            setTVData((prevData: TVDetail | null) => {
+              if (!prevData) return prevData;
+              return {
+                ...prevData,
+                creator,
+                country,
+                cast: credits.cast || [],
+                crew: credits.crew || [],
+              };
+            });
+          } else {
+            console.warn("Failed to fetch TV credits:", creditsResponse.message);
+            // Set default values if API fails
+            setTVData((prevData: TVDetail | null) => {
+              if (!prevData) return prevData;
+              return {
+                ...prevData,
+                creator: null,
+                country: "Not available",
+                cast: [],
+                crew: [],
+              };
+            });
+          }
+        } catch (creditsError) {
+          console.warn(
+            "TV Credits endpoint not available, using defaults:",
+            creditsError
+          );
+          // Set default values if endpoint doesn't exist
           setTVData((prevData: TVDetail | null) => {
             if (!prevData) return prevData;
             return {
@@ -101,40 +119,25 @@ const TVDetailPageContent = () => {
             };
           });
         }
-      } catch (creditsError) {
-        console.warn(
-          "TV Credits endpoint not available, using defaults:",
-          creditsError
-        );
-        // Set default values if endpoint doesn't exist
+      } catch (error) {
+        console.error("Error fetching TV credits:", error);
+        // Set default values on any error
         setTVData((prevData: TVDetail | null) => {
           if (!prevData) return prevData;
           return {
             ...prevData,
             creator: null,
-            country: "Not available",
+            country: "Error loading",
             cast: [],
             crew: [],
           };
         });
+      } finally {
+        setCreditsLoading(false);
       }
-    } catch (error) {
-      console.error("Error fetching TV credits:", error);
-      // Set default values on any error
-      setTVData((prevData: TVDetail | null) => {
-        if (!prevData) return prevData;
-        return {
-          ...prevData,
-          creator: null,
-          country: "Error loading",
-          cast: [],
-          crew: [],
-        };
-      });
-    } finally {
-      setCreditsLoading(false);
-    }
-  };
+    },
+    [language]
+  );
 
   useEffect(() => {
     const fetchTVData = async () => {
@@ -368,7 +371,7 @@ const TVDetailPageContent = () => {
     };
 
     fetchTVData();
-  }, [numericTvId, tvIdParam, language]);
+  }, [numericTvId, tvIdParam, language, fetchCredits]);
 
   // Helper functions
   const isLocalFallback = (path: string | null) =>
