@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
 import MovieGrid from "@/components/movie/MovieGrid";
@@ -5,11 +6,22 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getHomePageData } from "@/lib/home-page-data";
+import { getHomePageUiMessages } from "@/lib/ui-messages";
+import { getStaticPageSeo } from "@/lib/page-seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getServerPreferredLanguage();
+  const seo = getStaticPageSeo(language);
+
+  return {
+    title: seo.home.title,
+    description: seo.home.description,
+  };
+}
 
 export default async function Home() {
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-  const viewMoreLabel = isVietnamese ? "Xem thêm" : "View More";
+  const labels = getHomePageUiMessages(language);
 
   const {
     heroMovies,
@@ -30,9 +42,9 @@ export default async function Home() {
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title={isVietnamese ? "Đang chiếu" : "Now Playing"}
+            title={labels.nowPlaying}
             href="/movies/now-playing"
-            viewMoreLabel={viewMoreLabel}
+            viewMoreLabel={labels.viewMore}
           />
           <MovieGrid
             movies={nowPlayingMovies}
@@ -47,9 +59,9 @@ export default async function Home() {
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title={isVietnamese ? "Phổ biến" : "Popular"}
+            title={labels.popular}
             href="/movies/popular"
-            viewMoreLabel={viewMoreLabel}
+            viewMoreLabel={labels.viewMore}
           />
           <MovieGrid
             movies={popularMovies}
@@ -64,9 +76,9 @@ export default async function Home() {
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title={isVietnamese ? "Đánh giá cao" : "Top Rated"}
+            title={labels.topRated}
             href="/movies/top-rated"
-            viewMoreLabel={viewMoreLabel}
+            viewMoreLabel={labels.viewMore}
           />
           <MovieGrid
             movies={topRatedMovies}
@@ -81,9 +93,9 @@ export default async function Home() {
       <div className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title={isVietnamese ? "Sắp chiếu" : "Upcoming"}
+            title={labels.upcoming}
             href="/movies/upcoming"
-            viewMoreLabel={viewMoreLabel}
+            viewMoreLabel={labels.viewMore}
           />
           <MovieGrid
             movies={upcomingMovies}
@@ -99,7 +111,7 @@ export default async function Home() {
         onTheAirTVSeries={onTheAirTVSeries}
         popularTVSeries={popularTVSeries}
         topRatedTVSeries={topRatedTVSeries}
-        isVietnamese={isVietnamese}
+        language={language}
       />
     </Layout>
   );

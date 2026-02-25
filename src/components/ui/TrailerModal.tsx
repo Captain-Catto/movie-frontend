@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { X, Play } from "lucide-react";
 import { Video } from "@/types/content.types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getTrailerModalUiMessages } from "@/lib/ui-messages";
 
 interface TrailerModalProps {
   isOpen: boolean;
@@ -17,6 +19,8 @@ export default function TrailerModal({
   videos,
   movieTitle,
 }: TrailerModalProps) {
+  const { language } = useLanguage();
+  const labels = getTrailerModalUiMessages(language);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
 
   // Find the best trailer - prefer official trailers
@@ -109,7 +113,7 @@ export default function TrailerModal({
               </div>
             ) : (
               <div className="flex items-center justify-center h-full bg-gray-800">
-                <p className="text-gray-400">Select a video to play</p>
+                <p className="text-gray-400">{labels.selectVideoToPlay}</p>
               </div>
             )}
           </div>
@@ -118,7 +122,7 @@ export default function TrailerModal({
           {youtubeVideos.length > 0 && (
             <div className="w-80 border-l border-gray-700 flex flex-col">
               <div className="p-4 border-b border-gray-700 flex-shrink-0">
-                <h3 className="text-white font-semibold">Video List</h3>
+                <h3 className="text-white font-semibold">{labels.videoList}</h3>
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {youtubeVideos.map((video) => (
@@ -138,7 +142,7 @@ export default function TrailerModal({
                           {video.name}
                         </p>
                         <p className="text-xs text-gray-400">
-                          {video.type} • {video.official ? "Official" : "Fan"} •{" "}
+                          {video.type} • {video.official ? labels.official : labels.fan} •{" "}
                           {video.size}p
                         </p>
                       </div>
@@ -153,7 +157,7 @@ export default function TrailerModal({
         {/* No Videos Message */}
         {youtubeVideos.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-400">No trailers available.</p>
+            <p className="text-gray-400">{labels.noTrailersAvailable}</p>
           </div>
         )}
       </div>

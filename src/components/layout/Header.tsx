@@ -11,6 +11,7 @@ import UserMenu from "@/components/layout/UserMenu";
 import LanguageSelector from "@/components/layout/LanguageSelector";
 import { HeartIcon, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getHeaderUiMessages } from "@/lib/ui-messages";
 
 interface HeaderProps {
   hideOnPlay?: boolean;
@@ -28,29 +29,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const { user, isAuthenticated, logout } = useAuth();
   const { language } = useLanguage();
   const isHydrated = useIsHydrated();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-
-  const labels = {
-    home: isVietnamese ? "Trang chủ" : "Home",
-    trending: isVietnamese ? "Thịnh hành" : "Trending",
-    movies: isVietnamese ? "Phim lẻ" : "Movies",
-    browse: isVietnamese ? "Duyệt" : "Browse",
-    tvSeries: isVietnamese ? "Phim bộ" : "TV Series",
-    actors: isVietnamese ? "Diễn viên" : "Actors",
-    search: isVietnamese ? "Tìm kiếm" : "Search",
-    login: isVietnamese ? "Đăng nhập" : "Login",
-    loginSignUp: isVietnamese ? "Đăng nhập / Đăng ký" : "Login / Sign up",
-    closeMenu: isVietnamese ? "Đóng menu" : "Close menu",
-    openMenu: isVietnamese ? "Mở menu" : "Open menu",
-    close: isVietnamese ? "Đóng" : "Close",
-    accountAria: isVietnamese ? "Đi tới tài khoản" : "Go to account",
-    profileAlt: isVietnamese ? "Hồ sơ" : "Profile",
-    defaultUser: isVietnamese ? "Người dùng" : "User",
-    guest: isVietnamese ? "Khách" : "Guest",
-    signedIn: isVietnamese ? "Đã đăng nhập" : "Signed in",
-    notSignedIn: isVietnamese ? "Chưa đăng nhập" : "Not signed in",
-    favorites: isVietnamese ? "Yêu thích" : "Favorites",
-  };
+  const labels = getHeaderUiMessages(language);
 
   // Handle play state - hide header when playing (unless user has scrolled)
   useEffect(() => {
@@ -275,7 +254,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                     ) : (
                       <span className="text-white text-base font-semibold">
                         {isHydrated && isAuthenticated
-                          ? user?.name?.[0] || "U"
+                          ? user?.name?.[0] || labels.defaultAvatarInitial
                           : "?"}
                       </span>
                     )}

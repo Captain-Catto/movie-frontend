@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import WatchPageClient from "@/components/pages/WatchPageClient";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getWatchPageDataByRouteId } from "@/lib/detail-page-data";
+import { getStaticPageSeo } from "@/lib/page-seo";
 
 type SearchParamsValue = string | string[] | undefined;
 
@@ -22,6 +24,50 @@ const parsePositiveInt = (value: SearchParamsValue, fallback: number): number =>
   if (Number.isInteger(parsed) && parsed > 0) return parsed;
   return fallback;
 };
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: WatchPageProps): Promise<Metadata> {
+  const resolvedParams = params ? await params : { id: "" };
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const movieId = resolvedParams.id;
+  const season = parsePositiveInt(resolvedSearchParams?.season, 1);
+  const episode = parsePositiveInt(resolvedSearchParams?.episode, 1);
+  const language = await getServerPreferredLanguage();
+  const seo = getStaticPageSeo(language);
+
+  if (!movieId) {
+    return {
+      title: seo.watchFallback.title,
+      description: seo.watchFallback.description,
+    };
+  }
+
+  const initialData = await getWatchPageDataByRouteId(
+    movieId,
+    language,
+    season,
+    episode
+  );
+
+  if (!initialData.movieData) {
+    return {
+      title: seo.watchFallback.title,
+      description: seo.watchFallback.description,
+    };
+  }
+
+  const suffix =
+    initialData.movieData.contentType === "tv"
+      ? ` - S${season}E${episode}`
+      : "";
+
+  return {
+    title: `${initialData.movieData.title}${suffix}`,
+    description: initialData.movieData.description || seo.watchFallback.description,
+  };
+}
 
 export default async function WatchPage({ params, searchParams }: WatchPageProps) {
   const resolvedParams = params ? await params : { id: "" };

@@ -47,7 +47,6 @@ const TVDetailPageClient = ({
     initialError,
   });
   const locale = getLocaleFromLanguage(language);
-  const isVietnamese = language.toLowerCase().startsWith("vi");
   const [showFullDescription, setShowFullDescription] = useState(false);
   const labels = getTVDetailUiMessages(language);
 
@@ -115,18 +114,10 @@ const TVDetailPageClient = ({
   const getLocalizedStatus = (status: string | undefined) => {
     if (!status) return labels.unknown;
 
-    if (!isVietnamese) {
-      if (status === "Returning Series") return "On Air";
-      if (status === "Ended") return "Ended";
-      if (status === "Canceled") return "Canceled";
-      if (status === "In Production") return "In Production";
-      return status;
-    }
-
-    if (status === "Returning Series") return "Đang phát sóng";
-    if (status === "Ended") return "Đã kết thúc";
-    if (status === "Canceled") return "Đã hủy";
-    if (status === "In Production") return "Đang sản xuất";
+    if (status === "Returning Series") return labels.statusOnAir;
+    if (status === "Ended") return labels.statusEnded;
+    if (status === "Canceled") return labels.statusCanceledSeries;
+    if (status === "In Production") return labels.statusInProductionSeries;
     return status;
   };
 

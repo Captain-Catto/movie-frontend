@@ -11,6 +11,7 @@ import SearchTabs from "./SearchTabs";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { useSearch } from "@/hooks/useSearch";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getSearchUiMessages } from "@/lib/ui-messages";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getSearchUiMessages(language);
 
   const {
     searches: recentSearches,
@@ -116,11 +117,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           <div className="flex items-center space-x-2">
             <SearchIcon className="w-5 h-5 text-gray-400" />
             <h2 className="text-lg font-semibold text-white">
-              {isVietnamese ? "Tìm kiếm" : "Search"}
+              {labels.title}
             </h2>
           </div>
           <button
             onClick={onClose}
+            aria-label={labels.closeSearch}
+            title={labels.closeSearch}
             className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />

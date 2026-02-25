@@ -5,6 +5,8 @@ import type { CommentFormProps, CreateCommentDto } from "@/types/comment.types";
 import { useContentFilter } from "@/hooks/use-comments";
 import { useAppSelector } from "@/store/hooks";
 import { commentService } from "@/services/comment.service";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommentsUiMessages } from "@/lib/ui-messages";
 
 const NO_AVATAR = "/images/no-avatar.svg";
 
@@ -47,6 +49,8 @@ export function useCommentForm({
   onSubmit,
   onCancel,
 }: CommentFormProps): UseCommentFormResult {
+  const { language } = useLanguage();
+  const labels = getCommentsUiMessages(language);
   const [content, setContent] = useState(editingComment?.content || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [contentError, setContentError] = useState<string | null>(null);
@@ -144,18 +148,18 @@ export function useCommentForm({
     e.preventDefault();
 
     if (!isAuthenticated) {
-      setContentError("You need to login to comment");
+      setContentError(labels.needLoginToComment);
       return;
     }
 
     const trimmedContent = content.trim();
     if (!trimmedContent) {
-      setContentError("Content cannot be empty");
+      setContentError(labels.contentCannotBeEmpty);
       return;
     }
 
     if (trimmedContent.length > 1000) {
-      setContentError("Content is too long (max 1000 characters)");
+      setContentError(labels.contentTooLongMax1000);
       return;
     }
 
@@ -165,7 +169,7 @@ export function useCommentForm({
 
       const filterResult = await checkContent(trimmedContent);
       if (!filterResult.isAllowed) {
-        setContentError(filterResult.reason || "Inappropriate content");
+        setContentError(filterResult.reason || labels.inappropriateContent);
         return;
       }
 
@@ -184,7 +188,7 @@ export function useCommentForm({
       setContentError(null);
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : "Unable to send comment";
+        error instanceof Error ? error.message : labels.unableToSendComment;
       setContentError(errorMessage);
     } finally {
       setIsSubmitting(false);

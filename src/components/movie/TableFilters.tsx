@@ -7,6 +7,7 @@ import {
 } from "@/utils/genreMapping";
 import type { TableFilterOptions, TableFiltersProps } from "@/types/ui";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getTableFiltersUiMessages } from "@/lib/ui-messages";
 
 export type { TableFilterOptions };
 
@@ -19,7 +20,7 @@ const TableFilters = ({
 }: TableFiltersProps) => {
   const router = useRouter();
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getTableFiltersUiMessages(language);
   const [filters, setFilters] = useState<TableFilterOptions>({
     countries: [],
     movieType: "",
@@ -48,60 +49,26 @@ const TableFilters = ({
     }
   }, [initialFilters]);
 
-  const labels = useMemo(
-    () =>
-      isVietnamese
-        ? {
-            all: "Tất cả",
-            filters: "Bộ lọc",
-            country: "Quốc gia",
-            type: "Loại",
-            trending: "Thịnh hành",
-            genre: "Thể loại",
-            year: "Năm",
-            sortBy: "Sắp xếp",
-            selectedYears: "Năm đã chọn",
-            applyFilters: "Áp dụng",
-            close: "Đóng",
-            customYearPlaceholder: "Nhập năm + Enter",
-          }
-        : {
-            all: "All",
-            filters: "Filters",
-            country: "Country",
-            type: "Type",
-            trending: "Trending",
-            genre: "Genre",
-            year: "Year",
-            sortBy: "Sort by",
-            selectedYears: "Selected years",
-            applyFilters: "Apply Filters",
-            close: "Close",
-            customYearPlaceholder: "Enter year + Enter",
-          },
-    [isVietnamese]
-  );
-
   const countries = useMemo(
     () => [
       { value: "", label: labels.all },
-      { value: "US", label: isVietnamese ? "Mỹ" : "United States" },
-      { value: "KR", label: isVietnamese ? "Hàn Quốc" : "South Korea" },
-      { value: "JP", label: isVietnamese ? "Nhật Bản" : "Japan" },
-      { value: "CN", label: isVietnamese ? "Trung Quốc" : "China" },
-      { value: "VN", label: isVietnamese ? "Việt Nam" : "Vietnam" },
+      { value: "US", label: labels.countryUS },
+      { value: "KR", label: labels.countryKR },
+      { value: "JP", label: labels.countryJP },
+      { value: "CN", label: labels.countryCN },
+      { value: "VN", label: labels.countryVN },
     ],
-    [isVietnamese, labels.all]
+    [labels]
   );
 
   const movieTypes = useMemo(
     () => [
       { value: "", label: labels.all },
-      { value: "movie", label: isVietnamese ? "Phim lẻ" : "Movie" },
-      { value: "tv", label: isVietnamese ? "Phim bộ" : "TV Series" },
+      { value: "movie", label: labels.movie },
+      { value: "tv", label: labels.tvSeries },
       { value: "trending", label: labels.trending },
     ],
-    [isVietnamese, labels.all, labels.trending]
+    [labels]
   );
 
   // Dynamically get genres based on selected movie type
@@ -146,19 +113,19 @@ const TableFilters = ({
   const sortOptions = [
     {
       value: "popularity",
-      label: isVietnamese ? "Phổ biến" : "Popular",
+      label: labels.popular,
     },
-    { value: "latest", label: isVietnamese ? "Mới nhất" : "Latest" },
+    { value: "latest", label: labels.latest },
     {
       value: "top_rated",
-      label: isVietnamese ? "Đánh giá cao" : "Top Rated",
+      label: labels.topRated,
     },
     {
       value: "updated",
-      label: isVietnamese ? "Cập nhật gần đây" : "Recently Updated",
+      label: labels.recentlyUpdated,
     },
-    { value: "imdb", label: isVietnamese ? "Điểm IMDb" : "IMDb Score" },
-    { value: "views", label: isVietnamese ? "Xem nhiều" : "Most Viewed" },
+    { value: "imdb", label: labels.imdbScore },
+    { value: "views", label: labels.mostViewed },
   ];
 
   const handleMultiFilterClick = (

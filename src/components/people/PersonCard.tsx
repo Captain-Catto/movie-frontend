@@ -10,6 +10,7 @@ import {
   FALLBACK_PROFILE,
 } from "@/constants/app.constants";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getPeopleUiMessages } from "@/lib/ui-messages";
 
 interface PersonCardProps {
   person: PersonData;
@@ -17,7 +18,7 @@ interface PersonCardProps {
 
 const PersonCard = ({ person }: PersonCardProps) => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getPeopleUiMessages(language);
 
   const getProfileImage = () => {
     const imageUrl = person.profile_path
@@ -29,15 +30,15 @@ const PersonCard = ({ person }: PersonCardProps) => {
   const getKnownForText = () => {
     switch (person.known_for_department) {
       case "Acting":
-        return isVietnamese ? "Diễn viên" : "Actor";
+        return labels.actor;
       case "Directing":
-        return isVietnamese ? "Đạo diễn" : "Director";
+        return labels.director;
       case "Writing":
-        return isVietnamese ? "Biên kịch" : "Writer";
+        return labels.writer;
       case "Production":
-        return isVietnamese ? "Sản xuất" : "Production";
+        return labels.production;
       default:
-        return person.known_for_department || (isVietnamese ? "Nghệ sĩ" : "Artist");
+        return person.known_for_department || labels.artist;
     }
   };
 

@@ -4,6 +4,7 @@ import PersonCard from "./PersonCard";
 import PersonCardSkeleton from "@/components/ui/PersonCardSkeleton";
 import type { PersonData } from "@/types/people.types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getPeopleUiMessages } from "@/lib/ui-messages";
 
 interface PeopleGridProps {
   people: PersonData[];
@@ -19,7 +20,7 @@ const PeopleGrid = ({
   hasMore,
 }: PeopleGridProps) => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getPeopleUiMessages(language);
 
   return (
     <div className="space-y-8">
@@ -57,12 +58,10 @@ const PeopleGrid = ({
               />
             </svg>
             <h3 className="text-lg font-medium text-white mb-2">
-              {isVietnamese ? "Không tìm thấy diễn viên" : "No actors found"}
+              {labels.noActorsFound}
             </h3>
             <p>
-              {isVietnamese
-                ? "Danh sách diễn viên hiện đang trống"
-                : "Actors list is currently empty"}
+              {labels.actorsListEmpty}
             </p>
           </div>
         </div>
@@ -75,7 +74,7 @@ const PeopleGrid = ({
             onClick={onLoadMore}
             className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
           >
-            {isVietnamese ? "Xem thêm" : "Load More"}
+            {labels.loadMore}
           </button>
         </div>
       )}

@@ -7,6 +7,8 @@ import Link from "next/link";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { FaHeart, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getUserMenuUiMessages } from "@/lib/ui-messages";
 
 interface UserMenuProps {
   user: {
@@ -21,6 +23,8 @@ interface UserMenuProps {
 }
 
 export default function UserMenu({ user, onLogout }: UserMenuProps) {
+  const { language } = useLanguage();
+  const labels = getUserMenuUiMessages(language);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -51,7 +55,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
 
   const avatarSrc = user?.image || FALLBACK_PROFILE;
   const displayName =
-    user?.name || user?.firstName || user?.email?.split("@")[0] || "User";
+    user?.name || user?.firstName || user?.email?.split("@")[0] || labels.defaultUser;
 
   const handleLogout = () => {
     setIsOpen(false);
@@ -61,17 +65,17 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
   const menuItems = [
     {
       icon: <FaBell className="w-4 h-4" />,
-      label: "Notifications",
+      label: labels.notifications,
       href: "/notifications",
     },
     {
       icon: <FaHeart className="w-4 h-4" />,
-      label: "Favorites",
+      label: labels.favorites,
       href: "/favorites",
     },
     {
       icon: <FaUser className="w-4 h-4" />,
-      label: "Account",
+      label: labels.account,
       href: "/account",
     },
   ];
@@ -152,7 +156,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
               className="w-full flex items-center px-4 py-3 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors border-t border-gray-700 mt-2 cursor-pointer"
             >
               <FaSignOutAlt className="w-4 h-4 mr-3 text-gray-400" />
-              Logout
+              {labels.logout}
             </button>
           </div>
         </div>

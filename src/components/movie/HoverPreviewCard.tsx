@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocalizedGenreNameById } from "@/utils/genreMapping";
+import { getHoverPreviewCardUiMessages } from "@/lib/ui-messages";
 
 interface HoverPreviewCardProps {
   title: string;
@@ -60,6 +61,7 @@ export function HoverPreviewCard({
   placement = "center",
 }: HoverPreviewCardProps) {
   const { language } = useLanguage();
+  const labels = getHoverPreviewCardUiMessages(language);
   const displayRating =
     typeof rating === "number"
       ? rating > 0
@@ -137,7 +139,7 @@ export function HoverPreviewCard({
             onClick={handleWatchClick}
           >
             <Play className="w-4 h-4 fill-white" />
-            Watch
+            {labels.watch}
           </Link>
 
           {favoriteButton && (
@@ -170,7 +172,7 @@ export function HoverPreviewCard({
             onClick={handleDetailsClick}
           >
             <Info className="w-4 h-4" />
-            Details
+            {labels.details}
           </Link>
         </div>
 
@@ -195,7 +197,7 @@ export function HoverPreviewCard({
                   language,
                   contentType
                 );
-                const label = localizedName || name || `Genre ${id}`;
+                const label = localizedName || name || labels.genreFallback(id);
                 return (
                   <Link
                     key={id}

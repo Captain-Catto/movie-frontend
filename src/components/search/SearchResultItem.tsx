@@ -6,6 +6,7 @@ import Image from "next/image";
 import { SearchResult } from "@/types/search";
 import { Calendar, Star, Film, Tv } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getSearchUiMessages } from "@/lib/ui-messages";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -24,7 +25,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
   onResultClick,
 }) => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getSearchUiMessages(language);
   const releaseDate = result.releaseDate || result.firstAirDate;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
 
@@ -38,14 +39,14 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
     if (result.mediaType === "tv") {
       return {
         icon: Tv,
-        label: isVietnamese ? "Phim bộ" : "TV Series",
+        label: labels.typeLabel("tv"),
         href: `/tv/${result.tmdbId}`,
         color: "text-green-400",
       };
     }
     return {
       icon: Film,
-      label: isVietnamese ? "Phim lẻ" : "Movies",
+      label: labels.typeLabel("movie"),
       href: `/movie/${result.tmdbId}`,
       color: "text-blue-400",
     };

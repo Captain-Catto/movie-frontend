@@ -2,6 +2,8 @@
 
 import { useLoading } from '@/hooks/useLoading';
 import CategoryGridSkeleton from '@/components/ui/CategoryGridSkeleton';
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getCategoryGridUiMessages } from "@/lib/ui-messages";
 
 interface Category {
   id: string;
@@ -15,13 +17,15 @@ interface CategoryGridProps {
 
 const CategoryGrid = ({ categories }: CategoryGridProps) => {
   const { isLoading } = useLoading({ delay: 1500 });
+  const { language } = useLanguage();
+  const labels = getCategoryGridUiMessages(language);
 
   if (isLoading) {
     return <CategoryGridSkeleton />;
   }
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-      <h2 className="text-2xl font-bold mb-8 text-white">Popular Categories</h2>
+      <h2 className="text-2xl font-bold mb-8 text-white">{labels.popularCategories}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((category) => (
           <div

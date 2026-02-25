@@ -14,6 +14,8 @@ import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAuthModalUiMessages } from "@/lib/ui-messages";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -32,6 +34,8 @@ export default function AuthModal({
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const { loginWithEmail, register: registerUser, loginWithGoogle } = useAuth();
+  const { language } = useLanguage();
+  const labels = getAuthModalUiMessages(language);
 
   const handleRegisterSuccess = async (
     name: string,
@@ -42,21 +46,21 @@ export default function AuthModal({
       const result = await registerUser(name, email, password);
 
       if (result.success) {
-        setSuccess("Register success! Welcome to MovieStream.");
+        setSuccess(labels.registerSuccess);
         setTimeout(() => setSuccess(""), 5000);
         setTimeout(() => {
           onClose();
           onSuccess?.();
         }, 1500);
       } else {
-        handleError(result.error || "Register failed");
+        handleError(result.error || labels.registerFailed);
       }
     } catch (error: unknown) {
       console.error("Registration error:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An error occurred. Please try again.";
+          : labels.genericError;
       handleError(errorMessage);
     }
   };
@@ -74,7 +78,7 @@ export default function AuthModal({
       const result = await loginWithGoogle();
 
       if (result.success) {
-        setSuccess("Login with Google succeeded!");
+        setSuccess(labels.googleLoginSuccess);
         setTimeout(() => setSuccess(""), 5000);
         setTimeout(() => {
           onClose();
@@ -82,14 +86,14 @@ export default function AuthModal({
           // Auth state automatically updated via context
         }, 1000);
       } else {
-        handleError(result.error || "Login with Google failed");
+        handleError(result.error || labels.googleLoginFailed);
       }
     } catch (error: unknown) {
       console.error("Google login error:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Login with Google failed. Pls try again.";
+          : labels.googleLoginFailedRetry;
       handleError(errorMessage);
     } finally {
       setIsGoogleLoading(false);
@@ -114,10 +118,10 @@ export default function AuthModal({
       <DialogContent className="sm:max-w-[450px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white text-center">
-            {activeTab === "login" ? "Login" : "Register"}
+            {activeTab === "login" ? labels.loginTitle : labels.registerTitle}
           </DialogTitle>
           <DialogDescription className="text-gray-300 text-center">
-            {activeTab === "login" ? "Login to explore" : "Create an account"}
+            {activeTab === "login" ? labels.loginDescription : labels.registerDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -143,13 +147,13 @@ export default function AuthModal({
               value="login"
               className="data-[state=active]:bg-red-600 data-[state=active]:text-white"
             >
-              Login
+              {labels.loginTab}
             </TabsTrigger>
             <TabsTrigger
               value="register"
               className="data-[state=active]:bg-red-600 data-[state=active]:text-white"
             >
-              Register
+              {labels.registerTab}
             </TabsTrigger>
           </TabsList>
 
@@ -158,7 +162,7 @@ export default function AuthModal({
               onSubmit={async (email, password) => {
                 const result = await loginWithEmail(email, password);
                 if (result.success) {
-                  setSuccess("Login succeeded!");
+                  setSuccess(labels.loginSuccess);
                   setTimeout(() => setSuccess(""), 5000);
                   setTimeout(() => {
                     onClose();
@@ -177,7 +181,7 @@ export default function AuthModal({
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">
-                  Or continue with
+                  {labels.orContinueWith}
                 </span>
               </div>
             </div>
@@ -190,7 +194,7 @@ export default function AuthModal({
               disabled={isGoogleLoading}
             >
               <FcGoogle className="w-5 h-5 mr-2" />
-              {isGoogleLoading ? "Processing..." : "Login with Google"}
+              {isGoogleLoading ? labels.processing : labels.loginWithGoogle}
             </Button>
           </TabsContent>
 
@@ -206,7 +210,7 @@ export default function AuthModal({
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">
-                  Or register with
+                  {labels.orRegisterWith}
                 </span>
               </div>
             </div>
@@ -219,20 +223,20 @@ export default function AuthModal({
               disabled={isGoogleLoading}
             >
               <FcGoogle className="w-5 h-5 mr-2" />
-              {isGoogleLoading ? "Processing..." : "Register with Google"}
+              {isGoogleLoading ? labels.processing : labels.registerWithGoogle}
             </Button>
           </TabsContent>
         </Tabs>
 
         <div className="text-center text-sm text-gray-400 mt-4">
-          <p>By continuing, you agree to</p>
+          <p>{labels.agreePrefix}</p>
           <p>
             <span className="text-red-400 hover:underline cursor-pointer">
-              Terms of Service
+              {labels.termsOfService}
             </span>{" "}
-            and{" "}
+            {labels.and}{" "}
             <span className="text-red-400 hover:underline cursor-pointer">
-              Privacy Policy
+              {labels.privacyPolicy}
             </span>
           </p>
         </div>

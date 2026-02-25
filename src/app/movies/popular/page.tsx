@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import CategoryListingPage from "@/components/content/CategoryListingPage";
 import { DEFAULT_MOVIE_PAGE_SIZE } from "@/constants/app.constants";
 import {
@@ -7,19 +8,34 @@ import {
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
 import { getServerPreferredLanguage } from "@/lib/server-language";
-import { getCategoryListingUiMessages } from "@/lib/ui-messages";
+import {
+  getCategoryFetchErrorUiMessages,
+  getCategoryListingUiMessages,
+} from "@/lib/ui-messages";
 import { apiService } from "@/services/api";
 import type { Movie, MovieCardData } from "@/types/content.types";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
+import { getCategorySeo } from "@/lib/page-seo";
 
 interface PopularPageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getServerPreferredLanguage();
+  const seo = getCategorySeo("movies-popular", language);
+
+  return {
+    title: seo.title,
+    description: seo.description,
+  };
 }
 
 export default async function PopularPage({ searchParams }: PopularPageProps) {
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const uiLabels = getCategoryFetchErrorUiMessages(language);
 
   let movies: MovieCardData[] = [];
   let totalPages = 1;
@@ -34,7 +50,7 @@ export default async function PopularPage({ searchParams }: PopularPageProps) {
     });
 
     if (!response.success) {
-      throw new Error(response.message || "Failed to fetch popular movies");
+      throw new Error(response.message || uiLabels.failedToFetchPopularMovies);
     }
 
     const items = extractCategoryItems(response.data);
@@ -44,7 +60,7 @@ export default async function PopularPage({ searchParams }: PopularPageProps) {
     totalPages = pagination.totalPages;
     total = pagination.total;
   } catch (err) {
-    error = err instanceof Error ? err.message : "Unknown error";
+    error = err instanceof Error ? err.message : uiLabels.unknownError;
   }
   const labels = getCategoryListingUiMessages("movies-popular", language, total);
 

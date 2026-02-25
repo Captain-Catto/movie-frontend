@@ -6,6 +6,8 @@ import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
 import { Pagination } from "@/components/ui/Pagination";
 import { useLoading } from "@/hooks/useLoading";
 import { SKELETON_COUNT_TV } from "@/constants/app.constants";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getMoviesGridUiMessages } from "@/lib/ui-messages";
 
 interface MoviesGridProps {
   title?: string;
@@ -27,6 +29,8 @@ const MoviesGrid = ({
   skeletonCount = SKELETON_COUNT_TV,
 }: MoviesGridProps) => {
   const { isLoading } = useLoading({ delay: 800 });
+  const { language } = useLanguage();
+  const labels = getMoviesGridUiMessages(language);
 
   return (
     <div className={`mx-auto px-4 py-8 ${className}`}>
@@ -63,9 +67,9 @@ const MoviesGrid = ({
                 />
               </svg>
               <h3 className="text-lg font-medium text-white mb-2">
-                No movies found
+                {labels.noMoviesFound}
               </h3>
-              <p>The current movie list is empty</p>
+              <p>{labels.movieListEmpty}</p>
             </div>
           </div>
         )}

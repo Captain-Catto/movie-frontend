@@ -2,10 +2,11 @@ import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import TrendingSuggestions from "@/components/movie/TrendingSuggestions";
 import { getServerPreferredLanguage } from "@/lib/server-language";
+import { getNotFoundUiMessages } from "@/lib/ui-messages";
 
 export default async function NotFound() {
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getNotFoundUiMessages(language);
 
   return (
     <Layout>
@@ -14,12 +15,10 @@ export default async function NotFound() {
         <div className="mb-8">
           <h1 className="text-9xl font-bold text-red-500 mb-4">404</h1>
           <h2 className="text-3xl font-bold text-white mb-4">
-            {isVietnamese ? "Không tìm thấy trang" : "Page Not Found"}
+            {labels.title}
           </h2>
           <p className="text-gray-400 text-lg mb-8">
-            {isVietnamese
-              ? "Trang bạn đang tìm không tồn tại hoặc đã được di chuyển."
-              : "Sorry, the page you are looking for doesn&apos;t exist or has been moved."}
+            {labels.description}
           </p>
         </div>
 
@@ -28,20 +27,20 @@ export default async function NotFound() {
             href="/"
             className="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            {isVietnamese ? "Về trang chủ" : "Go Back Home"}
+            {labels.goHome}
           </Link>
           <Link
             href="/browse"
             className="inline-block w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
-            {isVietnamese ? "Duyệt phim" : "Browse Movies"}
+            {labels.browseMovies}
           </Link>
         </div>
       </div>
       <div className="w-full">
         <TrendingSuggestions
           type="all"
-          title={isVietnamese ? "Đang thịnh hành" : "Trending Now"}
+          title={labels.trendingNow}
         />
       </div>
     </div>

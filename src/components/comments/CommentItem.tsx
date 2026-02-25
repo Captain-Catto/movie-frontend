@@ -8,10 +8,11 @@ import CommentForm from "./CommentForm";
 import { RelativeTime } from "@/utils/hydration-safe-date";
 import { useCommentItem } from "@/hooks/components/useCommentItem";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommentsUiMessages } from "@/lib/ui-messages";
 
 export function CommentItem(props: CommentItemProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getCommentsUiMessages(language);
 
   const {
     currentComment,
@@ -49,7 +50,7 @@ export function CommentItem(props: CommentItemProps) {
       <div className="user-avatar flex-shrink-0">
         <Image
           src={avatarSrc}
-          alt={currentComment.user?.name || (isVietnamese ? "Người dùng" : "User")}
+          alt={currentComment.user?.name || labels.defaultUser}
           width={40}
           height={40}
           className="rounded-full object-cover"
@@ -61,7 +62,7 @@ export function CommentItem(props: CommentItemProps) {
         <div className="comment-header flex items-center justify-between mb-2">
           <div className="user-name line-center gr-free flex items-center gap-2">
             <span className="text-white text-sm font-medium">
-              {currentComment.user?.name || (isVietnamese ? "Ẩn danh" : "Anonymous")}
+              {currentComment.user?.name || labels.anonymous}
               {isAdmin && (
                 <i className="fa-solid fa-infinity text-primary ms-2 text-red-500"></i>
               )}
@@ -76,7 +77,7 @@ export function CommentItem(props: CommentItemProps) {
               />
               {currentComment.isEdited && (
                 <span className="text-gray-500 ml-2">
-                  ({isVietnamese ? "Đã chỉnh sửa" : "Edited"})
+                  ({labels.edited})
                 </span>
               )}
             </div>
@@ -91,7 +92,7 @@ export function CommentItem(props: CommentItemProps) {
               editingComment={currentComment}
               onSubmit={handleEditSubmit}
               onCancel={handleCancelEdit}
-              placeholder={isVietnamese ? "Sửa bình luận" : "Edit comment"}
+              placeholder={labels.editComment}
             />
           </div>
         ) : (
@@ -162,7 +163,7 @@ export function CommentItem(props: CommentItemProps) {
               onClick={() => setShowReplyForm((prev) => !prev)}
             >
               <i className="fa-solid fa-reply text-xs"></i>
-              <span className="text-xs">{isVietnamese ? "Trả lời" : "Reply"}</span>
+              <span className="text-xs">{labels.reply}</span>
             </button>
           )}
 
@@ -176,7 +177,7 @@ export function CommentItem(props: CommentItemProps) {
                   disabled={isEditing}
                 >
                   <i className="fa-solid fa-pen text-xs"></i>
-                  <span className="text-xs">{isVietnamese ? "Sửa" : "Edit"}</span>
+                  <span className="text-xs">{labels.edit}</span>
                 </button>
               )}
               <button
@@ -185,7 +186,7 @@ export function CommentItem(props: CommentItemProps) {
                 onClick={() => void handleSelfDelete()}
               >
                 <i className="fa-solid fa-trash text-xs"></i>
-                <span className="text-xs">{isVietnamese ? "Xóa" : "Delete"}</span>
+                <span className="text-xs">{labels.delete}</span>
               </button>
             </div>
           )}
@@ -197,9 +198,7 @@ export function CommentItem(props: CommentItemProps) {
               movieId={currentComment.movieId}
               tvSeriesId={currentComment.tvSeriesId || currentComment.tvId}
               parentId={currentComment.id}
-              placeholder={`${
-                isVietnamese ? "Trả lời" : "Reply to"
-              } ${currentComment.user?.name || ""}...`}
+              placeholder={labels.replyTo(currentComment.user?.name || "")}
               onSubmit={handleReplySubmit}
               onCancel={() => setShowReplyForm(false)}
             />
@@ -219,16 +218,10 @@ export function CommentItem(props: CommentItemProps) {
                 } text-xs`}
               ></i>
               {loadingReplies
-                ? isVietnamese
-                  ? "Đang tải..."
-                  : "Loading..."
+                ? labels.loading
                 : showReplies
-                ? isVietnamese
-                  ? "Ẩn trả lời"
-                  : "Hide replies"
-                : isVietnamese
-                ? `Xem tất cả trả lời (${localReplyCount})`
-                : `View all replies (${localReplyCount})`}
+                ? labels.hideReplies
+                : labels.viewAllReplies(localReplyCount)}
             </button>
           </div>
         )}

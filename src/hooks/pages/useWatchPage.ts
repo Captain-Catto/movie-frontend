@@ -12,6 +12,7 @@ import {
   type WatchContentData,
 } from "@/utils/watchContentMapper";
 import { getWatchPageDataByRouteId } from "@/lib/detail-page-data";
+import { getPageHookUiMessages } from "@/lib/ui-messages";
 import type {
   WatchPageCredits,
   WatchPageRecommendationItem,
@@ -80,21 +81,7 @@ export function useWatchPage({
 }: UseWatchPageOptions): UseWatchPageResult {
   const searchParams = useSearchParams();
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-  const messages = {
-    loadContentFailed: isVietnamese
-      ? "Không thể tải thông tin nội dung"
-      : "Unable to load content information",
-    fetchStreamFailed: isVietnamese
-      ? "Không thể lấy nguồn phát."
-      : "Unable to fetch stream source.",
-    noStreamAvailable: isVietnamese
-      ? "Hiện chưa có nguồn phát phù hợp."
-      : "No stream source available right now.",
-    loadStreamFailed: isVietnamese
-      ? "Không thể tải nguồn phát từ các nhà cung cấp hiện có."
-      : "Unable to load stream from available providers.",
-  };
+  const labels = getPageHookUiMessages(language);
 
   const [movieData, setMovieData] = useState<WatchContentData | null>(
     initialMovieData
@@ -180,12 +167,12 @@ export function useWatchPage({
         setStreamError(result.streamError);
         setError(result.error);
       } catch {
-        setError(messages.loadContentFailed);
+        setError(labels.loadContentFailed);
         setMovieData(null);
         setCredits(null);
         setRecommendations([]);
         setStreamCandidates([]);
-        setStreamError(messages.fetchStreamFailed);
+        setStreamError(labels.fetchStreamFailed);
       } finally {
         setCreditsLoading(false);
         setRecommendationsLoading(false);
@@ -201,7 +188,7 @@ export function useWatchPage({
       setStreamError(null);
       setActiveStreamIndex(0);
     }
-  }, [movieId, language, initialLanguage, season, episode, messages.fetchStreamFailed, messages.loadContentFailed]);
+  }, [movieId, language, initialLanguage, season, episode, labels.fetchStreamFailed, labels.loadContentFailed]);
 
   useEffect(() => {
     if (!streamTmdbId || !streamContentType) return;
@@ -244,14 +231,14 @@ export function useWatchPage({
         setActiveStreamIndex(0);
       } else {
         setStreamCandidates([]);
-        setStreamError(messages.noStreamAvailable);
+        setStreamError(labels.noStreamAvailable);
       }
     };
 
     fetchStreamUrl().catch(() => {
       if (cancelled) return;
       setStreamCandidates([]);
-      setStreamError(messages.fetchStreamFailed);
+      setStreamError(labels.fetchStreamFailed);
     });
 
     return () => {
@@ -267,8 +254,8 @@ export function useWatchPage({
     initialSeason,
     initialEpisode,
     language,
-    messages.fetchStreamFailed,
-    messages.noStreamAvailable,
+    labels.fetchStreamFailed,
+    labels.noStreamAvailable,
   ]);
 
   useEffect(() => {
@@ -297,10 +284,10 @@ export function useWatchPage({
         setStreamError(null);
         return prev + 1;
       }
-      setStreamError(messages.loadStreamFailed);
+      setStreamError(labels.loadStreamFailed);
       return prev;
     });
-  }, [clearStreamTimeout, streamCandidates.length, messages.loadStreamFailed]);
+  }, [clearStreamTimeout, streamCandidates.length, labels.loadStreamFailed]);
 
   const handleStreamLoadSuccess = useCallback(() => {
     clearStreamTimeout();

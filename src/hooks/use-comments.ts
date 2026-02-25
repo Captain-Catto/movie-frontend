@@ -14,6 +14,8 @@ import {
   UseCommentsReturn,
 } from "@/types/comment.types";
 import { useToast } from "@/hooks/useToast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommentsUiMessages } from "@/lib/ui-messages";
 
 export function useComments(
   options: UseCommentsOptions = {}
@@ -36,6 +38,8 @@ export function useComments(
   const [hasMore, setHasMore] = useState(true);
 
   const { showSuccess, showError } = useToast();
+  const { language } = useLanguage();
+  const labels = getCommentsUiMessages(language);
 
   // Memoized query parameters
   const queryParams = useMemo(
@@ -67,14 +71,14 @@ export function useComments(
         setPage(pageNum);
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to load comments";
+          err instanceof Error ? err.message : labels.errorLoadingCommentsDefault;
         setError(errorMessage);
-        showError("Error loading comments", errorMessage);
+        showError(labels.errorLoadingCommentsTitle, errorMessage);
       } finally {
         setLoading(false);
       }
     },
-    [queryParams, showError]
+    [queryParams, showError, labels.errorLoadingCommentsDefault, labels.errorLoadingCommentsTitle]
   );
 
   // Load more comments (pagination)
@@ -108,18 +112,26 @@ export function useComments(
         }
 
         showSuccess(
-          "Comment posted",
-          "Your comment has been posted successfully."
+          labels.commentPostedTitle,
+          labels.commentPostedDescription
         );
         return newComment;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to post comment";
-        showError("Error", errorMessage);
+          err instanceof Error ? err.message : labels.errorPostingCommentDefault;
+        showError(labels.errorTitle, errorMessage);
         throw err;
       }
     },
-    [refresh, showSuccess, showError]
+    [
+      refresh,
+      showSuccess,
+      showError,
+      labels.commentPostedTitle,
+      labels.commentPostedDescription,
+      labels.errorPostingCommentDefault,
+      labels.errorTitle,
+    ]
   );
 
   // Update comment
@@ -134,18 +146,25 @@ export function useComments(
         );
 
         showSuccess(
-          "Comment updated",
-          "Your comment has been updated successfully."
+          labels.commentUpdatedTitle,
+          labels.commentUpdatedDescription
         );
         return updatedComment;
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to update comment";
-        showError("Error updating comment", errorMessage);
+          err instanceof Error ? err.message : labels.errorUpdatingCommentDefault;
+        showError(labels.errorUpdatingCommentTitle, errorMessage);
         throw err;
       }
     },
-    [showSuccess, showError]
+    [
+      showSuccess,
+      showError,
+      labels.commentUpdatedTitle,
+      labels.commentUpdatedDescription,
+      labels.errorUpdatingCommentDefault,
+      labels.errorUpdatingCommentTitle,
+    ]
   );
 
   // Delete comment
@@ -160,17 +179,24 @@ export function useComments(
         setComments((prev) => prev.filter((comment) => comment.id !== id));
 
         showSuccess(
-          "Comment deleted",
-          "Your comment has been deleted successfully."
+          labels.commentDeletedTitle,
+          labels.commentDeletedDescription
         );
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to delete comment";
-        showError("Error deleting comment", errorMessage);
+          err instanceof Error ? err.message : labels.errorDeletingCommentDefault;
+        showError(labels.errorDeletingCommentTitle, errorMessage);
         throw err;
       }
     },
-    [showSuccess, showError]
+    [
+      showSuccess,
+      showError,
+      labels.commentDeletedTitle,
+      labels.commentDeletedDescription,
+      labels.errorDeletingCommentDefault,
+      labels.errorDeletingCommentTitle,
+    ]
   );
 
   // Like comment
@@ -210,11 +236,11 @@ export function useComments(
         // If not top-level, it's a nested comment and will be handled by handleNestedLike
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to like comment";
-        showError("Error", errorMessage);
+          err instanceof Error ? err.message : labels.errorLikingCommentDefault;
+        showError(labels.errorTitle, errorMessage);
       }
     },
-    [showError, comments]
+    [showError, comments, labels.errorLikingCommentDefault, labels.errorTitle]
   );
 
   // Dislike comment
@@ -254,11 +280,11 @@ export function useComments(
         // If not top-level, it's a nested comment and will be handled by handleNestedDislike
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to dislike comment";
-        showError("Error", errorMessage);
+          err instanceof Error ? err.message : labels.errorDislikingCommentDefault;
+        showError(labels.errorTitle, errorMessage);
       }
     },
-    [showError, comments]
+    [showError, comments, labels.errorDislikingCommentDefault, labels.errorTitle]
   );
 
   // Report comment
@@ -286,17 +312,24 @@ export function useComments(
         );
 
         showSuccess(
-          "Comment reported",
-          "Thank you for reporting this comment. We will review it shortly."
+          labels.commentReportedTitle,
+          labels.commentReportedDescription
         );
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : "Failed to report comment";
-        showError("Error reporting comment", errorMessage);
+          err instanceof Error ? err.message : labels.errorReportingCommentDefault;
+        showError(labels.errorReportingCommentTitle, errorMessage);
         throw err;
       }
     },
-    [showSuccess, showError]
+    [
+      showSuccess,
+      showError,
+      labels.commentReportedTitle,
+      labels.commentReportedDescription,
+      labels.errorReportingCommentDefault,
+      labels.errorReportingCommentTitle,
+    ]
   );
 
   // Load comments on mount and when dependencies change
@@ -352,6 +385,8 @@ export function useComment(commentId: number) {
   const [error, setError] = useState<string | null>(null);
 
   const { showError } = useToast();
+  const { language } = useLanguage();
+  const labels = getCommentsUiMessages(language);
 
   const loadComment = useCallback(async () => {
     try {
@@ -361,13 +396,13 @@ export function useComment(commentId: number) {
       setComment(commentData);
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to load comment";
+        err instanceof Error ? err.message : labels.errorLoadingCommentDefault;
       setError(errorMessage);
-      showError("Error loading comment", errorMessage);
+      showError(labels.errorLoadingCommentTitle, errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [commentId, showError]);
+  }, [commentId, showError, labels.errorLoadingCommentDefault, labels.errorLoadingCommentTitle]);
 
   useEffect(() => {
     if (commentId) {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MovieFilters from "@/components/movie/MovieFilters";
@@ -12,9 +13,24 @@ import {
   parseBrowsePageParams,
 } from "@/lib/browse-page-data";
 import { getBrowseUiMessages, getCommonUiMessages } from "@/lib/ui-messages";
+import { getBrowseSeoByFetchType } from "@/lib/page-seo";
 
 interface BrowsePageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
+}
+
+export async function generateMetadata({
+  searchParams,
+}: BrowsePageProps): Promise<Metadata> {
+  const params = searchParams ? await searchParams : undefined;
+  const { fetchType } = parseBrowsePageParams(params);
+  const language = await getServerPreferredLanguage();
+  const seo = getBrowseSeoByFetchType(fetchType, language);
+
+  return {
+    title: seo.title,
+    description: seo.description,
+  };
 }
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {

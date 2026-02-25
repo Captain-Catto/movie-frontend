@@ -7,6 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { enUS, vi } from "date-fns/locale";
 import { ClientOnly } from "@/components/hydration/ClientOnly";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getSearchUiMessages, resolveUiLocale } from "@/lib/ui-messages";
 
 interface RecentSearchesProps {
   searches: RecentSearch[];
@@ -22,19 +23,19 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
   onClearAll,
 }) => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getSearchUiMessages(language);
+  const locale = resolveUiLocale(language);
+  const dateFnsLocale = locale === "vi" ? vi : enUS;
 
   if (searches.length === 0) {
     return (
       <div className="p-6 text-center">
         <Clock className="w-12 h-12 text-gray-600 mx-auto mb-3" />
         <h3 className="text-gray-400 font-medium mb-1">
-          {isVietnamese ? "Chưa có tìm kiếm gần đây" : "No recent searches"}
+          {labels.noRecentSearches}
         </h3>
         <p className="text-gray-500 text-sm">
-          {isVietnamese
-            ? "Lịch sử tìm kiếm sẽ hiển thị ở đây"
-            : "Your searches will appear here"}
+          {labels.recentSearchesDescription}
         </p>
       </div>
     );
@@ -43,11 +44,11 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
   const getTypeLabel = (type: string) => {
     switch (type) {
       case "movie":
-        return isVietnamese ? "Phim lẻ" : "Movies";
+        return labels.typeLabel("movie");
       case "tv":
-        return isVietnamese ? "Phim bộ" : "TV Series";
+        return labels.typeLabel("tv");
       default:
-        return isVietnamese ? "Tất cả" : "All";
+        return labels.typeLabel("all");
     }
   };
 
@@ -68,7 +69,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-medium flex items-center space-x-2">
             <Clock className="w-4 h-4" />
-            <span>{isVietnamese ? "Tìm kiếm gần đây" : "Recent Searches"}</span>
+            <span>{labels.recentSearchesTitle}</span>
           </h3>
 
           {searches.length > 0 && (
@@ -77,7 +78,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
               className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center space-x-1 cursor-pointer"
             >
               <Trash2 className="w-3 h-3" />
-              <span>{isVietnamese ? "Xóa tất cả" : "Clear all"}</span>
+              <span>{labels.clearAll}</span>
             </button>
           )}
         </div>
@@ -107,21 +108,21 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                   <ClientOnly
                     fallback={
                       <span className="text-xs text-gray-400">
-                        {isVietnamese ? "Vừa xong" : "Recently"}
+                        {labels.recently}
                       </span>
                     }
                   >
                     <span className="text-xs text-gray-400">
                       {formatDistanceToNow(new Date(search.timestamp), {
                         addSuffix: true,
-                        locale: isVietnamese ? vi : enUS,
+                        locale: dateFnsLocale,
                       })}
                     </span>
                   </ClientOnly>
 
                   {search.source === "local" && (
                     <span className="text-xs text-gray-500 bg-gray-700 px-1 rounded">
-                      {isVietnamese ? "Máy cục bộ" : "Local"}
+                      {labels.local}
                     </span>
                   )}
                 </div>

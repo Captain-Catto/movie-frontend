@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { analyticsService } from "@/services/analytics.service";
 import { getMovieDetailPageDataByTmdbId } from "@/lib/detail-page-data";
+import { getPageHookUiMessages } from "@/lib/ui-messages";
 import type { MovieDetail } from "@/types/content.types";
 
 export interface UseMovieDetailPageClientOptions {
@@ -31,7 +32,7 @@ export function useMovieDetailPageClient({
   initialError,
 }: UseMovieDetailPageClientOptions): UseMovieDetailPageClientResult {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getPageHookUiMessages(language);
   const [movieData, setMovieData] = useState<MovieDetail | null>(initialMovieData);
   const [loading, setLoading] = useState(() => !initialMovieData && !initialError);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -63,7 +64,7 @@ export function useMovieDetailPageClient({
         if (!Number.isFinite(parsedTmdbId) || parsedTmdbId <= 0) {
           setMovieData(null);
           setContentType(null);
-          setError(isVietnamese ? "ID nội dung không hợp lệ" : "Invalid content ID");
+          setError(labels.invalidContentId);
           return;
         }
 
@@ -81,11 +82,7 @@ export function useMovieDetailPageClient({
         }
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : isVietnamese
-            ? "Đã xảy ra lỗi"
-            : "An error occurred"
+          err instanceof Error ? err.message : labels.anErrorOccurred
         );
         setMovieData(null);
         setContentType(null);
@@ -98,7 +95,7 @@ export function useMovieDetailPageClient({
     if (movieId) {
       fetchMovieData();
     }
-  }, [movieId, language, initialLanguage, isVietnamese]);
+  }, [movieId, language, initialLanguage, labels.anErrorOccurred, labels.invalidContentId]);
 
   return {
     movieData,

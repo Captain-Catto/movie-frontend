@@ -3,6 +3,7 @@
 import React, { forwardRef } from "react";
 import { Search, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getSearchUiMessages } from "@/lib/ui-messages";
 
 interface SearchInputProps {
   query: string;
@@ -14,7 +15,7 @@ interface SearchInputProps {
 const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   ({ query, onQueryChange, onSearch, isLoading }, ref) => {
     const { language } = useLanguage();
-    const isVietnamese = language.toLowerCase().startsWith("vi");
+    const labels = getSearchUiMessages(language);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const newQuery = e.target.value;
@@ -43,11 +44,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           <input
             ref={ref}
             type="text"
-            placeholder={
-              isVietnamese
-                ? "Tìm phim lẻ, phim bộ..."
-                : "Search movies, TV shows..."
-            }
+            placeholder={labels.placeholder}
             value={query}
             onChange={handleInputChange}
             className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
@@ -73,9 +70,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
 
         {query.length > 0 && query.length < 2 && (
           <p className="text-xs text-gray-400 mt-2">
-            {isVietnamese
-              ? "Nhập ít nhất 2 ký tự để tìm kiếm"
-              : "Enter at least 2 characters to search"}
+            {labels.minCharsHint}
           </p>
         )}
       </form>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import CategoryListingPage from "@/components/content/CategoryListingPage";
 import { DEFAULT_TV_PAGE_SIZE } from "@/constants/app.constants";
 import {
@@ -7,13 +8,27 @@ import {
   type SearchParamsRecord,
 } from "@/lib/category-page-data";
 import { getServerPreferredLanguage } from "@/lib/server-language";
-import { getCategoryListingUiMessages } from "@/lib/ui-messages";
+import {
+  getCategoryFetchErrorUiMessages,
+  getCategoryListingUiMessages,
+} from "@/lib/ui-messages";
 import { apiService } from "@/services/api";
 import type { MovieCardData, TVSeries } from "@/types/content.types";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
+import { getCategorySeo } from "@/lib/page-seo";
 
 interface PopularTVPageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getServerPreferredLanguage();
+  const seo = getCategorySeo("tv-popular", language);
+
+  return {
+    title: seo.title,
+    description: seo.description,
+  };
 }
 
 export default async function PopularTVPage({
@@ -22,6 +37,7 @@ export default async function PopularTVPage({
   const params = searchParams ? await searchParams : undefined;
   const currentPage = parsePageParam(params?.page);
   const language = await getServerPreferredLanguage();
+  const uiLabels = getCategoryFetchErrorUiMessages(language);
 
   let tvShows: MovieCardData[] = [];
   let totalPages = 1;
@@ -36,7 +52,7 @@ export default async function PopularTVPage({
     });
 
     if (!response.success) {
-      throw new Error(response.message || "Failed to fetch popular TV shows");
+      throw new Error(response.message || uiLabels.failedToFetchPopularTVShows);
     }
 
     const items = extractCategoryItems(response.data);
@@ -46,7 +62,7 @@ export default async function PopularTVPage({
     totalPages = pagination.totalPages;
     total = pagination.total;
   } catch (err) {
-    error = err instanceof Error ? err.message : "Unknown error";
+    error = err instanceof Error ? err.message : uiLabels.unknownError;
   }
   const labels = getCategoryListingUiMessages("tv-popular", language, total);
 

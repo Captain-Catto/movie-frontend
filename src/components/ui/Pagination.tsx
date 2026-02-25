@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { getCommonUiMessages } from "@/lib/ui-messages";
+import { getCommonUiMessages, getPaginationUiMessages } from "@/lib/ui-messages";
 
 interface PaginationProps {
   currentPage: number;
@@ -25,15 +25,14 @@ export function Pagination({
 }: PaginationProps) {
   const { language } = useLanguage();
   const common = getCommonUiMessages(language);
+  const pagination = getPaginationUiMessages(language);
   const labels = {
     pagination: common.page,
     previousPage: `${common.previous} ${common.page.toLowerCase()}`,
     nextPage: `${common.next} ${common.page.toLowerCase()}`,
     page: common.page,
-    goTo: language.toLowerCase().startsWith("vi") ? "Đến" : "Go to",
-    jumpToPageTitle: language.toLowerCase().startsWith("vi")
-      ? `Đi đến trang (1-${totalPages})`
-      : `Jump to page (1-${totalPages})`,
+    goTo: pagination.goTo,
+    jumpToPageTitle: pagination.jumpToPageTitle(totalPages),
   };
 
   const [isInputMode, setIsInputMode] = useState(false);

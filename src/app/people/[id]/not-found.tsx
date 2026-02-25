@@ -1,10 +1,11 @@
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
 import { getServerPreferredLanguage } from "@/lib/server-language";
+import { getMediaNotFoundUiMessages } from "@/lib/ui-messages";
 
 export default async function ActorNotFound() {
   const language = await getServerPreferredLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getMediaNotFoundUiMessages(language);
 
   return (
     <Layout>
@@ -13,12 +14,10 @@ export default async function ActorNotFound() {
           <div className="mb-8">
             <h1 className="text-8xl font-bold text-gray-800 mb-4">404</h1>
             <h2 className="text-3xl font-bold text-white mb-4">
-              {isVietnamese ? "Không tìm thấy diễn viên" : "Actor Not Found"}
+              {labels.actorTitle}
             </h2>
             <p className="text-gray-400 text-lg mb-8">
-              {isVietnamese
-                ? "Không tìm thấy diễn viên bạn đang tìm. Có thể dữ liệu đã bị gỡ hoặc ID không chính xác."
-                : "We couldn&apos;t find the actor you&apos;re looking for. They might have been removed or the ID is incorrect."}
+              {labels.actorDescription}
             </p>
           </div>
 
@@ -27,13 +26,13 @@ export default async function ActorNotFound() {
               href="/people"
               className="inline-block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {isVietnamese ? "← Quay lại diễn viên" : "← Back to Actors"}
+              {labels.backToActors}
             </Link>
             <Link
               href="/"
               className="inline-block w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {isVietnamese ? "Về trang chủ" : "Go Home"}
+              {labels.goHome}
             </Link>
           </div>
         </div>

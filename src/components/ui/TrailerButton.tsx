@@ -4,6 +4,7 @@ import { Play, Loader2 } from "lucide-react";
 import TrailerModal from "./TrailerModal";
 import { useTrailerButton } from "@/hooks/components/useTrailerButton";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getTrailerButtonUiMessages } from "@/lib/ui-messages";
 
 interface TrailerButtonProps {
   movieId: number;
@@ -19,7 +20,7 @@ export default function TrailerButton({
   className = "",
 }: TrailerButtonProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getTrailerButtonUiMessages(language);
 
   const {
     isModalOpen,
@@ -46,7 +47,7 @@ export default function TrailerButton({
     return (
       <button disabled className={combinedClasses}>
         <Loader2 size={20} className="animate-spin" />
-        <span>{isVietnamese ? "Đang kiểm tra trailer..." : "Checking trailer..."}</span>
+        <span>{labels.checkingTrailer}</span>
       </button>
     );
   }
@@ -59,12 +60,8 @@ export default function TrailerButton({
         className={combinedClasses}
         title={
           hasVideos === false
-            ? isVietnamese
-              ? "Không có trailer"
-              : "No trailer available"
-            : isVietnamese
-            ? "Xem trailer"
-            : "Watch trailer"
+            ? labels.noTrailerAvailable
+            : labels.watchTrailer
         }
       >
         {loading ? (
@@ -74,16 +71,10 @@ export default function TrailerButton({
         )}
         <span>
           {loading
-            ? isVietnamese
-              ? "Đang tải..."
-              : "Loading..."
+            ? labels.loading
             : hasVideos === false
-            ? isVietnamese
-              ? "Không có trailer"
-              : "No trailer available"
-            : isVietnamese
-            ? "Xem trailer"
-            : "Watch Trailer"}
+            ? labels.noTrailerAvailable
+            : labels.watchTrailer}
         </span>
       </button>
 

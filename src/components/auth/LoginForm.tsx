@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getLoginFormUiMessages } from "@/lib/ui-messages";
 interface LoginFormProps {
   onSubmit: (
     email: string,
@@ -12,6 +14,8 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSubmit }: LoginFormProps) {
+  const { language } = useLanguage();
+  const labels = getLoginFormUiMessages(language);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -24,13 +28,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     const newErrors: Record<string, string> = {};
 
     if (!formData.email.trim()) {
-      newErrors.email = "Please enter your email";
+      newErrors.email = labels.enterEmail;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = labels.invalidEmail;
     }
 
     if (!formData.password) {
-      newErrors.password = "Please enter your password";
+      newErrors.password = labels.enterPassword;
     }
 
     setErrors(newErrors);
@@ -49,13 +53,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     try {
       const result = await onSubmit(formData.email, formData.password);
       if (!result.success) {
-        setSubmitError(result.error || "Login failed");
+        setSubmitError(result.error || labels.loginFailed);
       } else {
         setSubmitError("");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setSubmitError("An error occurred. Please try again.");
+      setSubmitError(labels.genericError);
     } finally {
       setIsLoading(false);
     }
@@ -79,13 +83,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       )}
       <div className="space-y-2">
         <Label htmlFor="login-email" className="text-white">
-          Email
+          {labels.email}
         </Label>
         <Input
           id="login-email"
           name="email"
           type="email"
-          placeholder="email@example.com"
+          placeholder={labels.emailPlaceholder}
           value={formData.email}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -100,13 +104,13 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="login-password" className="text-white">
-          Password
+          {labels.password}
         </Label>
         <Input
           id="login-password"
           name="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={labels.passwordPlaceholder}
           value={formData.password}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -124,7 +128,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           type="button"
           className="text-sm text-red-400 hover:text-red-300 transition-colors"
         >
-          Forgot password?
+          {labels.forgotPassword}
         </button>
       </div>
 
@@ -133,7 +137,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         className="w-full bg-red-600 hover:bg-red-700 text-white"
         disabled={isLoading}
       >
-        {isLoading ? "Logging in..." : "Login"}
+        {isLoading ? labels.loggingIn : labels.login}
       </Button>
     </form>
   );

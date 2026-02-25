@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getRegisterFormUiMessages } from "@/lib/ui-messages";
 interface RegisterFormProps {
   onSuccess: (name: string, email: string, password: string) => void;
   onError: (message: string) => void;
@@ -13,6 +15,8 @@ export default function RegisterForm({
   onSuccess,
   onError,
 }: RegisterFormProps) {
+  const { language } = useLanguage();
+  const labels = getRegisterFormUiMessages(language);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,21 +30,21 @@ export default function RegisterForm({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Please enter your username";
+      newErrors.name = labels.enterUsername;
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Please enter your email";
+      newErrors.email = labels.enterEmail;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = labels.invalidEmail;
     }
 
     if (!formData.password) {
-      newErrors.password = "Please enter your password";
+      newErrors.password = labels.enterPassword;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      newErrors.confirmPassword = labels.passwordsDoNotMatch;
     }
 
     setErrors(newErrors);
@@ -60,7 +64,7 @@ export default function RegisterForm({
       await onSuccess(formData.name, formData.email, formData.password);
     } catch (error) {
       console.error("Registration error:", error);
-      onError("An error occurred. Please try again.");
+      onError(labels.genericError);
     } finally {
       setIsLoading(false);
     }
@@ -79,13 +83,13 @@ export default function RegisterForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name" className="text-white">
-          Username <span className="text-red-500">*</span>
+          {labels.username} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="name"
           name="name"
           type="text"
-          placeholder="e.g., john_doe"
+          placeholder={labels.usernamePlaceholder}
           value={formData.name}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -98,13 +102,13 @@ export default function RegisterForm({
 
       <div className="space-y-2">
         <Label htmlFor="email" className="text-white">
-          Email <span className="text-red-500">*</span>
+          {labels.email} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="email@example.com"
+          placeholder={labels.emailPlaceholder}
           value={formData.email}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -117,13 +121,13 @@ export default function RegisterForm({
 
       <div className="space-y-2">
         <Label htmlFor="password" className="text-white">
-          Password <span className="text-red-500">*</span>
+          {labels.password} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="••••••••"
+          placeholder={labels.passwordPlaceholder}
           value={formData.password}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -138,13 +142,13 @@ export default function RegisterForm({
 
       <div className="space-y-2">
         <Label htmlFor="confirmPassword" className="text-white">
-          Confirm Password <span className="text-red-500">*</span>
+          {labels.confirmPassword} <span className="text-red-500">*</span>
         </Label>
         <Input
           id="confirmPassword"
           name="confirmPassword"
           type="password"
-          placeholder="••••••••"
+          placeholder={labels.passwordPlaceholder}
           value={formData.confirmPassword}
           onChange={handleChange}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
@@ -162,7 +166,7 @@ export default function RegisterForm({
         className="w-full bg-red-600 hover:bg-red-700 text-white"
         disabled={isLoading}
       >
-        {isLoading ? "Registering..." : "Register"}
+        {isLoading ? labels.registering : labels.register}
       </Button>
     </form>
   );

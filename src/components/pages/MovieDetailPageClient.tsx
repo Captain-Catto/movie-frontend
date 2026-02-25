@@ -45,7 +45,6 @@ const MovieDetailPageClient = ({
 }: MovieDetailPageClientProps) => {
   const { language } = useLanguage();
   const locale = getLocaleFromLanguage(language);
-  const isVietnamese = language.toLowerCase().startsWith("vi");
   const {
     movieData,
     loading,
@@ -96,8 +95,8 @@ const MovieDetailPageClient = ({
       }
     }
 
-    if (isVietnamese && raw.toLowerCase() === "vietsub") {
-      return "Phụ đề Việt";
+    if (raw.toLowerCase() === "vietsub") {
+      return labels.vietsub;
     }
 
     return raw;
@@ -106,21 +105,19 @@ const MovieDetailPageClient = ({
   const getLocalizedStatus = (status: string | undefined) => {
     if (!status) return labels.unknown;
 
-    if (!isVietnamese) return status;
-
     switch (status) {
       case "Released":
-        return "Đã phát hành";
+        return labels.statusReleased;
       case "Rumored":
-        return "Tin đồn";
+        return labels.statusRumored;
       case "Planned":
-        return "Đã lên kế hoạch";
+        return labels.statusPlanned;
       case "In Production":
-        return "Đang sản xuất";
+        return labels.statusInProduction;
       case "Post Production":
-        return "Hậu kỳ";
+        return labels.statusPostProduction;
       case "Canceled":
-        return "Đã hủy";
+        return labels.statusCanceled;
       default:
         return status;
     }

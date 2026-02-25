@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { optimisticToggle, toggleFavoriteAsync } from "@/store/favoritesSlice";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getFavoriteButtonUiMessages } from "@/lib/ui-messages";
 
 interface FavoriteButtonProps {
   movie: {
@@ -40,6 +42,8 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastToggleAt, setLastToggleAt] = useState<number | null>(null);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { language } = useLanguage();
+  const labels = getFavoriteButtonUiMessages(language);
   const { showSuccess, showError, showWarning } = useToast();
   const dispatch = useAppDispatch();
 
@@ -103,13 +107,13 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     setLastToggleAt(now);
 
     if (!isAuthenticated) {
-      showWarning("Login required", "You have to login to use this feature");
+      showWarning(labels.loginRequiredTitle, labels.loginRequiredDescription);
       return;
     }
 
     if (!movieId) {
       console.error("❌ Movie ID is missing");
-      showError("Invalid movie data");
+      showError(labels.invalidMovieData);
       return;
     }
 
@@ -136,13 +140,13 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
       // Show success message
       if (result.isFavorite) {
-        showSuccess("Added to favorites!", movie.title);
+        showSuccess(labels.addedToFavorites, movie.title);
       } else {
-        showSuccess("Removed from favorites", movie.title);
+        showSuccess(labels.removedFromFavorites, movie.title);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
-      showError("Failed to update favorite status");
+      showError(labels.updateFavoriteFailed);
     } finally {
       setIsProcessing(false);
     }
@@ -164,7 +168,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
         `}
       >
         <i className="far fa-heart text-lg"></i>
-        {!iconOnly && "Loading..."}
+        {!iconOnly && labels.loading}
       </button>
     );
   }
@@ -199,10 +203,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       `}
       title={
         !isAuthenticated
-          ? "Login required"
+          ? labels.loginRequiredTitle
           : isFavorite
-          ? "Remove from favorites"
-          : "Add to favorites"
+          ? labels.titleRemove
+          : labels.titleAdd
       }
     >
       <i
@@ -212,10 +216,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       ></i>
       {!iconOnly &&
         (isProcessing
-          ? "Processing..."
+          ? labels.processing
           : isFavorite
-          ? "Favorited"
-          : "Add to Favorites")}
+          ? labels.favorited
+          : labels.addToFavorites)}
     </button>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getGlobalErrorUiMessages } from "@/lib/ui-messages";
 
 export default function GlobalError({
   reset,
@@ -8,14 +9,15 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [isVietnamese, setIsVietnamese] = useState(false);
+  const [language, setLanguage] = useState<"vi" | "en">("en");
+  const labels = getGlobalErrorUiMessages(language);
 
   useEffect(() => {
     const cookie = document.cookie;
-    setIsVietnamese(
+    const hasVietnamesePreference =
       cookie.includes("preferred-language=vi-VN") ||
-        cookie.includes("preferred-language=vi")
-    );
+      cookie.includes("preferred-language=vi");
+    setLanguage(hasVietnamesePreference ? "vi" : "en");
   }, []);
 
   return (
@@ -26,12 +28,10 @@ export default function GlobalError({
             <div className="mb-8">
               <div className="text-6xl mb-4">💥</div>
               <h2 className="text-3xl font-bold text-white mb-4">
-                {isVietnamese ? "Lỗi nghiêm trọng" : "Critical Error"}
+                {labels.title}
               </h2>
               <p className="text-gray-400 text-lg mb-4">
-                {isVietnamese
-                  ? "Đã xảy ra lỗi nghiêm trọng. Vui lòng tải lại trang."
-                  : "A critical error occurred. Please refresh the page."}
+                {labels.description}
               </p>
             </div>
 
@@ -40,7 +40,7 @@ export default function GlobalError({
                 onClick={reset}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
-                {isVietnamese ? "Tải lại trang" : "Refresh Page"}
+                {labels.refreshPage}
               </button>
             </div>
           </div>

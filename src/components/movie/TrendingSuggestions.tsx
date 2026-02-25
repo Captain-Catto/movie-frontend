@@ -3,6 +3,7 @@
 import MovieGrid from "@/components/movie/MovieGrid";
 import { useTrendingSuggestions } from "@/hooks/components/useTrendingSuggestions";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getTrendingSuggestionsUiMessages } from "@/lib/ui-messages";
 
 interface TrendingSuggestionsProps {
   type: "movie" | "tv" | "all";
@@ -14,7 +15,7 @@ export default function TrendingSuggestions({
   title,
 }: TrendingSuggestionsProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getTrendingSuggestionsUiMessages(language);
   const { items, loading } = useTrendingSuggestions({ type, limit: 6 });
 
   if (!loading && items.length === 0) return null;
@@ -23,7 +24,7 @@ export default function TrendingSuggestions({
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="border-t border-gray-800 pt-12">
         <h3 className="text-2xl font-bold text-white mb-8 text-center">
-          {title || (isVietnamese ? "Đang phổ biến" : "Popular Right Now")}
+          {title || labels.popularRightNow}
         </h3>
         <MovieGrid
           movies={items}

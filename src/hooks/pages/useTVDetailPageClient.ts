@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { analyticsService } from "@/services/analytics.service";
 import { getTVDetailPageDataByTmdbId } from "@/lib/detail-page-data";
+import { getPageHookUiMessages } from "@/lib/ui-messages";
 import type { TVDetail } from "@/types/content.types";
 
 export interface UseTVDetailPageClientOptions {
@@ -30,7 +31,7 @@ export function useTVDetailPageClient({
 }: UseTVDetailPageClientOptions): UseTVDetailPageClientResult {
   const numericTvId = Number(tvIdParam);
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getPageHookUiMessages(language);
   const [tvData, setTVData] = useState<TVDetail | null>(initialTVData);
   const [loading, setLoading] = useState(() => !initialTVData && !initialError);
   const [creditsLoading, setCreditsLoading] = useState(false);
@@ -57,9 +58,7 @@ export function useTVDetailPageClient({
         setError(null);
 
         if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
-          throw new Error(
-            isVietnamese ? "ID phim bộ không hợp lệ" : "Invalid TV series ID"
-          );
+          throw new Error(labels.invalidTvSeriesId);
         }
 
         const result = await getTVDetailPageDataByTmdbId(numericTvId, language);
@@ -75,11 +74,7 @@ export function useTVDetailPageClient({
         }
       } catch (err) {
         setError(
-          err instanceof Error
-            ? err.message
-            : isVietnamese
-            ? "Lỗi không xác định"
-            : "Unknown error"
+          err instanceof Error ? err.message : labels.unknownError
         );
         setTVData(null);
       } finally {
@@ -89,7 +84,7 @@ export function useTVDetailPageClient({
     };
 
     fetchTVData();
-  }, [numericTvId, tvIdParam, language, initialLanguage, isVietnamese]);
+  }, [numericTvId, tvIdParam, language, initialLanguage, labels.invalidTvSeriesId, labels.unknownError]);
 
   return {
     tvData,

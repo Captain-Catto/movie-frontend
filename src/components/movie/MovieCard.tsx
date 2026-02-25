@@ -10,6 +10,8 @@ import { FALLBACK_POSTER } from "@/constants/app.constants";
 import { useWindowWidth } from "@/hooks/useWindowWidth";
 import type { MovieCardData } from "@/types/content.types";
 import { analyticsService } from "@/services/analytics.service";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getMovieCardUiMessages } from "@/lib/ui-messages";
 
 interface MovieCardProps {
   movie: MovieCardData;
@@ -17,6 +19,8 @@ interface MovieCardProps {
 
 const MovieCard = ({ movie }: MovieCardProps) => {
   const router = useRouter();
+  const { language } = useLanguage();
+  const labels = getMovieCardUiMessages(language);
   const cardRef = useRef<HTMLDivElement>(null);
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
@@ -120,7 +124,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             <div className="pin-new m-pin-new">
               <div className="line-center line-pd absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                 {movie.isComplete ? (
-                  <span>Full</span>
+                  <span>{labels.full}</span>
                 ) : (
                   <span>{movie.episodeNumber}</span>
                 )}
@@ -136,7 +140,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           {/* Movie Poster */}
           <Image
             src={posterSafe}
-            alt={`Watch Now ${movie.title}`}
+            alt={labels.watchNowAlt(movie.title)}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
             loading="lazy"
@@ -153,7 +157,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
                 <div className="w-4 h-4 relative">
                   <div className="w-0 h-0 border-l-[8px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-0.5"></div>
                 </div>
-                <span>Watch</span>
+                <span>{labels.watch}</span>
               </button>
             </div>
           </div>

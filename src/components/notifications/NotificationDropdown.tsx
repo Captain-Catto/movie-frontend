@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { RelativeTime } from "@/utils/hydration-safe-date";
 import { useNotificationDropdown } from "@/hooks/components/useNotificationDropdown";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getNotificationDropdownUiMessages } from "@/lib/ui-messages";
 
 interface NotificationDropdownProps {
   className?: string;
@@ -15,6 +16,7 @@ interface NotificationDropdownProps {
 
 export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const { language } = useLanguage();
+  const labels = getNotificationDropdownUiMessages(language);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const {
     isOpen,
@@ -54,7 +56,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         size="icon"
         onClick={handleBellClick}
         className="relative text-white hover:bg-transparent group"
-        title={`${unreadCount} unread notifications`}
+        title={labels.unreadNotificationsTitle(unreadCount)}
       >
         <Bell
           size={20}
@@ -74,7 +76,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         <div className="absolute right-0 top-full mt-2 w-80 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-[150]">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <h3 className="text-white font-semibold">Notifications</h3>
+            <h3 className="text-white font-semibold">{labels.notifications}</h3>
             {notifications.length > 0 && (
               <Button
                 variant="ghost"
@@ -84,13 +86,13 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
                 title={
                   !isConnected
-                    ? "⚠️ Cannot connect to server. Please check your network connection."
+                    ? `⚠ ${labels.cannotConnect}`
                     : notifications.every((n) => n.isRead)
-                    ? "All notifications have been read"
-                    : "Mark all as read"
+                    ? labels.allRead
+                    : labels.markAllRead
                 }
               >
-                {isMarkingAllAsRead ? "Marking..." : "Mark all read"}
+                {isMarkingAllAsRead ? labels.marking : labels.markAllRead}
               </Button>
             )}
           </div>
@@ -100,7 +102,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-400">
                 <Bell size={24} className="mx-auto mb-2 opacity-50" />
-                <p>No notifications yet</p>
+                <p>{labels.noNotificationsYet}</p>
               </div>
             ) : (
               notifications.map((notification) => (
@@ -143,7 +145,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                           size="sm"
                           onClick={() => handleMarkAsRead(notification.id)}
                           className="text-blue-400 hover:text-blue-300 text-xs p-1"
-                          title="Mark as read"
+                          title={labels.markAsRead}
                         >
                           <CheckCircle size={14} />
                         </Button>
@@ -164,7 +166,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 className="w-full text-blue-400 hover:text-blue-300 text-sm"
                 onClick={goToNotificationsPage}
               >
-                View all notifications
+                {labels.viewAllNotifications}
               </Button>
             </div>
           )}

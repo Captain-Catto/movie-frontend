@@ -2,34 +2,11 @@
 
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getFooterUiMessages } from "@/lib/ui-messages";
 
 const Footer = () => {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
-
-  const labels = {
-    tagline: isVietnamese
-      ? "Trải nghiệm giải trí đa dạng với kho phim phong phú của chúng tôi."
-      : "Experience great entertainment with our diverse movie collection.",
-    quickLinks: isVietnamese ? "Liên kết nhanh" : "Quick Links",
-    home: isVietnamese ? "Trang chủ" : "Home",
-    newReleases: isVietnamese ? "Mới phát hành" : "New Releases",
-    movies: isVietnamese ? "Phim lẻ" : "Movies",
-    tvSeries: isVietnamese ? "Phim bộ" : "TV Series",
-    trending: isVietnamese ? "Thịnh hành" : "Trending",
-    categories: isVietnamese ? "Thể loại" : "Categories",
-    action: isVietnamese ? "Hành động" : "Action",
-    romance: isVietnamese ? "Lãng mạn" : "Romance",
-    comedy: isVietnamese ? "Hài" : "Comedy",
-    animation: isVietnamese ? "Hoạt hình" : "Animation",
-    horror: isVietnamese ? "Kinh dị" : "Horror",
-    contact: isVietnamese ? "Liên hệ" : "Contact",
-    copyright: isVietnamese
-      ? "© 2024 MovieStream. Bảo lưu mọi quyền."
-      : "© 2024 MovieStream. All rights reserved.",
-    terms: isVietnamese ? "Điều khoản sử dụng" : "Terms of Use",
-    privacy: isVietnamese ? "Chính sách bảo mật" : "Privacy Policy",
-  };
+  const labels = getFooterUiMessages(language);
 
   return (
     <footer className="bg-gray-900 pt-16 pb-8">
@@ -297,7 +274,7 @@ const Footer = () => {
                 href="/faq"
                 className="text-gray-400 hover:text-red-500 text-sm transition-colors"
               >
-                FAQ
+                {labels.faq}
               </Link>
             </div>
           </div>

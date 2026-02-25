@@ -13,6 +13,7 @@ import { useComments } from "@/hooks/use-comments";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCommentsUiMessages } from "@/lib/ui-messages";
 
 export function CommentSection({
   movieId,
@@ -20,7 +21,7 @@ export function CommentSection({
   className = "",
 }: CommentSectionProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getCommentsUiMessages(language);
 
   const [sortBy] = useState<CommentSortOption>("newest");
 
@@ -102,7 +103,7 @@ export function CommentSection({
           <CommentForm
             movieId={movieId}
             tvSeriesId={tvSeriesId}
-            placeholder={isVietnamese ? "Viết bình luận" : "Write a comment"}
+            placeholder={labels.writeComment}
             onSubmit={handleCommentSubmit}
             className="mb-6"
           />
@@ -114,7 +115,7 @@ export function CommentSection({
             <div className="text-center py-8">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
               <p className="text-gray-400 mt-3">
-                {isVietnamese ? "Đang tải bình luận..." : "Loading comments..."}
+                {labels.loadingComments}
               </p>
             </div>
           ) : error ? (
@@ -148,12 +149,8 @@ export function CommentSection({
                     onClick={loadMore}
                   >
                     {loading
-                      ? isVietnamese
-                        ? "Đang tải..."
-                        : "Loading..."
-                      : isVietnamese
-                      ? "Xem thêm bình luận..."
-                      : "Load more comments..."}
+                      ? labels.loading
+                      : labels.loadMoreComments}
                   </button>
                 </div>
               )}
@@ -161,12 +158,10 @@ export function CommentSection({
           ) : (
             <div className="text-center py-12">
               <p className="text-gray-400 text-lg mb-2">
-                {isVietnamese ? "Chưa có bình luận" : "No comments yet"}
+                {labels.noCommentsYet}
               </p>
               <p className="text-gray-500 text-sm">
-                {isVietnamese
-                  ? "Hãy là người đầu tiên chia sẻ cảm nghĩ của bạn!"
-                  : "Be the first to share your thoughts!"}
+                {labels.beFirstToShareThoughts}
               </p>
             </div>
           )}

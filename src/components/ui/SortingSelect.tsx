@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getSortingSelectUiMessages } from "@/lib/ui-messages";
 
 interface SortingSelectProps {
   value: string;
@@ -14,27 +15,27 @@ export default function SortingSelect({
   className = "",
 }: SortingSelectProps) {
   const { language } = useLanguage();
-  const isVietnamese = language.toLowerCase().startsWith("vi");
+  const labels = getSortingSelectUiMessages(language);
 
   const sortOptions = [
     {
       value: "popularity",
-      label: isVietnamese ? "🔥 Đang thịnh hành" : "🔥 Trending Now",
+      label: labels.trendingNow,
     },
     {
       value: "top_rated",
-      label: isVietnamese ? "⭐ Đánh giá cao" : "⭐ Top Rated",
+      label: labels.topRated,
     },
     {
       value: "latest",
-      label: isVietnamese ? "🆕 Mới phát hành" : "🆕 Latest Releases",
+      label: labels.latestReleases,
     },
   ];
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <label className="text-gray-300 text-sm font-medium">
-        {isVietnamese ? "Sắp xếp:" : "Sort by:"}
+        {labels.sortBy}
       </label>
       <select
         value={value}

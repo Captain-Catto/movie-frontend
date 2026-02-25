@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import Container from "@/components/ui/Container";
 import MovieGrid from "@/components/movie/MovieGrid";
@@ -14,9 +15,20 @@ import {
   getCommonUiMessages,
   getPublicListingUiMessages,
 } from "@/lib/ui-messages";
+import { getStaticPageSeo } from "@/lib/page-seo";
 
 interface TVShowsPageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getServerPreferredLanguage();
+  const seo = getStaticPageSeo(language);
+
+  return {
+    title: seo.tv.title,
+    description: seo.tv.description,
+  };
 }
 
 export default async function TVShowsPage({ searchParams }: TVShowsPageProps) {

@@ -1,6 +1,10 @@
+'use client';
+
 import MovieCard from './MovieCard';
 import type { MovieCardData } from "@/types/content.types";
 import MovieCardSkeleton from '@/components/ui/MovieCardSkeleton';
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getMovieGridUiMessages } from "@/lib/ui-messages";
 
 interface MovieGridProps {
   movies: MovieCardData[];
@@ -21,6 +25,9 @@ const MovieGrid = ({
   loading = false,
   skeletonCount: customSkeletonCount
 }: MovieGridProps) => {
+  const { language } = useLanguage();
+  const labels = getMovieGridUiMessages(language);
+
   // Limit movies to 6 per row if maxRows is 1
   const displayMovies = maxRows === 1 ? movies.slice(0, 6) : movies;
   const skeletonCount = customSkeletonCount ?? (maxRows === 1 ? 6 : 12);
@@ -48,7 +55,7 @@ const MovieGrid = ({
                   <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
                   <polyline points="16 7 22 7 22 13"></polyline>
                 </svg>
-                <span>Trending</span>
+                <span>{labels.trending}</span>
               </button>
               <button className="flex items-center space-x-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
                 <svg
@@ -66,7 +73,7 @@ const MovieGrid = ({
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
-                <span>Latest</span>
+                <span>{labels.latest}</span>
               </button>
             </div>
           )}
