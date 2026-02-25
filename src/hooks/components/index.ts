@@ -41,3 +41,18 @@ export { useTVSeriesSections } from "./useTVSeriesSections";
 export { useTrailerButton } from "./useTrailerButton";
 
 export { useEpisodePicker } from "./useEpisodePicker";
+
+export { useNotificationDropdown } from "./useNotificationDropdown";
+export type {
+  NotificationItem,
+  UseNotificationDropdownResult,
+} from "./useNotificationDropdown";
+
+export { useVideoUploader } from "./useVideoUploader";
+export { useMovieUploader } from "./useMovieUploader";
+
+export { useCommentForm } from "./useCommentForm";
+export type { UseCommentFormResult } from "./useCommentForm";
+
+export { useCommentItem } from "./useCommentItem";
+export type { UseCommentItemResult } from "./useCommentItem";

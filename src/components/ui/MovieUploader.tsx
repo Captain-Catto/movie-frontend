@@ -1,152 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import { Upload, CheckCircle, AlertCircle, Film, Cloud } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
-
-interface UploadedMovie {
-  id: string;
-  title: string;
-  description: string;
-  streamUrl: string;
-  fileSize: number;
-  originalName: string;
-  uploadDate: string;
-}
+import { useMovieUploader } from "@/hooks/components/useMovieUploader";
 
 export default function MovieUploader() {
   const { language } = useLanguage();
   const locale = getLocaleFromLanguage(language);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadedMovie, setUploadedMovie] = useState<UploadedMovie | null>(
-    null
-  );
-  const [error, setError] = useState<string | null>(null);
-  const [movieData, setMovieData] = useState({
-    title: "",
-    description: "",
-    year: new Date().getFullYear(),
-    genre: "Demo",
-    duration: "",
-  });
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith("video/")) {
-        setError("Only video files accepted (mp4, avi, mov, etc.)");
-        return;
-      }
-
-      // Validate file size (max 500MB for demo)
-      const maxSize = 500 * 1024 * 1024; // 500MB
-      if (file.size > maxSize) {
-        setError("File too large. Maximum 500MB for demo.");
-        return;
-      }
-
-      setSelectedFile(file);
-      setError(null);
-
-      // Auto-fill title from filename
-      if (!movieData.title) {
-        const titleFromFile = file.name.replace(/\.[^/.]+$/, "");
-        setMovieData((prev) => ({ ...prev, title: titleFromFile }));
-      }
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setError("Please select a video file");
-      return;
-    }
-
-    if (!movieData.title.trim()) {
-      setError("Please enter movie title");
-      return;
-    }
-
-    setUploading(true);
-    setUploadProgress(0);
-    setError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("movie", selectedFile);
-      formData.append("title", movieData.title);
-      formData.append("description", movieData.description);
-      formData.append("year", movieData.year.toString());
-      formData.append("genre", movieData.genre);
-      formData.append("duration", movieData.duration);
-
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + Math.random() * 10;
-        });
-      }, 500);
-
-      const response = await fetch(
-        "http://localhost:8080/api/movie-upload/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      const result = await response.json();
-
-      if (result.success) {
-        setUploadedMovie(result.data);
-        setSelectedFile(null);
-        setMovieData({
-          title: "",
-          description: "",
-          year: new Date().getFullYear(),
-          genre: "Demo",
-          duration: "",
-        });
-      } else {
-        setError(result.message || "Upload failed");
-        if (result.data?.instructions) {
-        }
-      }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unknown error occurred";
-      setError(`Upload failed: ${message}`);
-    } finally {
-      setUploading(false);
-      setTimeout(() => setUploadProgress(0), 2000);
-    }
-  };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const resetUpload = () => {
-    setUploadedMovie(null);
-    setSelectedFile(null);
-    setError(null);
-  };
+  const {
+    selectedFile,
+    uploading,
+    uploadProgress,
+    uploadedMovie,
+    error,
+    movieData,
+    setMovieData,
+    handleFileSelect,
+    handleUpload,
+    resetUpload,
+    formatFileSize,
+  } = useMovieUploader();
 
   if (uploadedMovie) {
     return (
@@ -155,9 +30,7 @@ export default function MovieUploader() {
           <div className="flex items-center space-x-2">
             <CheckCircle className="text-green-500" size={24} />
             <div>
-              <h3 className="text-green-400 font-semibold">
-                Upload successful!
-              </h3>
+              <h3 className="text-green-400 font-semibold">Upload successful!</h3>
               <p className="text-green-300 text-sm">
                 Movie uploaded to AWS S3 and ready to stream
               </p>
@@ -184,8 +57,7 @@ export default function MovieUploader() {
               <strong>Original file:</strong> {uploadedMovie.originalName}
             </div>
             <div>
-              <strong>Size:</strong>{" "}
-              {formatFileSize(uploadedMovie.fileSize)}
+              <strong>Size:</strong> {formatFileSize(uploadedMovie.fileSize)}
             </div>
             <div>
               <strong>Uploaded at:</strong>{" "}
@@ -203,10 +75,7 @@ export default function MovieUploader() {
         </div>
 
         <div className="bg-black rounded-lg overflow-hidden">
-          <VideoPlayer
-            src={uploadedMovie.streamUrl}
-            title={uploadedMovie.title}
-          />
+          <VideoPlayer src={uploadedMovie.streamUrl} title={uploadedMovie.title} />
         </div>
       </div>
     );
@@ -229,7 +98,6 @@ export default function MovieUploader() {
           </div>
         )}
 
-        {/* File Upload */}
         <div className="mb-6">
           <label className="block text-white font-medium mb-2">
             Select video file
@@ -250,9 +118,7 @@ export default function MovieUploader() {
               {selectedFile ? (
                 <div className="space-y-2">
                   <Film className="mx-auto text-green-500" size={48} />
-                  <p className="text-green-400 font-medium">
-                    {selectedFile.name}
-                  </p>
+                  <p className="text-green-400 font-medium">{selectedFile.name}</p>
                   <p className="text-gray-400 text-sm">
                     {formatFileSize(selectedFile.size)} • {selectedFile.type}
                   </p>
@@ -272,12 +138,9 @@ export default function MovieUploader() {
           </div>
         </div>
 
-        {/* Movie Info */}
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-white font-medium mb-2">
-              Movie title *
-            </label>
+            <label className="block text-white font-medium mb-2">Movie title *</label>
             <input
               type="text"
               value={movieData.title}
@@ -296,10 +159,7 @@ export default function MovieUploader() {
             <textarea
               value={movieData.description}
               onChange={(e) =>
-                setMovieData((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
+                setMovieData((prev) => ({ ...prev, description: e.target.value }))
               }
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
               placeholder="Movie description (optional)"
@@ -317,7 +177,7 @@ export default function MovieUploader() {
                 onChange={(e) =>
                   setMovieData((prev) => ({
                     ...prev,
-                    year: parseInt(e.target.value) || new Date().getFullYear(),
+                    year: parseInt(e.target.value, 10) || new Date().getFullYear(),
                   }))
                 }
                 className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
@@ -328,9 +188,7 @@ export default function MovieUploader() {
             </div>
 
             <div>
-              <label className="block text-white font-medium mb-2">
-                Genre
-              </label>
+              <label className="block text-white font-medium mb-2">Genre</label>
               <select
                 value={movieData.genre}
                 onChange={(e) =>
@@ -349,17 +207,12 @@ export default function MovieUploader() {
             </div>
 
             <div>
-              <label className="block text-white font-medium mb-2">
-                Duration
-              </label>
+              <label className="block text-white font-medium mb-2">Duration</label>
               <input
                 type="text"
                 value={movieData.duration}
                 onChange={(e) =>
-                  setMovieData((prev) => ({
-                    ...prev,
-                    duration: e.target.value,
-                  }))
+                  setMovieData((prev) => ({ ...prev, duration: e.target.value }))
                 }
                 className="w-full px-3 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
                 placeholder="VD: 120 min"
@@ -369,7 +222,6 @@ export default function MovieUploader() {
           </div>
         </div>
 
-        {/* Upload Progress */}
         {uploading && (
           <div className="mb-6">
             <div className="flex justify-between text-sm text-gray-400 mb-2">
@@ -385,9 +237,8 @@ export default function MovieUploader() {
           </div>
         )}
 
-        {/* Upload Button */}
         <button
-          onClick={handleUpload}
+          onClick={() => void handleUpload()}
           disabled={!selectedFile || uploading || !movieData.title.trim()}
           className={`w-full py-3 rounded-lg font-medium transition-colors ${
             !selectedFile || uploading || !movieData.title.trim()
@@ -408,9 +259,8 @@ export default function MovieUploader() {
           )}
         </button>
 
-        {/* Instructions */}
         <div className="mt-6 text-sm text-gray-400">
-          <p className="font-medium mb-2">📝 Notes:</p>
+          <p className="font-medium mb-2">Notes:</p>
           <ul className="space-y-1 text-xs">
             <li>• File will be uploaded to AWS S3 bucket</li>
             <li>• AWS credentials configuration required in backend</li>

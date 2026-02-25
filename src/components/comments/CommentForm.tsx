@@ -1,204 +1,42 @@
-// CommentForm Component
-// Form for creating and editing comments with reference layout
-
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
-import { CommentFormProps, CreateCommentDto } from "@/types/comment.types";
-import { useContentFilter } from "@/hooks/use-comments";
-import { useAppSelector } from "@/store/hooks";
-import { commentService } from "@/services/comment.service";
+import { CommentFormProps } from "@/types/comment.types";
+import { useCommentForm } from "@/hooks/components/useCommentForm";
 
-const NO_AVATAR = "/images/no-avatar.svg";
-
-export function CommentForm({
-  movieId,
-  tvSeriesId,
-  parentId,
-  editingComment,
-  onSubmit,
-  onCancel,
-  placeholder = "Write a comment",
-  className = "",
-}: CommentFormProps) {
-  const [content, setContent] = useState(editingComment?.content || "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [contentError, setContentError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Mention autocomplete state
-  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState("");
-  const [mentionUsers, setMentionUsers] = useState<Array<{ id: number; name: string; image?: string }>>([]);
-  const [mentionCursorPos, setMentionCursorPos] = useState(0);
-  const [loadingMentions, setLoadingMentions] = useState(false);
-
-  const { checkContent, checking } = useContentFilter();
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const avatarSrc = user?.image || NO_AVATAR;
-
-  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.onerror = null;
-    e.currentTarget.src = NO_AVATAR;
-  };
-
-  // Focus on mount
-  useEffect(() => {
-    if (textareaRef.current && parentId) {
-      textareaRef.current.focus();
-    }
-  }, [parentId]);
-
-  // Reset form when editing comment changes
-  useEffect(() => {
-    setContent(editingComment?.content || "");
-    setContentError(null);
-  }, [editingComment]);
-
-  // Handle mention search
-  const searchMentions = async (query: string) => {
-    if (query.length < 2) {
-      setMentionUsers([]);
-      return;
-    }
-
-    setLoadingMentions(true);
-    try {
-      const users = await commentService.searchUsers(query, 10);
-      setMentionUsers(users);
-    } catch (error) {
-      console.error("Failed to search users:", error);
-      setMentionUsers([]);
-    } finally {
-      setLoadingMentions(false);
-    }
-  };
-
-  // Handle content change with mention detection
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newContent = e.target.value;
-    const cursorPos = e.target.selectionStart;
-
-    setContent(newContent);
-
-    // Check if we're typing a mention
-    const textBeforeCursor = newContent.substring(0, cursorPos);
-    const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
-
-    if (mentionMatch) {
-      const query = mentionMatch[1];
-      setMentionQuery(query);
-      setMentionCursorPos(cursorPos);
-      setShowMentionDropdown(true);
-      searchMentions(query);
-    } else {
-      setShowMentionDropdown(false);
-      setMentionQuery("");
-      setMentionUsers([]);
-    }
-  };
-
-  // Insert mention into content
-  const insertMention = (userName: string) => {
-    const beforeMention = content.substring(0, mentionCursorPos - mentionQuery.length - 1);
-    const afterMention = content.substring(mentionCursorPos);
-    const newContent = `${beforeMention}@${userName} ${afterMention}`;
-
-    setContent(newContent);
-    setShowMentionDropdown(false);
-    setMentionQuery("");
-    setMentionUsers([]);
-
-    // Focus back to textarea
-    if (textareaRef.current) {
-      const newCursorPos = beforeMention.length + userName.length + 2;
-      setTimeout(() => {
-        textareaRef.current?.focus();
-        textareaRef.current?.setSelectionRange(newCursorPos, newCursorPos);
-      }, 0);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!isAuthenticated) {
-      setContentError("You need to login to comment");
-      return;
-    }
-
-    const trimmedContent = content.trim();
-    if (!trimmedContent) {
-      setContentError("Content cannot be empty");
-      return;
-    }
-
-    if (trimmedContent.length > 1000) {
-      setContentError("Content is too long (max 1000 characters)");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      setContentError(null);
-
-      // Check content filter
-      const filterResult = await checkContent(trimmedContent);
-      if (!filterResult.isAllowed) {
-        setContentError(
-          filterResult.reason || "Inappropriate content"
-        );
-        return;
-      }
-
-      // Prepare comment data
-      const commentData: CreateCommentDto = {
-        content: trimmedContent,
-        movieId,
-        tvId: tvSeriesId,
-        parentId,
-      };
-
-      // Call parent submit handler
-      if (onSubmit) {
-        await onSubmit(commentData);
-      }
-
-      // Reset form
-      setContent("");
-      setContentError(null);
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unable to send comment";
-      setContentError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setContent(editingComment?.content || "");
-    setContentError(null);
-    if (onCancel) {
-      onCancel();
-    }
-  };
+export function CommentForm(props: CommentFormProps) {
+  const {
+    textareaRef,
+    content,
+    isSubmitting,
+    contentError,
+    showMentionDropdown,
+    mentionQuery,
+    mentionUsers,
+    loadingMentions,
+    checking,
+    user,
+    isAuthenticated,
+    avatarSrc,
+    handleAvatarError,
+    handleContentChange,
+    insertMention,
+    handleSubmit,
+    handleCancel,
+  } = useCommentForm(props);
 
   if (!isAuthenticated) {
     return (
       <div className="my-area bg-gray-800 rounded-lg p-4">
-        <div className="text-center text-gray-400">
-          Please login to comment
-        </div>
+        <div className="text-center text-gray-400">Please login to comment</div>
       </div>
     );
   }
 
   return (
-    <div className={`my-area ${className}`}>
-      {/* User Info */}
+    <div className={`my-area ${props.className || ""}`}>
       <div className="ma-user flex items-center gap-3 mb-3">
         <div className="user-avatar">
           <Image
@@ -212,11 +50,12 @@ export function CommentForm({
         </div>
         <div className="info">
           <small className="text-gray-400 text-xs block">Commenting as</small>
-          <span className="text-white text-sm font-medium">{user?.name || "User"}</span>
+          <span className="text-white text-sm font-medium">
+            {user?.name || "User"}
+          </span>
         </div>
       </div>
 
-      {/* Textarea */}
       <div className="textarea-wrap">
         <div className="ma-input relative">
           <textarea
@@ -225,7 +64,7 @@ export function CommentForm({
             rows={4}
             cols={3}
             maxLength={1000}
-            placeholder={placeholder}
+            placeholder={props.placeholder || "Write a comment"}
             value={content}
             onChange={handleContentChange}
             disabled={isSubmitting || checking}
@@ -234,7 +73,6 @@ export function CommentForm({
             {content.length} / 1000
           </div>
 
-          {/* Mention Dropdown */}
           {showMentionDropdown && (
             <div className="mention-dropdown absolute left-0 right-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto z-50">
               {loadingMentions ? (
@@ -244,21 +82,21 @@ export function CommentForm({
                 </div>
               ) : mentionUsers.length > 0 ? (
                 <ul className="py-1">
-                  {mentionUsers.map((user) => (
+                  {mentionUsers.map((mentionUser) => (
                     <li
-                      key={user.id}
+                      key={mentionUser.id}
                       className="px-3 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-2"
-                      onClick={() => insertMention(user.name)}
+                      onClick={() => insertMention(mentionUser.name)}
                     >
                       <Image
-                        src={user.image || NO_AVATAR}
-                        alt={user.name}
+                        src={mentionUser.image || "/images/no-avatar.svg"}
+                        alt={mentionUser.name}
                         width={24}
                         height={24}
                         className="w-6 h-6 rounded-full object-cover"
                         onError={handleAvatarError}
                       />
-                      <span className="text-white text-sm">{user.name}</span>
+                      <span className="text-white text-sm">{mentionUser.name}</span>
                     </li>
                   ))}
                 </ul>
@@ -275,14 +113,10 @@ export function CommentForm({
           )}
         </div>
 
-        {/* Error Message */}
-        {contentError && (
-          <div className="text-red-500 text-sm mt-2">{contentError}</div>
-        )}
+        {contentError && <div className="text-red-500 text-sm mt-2">{contentError}</div>}
 
-        {/* Action Buttons */}
         <div className="line-center d-flex gap-3 ma-buttons mt-3 flex items-center justify-end">
-          {onCancel && (
+          {props.onCancel && (
             <button
               className="btn btn-basic text-gray-400 hover:text-white px-4 py-2"
               type="button"
@@ -296,19 +130,16 @@ export function CommentForm({
           <button
             className="btn btn-basic btn-submit bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             type="button"
-            onClick={handleSubmit}
+            onClick={(e) => void handleSubmit(e)}
             disabled={
-              isSubmitting ||
-              checking ||
-              !content.trim() ||
-              content.length > 1000
+              isSubmitting || checking || !content.trim() || content.length > 1000
             }
           >
             {isSubmitting || checking ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <>
-                <span>{editingComment ? "Update" : "Send"}</span>
+                <span>{props.editingComment ? "Update" : "Send"}</span>
                 <div className="inc-icon icon-20">
                   <svg
                     fill="none"

@@ -1,171 +1,35 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef } from "react";
 import { Bell, CheckCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
-import axiosInstance from "@/lib/axios-instance";
 import { RelativeTime } from "@/utils/hydration-safe-date";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
-
-interface Notification {
-  id: number;
-  title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error" | "system";
-  createdAt: Date;
-  isRead: boolean;
-  metadata?: {
-    movieId?: number;
-    tvId?: number;
-    commentId?: number;
-    parentId?: number;
-    [key: string]: unknown;
-  };
-}
+import { useNotificationDropdown } from "@/hooks/components/useNotificationDropdown";
 
 interface NotificationDropdownProps {
   className?: string;
 }
 
 export function NotificationDropdown({ className }: NotificationDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
-
-  const { isAuthenticated } = useAuth();
   const {
+    isOpen,
+    setIsOpen,
+    notifications,
+    isMarkingAllAsRead,
     unreadCount,
     isConnected,
-    latestNotification,
-    markAsRead,
-    markAllAsRead,
-  } = useNotificationSocket();
+    handleBellClick,
+    handleMarkAsRead,
+    handleNotificationClick,
+    goToNotificationsPage,
+    handleMarkAllAsRead,
+  } = useNotificationDropdown();
 
   // Close dropdown when clicking outside
   useClickOutside(dropdownRef, () => setIsOpen(false));
-
-  // Fetch existing notifications on component mount
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      // Use isAuthenticated from Redux instead of localStorage
-      if (!isAuthenticated) return;
-
-      try {
-        // Token is automatically injected by axios interceptor
-        const response = await axiosInstance.get("/notifications", {
-          params: { limit: 10 },
-        });
-
-        if (response.data?.success && response.data.data?.notifications) {
-          interface RawNotification {
-            id: string;
-            title: string;
-            message: string;
-            type: string;
-            createdAt: string;
-            isRead: boolean;
-            metadata?: Notification["metadata"];
-          }
-          const userNotifications = response.data.data.notifications.map(
-            (notif: RawNotification) => ({
-              id: notif.id,
-              title: notif.title,
-              message: notif.message,
-              type: notif.type,
-              createdAt: new Date(notif.createdAt),
-              isRead: notif.isRead,
-              metadata: notif.metadata,
-            })
-          );
-          setNotifications(userNotifications);
-        }
-      } catch (error) {
-        console.error("Error fetching notifications:", error);
-      }
-    };
-
-    fetchNotifications();
-  }, [isAuthenticated]);
-
-  // Add new notification to list when received
-  useEffect(() => {
-    if (latestNotification) {
-      const newNotification: Notification = {
-        ...latestNotification,
-        isRead: false,
-      };
-      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]); // Keep max 10 notifications
-    }
-  }, [latestNotification]);
-
-  const handleMarkAsRead = (notificationId: number) => {
-    markAsRead(notificationId);
-    setNotifications((prev) =>
-      prev.map((notif) =>
-        notif.id === notificationId ? { ...notif, isRead: true } : notif
-      )
-    );
-  };
-
-  const resolveTargetUrl = (
-    metadata?: Notification["metadata"]
-  ): string | null => {
-    if (!metadata) return null;
-    if (metadata.movieId) return `/watch/movie-${metadata.movieId}`;
-    if (metadata.tvId) return `/watch/tv-${metadata.tvId}`;
-    return null;
-  };
-
-  const handleNotificationClick = (notification: Notification) => {
-    const targetUrl = resolveTargetUrl(notification.metadata);
-    if (targetUrl) {
-      handleMarkAsRead(notification.id);
-      router.push(targetUrl);
-      setIsOpen(false);
-    }
-  };
-
-  const goToNotificationsPage = () => {
-    router.push("/notifications");
-    setIsOpen(false);
-  };
-
-  const handleBellClick = () => {
-    // On mobile, skip dropdown and go straight to notifications page
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      goToNotificationsPage();
-      return;
-    }
-    setIsOpen(!isOpen);
-  };
-
-  const handleMarkAllAsRead = async () => {
-    if (!isConnected) {
-      console.warn("⚠️ Cannot mark all as read: Socket not connected");
-      return;
-    }
-
-    setIsMarkingAllAsRead(true);
-
-    try {
-      markAllAsRead();
-      // Update local state immediately for better UX
-      setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, isRead: true }))
-      );
-    } catch (error) {
-      console.error("❌ Error marking all as read:", error);
-    } finally {
-      // Reset loading state after a short delay
-      setTimeout(() => setIsMarkingAllAsRead(false), 500);
-    }
-  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
