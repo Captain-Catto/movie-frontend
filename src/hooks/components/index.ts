@@ -26,3 +26,18 @@ export type {
   UseMovieFiltersOptions,
   UseMovieFiltersResult,
 } from './useMovieFilters';
+
+export { useRecommendationsSection } from "./useRecommendationsSection";
+export type {
+  RecommendationItem,
+  UseRecommendationsSectionOptions,
+  UseRecommendationsSectionResult,
+} from "./useRecommendationsSection";
+
+export { useTrendingSuggestions } from "./useTrendingSuggestions";
+
+export { useTVSeriesSections } from "./useTVSeriesSections";
+
+export { useTrailerButton } from "./useTrailerButton";
+
+export { useEpisodePicker } from "./useEpisodePicker";

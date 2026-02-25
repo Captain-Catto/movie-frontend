@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
-import { apiService } from "@/services/api";
+import { useRecommendationsSection } from "@/hooks/components/useRecommendationsSection";
 import { mapGenreIdsToNames } from "@/utils/genreMapping";
 import {
   TMDB_IMAGE_BASE_URL,
@@ -17,58 +16,14 @@ interface RecommendationsProps {
   contentType: "movie" | "tv";
 }
 
-interface RecommendationItem {
-  id: number;
-  title?: string;
-  name?: string;
-  poster_path?: string;
-  backdrop_path?: string;
-  overview?: string;
-  vote_average?: number;
-  release_date?: string;
-  first_air_date?: string;
-  media_type?: string;
-  genre_ids?: number[];
-}
-
 export default function RecommendationsSection({
   tmdbId,
   contentType,
 }: RecommendationsProps) {
-  const [recommendations, setRecommendations] = useState<RecommendationItem[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response =
-          contentType === "movie"
-            ? await apiService.getMovieRecommendations(tmdbId)
-            : await apiService.getTVRecommendations(tmdbId);
-
-        if (response.success) {
-          setRecommendations(response.data.slice(0, 12));
-        } else {
-          setError(response.error || "Failed to load recommendations");
-        }
-      } catch (err) {
-        setError("Failed to load recommendations");
-        console.error("Error fetching recommendations:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (tmdbId) {
-      fetchRecommendations();
-    }
-  }, [tmdbId, contentType]);
+  const { recommendations, loading, error } = useRecommendationsSection({
+    tmdbId,
+    contentType,
+  });
 
   if (loading) {
     return (

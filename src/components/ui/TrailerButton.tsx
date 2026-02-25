@@ -1,10 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Play, Loader2 } from "lucide-react";
 import TrailerModal from "./TrailerModal";
-import { apiService } from "@/services/api";
-import { Video } from "@/types/content.types";
+import { useTrailerButton } from "@/hooks/components/useTrailerButton";
 
 interface TrailerButtonProps {
   movieId: number;
@@ -19,83 +17,15 @@ export default function TrailerButton({
   contentType = "movie",
   className = "",
 }: TrailerButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [hasVideos, setHasVideos] = useState<boolean | null>(null);
-  const [initialCheckDone, setInitialCheckDone] = useState(false);
-
-  // Check if videos are available on component mount
-  useEffect(() => {
-    const checkVideosAvailability = async () => {
-      setLoading(true);
-      try {
-        let response;
-        if (contentType === "tv") {
-          response = await apiService.getTVVideos(movieId);
-        } else {
-          response = await apiService.getMovieVideos(movieId);
-        }
-
-        if (response.success && response.data?.results) {
-          const availableVideos = response.data.results;
-          setVideos(availableVideos);
-          setHasVideos(availableVideos.length > 0);
-        } else {
-          setHasVideos(false);
-          setVideos([]);
-        }
-      } catch (err) {
-        console.error("Error checking videos availability:", err);
-        setHasVideos(false);
-        setVideos([]);
-      } finally {
-        setLoading(false);
-        setInitialCheckDone(true);
-      }
-    };
-
-    if (movieId) {
-      checkVideosAvailability();
-    }
-  }, [movieId, contentType]);
-
-  const handleWatchTrailer = async () => {
-    if (videos.length > 0) {
-      setIsModalOpen(true);
-      return;
-    }
-
-    // If no videos available, don't do anything
-    if (hasVideos === false) {
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      let response;
-      if (contentType === "tv") {
-        response = await apiService.getTVVideos(movieId);
-      } else {
-        response = await apiService.getMovieVideos(movieId);
-      }
-
-      if (response.success && response.data?.results) {
-        setVideos(response.data.results);
-        setIsModalOpen(true);
-      } else {
-        setVideos([]);
-        setIsModalOpen(true);
-      }
-    } catch (err) {
-      console.error("Error fetching videos:", err);
-      setVideos([]);
-      setIsModalOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    isModalOpen,
+    videos,
+    loading,
+    hasVideos,
+    initialCheckDone,
+    openTrailer,
+    closeTrailer,
+  } = useTrailerButton({ movieId, contentType });
 
   const isDisabled = loading || hasVideos === false;
   const baseClasses =
@@ -120,7 +50,7 @@ export default function TrailerButton({
   return (
     <>
       <button
-        onClick={handleWatchTrailer}
+        onClick={() => void openTrailer()}
         disabled={isDisabled}
         className={combinedClasses}
         title={
@@ -144,7 +74,7 @@ export default function TrailerButton({
       {hasVideos && (
         <TrailerModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={closeTrailer}
           videos={videos}
           movieTitle={movieTitle}
         />

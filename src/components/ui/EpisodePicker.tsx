@@ -1,11 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { apiService } from "@/services/api";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { getDsLanguageFromLanguage } from "@/constants/app.constants";
-import type { Episode } from "@/types/content.types";
+import { useEpisodePicker } from "@/hooks/components/useEpisodePicker";
 
 interface EpisodePickerProps {
   tmdbId: number;
@@ -22,105 +17,20 @@ export default function EpisodePicker({
   currentEpisode,
   contentId,
 }: EpisodePickerProps) {
-  const router = useRouter();
-  const { language } = useLanguage();
-  const dsLang = getDsLanguageFromLanguage(language);
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState(currentSeason);
-  const seasonEpisodesCacheRef = useRef<Record<number, Episode[]>>({});
-
-  useEffect(() => {
-    setSelectedSeason(currentSeason);
-  }, [currentSeason]);
-
-  useEffect(() => {
-    seasonEpisodesCacheRef.current = {};
-  }, [tmdbId, language]);
-
-  useEffect(() => {
-    const fetchEpisodes = async () => {
-      const cachedEpisodes = seasonEpisodesCacheRef.current[selectedSeason];
-      if (cachedEpisodes) {
-        setEpisodes(cachedEpisodes);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const response = await apiService.getTVSeasonEpisodes(
-          tmdbId,
-          selectedSeason,
-          language
-        );
-        if (response.success && response.data?.episodes) {
-          const normalizedEpisodes = response.data.episodes.map((episode, index) => ({
-            ...episode,
-            episodeNumber:
-              Number.isInteger(episode.episodeNumber) && episode.episodeNumber > 0
-                ? episode.episodeNumber
-                : index + 1,
-            name: episode.name || `Episode ${episode.episodeNumber || index + 1}`,
-          }));
-
-          setEpisodes(normalizedEpisodes);
-          seasonEpisodesCacheRef.current[selectedSeason] =
-            normalizedEpisodes;
-        } else {
-          setEpisodes([]);
-        }
-      } catch {
-        setEpisodes([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchEpisodes();
-  }, [tmdbId, selectedSeason, language]);
-
-  useEffect(() => {
-    // Prefetch next episode stream URL in background for smoother sequential watching.
-    if (selectedSeason !== currentSeason || episodes.length === 0) return;
-
-    const nextEpisode = currentEpisode + 1;
-    const hasNextEpisode = episodes.some(
-      (ep) => ep.episodeNumber === nextEpisode
-    );
-    if (!hasNextEpisode) return;
-
-    apiService
-      .getStreamUrlByTmdbId(tmdbId, "tv", {
-        season: selectedSeason,
-        episode: nextEpisode,
-        dsLang,
-        autoplay: true,
-        autoNext: true,
-      })
-      .catch(() => undefined);
-  }, [tmdbId, selectedSeason, currentSeason, currentEpisode, episodes, dsLang]);
-
-  const handleSeasonChange = (newSeason: number) => {
-    if (newSeason === currentSeason && currentEpisode === 1) return;
-    setSelectedSeason(newSeason);
-    router.replace(`/watch/${contentId}?season=${newSeason}&episode=1`, {
-      scroll: false,
-    });
-  };
-
-  const handleEpisodeClick = (episodeNumber: number) => {
-    if (selectedSeason === currentSeason && episodeNumber === currentEpisode) {
-      return;
-    }
-    router.replace(
-      `/watch/${contentId}?season=${selectedSeason}&episode=${episodeNumber}`,
-      { scroll: false }
-    );
-  };
-
-  const seasonOptions = Array.from(
-    { length: numberOfSeasons },
-    (_, i) => i + 1
-  );
+  const {
+    episodes,
+    loading,
+    selectedSeason,
+    seasonOptions,
+    changeSeason,
+    selectEpisode,
+  } = useEpisodePicker({
+    tmdbId,
+    numberOfSeasons,
+    currentSeason,
+    currentEpisode,
+    contentId,
+  });
 
   return (
     <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
@@ -128,7 +38,7 @@ export default function EpisodePicker({
         <h3 className="text-lg font-bold text-white">Episodes</h3>
         <select
           value={selectedSeason}
-          onChange={(e) => handleSeasonChange(Number(e.target.value))}
+          onChange={(e) => changeSeason(Number(e.target.value))}
           className="bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-gray-500 transition-colors"
         >
           {seasonOptions.map((s) => (
@@ -162,7 +72,7 @@ export default function EpisodePicker({
             return (
               <button
                 key={episodeKey}
-                onClick={() => handleEpisodeClick(ep.episodeNumber)}
+                onClick={() => selectEpisode(ep.episodeNumber)}
                 title={ep.name}
                 className={`h-10 rounded text-sm font-medium transition-colors ${
                   isActive
