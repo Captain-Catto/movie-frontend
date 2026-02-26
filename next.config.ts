@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
     // if usage limits or remote fetch timeouts become a deployment blocker.
     unoptimized: process.env.NEXT_IMAGE_UNOPTIMIZED === "true",
     formats: ["image/avif", "image/webp"],
+    // Mobile-first widths to reduce overfetch on 360/390/414 devices.
+    deviceSizes: [360, 390, 414, 640, 750, 828, 1080, 1200, 1920],
     // Add a 192px candidate so poster cards don't overfetch 256px assets.
     imageSizes: [16, 32, 48, 64, 96, 128, 192, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days

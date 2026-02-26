@@ -41,7 +41,7 @@ export default async function Home() {
       <HeroSection movies={heroMovies} isLoading={false} />
 
       {/* Now Playing Section */}
-      <div className="py-8">
+      <div className="py-8 deferred-content">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title={labels.nowPlaying}
@@ -58,7 +58,7 @@ export default async function Home() {
       </div>
 
       {/* Popular Section */}
-      <div className="py-8">
+      <div className="py-8 deferred-content">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title={labels.popular}
@@ -75,7 +75,7 @@ export default async function Home() {
       </div>
 
       {/* Top Rated Section */}
-      <div className="py-8">
+      <div className="py-8 deferred-content">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title={labels.topRated}
@@ -92,7 +92,7 @@ export default async function Home() {
       </div>
 
       {/* Upcoming Section */}
-      <div className="py-8">
+      <div className="py-8 deferred-content">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title={labels.upcoming}
@@ -109,12 +109,14 @@ export default async function Home() {
       </div>
 
       {/* TV Series Sections */}
-      <TVSeriesSections
-        onTheAirTVSeries={onTheAirTVSeries}
-        popularTVSeries={popularTVSeries}
-        topRatedTVSeries={topRatedTVSeries}
-        language={language}
-      />
+      <div className="deferred-content">
+        <TVSeriesSections
+          onTheAirTVSeries={onTheAirTVSeries}
+          popularTVSeries={popularTVSeries}
+          topRatedTVSeries={topRatedTVSeries}
+          language={language}
+        />
+      </div>
     </Layout>
   );
 }

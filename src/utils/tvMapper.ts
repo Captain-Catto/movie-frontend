@@ -6,6 +6,7 @@ import {
 } from "@/constants/app.constants";
 import { TMDB_TV_GENRE_MAP as TMDB_TV_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { TVSeries, FrontendTVSeries } from "@/types/content.types";
+import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
 export function mapTVSeriesToFrontend(
   series: Record<string, unknown>
@@ -58,14 +59,20 @@ export function mapTVSeriesToFrontend(
     ensureString(series.originalTitle) ??
     title;
 
-  const posterPath = ensureString(series.posterUrl);
+  const posterPath = normalizeTmdbImageUrl(
+    ensureString(series.posterUrl),
+    TMDB_POSTER_SIZE
+  );
   const poster =
     posterPath ||
     (ensureString(series.poster_path)
       ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${series.poster_path}`
       : FALLBACK_POSTER);
 
-  const backdropPath = ensureString(series.backdropUrl);
+  const backdropPath = normalizeTmdbImageUrl(
+    ensureString(series.backdropUrl),
+    TMDB_BACKDROP_SIZE
+  );
   const backdrop =
     backdropPath ||
     (ensureString(series.backdrop_path)

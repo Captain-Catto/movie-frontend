@@ -150,8 +150,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                       src={backgroundImage}
                       alt={movie.title}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1440px) 100vw, 1280px"
-                      quality={45}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1536px) 90vw, 1280px"
+                      quality={35}
                       priority={index === 0}
                   />
                 </div>
@@ -347,6 +347,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     alt={movie.title}
                     width={80}
                     height={48}
+                    sizes="80px"
+                    quality={35}
                     className="w-20 h-12 object-cover"
                   />
                 </div>

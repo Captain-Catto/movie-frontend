@@ -1,7 +1,12 @@
 import { FrontendMovie } from "@/types/content.types";
-import { FALLBACK_POSTER } from "@/constants/app.constants";
+import {
+  FALLBACK_POSTER,
+  TMDB_BACKDROP_SIZE,
+  TMDB_POSTER_SIZE,
+} from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { detectContentType } from "@/utils/contentType";
+import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
 type TrendingItem = {
   tmdbId: number | string;
@@ -28,8 +33,12 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
   }
 
   // Use the full URLs from backend if available
-  const posterUrl = trending.posterUrl || FALLBACK_POSTER;
-  const backdropUrl = trending.backdropUrl || FALLBACK_POSTER;
+  const posterUrl =
+    normalizeTmdbImageUrl(trending.posterUrl, TMDB_POSTER_SIZE) ||
+    FALLBACK_POSTER;
+  const backdropUrl =
+    normalizeTmdbImageUrl(trending.backdropUrl, TMDB_BACKDROP_SIZE) ||
+    FALLBACK_POSTER;
 
   const genreSource = Array.isArray(trending.genreIds)
     ? trending.genreIds

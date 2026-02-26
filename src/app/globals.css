@@ -150,6 +150,11 @@ body {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
+
+  .deferred-content {
+    content-visibility: auto;
+    contain-intrinsic-size: 1000px;
+  }
 }
 
 /* Hero Section Styles */
@@ -171,6 +176,7 @@ body {
 .slide-elements {
   position: relative;
   height: 100%;
+  contain: layout paint;
 }
 
 .slide-url {

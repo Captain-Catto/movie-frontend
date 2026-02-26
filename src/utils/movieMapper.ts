@@ -7,6 +7,7 @@ import {
 } from "@/constants/app.constants";
 import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { detectContentType } from "@/utils/contentType";
+import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
 export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   // TMDB ID is REQUIRED since all data comes from TMDB
@@ -51,13 +52,13 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
 
   // Backend already has full URLs - use them directly, otherwise construct from paths
   const posterUrl =
-    movie.posterUrl ||
+    normalizeTmdbImageUrl(movie.posterUrl, TMDB_POSTER_SIZE) ||
     (posterPath
       ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}`
       : FALLBACK_POSTER);
 
   const backdropUrl =
-    movie.backdropUrl ||
+    normalizeTmdbImageUrl(movie.backdropUrl, TMDB_BACKDROP_SIZE) ||
     (backdropPath
       ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${backdropPath}`
       : FALLBACK_POSTER);
