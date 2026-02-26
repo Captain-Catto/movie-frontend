@@ -27,6 +27,19 @@ interface HeroSectionProps {
   isLoading?: boolean;
 }
 
+const HERO_TMDB_BACKDROP_SIZE = "w1280";
+
+const toHeroBackdrop = (url: string): string => {
+  if (!url.includes("image.tmdb.org/t/p/")) {
+    return url;
+  }
+
+  return url.replace(
+    /\/t\/p\/(?:w\d+|original)\//,
+    `/t/p/${HERO_TMDB_BACKDROP_SIZE}/`
+  );
+};
+
 const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const { language } = useLanguage();
   const labels = getHeroSectionUiMessages(language);
@@ -66,6 +79,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
         {movies.map((movie, index) => {
           const backgroundImage =
             movie.backgroundImage || movie.poster || FALLBACK_POSTER;
+          const heroBackgroundImage = toHeroBackdrop(backgroundImage);
           const posterImage =
             movie.posterImage || movie.poster || backgroundImage || FALLBACK_POSTER;
           const rawRatingCandidates: Array<number | string | null | undefined> = [
@@ -147,11 +161,11 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     <Image
                       className="fade-in visible w-full h-full object-cover"
                       title={movie.title}
-                      src={backgroundImage}
+                      src={heroBackgroundImage}
                       alt={movie.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1536px) 90vw, 1280px"
-                      quality={35}
+                      quality={55}
                       priority={index === 0}
                   />
                 </div>
@@ -348,7 +362,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     width={80}
                     height={48}
                     sizes="80px"
-                    quality={35}
+                    quality={45}
                     className="w-20 h-12 object-cover"
                   />
                 </div>

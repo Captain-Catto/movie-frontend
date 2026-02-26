@@ -9,7 +9,7 @@ const Footer = () => {
   const labels = getFooterUiMessages(language);
 
   return (
-    <footer className="mt-16 bg-gray-900 pt-16 pb-8">
+    <footer className="mt-24 bg-gray-900 pt-16 pb-8 lg:mt-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
