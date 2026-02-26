@@ -22,6 +22,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const { language } = useLanguage();
   const labels = getMovieCardUiMessages(language);
   const cardRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
   >("center");
@@ -98,7 +99,11 @@ const MovieCard = ({ movie }: MovieCardProps) => {
     <div
       ref={cardRef}
       className="sw-item group relative"
-      onMouseEnter={handleHoverPosition}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        handleHoverPosition();
+      }}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Main Card */}
       <Link href={detailHref} className="v-thumbnail block" onClick={handleCardClick}>
@@ -165,36 +170,38 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       </Link>
 
       {/* Desktop Hover Card - Large Overlay Style */}
-      <HoverPreviewCard
-        title={movie.title}
-        subtitle={movie.aliasTitle}
-        image={
-          movie.backgroundImage ||
-          movie.posterImage ||
-          posterSafe ||
-          FALLBACK_POSTER
-        }
-        watchHref={`/watch/${contentTypePrefix}-${movie.tmdbId}`}
-        detailHref={detailHref}
-        rating={movie.rating}
-        year={movie.year}
-        overview={movie.description}
-        contentType={contentTypePrefix === "tv" ? "tv" : "movie"}
-        contentId={movie.tmdbId}
-        placement={hoverPosition}
-        genreIds={movie.genreIds}
-        genreNames={movie.genres}
-        favoriteButton={{
-          id: movie.tmdbId,
-          tmdbId: movie.tmdbId,
-          title: movie.title,
-          poster_path: posterSafe,
-          vote_average: movie.rating,
-          media_type: contentTypePrefix === "tv" ? "tv" : "movie",
-          overview: movie.description,
-          genres: movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
-        }}
-      />
+      {isHovered && viewportWidth >= 1024 ? (
+        <HoverPreviewCard
+          title={movie.title}
+          subtitle={movie.aliasTitle}
+          image={
+            movie.backgroundImage ||
+            movie.posterImage ||
+            posterSafe ||
+            FALLBACK_POSTER
+          }
+          watchHref={`/watch/${contentTypePrefix}-${movie.tmdbId}`}
+          detailHref={detailHref}
+          rating={movie.rating}
+          year={movie.year}
+          overview={movie.description}
+          contentType={contentTypePrefix === "tv" ? "tv" : "movie"}
+          contentId={movie.tmdbId}
+          placement={hoverPosition}
+          genreIds={movie.genreIds}
+          genreNames={movie.genres}
+          favoriteButton={{
+            id: movie.tmdbId,
+            tmdbId: movie.tmdbId,
+            title: movie.title,
+            poster_path: posterSafe,
+            vote_average: movie.rating,
+            media_type: contentTypePrefix === "tv" ? "tv" : "movie",
+            overview: movie.description,
+            genres: movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
+          }}
+        />
+      ) : null}
 
       {/* Movie Info - Always visible */}
       <div className="info mt-3 space-y-1">

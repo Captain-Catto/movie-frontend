@@ -68,7 +68,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
       >
-        {movies.map((movie) => {
+        {movies.map((movie, index) => {
           const backgroundImage =
             movie.backgroundImage || movie.poster || FALLBACK_POSTER;
           const posterImage =
@@ -145,10 +145,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                   }
                 />
                 {/* Background Fade */}
-                <div
-                  className="background-fade absolute inset-0"
-                  style={{ backgroundImage: `url("${backgroundImage}")` }}
-                />
+                <div className="background-fade absolute inset-0" />
                 {/* Cover Fade */}
                 <div className="cover-fade absolute inset-0">
                   <div className="cover-image relative w-full h-full">
@@ -159,7 +156,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                       alt={movie.title}
                       fill
                       sizes="100vw"
-                      priority
+                      quality={60}
+                      priority={index === 0}
                   />
                 </div>
               </div>
