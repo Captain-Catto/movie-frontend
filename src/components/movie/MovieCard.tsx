@@ -205,15 +205,11 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
       {/* Movie Info - Always visible */}
       <div className="info mt-3 space-y-1">
-        <p className="item-title text-white">
-          <Link
-            href={detailHref}
-            title={movie.title}
-            className="block min-h-12 min-w-12 rounded px-2 py-2 text-center text-sm font-semibold leading-5 transition-colors hover:text-red-500 line-clamp-3"
-            onClick={handleCardClick}
-          >
-            {movie.title}
-          </Link>
+        <p
+          className="item-title block min-h-12 min-w-12 px-2 py-2 text-center text-sm font-semibold leading-5 text-white line-clamp-3"
+          title={movie.title}
+        >
+          {movie.title}
         </p>
       </div>
     </div>

@@ -9,7 +9,7 @@ const Footer = () => {
   const labels = getFooterUiMessages(language);
 
   return (
-    <footer className="bg-gray-900 pt-16 pb-8">
+    <footer className="mt-16 bg-gray-900 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
@@ -27,10 +27,12 @@ const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <Link
-                href="#"
+                href="https://facebook.com"
                 className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Facebook"
                 title="Facebook"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span className="sr-only">Facebook</span>
                 <svg
@@ -49,10 +51,12 @@ const Footer = () => {
                 </svg>
               </Link>
               <Link
-                href="#"
+                href="https://x.com"
                 className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Twitter"
                 title="Twitter"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span className="sr-only">Twitter</span>
                 <svg
@@ -71,10 +75,12 @@ const Footer = () => {
                 </svg>
               </Link>
               <Link
-                href="#"
+                href="https://instagram.com"
                 className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Instagram"
                 title="Instagram"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span className="sr-only">Instagram</span>
                 <svg
@@ -95,10 +101,12 @@ const Footer = () => {
                 </svg>
               </Link>
               <Link
-                href="#"
+                href="https://youtube.com"
                 className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="YouTube"
                 title="YouTube"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <span className="sr-only">YouTube</span>
                 <svg
