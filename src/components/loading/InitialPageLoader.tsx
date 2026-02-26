@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 
+const ENABLE_INITIAL_PAGE_LOADER =
+  process.env.NEXT_PUBLIC_ENABLE_INITIAL_LOADER === "true";
+
 /**
  * Full-screen loader shown only on the first page load of the session.
  */
@@ -18,6 +21,8 @@ export function InitialPageLoader() {
   const [shouldRender, setShouldRender] = useState(false);
 
   useEffect(() => {
+    if (!ENABLE_INITIAL_PAGE_LOADER) return;
+
     // Don't run until hydrated (avoids SSR issues with sessionStorage)
     if (!isHydrated) return;
 
@@ -53,6 +58,10 @@ export function InitialPageLoader() {
       }
     };
   }, [isHydrated, isHome]);
+
+  if (!ENABLE_INITIAL_PAGE_LOADER) {
+    return null;
+  }
 
   if (!isHome) {
     return null;

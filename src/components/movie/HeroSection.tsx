@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Autoplay, EffectFade } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import HeroSkeleton from "@/components/ui/HeroSkeleton";
@@ -20,7 +20,6 @@ import { getHeroSectionUiMessages } from "@/lib/ui-messages";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import "swiper/css/effect-fade";
 import { Info } from "lucide-react";
 
 interface HeroSectionProps {
@@ -48,7 +47,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   return (
     <div className="relative min-h-screen">
       <Swiper
-        modules={[Pagination, Autoplay, EffectFade]}
+        modules={[Pagination, Autoplay]}
         spaceBetween={0}
         slidesPerView={1}
         pagination={{
@@ -59,11 +58,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
           delay: 5000,
           disableOnInteraction: false,
         }}
-        effect="fade"
-        fadeEffect={{
-          crossFade: true,
-        }}
-        loop={movies.length > 1}
+        loop={false}
         className="h-screen"
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}

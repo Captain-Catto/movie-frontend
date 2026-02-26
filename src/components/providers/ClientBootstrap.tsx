@@ -3,6 +3,9 @@
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
+const ENABLE_INITIAL_PAGE_LOADER =
+  process.env.NEXT_PUBLIC_ENABLE_INITIAL_LOADER === "true";
+
 const TopLineLoader = dynamic(
   () =>
     import("@/components/loading/TopLineLoader").then(
@@ -46,7 +49,7 @@ export function ClientBootstrap() {
       <Suspense fallback={null}>
         <TopLineLoader />
       </Suspense>
-      <InitialPageLoader />
+      {ENABLE_INITIAL_PAGE_LOADER ? <InitialPageLoader /> : null}
       <AuthLoader />
       <FavoritesLoader />
       <ToastContainer />

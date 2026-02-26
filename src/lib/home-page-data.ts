@@ -6,6 +6,7 @@ import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
 import type { HomePageData } from "@/lib/page-data.types";
 
 const HOME_SECTION_LIMIT = 10;
+const HOME_HERO_LIMIT = 6;
 const HOME_TV_SECTION_LIMIT = 6;
 
 const toMovieCards = (items: unknown): MovieCardData[] => {
@@ -45,7 +46,7 @@ export async function getHomePageData(
     popularTVRes,
     topRatedTVRes,
   ] = await Promise.all([
-    apiService.getTrending({ page: 1, limit: HOME_SECTION_LIMIT, language }),
+    apiService.getTrending({ page: 1, limit: HOME_HERO_LIMIT, language }),
     apiService.getNowPlayingMovies({
       page: 1,
       limit: HOME_SECTION_LIMIT,
