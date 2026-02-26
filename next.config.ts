@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
     // if usage limits or remote fetch timeouts become a deployment blocker.
     unoptimized: process.env.NEXT_IMAGE_UNOPTIMIZED === "true",
     formats: ["image/avif", "image/webp"],
+    // Add a 192px candidate so poster cards don't overfetch 256px assets.
+    imageSizes: [16, 32, 48, 64, 96, 128, 192, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 7, // 7 days
     remotePatterns: remoteImageHosts.map((hostname) => ({
       protocol: "https",

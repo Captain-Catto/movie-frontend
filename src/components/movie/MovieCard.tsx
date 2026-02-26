@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
-import { useWindowWidth } from "@/hooks/useWindowWidth";
 import type { MovieCardData } from "@/types/content.types";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -21,12 +20,10 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const router = useRouter();
   const { language } = useLanguage();
   const labels = getMovieCardUiMessages(language);
-  const cardRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [hoverPosition, setHoverPosition] = useState<
     "center" | "left" | "right"
   >("center");
-  const { width: viewportWidth } = useWindowWidth();
 
   // Detect content type from href to create proper fallback
   const isTVSeries = movie.href?.includes("/tv/");
@@ -39,17 +36,15 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       : undefined) ||
     FALLBACK_POSTER;
 
-  const handleHoverPosition = () => {
-    if (!cardRef.current || viewportWidth === 0) return;
+  const handleHoverPosition = (pointerX: number) => {
+    if (typeof window === "undefined") return;
 
-    const cardRect = cardRef.current.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
     const hoverCardWidth = 384; // w-96 = 384px
     const margin = 20; // Safe margin from edge
 
-    // Calculate where the center of hover card would be
-    const cardCenterX = cardRect.left + cardRect.width / 2;
-    const hoverCardLeft = cardCenterX - hoverCardWidth / 2;
-    const hoverCardRight = cardCenterX + hoverCardWidth / 2;
+    const hoverCardLeft = pointerX - hoverCardWidth / 2;
+    const hoverCardRight = pointerX + hoverCardWidth / 2;
 
     // Check if hover card would overflow
     if (hoverCardLeft < margin) {
@@ -97,11 +92,10 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
   return (
     <div
-      ref={cardRef}
       className="sw-item group relative"
-      onMouseEnter={() => {
+      onMouseEnter={(event) => {
         setIsHovered(true);
-        handleHoverPosition();
+        handleHoverPosition(event.clientX);
       }}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -147,8 +141,9 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             src={posterSafe}
             alt={labels.watchNowAlt(movie.title)}
             fill
-            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 16.67vw, 12.5vw"
             loading="lazy"
+            quality={55}
             className="object-cover transition-transform duration-300"
           />
 
@@ -170,7 +165,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       </Link>
 
       {/* Desktop Hover Card - Large Overlay Style */}
-      {isHovered && viewportWidth >= 1024 ? (
+      {isHovered ? (
         <HoverPreviewCard
           title={movie.title}
           subtitle={movie.aliasTitle}
@@ -200,6 +195,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
             overview: movie.description,
             genres: movie.genres?.map((genre) => ({ id: 0, name: genre })) || [],
           }}
+          className="hidden lg:block"
         />
       ) : null}
 

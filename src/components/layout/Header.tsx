@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import LanguageSelector from "@/components/layout/LanguageSelector";
@@ -39,6 +39,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true); // Start visible
   const [hasScrolled, setHasScrolled] = useState(false);
+  const scrollRafRef = useRef<number | null>(null);
 
   const { user, isAuthenticated, logout } = useAuth();
   const { language } = useLanguage();
@@ -54,18 +55,35 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
   // Handle scroll to update play state visibility and header styling
   useEffect(() => {
-    const handleScroll = () => {
+    const updateScrollState = () => {
       const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 0);
+      setIsScrolled((prev) => {
+        const next = scrollTop > 0;
+        return prev === next ? prev : next;
+      });
 
       if (hideOnPlay && scrollTop > 50) {
-        setHasScrolled(true);
-        setIsVisible(true);
+        setHasScrolled((prev) => (prev ? prev : true));
+        setIsVisible((prev) => (prev ? prev : true));
       }
+
+      scrollRafRef.current = null;
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (scrollRafRef.current !== null) return;
+      scrollRafRef.current = window.requestAnimationFrame(updateScrollState);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollRafRef.current !== null) {
+        window.cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = null;
+      }
+    };
   }, [hideOnPlay]);
 
   // Reset scroll state when play state changes (to allow hiding again on next play)
