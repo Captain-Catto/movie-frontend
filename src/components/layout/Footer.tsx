@@ -28,7 +28,7 @@ const Footer = () => {
             <div className="flex space-x-4">
               <Link
                 href="#"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Facebook"
                 title="Facebook"
               >
@@ -50,7 +50,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="#"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Twitter"
                 title="Twitter"
               >
@@ -72,7 +72,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="#"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Instagram"
                 title="Instagram"
               >
@@ -96,7 +96,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="#"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="YouTube"
                 title="YouTube"
               >
@@ -125,11 +125,11 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-white">
               {labels.quickLinks}
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.home}
                 </Link>
@@ -137,7 +137,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/browse?sort=latest"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.newReleases}
                 </Link>
@@ -145,7 +145,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/movies"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.movies}
                 </Link>
@@ -153,7 +153,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/tv"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.tvSeries}
                 </Link>
@@ -161,7 +161,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/trending"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.trending}
                 </Link>
@@ -174,11 +174,11 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-white">
               {labels.categories}
             </h3>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/browse?type=movie&genres=28"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.action}
                 </Link>
@@ -186,7 +186,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/browse?type=movie&genres=10749"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.romance}
                 </Link>
@@ -194,7 +194,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/browse?type=movie&genres=35"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.comedy}
                 </Link>
@@ -202,7 +202,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/browse?type=movie&genres=16"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.animation}
                 </Link>
@@ -210,7 +210,7 @@ const Footer = () => {
               <li>
                 <Link
                   href="/browse?type=movie&genres=27"
-                  className="inline-flex min-h-11 items-center rounded-md px-2 text-gray-400 transition-colors hover:text-red-500"
+                  className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-gray-400 transition-colors hover:text-red-500"
                 >
                   {labels.horror}
                 </Link>
@@ -269,22 +269,22 @@ const Footer = () => {
             <p className="text-gray-400 text-sm">
               {labels.copyright}
             </p>
-            <div className="flex space-x-6">
+            <div className="flex space-x-8">
               <Link
                 href="/terms"
-                className="inline-flex min-h-11 items-center rounded-md px-2 text-sm text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-sm text-gray-400 transition-colors hover:text-red-500"
               >
                 {labels.terms}
               </Link>
               <Link
                 href="/privacy"
-                className="inline-flex min-h-11 items-center rounded-md px-2 text-sm text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-sm text-gray-400 transition-colors hover:text-red-500"
               >
                 {labels.privacy}
               </Link>
               <Link
                 href="/faq"
-                className="inline-flex min-h-11 items-center rounded-md px-2 text-sm text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-sm text-gray-400 transition-colors hover:text-red-500"
               >
                 {labels.faq}
               </Link>

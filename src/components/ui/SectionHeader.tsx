@@ -19,7 +19,7 @@ export default function SectionHeader({
       {showViewMore && href && (
         <Link
           href={href}
-          className="group inline-flex min-h-11 items-center gap-1 rounded-md px-2 py-2 text-gray-300 transition-colors hover:text-white"
+          className="group inline-flex min-h-12 min-w-12 items-center gap-1 rounded-md px-3 py-2 text-gray-300 transition-colors hover:text-white"
         >
           <span className="text-sm font-medium leading-none">{viewMoreLabel}</span>
           <svg

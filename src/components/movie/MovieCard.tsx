@@ -102,7 +102,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
       {/* Main Card */}
       <Link
         href={detailHref}
-        className="v-thumbnail block min-h-11 rounded-lg"
+        className="v-thumbnail block min-h-12 min-w-12 rounded-lg"
         onClick={handleCardClick}
       >
         <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 transition-all duration-300 lg:group-hover:z-20">
@@ -209,7 +209,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           <Link
             href={detailHref}
             title={movie.title}
-            className="block min-h-11 rounded px-1 py-2 text-center text-sm font-semibold leading-5 transition-colors hover:text-red-500 line-clamp-3"
+            className="block min-h-12 min-w-12 rounded px-2 py-2 text-center text-sm font-semibold leading-5 transition-colors hover:text-red-500 line-clamp-3"
             onClick={handleCardClick}
           >
             {movie.title}
