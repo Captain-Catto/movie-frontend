@@ -56,11 +56,15 @@ export default function SnowEffect({
 
     // Snowflake count based on intensity and density setting
     const baseSnowflakeCount = {
-      low: 50,
-      medium: 100,
-      high: 150,
+      low: 30,
+      medium: 60,
+      high: 90,
     }[intensity];
-    const snowflakeCount = Math.round(baseSnowflakeCount * settings.density);
+    const maxByViewport = window.innerWidth < 768 ? 55 : 85;
+    const snowflakeCount = Math.min(
+      Math.round(baseSnowflakeCount * settings.density),
+      maxByViewport
+    );
 
     // Initialize snowflakes with settings applied
     snowflakesRef.current = Array.from({ length: snowflakeCount }, () => ({

@@ -118,6 +118,8 @@ export default function RedEnvelopeEffect({
         high: 40,
       }[intensity];
     }
+    const maxEnvelopeCount = window.innerWidth < 768 ? 12 : 20;
+    targetCount = Math.min(targetCount, maxEnvelopeCount);
 
     // Function to create a new envelope
     const createEnvelope = (yStart: number = -100): RedEnvelope => ({
