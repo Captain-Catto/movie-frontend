@@ -8,8 +8,7 @@ export type Breakpoint = "mobile" | "tablet" | "desktop";
  * Track window width in a SSR-safe way and optionally derive a breakpoint label.
  */
 export function useWindowWidth(): { width: number; breakpoint: Breakpoint } {
-  const getWidth = () =>
-    typeof window === "undefined" ? 0 : window.innerWidth;
+  const getWidth = () => window.innerWidth;
 
   const computeBreakpoint = (width: number): Breakpoint => {
     if (width >= 1024) return "desktop";
@@ -17,10 +16,9 @@ export function useWindowWidth(): { width: number; breakpoint: Breakpoint } {
     return "mobile";
   };
 
-  const [width, setWidth] = useState<number>(getWidth());
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>(
-    computeBreakpoint(getWidth())
-  );
+  // Keep first render deterministic between SSR and CSR to avoid hydration mismatch.
+  const [width, setWidth] = useState<number>(0);
+  const [breakpoint, setBreakpoint] = useState<Breakpoint>("mobile");
 
   useEffect(() => {
     const handleResize = () => {

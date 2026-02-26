@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, waitFor } from "@testing-library/react";
 import { useWindowWidth } from "../useWindowWidth";
 
 describe("useWindowWidth", () => {
@@ -14,34 +14,44 @@ describe("useWindowWidth", () => {
     vi.restoreAllMocks();
   });
 
-  it("should return current window width", () => {
+  it("should return current window width", async () => {
     vi.stubGlobal("innerWidth", 1200);
     const { result } = renderHook(() => useWindowWidth());
-    expect(result.current.width).toBe(1200);
+    await waitFor(() => {
+      expect(result.current.width).toBe(1200);
+    });
   });
 
-  it("should return desktop breakpoint for width >= 1024", () => {
+  it("should return desktop breakpoint for width >= 1024", async () => {
     vi.stubGlobal("innerWidth", 1024);
     const { result } = renderHook(() => useWindowWidth());
-    expect(result.current.breakpoint).toBe("desktop");
+    await waitFor(() => {
+      expect(result.current.breakpoint).toBe("desktop");
+    });
   });
 
-  it("should return tablet breakpoint for width >= 640 and < 1024", () => {
+  it("should return tablet breakpoint for width >= 640 and < 1024", async () => {
     vi.stubGlobal("innerWidth", 800);
     const { result } = renderHook(() => useWindowWidth());
-    expect(result.current.breakpoint).toBe("tablet");
+    await waitFor(() => {
+      expect(result.current.breakpoint).toBe("tablet");
+    });
   });
 
-  it("should return mobile breakpoint for width < 640", () => {
+  it("should return mobile breakpoint for width < 640", async () => {
     vi.stubGlobal("innerWidth", 500);
     const { result } = renderHook(() => useWindowWidth());
-    expect(result.current.breakpoint).toBe("mobile");
+    await waitFor(() => {
+      expect(result.current.breakpoint).toBe("mobile");
+    });
   });
 
-  it("should update on window resize", () => {
+  it("should update on window resize", async () => {
     vi.stubGlobal("innerWidth", 1200);
     const { result } = renderHook(() => useWindowWidth());
-    expect(result.current.breakpoint).toBe("desktop");
+    await waitFor(() => {
+      expect(result.current.breakpoint).toBe("desktop");
+    });
 
     act(() => {
       vi.stubGlobal("innerWidth", 500);
