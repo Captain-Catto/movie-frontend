@@ -1,12 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authStorage, type StoredUser } from "@/lib/auth-storage";
-import { authApiService } from "@/services/auth-api";
-import {
-  openOAuthPopup,
-  waitForOAuthCallback,
-  type OAuthCallbackData,
-} from "@/lib/oauth-popup";
-import { getGoogleOAuthUrl } from "@/lib/google-oauth";
+import type { OAuthCallbackData } from "@/lib/oauth-popup";
 import { decodeJWT } from "@/utils/jwt-decode";
 
 interface AuthState {
@@ -71,6 +65,7 @@ export const loginWithEmail = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      const { authApiService } = await import("@/services/auth-api");
       const response = await authApiService.login({ email, password });
 
       if (
@@ -106,6 +101,7 @@ export const register = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      const { authApiService } = await import("@/services/auth-api");
       const response = await authApiService.register({
         name,
         email,
@@ -142,6 +138,12 @@ export const loginWithGoogle = createAsyncThunk(
   "auth/loginWithGoogle",
   async (_, { rejectWithValue }) => {
     try {
+      const [{ getGoogleOAuthUrl }, { openOAuthPopup, waitForOAuthCallback }] =
+        await Promise.all([
+          import("@/lib/google-oauth"),
+          import("@/lib/oauth-popup"),
+        ]);
+
       // Generate Google OAuth URL
       const oauthUrl = getGoogleOAuthUrl();
 
@@ -193,6 +195,7 @@ export const logoutUser = createAsyncThunk(
 
     try {
       if (refreshToken) {
+        const { authApiService } = await import("@/services/auth-api");
         await authApiService.logout(refreshToken);
       }
     } catch (error) {

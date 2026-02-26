@@ -138,6 +138,11 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                   href={movie.href}
                   className="slide-url absolute inset-0 z-10"
                   onClick={handleDetailClick}
+                  aria-label={
+                    language.startsWith("vi")
+                      ? `Xem chi tiết ${movie.title}`
+                      : `View details for ${movie.title}`
+                  }
                 />
                 {/* Background Fade */}
                 <div
@@ -174,7 +179,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     </h1>
 
                     {/* Alias Title */}
-                    <h3 className="media-alias-title">
+                    <p className="media-alias-title">
                       <Link
                         title={movie.aliasTitle || movie.title}
                         href={movie.href}
@@ -183,7 +188,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                       >
                         {movie.aliasTitle || movie.title}
                       </Link>
-                    </h3>
+                    </p>
 
                     {/* Tags */}
                     <div className="hl-tags flex flex-wrap gap-2">
@@ -246,7 +251,16 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
                     {/* Touch/Action Buttons */}
                     <div className="touch flex items-center space-x-4">
-                      <Link href={watchHref} className="button-play" onClick={handleWatchClick}>
+                      <Link
+                        href={watchHref}
+                        className="button-play"
+                        onClick={handleWatchClick}
+                        aria-label={
+                          language.startsWith("vi")
+                            ? `Xem ${movie.title}`
+                            : `Watch ${movie.title}`
+                        }
+                      >
                         <div className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors cursor-pointer">
                           <svg
                             className="w-5 h-5"
@@ -278,7 +292,16 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                           iconOnly={true}
                           className="!p-3"
                         />
-                        <Link href={movie.href} className="item" onClick={handleDetailClick}>
+                        <Link
+                          href={movie.href}
+                          className="item"
+                          onClick={handleDetailClick}
+                          aria-label={
+                            language.startsWith("vi")
+                              ? `Xem thông tin ${movie.title}`
+                              : `View information about ${movie.title}`
+                          }
+                        >
                           <Info className="w-6 h-6 text-gray-400" />
                         </Link>
                       </div>

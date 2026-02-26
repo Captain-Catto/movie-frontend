@@ -1,17 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
-import SearchModal from "@/components/search/SearchModal";
-import AuthModal from "@/components/auth/AuthModal";
-import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
-import UserMenu from "@/components/layout/UserMenu";
 import LanguageSelector from "@/components/layout/LanguageSelector";
 import { HeartIcon, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getHeaderUiMessages } from "@/lib/ui-messages";
+
+const SearchModal = dynamic(() => import("@/components/search/SearchModal"), {
+  ssr: false,
+});
+const AuthModal = dynamic(() => import("@/components/auth/AuthModal"), {
+  ssr: false,
+});
+const NotificationDropdown = dynamic(
+  () =>
+    import("@/components/notifications/NotificationDropdown").then(
+      (module) => module.NotificationDropdown
+    ),
+  { ssr: false }
+);
+const UserMenu = dynamic(() => import("@/components/layout/UserMenu"), {
+  ssr: false,
+});
 
 interface HeaderProps {
   hideOnPlay?: boolean;
@@ -331,17 +345,21 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
       )}
 
       {/* Search Modal */}
-      <SearchModal
-        isOpen={isSearchModalOpen}
-        onClose={handleSearchModalClose}
-      />
+      {isSearchModalOpen ? (
+        <SearchModal
+          isOpen={isSearchModalOpen}
+          onClose={handleSearchModalClose}
+        />
+      ) : null}
 
       {/* Auth Modal */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={handleAuthModalClose}
-        onSuccess={handleAuthSuccess}
-      />
+      {isAuthModalOpen ? (
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={handleAuthModalClose}
+          onSuccess={handleAuthSuccess}
+        />
+      ) : null}
     </>
   );
 };

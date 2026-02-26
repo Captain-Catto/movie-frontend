@@ -29,7 +29,10 @@ const Footer = () => {
               <Link
                 href="#"
                 className="text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="Facebook"
+                title="Facebook"
               >
+                <span className="sr-only">Facebook</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -48,7 +51,10 @@ const Footer = () => {
               <Link
                 href="#"
                 className="text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="Twitter"
+                title="Twitter"
               >
+                <span className="sr-only">Twitter</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -67,7 +73,10 @@ const Footer = () => {
               <Link
                 href="#"
                 className="text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="Instagram"
+                title="Instagram"
               >
+                <span className="sr-only">Instagram</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -88,7 +97,10 @@ const Footer = () => {
               <Link
                 href="#"
                 className="text-gray-400 hover:text-red-500 transition-colors"
+                aria-label="YouTube"
+                title="YouTube"
               >
+                <span className="sr-only">YouTube</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"

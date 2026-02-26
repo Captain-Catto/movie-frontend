@@ -198,7 +198,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
 
       {/* Movie Info - Always visible */}
       <div className="info mt-3 space-y-1">
-        <h4 className="item-title text-white">
+        <p className="item-title text-white">
           <Link
             href={detailHref}
             title={movie.title}
@@ -207,7 +207,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
           >
             {movie.title}
           </Link>
-        </h4>
+        </p>
       </div>
     </div>
   );
