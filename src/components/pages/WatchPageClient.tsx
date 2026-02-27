@@ -44,7 +44,8 @@ interface WatchPageClientProps {
 
 const isSafeEmbedStreamUrl = (url: string): boolean => {
   try {
-    const parsed = new URL(url);
+    // Accept absolute, protocol-relative and relative URLs, but only allow http(s).
+    const parsed = new URL(url, "http://localhost");
     return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
@@ -144,7 +145,7 @@ const WatchPageClient = ({
                     key={safeActiveStreamUrl}
                     src={safeActiveStreamUrl}
                     className="w-full h-full"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-top-navigation-by-user-activation"
                     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
                     allowFullScreen
                     referrerPolicy="no-referrer"
