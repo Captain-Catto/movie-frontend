@@ -42,16 +42,6 @@ interface WatchPageClientProps {
   initialEpisode: number;
 }
 
-const isSafeEmbedStreamUrl = (url: string): boolean => {
-  try {
-    // Accept absolute, protocol-relative and relative URLs, but only allow http(s).
-    const parsed = new URL(url, "http://localhost");
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
-  } catch {
-    return false;
-  }
-};
-
 const WatchPageClient = ({
   movieId,
   initialLanguage,
@@ -123,15 +113,6 @@ const WatchPageClient = ({
     );
   }
 
-  const hasUnsafeActiveStreamUrl =
-    typeof activeStreamUrl === "string" &&
-    activeStreamUrl.length > 0 &&
-    !isSafeEmbedStreamUrl(activeStreamUrl);
-  const safeActiveStreamUrl = hasUnsafeActiveStreamUrl ? null : activeStreamUrl;
-  const unsafeStreamMessage = language.startsWith("vi")
-    ? "Nguồn phát bị chặn vì URL không an toàn."
-    : "Stream source was blocked due to an unsafe URL.";
-
   return (
     <Layout hideHeaderOnPlay={true} isPlaying={isPlaying}>
       <div className="min-h-screen bg-gray-900">
@@ -139,16 +120,15 @@ const WatchPageClient = ({
         <div className="relative flex items-center justify-center bg-black">
           <div className="w-full aspect-video max-h-[100vh] min-h-[240px] sm:min-h-[320px] flex items-center justify-center">
             {isPlaying ? (
-              safeActiveStreamUrl ? (
+              activeStreamUrl ? (
                 <div className="relative w-full h-full">
                   <iframe
-                    key={safeActiveStreamUrl}
-                    src={safeActiveStreamUrl}
+                    key={activeStreamUrl}
+                    src={activeStreamUrl}
                     className="w-full h-full"
-                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-top-navigation-by-user-activation"
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
-                    referrerPolicy="no-referrer"
+                    referrerPolicy="origin"
                     onLoad={handleStreamLoadSuccess}
                     onError={handleStreamLoadError}
                   />
@@ -163,10 +143,6 @@ const WatchPageClient = ({
                 <div className="w-full h-full flex items-center justify-center bg-black px-6">
                   {streamError ? (
                     <p className="text-gray-300 text-center">{streamError}</p>
-                  ) : hasUnsafeActiveStreamUrl ? (
-                    <p className="text-gray-300 text-center">
-                      {unsafeStreamMessage}
-                    </p>
                   ) : null}
                 </div>
               )
