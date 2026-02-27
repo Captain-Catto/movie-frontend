@@ -170,8 +170,6 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                   />
                 </div>
               </div>
-              {/* Overlay with light gray on left and right edges, normal color in center */}
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-800/90 via-gray-800/30 to-gray-800/90" />{" "}
               {/* Safe Area Content */}
               <div className="safe-area relative z-20 h-full flex items-center">
                 <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
