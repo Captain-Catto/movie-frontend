@@ -42,6 +42,15 @@ interface WatchPageClientProps {
   initialEpisode: number;
 }
 
+const isSafeEmbedStreamUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
 const WatchPageClient = ({
   movieId,
   initialLanguage,
@@ -113,6 +122,15 @@ const WatchPageClient = ({
     );
   }
 
+  const hasUnsafeActiveStreamUrl =
+    typeof activeStreamUrl === "string" &&
+    activeStreamUrl.length > 0 &&
+    !isSafeEmbedStreamUrl(activeStreamUrl);
+  const safeActiveStreamUrl = hasUnsafeActiveStreamUrl ? null : activeStreamUrl;
+  const unsafeStreamMessage = language.startsWith("vi")
+    ? "Nguồn phát bị chặn vì URL không an toàn."
+    : "Stream source was blocked due to an unsafe URL.";
+
   return (
     <Layout hideHeaderOnPlay={true} isPlaying={isPlaying}>
       <div className="min-h-screen bg-gray-900">
@@ -120,15 +138,16 @@ const WatchPageClient = ({
         <div className="relative flex items-center justify-center bg-black">
           <div className="w-full aspect-video max-h-[100vh] min-h-[240px] sm:min-h-[320px] flex items-center justify-center">
             {isPlaying ? (
-              activeStreamUrl ? (
+              safeActiveStreamUrl ? (
                 <div className="relative w-full h-full">
                   <iframe
-                    key={activeStreamUrl}
-                    src={activeStreamUrl}
+                    key={safeActiveStreamUrl}
+                    src={safeActiveStreamUrl}
                     className="w-full h-full"
-                    allow="autoplay; fullscreen; picture-in-picture"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
                     allowFullScreen
-                    referrerPolicy="origin"
+                    referrerPolicy="no-referrer"
                     onLoad={handleStreamLoadSuccess}
                     onError={handleStreamLoadError}
                   />
@@ -143,6 +162,10 @@ const WatchPageClient = ({
                 <div className="w-full h-full flex items-center justify-center bg-black px-6">
                   {streamError ? (
                     <p className="text-gray-300 text-center">{streamError}</p>
+                  ) : hasUnsafeActiveStreamUrl ? (
+                    <p className="text-gray-300 text-center">
+                      {unsafeStreamMessage}
+                    </p>
                   ) : null}
                 </div>
               )
