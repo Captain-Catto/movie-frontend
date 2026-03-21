@@ -1,9 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Eye } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
+import { ContentDetailModal } from "@/components/admin/ContentDetailModal";
+import { ContentHoverPreview } from "@/components/admin/ContentHoverPreview";
 
 type TabKey = "movies" | "tv" | "trending";
 type ContentStatusFilter = "all" | "active" | "blocked";
@@ -21,6 +24,7 @@ interface ContentItem {
   voteAverage?: number;
   popularity?: number;
   mediaType?: "movie" | "tv";
+  overview?: string;
 }
 
 interface RawContentItem {
@@ -39,6 +43,7 @@ interface RawContentItem {
   popularity?: number | string | null;
   mediaType?: string | null;
   contentType?: string | null;
+  overview?: string | null;
 }
 
 const TAB_CONFIG: { key: TabKey; label: string }[] = [
@@ -92,6 +97,11 @@ export default function AdminContentPage() {
     content: ContentItem | null;
   }>({ open: false, content: null });
   const [blockReason, setBlockReason] = useState("");
+  const [detailModal, setDetailModal] = useState<{
+    open: boolean;
+    tmdbId: number;
+    contentType: "movie" | "tv";
+  }>({ open: false, tmdbId: 0, contentType: "movie" });
   const adminApi = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
 
@@ -131,6 +141,7 @@ export default function AdminContentPage() {
           ? Number(item.popularity)
           : undefined,
       mediaType: mediaType === "movie" ? "movie" : "tv",
+      overview: item.overview ?? undefined,
     }),
     []
   );
@@ -550,9 +561,18 @@ export default function AdminContentPage() {
                   contents.map((content) => (
                     <tr key={`${content.contentType}-${content.tmdbId}`}>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-white">
-                          {content.title}
-                        </div>
+                        <ContentHoverPreview
+                          title={content.title}
+                          posterUrl={content.posterUrl}
+                          posterPath={content.posterPath}
+                          voteAverage={content.voteAverage}
+                          overview={content.overview}
+                          contentType={content.contentType}
+                        >
+                          <div className="text-sm font-medium text-white cursor-pointer hover:text-red-400 transition-colors">
+                            {content.title}
+                          </div>
+                        </ContentHoverPreview>
                         {isTrendingTab && (
                           <div className="mt-1 text-xs text-gray-400">
                             Rating:{" "}
@@ -597,24 +617,42 @@ export default function AdminContentPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {content.isBlocked ? (
+                        <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => handleUnblockContent(content)}
-                            className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                            onClick={() =>
+                              setDetailModal({
+                                open: true,
+                                tmdbId: content.tmdbId,
+                                contentType:
+                                  content.contentType === "tv_series"
+                                    ? "tv"
+                                    : "movie",
+                              })
+                            }
+                            className="cursor-pointer px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded transition-colors"
+                            title="View details"
                           >
-                            {activeTab === "trending" ? "Unhide" : "Unblock"}
+                            <Eye className="w-4 h-4" />
                           </button>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setBlockReason("");
-                              setBlockModal({ open: true, content });
-                            }}
-                            className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
-                          >
-                            {activeTab === "trending" ? "Hide" : "Block"}
-                          </button>
-                        )}
+                          {content.isBlocked ? (
+                            <button
+                              onClick={() => handleUnblockContent(content)}
+                              className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
+                            >
+                              {activeTab === "trending" ? "Unhide" : "Unblock"}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setBlockReason("");
+                                setBlockModal({ open: true, content });
+                              }}
+                              className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
+                            >
+                              {activeTab === "trending" ? "Hide" : "Block"}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -640,6 +678,16 @@ export default function AdminContentPage() {
             </div>
           )}
         </div>
+
+        {/* Detail Modal */}
+        <ContentDetailModal
+          open={detailModal.open}
+          onClose={() =>
+            setDetailModal({ open: false, tmdbId: 0, contentType: "movie" })
+          }
+          tmdbId={detailModal.tmdbId}
+          contentType={detailModal.contentType}
+        />
 
         {/* Block Modal */}
         {blockModal.open && (
