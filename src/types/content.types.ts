@@ -31,12 +31,19 @@ export interface CastMember {
   profilePath?: string | null;
   title?: string;
   original_title?: string;
+  originalTitle?: string;
   media_type?: "movie" | "tv";
+  mediaType?: "movie" | "tv";
   poster_path?: string | null;
+  posterPath?: string | null;
   vote_average?: number;
+  voteAverage?: number;
   release_date?: string;
+  releaseDate?: string;
   first_air_date?: string;
+  firstAirDate?: string;
   known_for_department?: string;
+  knownForDepartment?: string;
   popularity?: number;
   job?: string;
   [key: string]: unknown;
@@ -49,13 +56,22 @@ export interface CrewMember {
   department?: string;
   profile_path?: string | null;
   profilePath?: string | null;
+  poster_path?: string | null;
+  posterPath?: string | null;
+  media_type?: "movie" | "tv";
+  mediaType?: "movie" | "tv";
+  release_date?: string;
+  releaseDate?: string;
+  first_air_date?: string;
+  firstAirDate?: string;
+  vote_average?: number;
+  voteAverage?: number;
   title?: string;
   original_title?: string;
-  media_type?: "movie" | "tv";
-  poster_path?: string | null;
-  vote_average?: number;
-  release_date?: string;
-  first_air_date?: string;
+  originalTitle?: string;
+  known_for_department?: string;
+  knownForDepartment?: string;
+  popularity?: number;
   [key: string]: unknown;
 }
 

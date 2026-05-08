@@ -49,11 +49,11 @@ function normalizePersonDetails(person: PersonDetails): PersonDetailData {
     biography: person.biography ?? "No biography available",
     birthday: person.birthday ?? null,
     deathday: person.deathday ?? null,
-    place_of_birth: person.place_of_birth ?? null,
-    profile_path: person.profile_path ?? null,
+    place_of_birth: person.placeOfBirth ?? person.place_of_birth ?? null,
+    profile_path: person.profilePath ?? person.profile_path ?? null,
     known_for_department:
-      typeof person.known_for_department === "string"
-        ? person.known_for_department
+      typeof (person.knownForDepartment ?? person.known_for_department) === "string"
+        ? (person.knownForDepartment ?? person.known_for_department)!
         : "Unknown",
     popularity: typeof person.popularity === "number" ? person.popularity : 0,
   };
@@ -88,9 +88,10 @@ export function groupCrewCreditsByContent(crewItems: CrewMember[]): CrewMember[]
 export function mapPersonCreditToMovieCardData(
   item: CastMember | CrewMember
 ): MovieCardData {
-  const posterPath = item.poster_path ?? item.profile_path ?? null;
-  const mediaType = item.media_type === "tv" ? "tv" : "movie";
-  const releaseDate = item.release_date ?? item.first_air_date ?? null;
+  const posterPath = item.posterPath ?? item.poster_path ?? item.profilePath ?? item.profile_path ?? null;
+  const rawMediaType = item.mediaType ?? item.media_type;
+  const mediaType = rawMediaType === "tv" ? "tv" : "movie";
+  const releaseDate = item.releaseDate ?? item.release_date ?? item.firstAirDate ?? item.first_air_date ?? null;
   const character =
     "character" in item && typeof item.character === "string"
       ? item.character

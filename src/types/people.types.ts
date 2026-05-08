@@ -11,12 +11,16 @@ export interface PersonDetails {
   birthday?: string;
   deathday?: string;
   place_of_birth?: string;
+  placeOfBirth?: string;
   profile_path?: string;
+  profilePath?: string;
   known_for_department?: string;
+  knownForDepartment?: string;
   popularity?: number;
   gender?: number;
   homepage?: string;
   imdb_id?: string;
+  imdbId?: string;
 }
 
 export interface PersonCredits {

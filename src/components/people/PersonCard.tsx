@@ -21,10 +21,10 @@ const PersonCard = ({ person }: PersonCardProps) => {
   const labels = getPeopleUiMessages(language);
 
   const getProfileImage = () => {
-    const imageUrl = person.profile_path
-      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${person.profile_path}`
+    const path = (person as unknown as { profilePath?: string | null }).profilePath ?? person.profile_path;
+    return path
+      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${path}`
       : FALLBACK_PROFILE;
-    return imageUrl;
   };
 
   const getKnownForText = () => {
