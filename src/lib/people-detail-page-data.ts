@@ -90,7 +90,6 @@ export function mapPersonCreditToMovieCardData(
 ): MovieCardData {
   const posterPath =
     item.posterPath ?? item.poster_path ??
-    item.backdropPath ?? item.backdrop_path ??
     item.profilePath ?? item.profile_path ?? null;
   const rawMediaType = item.mediaType ?? item.media_type;
   const mediaType = rawMediaType === "tv" ? "tv" : "movie";
