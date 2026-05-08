@@ -11,7 +11,6 @@ import type { MovieCardData } from "@/types/content.types";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMovieCardUiMessages } from "@/lib/ui-messages";
-import { API_BASE_URL } from "@/services/api";
 
 interface MovieCardProps {
   movie: MovieCardData;
@@ -42,7 +41,7 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   useEffect(() => {
     if (initialPoster !== FALLBACK_POSTER || !movie.tmdbId) return;
     const type = isTVSeries ? "tv" : "movie";
-    fetch(`${API_BASE_URL}/people/poster/${movie.tmdbId}?type=${type}`)
+    fetch(`/api/poster/${movie.tmdbId}?type=${type}`)
       .then((r) => r.json())
       .then((res) => {
         if (res.data?.posterPath) {
