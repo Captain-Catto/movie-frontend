@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
-import { FALLBACK_POSTER } from "@/constants/app.constants";
+import { FALLBACK_POSTER, TMDB_IMAGE_BASE_URL, TMDB_POSTER_SIZE } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMovieCardUiMessages } from "@/lib/ui-messages";
+import { API_BASE_URL } from "@/services/api";
 
 interface MovieCardProps {
   movie: MovieCardData;
@@ -29,12 +30,27 @@ const MovieCard = ({ movie }: MovieCardProps) => {
   const isTVSeries = movie.href?.includes("/tv/");
   const contentTypePrefix = isTVSeries ? "tv" : "movie";
   const detailHref = movie.href || `/${contentTypePrefix}/${movie.tmdbId}`;
-  const posterSafe =
+  const initialPoster =
     movie.poster ||
     ("posterUrl" in movie
       ? (movie as Record<string, string | undefined>).posterUrl
       : undefined) ||
     FALLBACK_POSTER;
+
+  const [posterSafe, setPosterSafe] = useState(initialPoster);
+
+  useEffect(() => {
+    if (initialPoster !== FALLBACK_POSTER || !movie.tmdbId) return;
+    const type = isTVSeries ? "tv" : "movie";
+    fetch(`${API_BASE_URL}/people/poster/${movie.tmdbId}?type=${type}`)
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.data?.posterPath) {
+          setPosterSafe(`${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${res.data.posterPath}`);
+        }
+      })
+      .catch(() => {});
+  }, [movie.tmdbId, initialPoster, isTVSeries]);
 
   const handleHoverPosition = (pointerX: number) => {
     if (typeof window === "undefined") return;
