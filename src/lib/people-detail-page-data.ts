@@ -88,7 +88,10 @@ export function groupCrewCreditsByContent(crewItems: CrewMember[]): CrewMember[]
 export function mapPersonCreditToMovieCardData(
   item: CastMember | CrewMember
 ): MovieCardData {
-  const posterPath = item.posterPath ?? item.poster_path ?? item.profilePath ?? item.profile_path ?? null;
+  const posterPath =
+    item.posterPath ?? item.poster_path ??
+    item.backdropPath ?? item.backdrop_path ??
+    item.profilePath ?? item.profile_path ?? null;
   const rawMediaType = item.mediaType ?? item.media_type;
   const mediaType = rawMediaType === "tv" ? "tv" : "movie";
   const releaseDate = item.releaseDate ?? item.release_date ?? item.firstAirDate ?? item.first_air_date ?? null;
