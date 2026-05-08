@@ -37,8 +37,11 @@ async function lookupContentByTmdbId(
 ): Promise<ContentLookupResult> {
   const lookupResult = await apiService.lookupByTmdbId(tmdbId);
 
-  if (lookupResult.success && lookupResult.data?.internalId) {
-    return apiService.getContentById(lookupResult.data.internalId, language);
+  if (lookupResult.success && lookupResult.data?.contentType === "tv") {
+    return apiService.getTVByTmdbId(tmdbId, language);
+  }
+  if (lookupResult.success && lookupResult.data?.contentType === "movie") {
+    return apiService.getMovieByTmdbId(tmdbId, language);
   }
 
   return apiService.getContentById(tmdbId, language);
@@ -264,12 +267,7 @@ export async function getTVDetailPageDataByTmdbId(
       : [];
 
   try {
-    const lookupResult = await apiService.lookupByTmdbId(tmdbId);
-    const internalId =
-      lookupResult.success && lookupResult.data?.internalId
-        ? lookupResult.data.internalId
-        : tmdbId;
-    const response = await apiService.getTVSeriesById(internalId, language);
+    const response = await apiService.getTVSeriesById(tmdbId, language);
     if (!response.success || !response.data) {
       return {
         tvData: null,
