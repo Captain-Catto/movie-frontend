@@ -332,8 +332,8 @@ const TVDetailPageClient = ({
                           <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-700 relative">
                             <Image
                               src={
-                                actor.profile_path
-                                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path}`
+                                (actor.profile_path || actor.profilePath)
+                                  ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path || actor.profilePath}`
                                   : FALLBACK_POSTER
                               }
                               alt={actor.name}

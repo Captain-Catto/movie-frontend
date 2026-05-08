@@ -453,11 +453,11 @@ const WatchPageClient = ({
                       <div key={actor.id} className="text-center">
                         <Link href={`/people/${actor.id}`} className="block mb-2">
                           <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-700 mx-auto">
-                            {actor.profile_path ? (
+                            {(actor.profile_path || actor.profilePath) ? (
                               <Image
                                 src={
-                                  actor.profile_path
-                                    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path}`
+                                  (actor.profile_path || actor.profilePath)
+                                    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path || actor.profilePath}`
                                     : FALLBACK_POSTER
                                 }
                                 alt={actor.name}

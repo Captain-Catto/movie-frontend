@@ -28,6 +28,7 @@ export interface CastMember {
   name: string;
   character?: string;
   profile_path?: string | null;
+  profilePath?: string | null;
   title?: string;
   original_title?: string;
   media_type?: "movie" | "tv";
@@ -47,6 +48,7 @@ export interface CrewMember {
   job?: string;
   department?: string;
   profile_path?: string | null;
+  profilePath?: string | null;
   title?: string;
   original_title?: string;
   media_type?: "movie" | "tv";

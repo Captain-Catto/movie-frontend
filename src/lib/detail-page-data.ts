@@ -153,11 +153,11 @@ function mergeMovieCredits(detail: MovieDetail, credits: Credits): MovieDetail {
     director,
     country: credits.production_countries?.[0]?.name || "Unknown",
     cast:
-      credits.cast?.slice(0, 10)?.map((actor: CastMember) => ({
+      credits.cast?.slice(0, 10)?.map((actor: CastMember & { profilePath?: string | null }) => ({
         id: actor.id,
         name: actor.name,
         character: actor.character,
-        profile_path: actor.profile_path,
+        profile_path: actor.profilePath ?? actor.profile_path,
       })) || [],
     runtime: credits.runtime
       ? formatWatchDuration(Number(credits.runtime), "movie")
