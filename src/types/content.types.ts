@@ -36,6 +36,8 @@ export interface CastMember {
   mediaType?: "movie" | "tv";
   poster_path?: string | null;
   posterPath?: string | null;
+  backdrop_path?: string | null;
+  backdropPath?: string | null;
   vote_average?: number;
   voteAverage?: number;
   release_date?: string;
@@ -46,6 +48,7 @@ export interface CastMember {
   knownForDepartment?: string;
   popularity?: number;
   job?: string;
+  overview?: string;
   [key: string]: unknown;
 }
 
@@ -58,6 +61,8 @@ export interface CrewMember {
   profilePath?: string | null;
   poster_path?: string | null;
   posterPath?: string | null;
+  backdrop_path?: string | null;
+  backdropPath?: string | null;
   media_type?: "movie" | "tv";
   mediaType?: "movie" | "tv";
   release_date?: string;
@@ -72,6 +77,7 @@ export interface CrewMember {
   known_for_department?: string;
   knownForDepartment?: string;
   popularity?: number;
+  overview?: string;
   [key: string]: unknown;
 }
 

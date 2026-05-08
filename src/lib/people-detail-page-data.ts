@@ -3,6 +3,7 @@ import {
   FALLBACK_PROFILE,
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
+  TMDB_BACKDROP_SIZE,
 } from "@/constants/app.constants";
 import { apiService } from "@/services/api";
 import type {
@@ -91,6 +92,7 @@ export function mapPersonCreditToMovieCardData(
   const posterPath =
     item.posterPath ?? item.poster_path ??
     item.profilePath ?? item.profile_path ?? null;
+  const backdropPath = item.backdropPath ?? item.backdrop_path ?? null;
   const rawMediaType = item.mediaType ?? item.media_type;
   const mediaType = rawMediaType === "tv" ? "tv" : "movie";
   const releaseDate = item.releaseDate ?? item.release_date ?? item.firstAirDate ?? item.first_air_date ?? null;
@@ -113,6 +115,10 @@ export function mapPersonCreditToMovieCardData(
     href: mediaType === "tv" ? `/tv/${item.id}` : `/movie/${item.id}`,
     year: Number.isFinite(releaseYear) ? releaseYear : undefined,
     rating: typeof item.vote_average === "number" ? item.vote_average : undefined,
+    description: item.overview || undefined,
+    backgroundImage: backdropPath
+      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${backdropPath}`
+      : undefined,
   };
 }
 
