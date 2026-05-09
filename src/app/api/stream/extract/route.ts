@@ -38,22 +38,21 @@ function findM3u8(html: string): string | null {
   return null;
 }
 
-// Decode vidsrc data-hash → split at first ':' → [mediaHash, proToken]
-// The proToken is the prorcp path used by cloudnestra
-function decodeVidsrcHash(hash: string): { mediaHash: string; proToken: string } | null {
-  try {
-    const decoded = Buffer.from(hash, "base64").toString("utf-8");
-    console.log(`${TAG} decoded hash (first 120): ${decoded.slice(0, 120)}`);
-    const colonIdx = decoded.indexOf(":");
-    if (colonIdx === -1) return null;
-    const mediaHash = decoded.slice(0, colonIdx);
-    const proToken = decoded.slice(colonIdx + 1);
-    console.log(`${TAG} mediaHash: ${mediaHash}`);
-    console.log(`${TAG} proToken (first 80): ${proToken.slice(0, 80)}`);
-    return { mediaHash, proToken };
-  } catch {
-    return null;
+// Extract /prorcp/{token} path from rcp page inline script
+function extractProrcpToken(html: string): string | null {
+  const patterns = [
+    /src:\s*['"]\/prorcp\/([^'"]+)['"]/,
+    /['"]\/prorcp\/([^'"]{10,})['"]/,
+    /prorcp\/([A-Za-z0-9+/=_\-]{10,})/,
+  ];
+  for (const p of patterns) {
+    const m = html.match(p);
+    if (m?.[1]) {
+      console.log(`${TAG} prorcp token from rcp: ${m[1].slice(0, 60)}...`);
+      return m[1];
+    }
   }
+  return null;
 }
 
 function buildProxy(m3u8Url: string): string {
@@ -63,7 +62,7 @@ function buildProxy(m3u8Url: string): string {
 
 async function tryProrcp(proToken: string, referer: string): Promise<string | null> {
   const url = `https://cloudnestra.com/prorcp/${proToken}`;
-  console.log(`${TAG} trying prorcp: ${url.slice(0, 100)}...`);
+  console.log(`${TAG} fetching prorcp: ${url.slice(0, 100)}`);
   const { text, status } = await fetchText(url, referer);
   if (status !== 200) { console.log(`${TAG} prorcp → ${status}`); return null; }
   console.log(`${TAG} prorcp HTML size: ${text.length}`);
@@ -71,10 +70,10 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
   const m3u8 = findM3u8(text);
   if (m3u8) return m3u8;
 
-  // Log full prorcp HTML for inspection
-  console.log(`${TAG} FULL prorcp HTML:\n${text}`);
+  console.log(`${TAG} No m3u8 in prorcp HTML, checking scripts...`);
+  console.log(`${TAG} prorcp HTML (first 2000):\n${text.slice(0, 2000)}`);
 
-  // Also check external scripts loaded by prorcp
+  // Check external scripts
   const scriptSrcs = [...text.matchAll(/src=["']([^"']+)["']/gi)]
     .map((m) => m[1])
     .filter((s) => !s.includes("jquery") && !s.includes("cloudflare") && !s.includes("font-awesome"));
@@ -86,23 +85,37 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
     if (s === 200) {
       const m3u8b = findM3u8(js);
       if (m3u8b) return m3u8b;
-      // Log interesting parts
-      const urls = [...js.matchAll(/(https?:\/\/[^"'`\s]{10,})/g)].map((m) => m[1]);
-      if (urls.length > 0) {
-        console.log(`${TAG} URLs in ${src}:`, urls.slice(0, 10));
-      }
+      const urls = [...js.matchAll(/(https?:\/\/[^"'`\s]{20,})/g)].map((m) => m[1]);
+      if (urls.length > 0) console.log(`${TAG} URLs in ${src}:`, urls.slice(0, 10));
     }
   }
 
   return null;
 }
 
-async function tryRcpWithFullLog(hash: string, embedUrl: string): Promise<string | null> {
-  const url = `https://cloudnestra.com/rcp/${hash}`;
-  const { text, status } = await fetchText(url, embedUrl);
-  if (status !== 200) return null;
-  console.log(`${TAG} rcp HTML (FULL ${text.length} chars):\n${text}`);
-  return findM3u8(text);
+async function fetchRcpAndExtract(hash: string, embedUrl: string): Promise<string | null> {
+  const rcpUrl = `https://cloudnestra.com/rcp/${hash}`;
+  console.log(`${TAG} fetching rcp: ${rcpUrl}`);
+  const { text, status } = await fetchText(rcpUrl, embedUrl);
+  if (status !== 200) { console.log(`${TAG} rcp → ${status}`); return null; }
+  console.log(`${TAG} rcp HTML size: ${text.length}`);
+
+  // First try: find m3u8 directly in rcp page
+  const directM3u8 = findM3u8(text);
+  if (directM3u8) {
+    console.log(`${TAG} m3u8 found directly in rcp page`);
+    return directM3u8;
+  }
+
+  // Extract prorcp token from inline script
+  const proToken = extractProrcpToken(text);
+  if (!proToken) {
+    console.log(`${TAG} No prorcp token in rcp page. HTML snippet:\n${text.slice(0, 3000)}`);
+    return null;
+  }
+
+  // Fetch prorcp page with the rcp URL as referer
+  return tryProrcp(proToken, rcpUrl);
 }
 
 export async function GET(request: NextRequest) {
@@ -138,29 +151,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "no data-hash found" }, { status: 404 });
     }
 
-    // 3. For each hash: decode → try prorcp directly (skip rcp page)
+    // 3. For each hash: fetch rcp page → extract prorcp token → fetch prorcp → find m3u8
     for (const hash of hashes) {
       console.log(`\n${TAG} --- hash: ${hash.slice(0, 40)}...`);
-      const decoded = decodeVidsrcHash(hash);
-
-      if (decoded?.proToken) {
-        const m3u8 = await tryProrcp(decoded.proToken, embedUrl);
-        if (m3u8) {
-          const proxy = buildProxy(m3u8);
-          console.log(`${TAG} SUCCESS → ${m3u8}`);
-          console.log("=".repeat(60) + "\n");
-          return NextResponse.json({ m3u8: proxy, raw: m3u8 });
-        }
-      }
-
-      // Fallback: fetch rcp page and log it fully (only first hash to avoid spam)
-      if (hash === hashes[0]) {
-        const m3u8 = await tryRcpWithFullLog(hash, embedUrl);
-        if (m3u8) {
-          const proxy = buildProxy(m3u8);
-          console.log(`${TAG} SUCCESS via rcp → ${m3u8}`);
-          return NextResponse.json({ m3u8: proxy, raw: m3u8 });
-        }
+      const m3u8 = await fetchRcpAndExtract(hash, embedUrl);
+      if (m3u8) {
+        const proxy = buildProxy(m3u8);
+        console.log(`${TAG} SUCCESS → ${m3u8}`);
+        console.log("=".repeat(60) + "\n");
+        return NextResponse.json({ m3u8: proxy, raw: m3u8 });
       }
     }
 
