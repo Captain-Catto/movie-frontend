@@ -129,6 +129,7 @@ const WatchPageClient = ({
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
                     referrerPolicy="origin"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-fullscreen allow-pointer-lock allow-downloads"
                     onLoad={handleStreamLoadSuccess}
                     onError={handleStreamLoadError}
                   />

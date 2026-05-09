@@ -40,6 +40,10 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [isVisible, setIsVisible] = useState(true); // Start visible
   const [hasScrolled, setHasScrolled] = useState(false);
   const scrollRafRef = useRef<number | null>(null);
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   const { user, isAuthenticated, logout } = useAuth();
   const { language } = useLanguage();
@@ -65,6 +69,9 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
       if (hideOnPlay && scrollTop > 50) {
         setHasScrolled((prev) => (prev ? prev : true));
         setIsVisible((prev) => (prev ? prev : true));
+      } else if (hideOnPlay && isPlayingRef.current && scrollTop <= 50) {
+        setHasScrolled(false);
+        setIsVisible(false);
       }
 
       scrollRafRef.current = null;
