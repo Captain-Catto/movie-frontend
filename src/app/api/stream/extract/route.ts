@@ -111,10 +111,32 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
   // 2. Search for streaming domains anywhere in the full HTML
   searchDomains(text, "prorcp HTML");
 
-  // 3. Log body content after CSS (chars 2000-8000) to see inline scripts
+  // 3. Extract /pl/PATH/master.m3u8 path and CDN hosts from test_doms
+  const plMatch = text.match(/\/pl\/([A-Za-z0-9_\-\.]{100,})\/master\.m3u8/);
+  if (plMatch) {
+    const plPath = plMatch[1];
+    console.log(`${TAG} /pl/ path found (${plPath.length} chars): ${plPath.slice(0, 60)}...`);
+
+    // Extract CDN hosts from test_doms array
+    const cdnHosts: string[] = [];
+    const testDomsM = text.match(/test_doms\s*=\s*\[([\s\S]*?)\]/);
+    if (testDomsM) {
+      for (const m of testDomsM[1].matchAll(/["'](https?:\/\/[^"']+)["']/g)) {
+        cdnHosts.push(m[1]);
+      }
+    }
+    if (cdnHosts.length === 0) cdnHosts.push("https://tmstr1.neonhorizonworkshops.com");
+    console.log(`${TAG} CDN hosts:`, cdnHosts);
+
+    const m3u8 = `${cdnHosts[0]}/pl/${plPath}/master.m3u8`;
+    console.log(`${TAG} Constructed m3u8: ${m3u8.slice(0, 120)}`);
+    return m3u8;
+  }
+
+  // 4. Log body content after CSS (chars 2000-8000) to see inline scripts
   console.log(`${TAG} prorcp HTML [2000-8000]:\n${text.slice(2000, 8000)}`);
 
-  // 4. Check external scripts
+  // 5. Check external scripts
   const allScriptSrcs = [...text.matchAll(/src=["']([^"']+)["']/gi)].map((m) => m[1]);
   const skipPatterns = ["jquery", "cloudflare", "font-awesome", "unpkg.com", "googleapis"];
   const scriptSrcs = allScriptSrcs.filter((s) => !skipPatterns.some((p) => s.includes(p)));
