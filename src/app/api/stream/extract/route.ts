@@ -74,19 +74,26 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
   console.log(`${TAG} prorcp HTML (first 2000):\n${text.slice(0, 2000)}`);
 
   // Check external scripts
-  const scriptSrcs = [...text.matchAll(/src=["']([^"']+)["']/gi)]
-    .map((m) => m[1])
-    .filter((s) => !s.includes("jquery") && !s.includes("cloudflare") && !s.includes("font-awesome"));
-  console.log(`${TAG} prorcp scripts:`, scriptSrcs);
+  const allScriptSrcs = [...text.matchAll(/src=["']([^"']+)["']/gi)].map((m) => m[1]);
+  // Prioritize unique/hash-named scripts (likely media config), then others, skip known CDN libs
+  const skipPatterns = ["jquery", "cloudflare", "font-awesome", "unpkg.com", "googleapis"];
+  const scriptSrcs = allScriptSrcs.filter((s) => !skipPatterns.some((p) => s.includes(p)));
+  const prioritized = [
+    ...scriptSrcs.filter((s) => /\/[a-f0-9]{20,}\.js|\/[a-zA-Z0-9]{8,}\/[a-f0-9]{20,}\.js/.test(s)),
+    ...scriptSrcs.filter((s) => !/\/[a-f0-9]{20,}\.js|\/[a-zA-Z0-9]{8,}\/[a-f0-9]{20,}\.js/.test(s)),
+  ];
+  console.log(`${TAG} prorcp scripts (prioritized):`, prioritized);
 
-  for (const src of scriptSrcs.slice(0, 5)) {
+  for (const src of prioritized) {
     const scriptUrl = src.startsWith("http") ? src : `https://cloudnestra.com${src}`;
     const { text: js, status: s } = await fetchText(scriptUrl, url);
     if (s === 200) {
       const m3u8b = findM3u8(js);
       if (m3u8b) return m3u8b;
       const urls = [...js.matchAll(/(https?:\/\/[^"'`\s]{20,})/g)].map((m) => m[1]);
-      if (urls.length > 0) console.log(`${TAG} URLs in ${src}:`, urls.slice(0, 10));
+      if (urls.length > 0) console.log(`${TAG} URLs in ${src}:`, urls.slice(0, 15));
+      // Log short scripts fully for inspection
+      if (js.length < 5000) console.log(`${TAG} FULL script ${src} (${js.length}b):\n${js}`);
     }
   }
 
