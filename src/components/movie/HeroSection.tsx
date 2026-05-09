@@ -199,7 +199,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                       <div className="tag-media-type">
                         <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold">
                           {movie.href.includes("/tv/")
-                            ? labels.tvSeries
+                             ? labels.tvSeries
                             : labels.movie}
                         </span>
                       </div>
