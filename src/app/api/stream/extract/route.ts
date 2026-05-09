@@ -87,14 +87,27 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
   for (const src of prioritized) {
     const scriptUrl = src.startsWith("http") ? src : `https://cloudnestra.com${src}`;
     const { text: js, status: s } = await fetchText(scriptUrl, url);
-    if (s === 200) {
-      const m3u8b = findM3u8(js);
-      if (m3u8b) return m3u8b;
-      const urls = [...js.matchAll(/(https?:\/\/[^"'`\s]{20,})/g)].map((m) => m[1]);
-      if (urls.length > 0) console.log(`${TAG} URLs in ${src}:`, urls.slice(0, 15));
-      // Log short scripts fully for inspection
-      if (js.length < 5000) console.log(`${TAG} FULL script ${src} (${js.length}b):\n${js}`);
+    if (s !== 200) continue;
+
+    const m3u8b = findM3u8(js);
+    if (m3u8b) return m3u8b;
+
+    console.log(`${TAG} script ${src}: ${js.length}b`);
+
+    // Always log priority (hash-named) scripts up to 8000 chars
+    const isPriority = /\/[a-f0-9]{20,}\.js|\/[a-zA-Z0-9]{8,}\/[a-f0-9]{20,}\.js/.test(src);
+    if (isPriority) {
+      console.log(`${TAG} PRIORITY script content (first 8000):\n${js.slice(0, 8000)}`);
+    } else if (js.length < 5000) {
+      console.log(`${TAG} FULL script ${src}:\n${js}`);
     }
+
+    // Search for playerjs file config and any interesting keys
+    const fileMatch = js.match(/["']?file["']?\s*:\s*["'`]([^"'`]{10,})["'`]/);
+    if (fileMatch) console.log(`${TAG} 'file' key in ${src}: ${fileMatch[1].slice(0, 200)}`);
+
+    const urls = [...js.matchAll(/(https?:\/\/[^"'`\s]{20,})/g)].map((m) => m[1]);
+    if (urls.length > 0) console.log(`${TAG} URLs in ${src}:`, urls.slice(0, 15));
   }
 
   return null;
