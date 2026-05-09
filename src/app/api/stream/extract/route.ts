@@ -6,7 +6,7 @@ const BASE = "https://vidsrcme.ru";
 const HEADERS = {
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.5",
 };
 
@@ -33,69 +33,47 @@ function findM3u8(html: string): string | null {
   ];
   for (const p of patterns) {
     const m = html.match(p);
-    if (m?.[1]) {
-      console.log(`${TAG} m3u8 found: ${m[1]}`);
-      return m[1];
-    }
+    if (m?.[1]) { console.log(`${TAG} m3u8: ${m[1]}`); return m[1]; }
   }
   return null;
 }
 
 function findCloudnestraUrl(text: string): string | null {
   const m = text.match(/(https?:\/\/cloudnestra\.com\/(?:pro)?rcp\/[A-Za-z0-9+/=_\-]+)/);
-  if (m?.[1]) {
-    console.log(`${TAG} cloudnestra URL: ${m[1]}`);
-    return m[1];
-  }
+  if (m?.[1]) { console.log(`${TAG} cloudnestra URL: ${m[1]}`); return m[1]; }
   return null;
 }
 
-// Dump all interesting patterns from a JS file
 function analyzeJs(label: string, js: string): void {
-  console.log(`\n${TAG} ─── analyze: ${label} (${js.length} chars) ───`);
+  console.log(`\n${TAG} ─── ${label} (${js.length} chars) ───`);
 
-  // All string literals that look like URLs or paths
-  const paths = [...js.matchAll(/["'`](\/[a-z][^"'`\s]{2,80})["'`]/gi)]
-    .map((m) => m[1])
-    .filter((v, i, a) => a.indexOf(v) === i);
+  const paths = [...js.matchAll(/["'`](\/[a-zA-Z][^"'`\s]{2,80})["'`]/g)]
+    .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
   console.log(`${TAG} path strings (${paths.length}):`);
-  paths.slice(0, 30).forEach((p) => console.log(`${TAG}   ${p}`));
+  paths.slice(0, 40).forEach((p) => console.log(`${TAG}   ${p}`));
 
-  // Full http/https URLs
   const urls = [...js.matchAll(/(https?:\/\/[^"'`\s\\]{5,120})/g)]
-    .map((m) => m[1])
-    .filter((v, i, a) => a.indexOf(v) === i);
+    .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
   console.log(`${TAG} http URLs (${urls.length}):`);
   urls.slice(0, 20).forEach((u) => console.log(`${TAG}   ${u}`));
 
-  // XMLHttpRequest open() calls
-  const xhr = [...js.matchAll(/\.open\(["'`][^"'`]*["'`]\s*,\s*["'`]([^"'`\s]+)["'`]/gi)]
-    .map((m) => m[1])
-    .filter((v, i, a) => a.indexOf(v) === i);
-  console.log(`${TAG} XHR.open() URLs (${xhr.length}):`);
-  xhr.forEach((u) => console.log(`${TAG}   ${u}`));
+  const xhr = [...js.matchAll(/\.open\([^,]+,\s*["'`]([^"'`\s]+)["'`]/gi)]
+    .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
+  console.log(`${TAG} XHR.open (${xhr.length}): ${xhr.join(", ")}`);
 
-  // fetch() calls
   const fetches = [...js.matchAll(/fetch\(["'`]([^"'`\s]+)["'`]/gi)]
-    .map((m) => m[1])
-    .filter((v, i, a) => a.indexOf(v) === i);
-  console.log(`${TAG} fetch() (${fetches.length}):`);
-  fetches.forEach((u) => console.log(`${TAG}   ${u}`));
+    .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
+  console.log(`${TAG} fetch() (${fetches.length}): ${fetches.join(", ")}`);
 
-  // cloudnestra refs
-  const cn = [...js.matchAll(/["'`]([^"'`]*cloudnestra[^"'`]*)["'`]/gi)]
-    .map((m) => m[1]);
+  const cn = [...js.matchAll(/["'`]([^"'`]*cloudnestra[^"'`]*)["'`]/gi)].map((m) => m[1]);
   console.log(`${TAG} cloudnestra refs (${cn.length}):`);
   cn.slice(0, 10).forEach((s) => console.log(`${TAG}   ${s}`));
 
-  // rcp refs
-  const rcp = [...js.matchAll(/["'`]([^"'`]*\/rcp\/[^"'`]*)["'`]/gi)]
-    .map((m) => m[1]);
-  console.log(`${TAG} /rcp/ refs (${rcp.length}):`);
-  rcp.slice(0, 10).forEach((s) => console.log(`${TAG}   ${s}`));
+  const rcp = [...js.matchAll(/["'`]([^"'`]*rcp[^"'`]{0,60})["'`]/gi)].map((m) => m[1]);
+  console.log(`${TAG} rcp refs (${rcp.length}): ${rcp.slice(0, 5).join(" | ")}`);
 
-  console.log(`${TAG} first 3000 chars:\n${js.slice(0, 3000)}`);
-  console.log(`${TAG} ─── end analyze: ${label} ───\n`);
+  console.log(`${TAG} first 4000 chars:\n${js.slice(0, 4000)}`);
+  console.log(`${TAG} ─── end ${label} ───\n`);
 }
 
 export async function GET(request: NextRequest) {
@@ -119,82 +97,82 @@ export async function GET(request: NextRequest) {
         : `${BASE}/embed/movie?tmdb=${tmdbId}&autoplay=1`;
 
     const { text: embedHtml } = await fetchText(embedUrl);
-    console.log(`${TAG} embed size: ${embedHtml.length}`);
-
     const imdbId = embedHtml.match(/data-i=["'](\d+)["']/)?.[1] ?? null;
     console.log(`${TAG} data-i = ${imdbId}`);
 
-    // 2. Find sources.js URL in embed page
-    const sourcesJsPath = embedHtml.match(/(\/[^\s"'<>]+sources[^\s"'<>]*\.js[^\s"'<>]*)/i)?.[1];
-    console.log(`${TAG} sources.js path: ${sourcesJsPath ?? "NOT FOUND"}`);
+    // 2. Extract the inline <script> content (the big webpack bundle)
+    const inlineScript = embedHtml.match(/<script[^>]*>([\s\S]{1000,}?)<\/script>/)?.[1] ?? "";
+    console.log(`${TAG} inline script size: ${inlineScript.length}`);
 
-    // 3. Fetch and analyze sources.js
+    // 3. Analyze the inline bundle to find clues
+    if (inlineScript.length > 100) {
+      analyzeJs("inline-bundle", inlineScript);
+    }
+
+    // 4. Find sources.js path INSIDE the inline bundle (not as src attribute)
+    const sourcesJsPath =
+      inlineScript.match(/["'`](\/[^"'`\s]*sources[^"'`\s]*\.js(?:\?[^"'`\s]*)?)["'`]/i)?.[1] ??
+      embedHtml.match(/(\/sources\.js\?[^\s"'<>]*)/)?.[1] ??
+      null;
+    console.log(`${TAG} sources.js path in bundle: ${sourcesJsPath ?? "NOT FOUND"}`);
+
     if (sourcesJsPath) {
-      const sourcesUrl = sourcesJsPath.startsWith("http") ? sourcesJsPath : `${BASE}${sourcesJsPath}`;
+      const sourcesUrl = `${BASE}${sourcesJsPath}`;
       const { text: sourcesJs, status } = await fetchText(sourcesUrl, embedUrl);
       if (status === 200) {
         analyzeJs("sources.js", sourcesJs);
 
-        // Try to find cloudnestra URL directly in sources.js
         const cn = findCloudnestraUrl(sourcesJs);
         if (cn) {
           const { text: cnHtml } = await fetchText(cn, embedUrl);
           const m3u8 = findM3u8(cnHtml);
-          if (m3u8) {
-            const base = m3u8.substring(0, m3u8.lastIndexOf("/") + 1);
-            const proxy = `/api/stream/proxy?url=${encodeURIComponent(m3u8)}&base=${encodeURIComponent(base)}`;
-            console.log(`${TAG} SUCCESS via sources.js → ${m3u8}`);
-            return NextResponse.json({ m3u8: proxy, raw: m3u8 });
-          }
+          if (m3u8) return successResponse(m3u8);
         }
 
-        // Try to find API endpoints from sources.js and call them
-        const paths = [...sourcesJs.matchAll(/["'`](\/[a-z][^"'`\s]{2,60})["'`]/gi)]
-          .map((m) => m[1])
-          .filter((p) => p.includes("source") || p.includes("stream") || p.includes("rcp") || p.includes("media"));
+        // Try API paths found in sources.js
+        const apiPaths = [...sourcesJs.matchAll(/["'`](\/[^"'`\s]*(?:source|stream|rcp|media)[^"'`\s]{0,60})["'`]/gi)]
+          .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
 
-        for (const path of paths.slice(0, 10)) {
-          const apiUrl = `${BASE}${path}`.replace("{id}", imdbId ?? "")
-            .replace("{s}", season).replace("{e}", episode);
-          console.log(`${TAG} trying API path: ${apiUrl}`);
+        for (const path of apiPaths.slice(0, 15)) {
+          const apiUrl = `${BASE}${path}`
+            .replace(/\{?id\}?/i, imdbId ?? "")
+            .replace(/\{?s\}?/i, season)
+            .replace(/\{?e\}?/i, episode);
           try {
-            const { text: apiText, status: apiStatus } = await fetchText(apiUrl, embedUrl);
-            if (apiStatus === 200) {
-              console.log(`${TAG} API response (${apiText.length} chars):\n${apiText.slice(0, 600)}`);
+            const { text: apiText, status: s } = await fetchText(apiUrl, embedUrl);
+            if (s === 200) {
+              console.log(`${TAG} API hit ${apiUrl}:\n${apiText.slice(0, 400)}`);
               const cn2 = findCloudnestraUrl(apiText);
               if (cn2) {
                 const { text: cnHtml2 } = await fetchText(cn2, embedUrl);
                 const m3u8 = findM3u8(cnHtml2);
-                if (m3u8) {
-                  const base = m3u8.substring(0, m3u8.lastIndexOf("/") + 1);
-                  const proxy = `/api/stream/proxy?url=${encodeURIComponent(m3u8)}&base=${encodeURIComponent(base)}`;
-                  console.log(`${TAG} SUCCESS via API → ${m3u8}`);
-                  return NextResponse.json({ m3u8: proxy, raw: m3u8 });
-                }
+                if (m3u8) return successResponse(m3u8);
               }
             }
-          } catch {
-            // continue
-          }
+          } catch { /* continue */ }
         }
       }
     }
 
-    // 4. Fetch and analyze cloudnestra's asdf.js if referenced
-    const asdfMatch = embedHtml.match(/((?:https?:)?\/\/cloudnestra\.com\/[^\s"'<>]+\.js[^\s"'<>]*)/i);
-    if (asdfMatch) {
-      const asdfUrl = asdfMatch[1].startsWith("//") ? `https:${asdfMatch[1]}` : asdfMatch[1];
-      console.log(`${TAG} cloudnestra JS file: ${asdfUrl}`);
-      const { text: asdfJs, status } = await fetchText(asdfUrl, embedUrl);
-      if (status === 200) analyzeJs("cloudnestra-asdf.js", asdfJs);
-    }
+    // 5. Also fetch all external <script src="..."> files from vidsrcme.ru
+    const externalScripts = [...embedHtml.matchAll(/src=["']((?:https?:\/\/vidsrcme\.ru)?\/[^"']+\.js[^"']*)["']/gi)]
+      .map((m) => m[1])
+      .filter((u) => !u.includes("cdnjs") && !u.includes("jquery"));
 
-    // 5. Analyze the main embed JS bundle too (last resort)
-    const mainJsPath = embedHtml.match(/src=["'](\/[^"']+\.js[^"']*)["']/i)?.[1];
-    if (mainJsPath && mainJsPath !== sourcesJsPath) {
-      const mainJsUrl = `${BASE}${mainJsPath}`;
-      const { text: mainJs, status } = await fetchText(mainJsUrl, embedUrl);
-      if (status === 200) analyzeJs("main-bundle.js", mainJs);
+    console.log(`${TAG} external scripts (${externalScripts.length}):`, externalScripts);
+
+    for (const scriptPath of externalScripts.slice(0, 5)) {
+      const scriptUrl = scriptPath.startsWith("http") ? scriptPath : `${BASE}${scriptPath}`;
+      const { text: scriptJs, status } = await fetchText(scriptUrl, embedUrl);
+      if (status === 200) {
+        analyzeJs(`script:${scriptPath}`, scriptJs);
+        const cn = findCloudnestraUrl(scriptJs);
+        if (cn) {
+          const { text: cnHtml } = await fetchText(cn, embedUrl);
+          const m3u8 = findM3u8(cnHtml);
+          if (m3u8) return successResponse(m3u8);
+        }
+      }
     }
 
     console.log(`${TAG} FAILED: all methods exhausted`);
@@ -204,4 +182,12 @@ export async function GET(request: NextRequest) {
     console.log(`${TAG} ERROR: ${msg}`);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
+}
+
+function successResponse(m3u8Url: string) {
+  const base = m3u8Url.substring(0, m3u8Url.lastIndexOf("/") + 1);
+  const proxy = `/api/stream/proxy?url=${encodeURIComponent(m3u8Url)}&base=${encodeURIComponent(base)}`;
+  console.log(`${TAG} SUCCESS → ${m3u8Url}`);
+  console.log("=".repeat(60) + "\n");
+  return NextResponse.json({ m3u8: proxy, raw: m3u8Url });
 }
