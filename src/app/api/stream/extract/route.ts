@@ -26,27 +26,127 @@ async function fetchText(url: string, referer?: string): Promise<string> {
   return text;
 }
 
+async function fetchJson(url: string, referer?: string): Promise<unknown> {
+  console.log(`${TAG} fetch JSON → ${url}`);
+  const res = await fetch(url, {
+    headers: {
+      ...BROWSER_HEADERS,
+      Accept: "application/json, */*",
+      ...(referer ? { Referer: referer, Origin: new URL(referer).origin } : {}),
+    },
+    signal: AbortSignal.timeout(10000),
+  });
+  console.log(`${TAG} response ${res.status} ← ${url}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// Extract data-i (IMDB ID), data-s, data-e from vidsrc body tag
+function extractBodyDataAttrs(html: string): { imdbId: string | null; season: string; episode: string } {
+  const imdbMatch = html.match(/data-i=["'](\d+)["']/);
+  const seasonMatch = html.match(/data-s=["'](\d+)["']/);
+  const episodeMatch = html.match(/data-e=["'](\d+)["']/);
+  return {
+    imdbId: imdbMatch?.[1] ?? null,
+    season: seasonMatch?.[1] ?? "1",
+    episode: episodeMatch?.[1] ?? "1",
+  };
+}
+
+// Search JS bundle for API-like URL patterns
+function findApiPatternsInJs(html: string): void {
+  // Find all string literals containing /api/
+  const apiUrls = [...html.matchAll(/["'`]([^"'`]*\/api\/[^"'`]{3,100})["'`]/g)]
+    .map((m) => m[1])
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .slice(0, 30);
+
+  console.log(`${TAG} /api/ patterns in JS (${apiUrls.length}):`);
+  apiUrls.forEach((u) => console.log(`${TAG}   ${u}`));
+
+  // Find strings containing "source"
+  const sourceStrings = [...html.matchAll(/["'`]([^"'`]*source[^"'`]{0,60})["'`]/gi)]
+    .map((m) => m[1])
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .slice(0, 20);
+
+  console.log(`${TAG} "source" strings in JS (${sourceStrings.length}):`);
+  sourceStrings.forEach((s) => console.log(`${TAG}   ${s}`));
+
+  // Find strings containing "rcp" or "cloudnestra"
+  const rcpStrings = [...html.matchAll(/["'`]([^"'`]*(rcp|cloudnestra)[^"'`]{0,80})["'`]/gi)]
+    .map((m) => m[1])
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .slice(0, 10);
+
+  console.log(`${TAG} "rcp/cloudnestra" strings in JS (${rcpStrings.length}):`);
+  rcpStrings.forEach((s) => console.log(`${TAG}   ${s}`));
+
+  // Find fetch() call patterns
+  const fetchPatterns = [...html.matchAll(/fetch\(["'`]([^"'`]+)["'`]/g)]
+    .map((m) => m[1])
+    .filter((v, i, a) => a.indexOf(v) === i)
+    .slice(0, 20);
+
+  console.log(`${TAG} fetch() patterns (${fetchPatterns.length}):`);
+  fetchPatterns.forEach((p) => console.log(`${TAG}   ${p}`));
+}
+
+// Try known vidsrc API endpoint patterns to get the source/embed URL
+async function tryVidsrcApi(
+  base: string,
+  imdbId: string,
+  season: string,
+  episode: string
+): Promise<string | null> {
+  const tt = `tt${imdbId}`;
+  const candidates = [
+    // Common vidsrc.me API patterns
+    `${base}/api/v2/media/${tt}?s=${season}&e=${episode}`,
+    `${base}/api/v2/media/${tt}/sources`,
+    `${base}/api/v2/media/${imdbId}/sources?s=${season}&e=${episode}`,
+    `${base}/api/v2/media/${tt}`,
+    `${base}/rcp/${tt}`,
+  ];
+
+  for (const url of candidates) {
+    try {
+      const data = await fetchJson(url, base);
+      const json = data as Record<string, unknown>;
+      console.log(`${TAG} API response from ${url}:`, JSON.stringify(json).slice(0, 300));
+
+      // Look for iframe/embed/source URL in response
+      const text = JSON.stringify(json);
+      const cloudnestraMatch = text.match(
+        /(https?:\\?\/\\?\/cloudnestra\.com\\?\/(?:pro)?rcp\\?\/[A-Za-z0-9+/=_\-]+)/
+      );
+      if (cloudnestraMatch) {
+        const url = cloudnestraMatch[1].replace(/\\\/\g/, "/");
+        console.log(`${TAG} cloudnestra URL from API: ${url}`);
+        return url;
+      }
+    } catch (e) {
+      console.log(`${TAG} API ${url} failed: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+  return null;
+}
+
 function extractCloudnestraUrl(html: string): string | null {
-  // iframe src pattern
-  const iframeMatch = html.match(
-    /src=["'](https?:\/\/cloudnestra\.com\/(?:pro)?rcp\/[A-Za-z0-9+/=_\-]+)/
-  );
-  if (iframeMatch) {
-    console.log(`${TAG} cloudnestra URL (iframe): ${iframeMatch[1]}`);
-    return iframeMatch[1];
+  const patterns = [
+    /src=["'](https?:\/\/cloudnestra\.com\/(?:pro)?rcp\/[A-Za-z0-9+/=_\-]+)/,
+    /(https?:\/\/cloudnestra\.com\/(?:pro)?rcp\/[A-Za-z0-9+/=_\-]+)/,
+  ];
+
+  for (const pat of patterns) {
+    const match = html.match(pat);
+    if (match) {
+      console.log(`${TAG} cloudnestra URL: ${match[1]}`);
+      return match[1];
+    }
   }
 
-  // JS string pattern
-  const jsMatch = html.match(
-    /(https?:\/\/cloudnestra\.com\/(?:pro)?rcp\/[A-Za-z0-9+/=_\-]+)/
-  );
-  if (jsMatch) {
-    console.log(`${TAG} cloudnestra URL (js): ${jsMatch[1]}`);
-    return jsMatch[1];
-  }
-
-  console.log(`${TAG} cloudnestra URL: NOT FOUND`);
-  console.log(`${TAG} html snippet (first 2000 chars):\n${html.slice(0, 2000)}`);
+  console.log(`${TAG} cloudnestra URL: NOT FOUND in HTML`);
   return null;
 }
 
@@ -56,7 +156,6 @@ function extractM3u8Url(html: string): string | null {
     /(https?:\/\/[^"'\s,}\]]+\.m3u8[^"'\s,}\]]*)/,
   ];
 
-  // First pass: prefer master.m3u8
   for (const pattern of patterns) {
     const match = html.match(pattern);
     if (match) {
@@ -67,8 +166,6 @@ function extractM3u8Url(html: string): string | null {
       }
     }
   }
-
-  // Second pass: accept any .m3u8
   for (const pattern of patterns) {
     const match = html.match(pattern);
     if (match) {
@@ -79,14 +176,11 @@ function extractM3u8Url(html: string): string | null {
   }
 
   console.log(`${TAG} m3u8 URL: NOT FOUND`);
-  console.log(`${TAG} html snippet (first 3000 chars):\n${html.slice(0, 3000)}`);
   return null;
 }
 
 function buildProxyM3u8Url(m3u8Url: string, baseUrl: string): string {
-  const encoded = encodeURIComponent(m3u8Url);
-  const encodedBase = encodeURIComponent(baseUrl);
-  return `/api/stream/proxy?url=${encoded}&base=${encodedBase}`;
+  return `/api/stream/proxy?url=${encodeURIComponent(m3u8Url)}&base=${encodeURIComponent(baseUrl)}`;
 }
 
 export async function GET(request: NextRequest) {
@@ -105,65 +199,73 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Step 1: Build vidsrc embed URL
+    const vidsrcBase = "https://vidsrcme.ru";
     const vidsrcUrl =
       type === "tv"
-        ? `https://vidsrcme.ru/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}&autoplay=1`
-        : `https://vidsrcme.ru/embed/movie?tmdb=${tmdbId}&autoplay=1`;
+        ? `${vidsrcBase}/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}&autoplay=1`
+        : `${vidsrcBase}/embed/movie?tmdb=${tmdbId}&autoplay=1`;
 
-    console.log(`${TAG} [1/5] vidsrc URL: ${vidsrcUrl}`);
-
-    // Step 2: Fetch vidsrc embed page
+    console.log(`${TAG} [1] fetching vidsrc embed: ${vidsrcUrl}`);
     const vidsrcHtml = await fetchText(vidsrcUrl);
 
-    // Step 3: Extract cloudnestra URL
-    console.log(`${TAG} [2/5] extracting cloudnestra URL from vidsrc HTML...`);
-    const cloudnestraUrl = extractCloudnestraUrl(vidsrcHtml);
+    // Extract data-i (IMDB ID) from body tag
+    const { imdbId } = extractBodyDataAttrs(vidsrcHtml);
+    console.log(`${TAG} data-i (IMDB ID): ${imdbId}`);
+
+    // Try to find cloudnestra URL in the HTML first
+    console.log(`${TAG} [2] searching for cloudnestra URL in HTML...`);
+    let cloudnestraUrl = extractCloudnestraUrl(vidsrcHtml);
+
+    // If not found, analyze JS patterns and try vidsrc API directly
     if (!cloudnestraUrl) {
-      console.log(`${TAG} FAILED: cloudnestra URL not found`);
+      console.log(`${TAG} [3] analyzing JS bundle for API patterns...`);
+      findApiPatternsInJs(vidsrcHtml);
+
+      if (imdbId) {
+        console.log(`${TAG} [4] trying vidsrc API endpoints with IMDB ID ${imdbId}...`);
+        cloudnestraUrl = await tryVidsrcApi(vidsrcBase, imdbId, season, episode);
+      }
+    }
+
+    if (!cloudnestraUrl) {
+      console.log(`${TAG} FAILED: could not find cloudnestra URL via any method`);
       return NextResponse.json(
-        { error: "cloudnestra URL not found in vidsrc page" },
+        { error: "cloudnestra URL not found" },
         { status: 404 }
       );
     }
 
-    // Step 4: Fetch cloudnestra player page
-    console.log(`${TAG} [3/5] fetching cloudnestra page...`);
+    // Fetch cloudnestra page and extract m3u8
+    console.log(`${TAG} [5] fetching cloudnestra: ${cloudnestraUrl}`);
     const cloudnestraHtml = await fetchText(cloudnestraUrl, vidsrcUrl);
 
-    // Step 5: Extract m3u8 URL from cloudnestra page
-    console.log(`${TAG} [4/5] extracting m3u8 from cloudnestra HTML...`);
+    console.log(`${TAG} [6] searching for m3u8 in cloudnestra HTML...`);
     let m3u8Url = extractM3u8Url(cloudnestraHtml);
 
-    // Step 5b: If not found, look for prorcp URL inside cloudnestra and try that
     if (!m3u8Url) {
-      console.log(`${TAG} m3u8 not in rcp page, checking for prorcp URL...`);
+      console.log(`${TAG} m3u8 not in rcp page, looking for prorcp link...`);
       const prorcp = extractCloudnestraUrl(cloudnestraHtml);
       if (prorcp && prorcp !== cloudnestraUrl) {
-        console.log(`${TAG} [4b/5] fetching prorcp page: ${prorcp}`);
+        console.log(`${TAG} [6b] fetching prorcp: ${prorcp}`);
         const proHtml = await fetchText(prorcp, cloudnestraUrl);
         m3u8Url = extractM3u8Url(proHtml);
       } else {
-        console.log(`${TAG} no prorcp URL found either`);
+        // Log cloudnestra HTML snippet for debugging
+        console.log(`${TAG} cloudnestra HTML snippet:\n${cloudnestraHtml.slice(0, 3000)}`);
       }
     }
 
     if (!m3u8Url) {
-      console.log(`${TAG} FAILED: m3u8 not found anywhere`);
-      return NextResponse.json(
-        { error: "m3u8 URL not found in cloudnestra page" },
-        { status: 404 }
-      );
+      console.log(`${TAG} FAILED: m3u8 not found`);
+      return NextResponse.json({ error: "m3u8 URL not found" }, { status: 404 });
     }
 
-    // Step 6: Build proxy URL
-    console.log(`${TAG} [5/5] building proxy URL...`);
     const m3u8Base = m3u8Url.substring(0, m3u8Url.lastIndexOf("/") + 1);
     const proxiedUrl = buildProxyM3u8Url(m3u8Url, m3u8Base);
 
     console.log(`${TAG} SUCCESS`);
     console.log(`${TAG}   raw m3u8 : ${m3u8Url}`);
-    console.log(`${TAG}   proxy url: ${proxiedUrl}`);
+    console.log(`${TAG}   proxy    : ${proxiedUrl}`);
     console.log("=".repeat(60) + "\n");
 
     return NextResponse.json({ m3u8: proxiedUrl, raw: m3u8Url });
