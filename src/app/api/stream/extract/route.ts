@@ -26,6 +26,8 @@ async function fetchText(url: string, referer?: string): Promise<{ text: string;
 
 function findM3u8(html: string): string | null {
   const patterns = [
+    // Cloudnestra /pl/ format (URL-safe base64 path, may contain _ - .)
+    /(https?:\/\/[a-zA-Z0-9._\-]+\/pl\/[A-Za-z0-9_\-\.]+\/master\.m3u8)/,
     /["'`](https?:\/\/[^"'`\s]+master\.m3u8[^"'`\s]*?)["'`]/,
     /["'`](https?:\/\/[^"'`\s]+\.m3u8[^"'`\s]*?)["'`]/,
     /(https?:\/\/[^"'\s,}\]]+master\.m3u8)/,
@@ -33,7 +35,8 @@ function findM3u8(html: string): string | null {
   ];
   for (const p of patterns) {
     const m = html.match(p);
-    if (m?.[1]) { console.log(`${TAG} m3u8: ${m[1]}`); return m[1]; }
+    const url = m?.[1] ?? m?.[0];
+    if (url?.startsWith("http")) { console.log(`${TAG} m3u8: ${url}`); return url; }
   }
   return null;
 }
@@ -89,7 +92,7 @@ function searchDomains(text: string, label: string): void {
   for (const d of domains) {
     const idx = text.indexOf(d);
     if (idx >= 0) {
-      console.log(`${TAG} *** '${d}' in ${label} at ${idx}: ...${text.slice(Math.max(0, idx - 40), idx + 200)}...`);
+      console.log(`${TAG} *** '${d}' in ${label} at ${idx}: ...${text.slice(Math.max(0, idx - 300), idx + 300)}...`);
     }
   }
 }
