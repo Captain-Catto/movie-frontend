@@ -79,7 +79,7 @@ export default function LinkPagination({
           {labels.previous}
         </Link>
       ) : (
-        <span className="px-3 py-2 text-sm bg-gray-800 text-gray-500 rounded-md cursor-not-allowed">
+        <span className="px-3 py-2 text-sm bg-gray-800 text-gray-300 rounded-md cursor-not-allowed">
           {labels.previous}
         </span>
       )}
@@ -138,7 +138,7 @@ export default function LinkPagination({
           {labels.next}
         </Link>
       ) : (
-        <span className="px-3 py-2 text-sm bg-gray-800 text-gray-500 rounded-md cursor-not-allowed">
+        <span className="px-3 py-2 text-sm bg-gray-800 text-gray-300 rounded-md cursor-not-allowed">
           {labels.next}
         </span>
       )}

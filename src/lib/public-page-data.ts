@@ -40,12 +40,12 @@ const mapCastMemberToPersonData = (person: CastMember): PersonData => {
   return {
     id: person.id,
     name: person.name,
-    profile_path: person.profile_path ?? null,
+    profile_path: (record.profilePath as string | null) ?? person.profile_path ?? null,
     known_for_department:
-      typeof person.known_for_department === "string"
-        ? person.known_for_department
+      typeof (record.knownForDepartment ?? person.known_for_department) === "string"
+        ? (record.knownForDepartment ?? person.known_for_department) as string
         : "Artist",
-    known_for: asKnownForItemArray(record.known_for),
+    known_for: asKnownForItemArray(record.knownFor ?? record.known_for),
     popularity: typeof person.popularity === "number" ? person.popularity : 0,
   };
 };

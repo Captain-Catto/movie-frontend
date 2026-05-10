@@ -3,6 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import LanguageSelector from "@/components/layout/LanguageSelector";
@@ -45,6 +46,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { language } = useLanguage();
   const isHydrated = useIsHydrated();
@@ -118,6 +120,9 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
   const handleAuthSuccess = () => {};
 
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+
   const navigationItems = [
     { href: "/", label: labels.home },
     { href: "/trending", label: labels.trending },
@@ -155,7 +160,11 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="text-white hover:text-red-500 transition-colors font-medium"
+                    className={`transition-colors font-medium ${
+                      isActive(item.href)
+                        ? "text-white"
+                        : "text-gray-500 hover:text-red-500"
+                    }`}
                   >
                     {item.label}
                   </Link>
@@ -357,7 +366,11 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="block w-full px-4 py-4 rounded-md transition-all duration-200 text-white hover:text-red-500 hover:bg-gray-700/50 font-medium text-right text-lg"
+                    className={`block w-full px-4 py-4 rounded-md transition-all duration-200 font-medium text-right text-lg hover:bg-gray-700/50 ${
+                      isActive(item.href)
+                        ? "text-white"
+                        : "text-gray-500 hover:text-red-500"
+                    }`}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}

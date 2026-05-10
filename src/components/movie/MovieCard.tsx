@@ -14,9 +14,10 @@ import { getMovieCardUiMessages } from "@/lib/ui-messages";
 
 interface MovieCardProps {
   movie: MovieCardData;
+  priority?: boolean;
 }
 
-const MovieCard = ({ movie }: MovieCardProps) => {
+const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
   const router = useRouter();
   const { language } = useLanguage();
   const labels = getMovieCardUiMessages(language);
@@ -146,7 +147,8 @@ const MovieCard = ({ movie }: MovieCardProps) => {
               alt={labels.watchNowAlt(movie.title)}
               fill
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 16.67vw, 12.5vw"
-              loading="lazy"
+              priority={priority}
+              loading={priority ? undefined : "lazy"}
               quality={55}
               className="object-cover transition-transform duration-300"
             />

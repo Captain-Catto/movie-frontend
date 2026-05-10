@@ -1,6 +1,6 @@
 // Centralized application constants
 export const TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p";
-export const TMDB_POSTER_SIZE = "w500";
+export const TMDB_POSTER_SIZE = "w342";
 export const TMDB_BACKDROP_SIZE = "w780";
 export const TMDB_ORIGINAL_SIZE = "original";
 

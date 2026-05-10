@@ -86,8 +86,8 @@ const MovieGrid = ({
             <MovieCardSkeleton key={index} />
           ))
         ) : (
-          displayMovies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+          displayMovies.map((movie, index) => (
+            <MovieCard key={movie.id} movie={movie} priority={index < 4} />
           ))
         )}
       </div>

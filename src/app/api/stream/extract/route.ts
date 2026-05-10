@@ -11,7 +11,6 @@ const HEADERS = {
 };
 
 async function fetchText(url: string, referer?: string): Promise<{ text: string; status: number }> {
-  console.log(`${TAG} GET ${url}`);
   const res = await fetch(url, {
     headers: {
       ...HEADERS,
@@ -19,14 +18,12 @@ async function fetchText(url: string, referer?: string): Promise<{ text: string;
     },
     signal: AbortSignal.timeout(12000),
   });
-  console.log(`${TAG} → ${res.status}`);
   const text = await res.text();
   return { text, status: res.status };
 }
 
 function findM3u8(html: string): string | null {
   const patterns = [
-    // Cloudnestra /pl/ format (URL-safe base64 path, may contain _ - .)
     /(https?:\/\/[a-zA-Z0-9._\-]+\/pl\/[A-Za-z0-9_\-\.]+\/master\.m3u8)/,
     /["'`](https?:\/\/[^"'`\s]+master\.m3u8[^"'`\s]*?)["'`]/,
     /["'`](https?:\/\/[^"'`\s]+\.m3u8[^"'`\s]*?)["'`]/,
@@ -36,36 +33,11 @@ function findM3u8(html: string): string | null {
   for (const p of patterns) {
     const m = html.match(p);
     const url = m?.[1] ?? m?.[0];
-    if (url?.startsWith("http")) { console.log(`${TAG} m3u8: ${url}`); return url; }
+    if (url?.startsWith("http")) return url;
   }
   return null;
 }
 
-// Decode javascript-obfuscator string table (custom base64: lowercase first, then uppercase)
-function decodeObfuscatorTable(encoded: string): string {
-  const alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=";
-  let raw = "";
-  let buf = 0, bits = 0;
-  for (const ch of encoded) {
-    const v = alpha.indexOf(ch);
-    if (v < 0 || v === 64) continue;
-    buf = (buf << 6) | v;
-    bits += 6;
-    if (bits >= 8) {
-      bits -= 8;
-      raw += String.fromCharCode((buf >> bits) & 0xff);
-      buf &= (1 << bits) - 1;
-    }
-  }
-  let pct = "";
-  for (let i = 0; i < raw.length; i++) {
-    const c = raw.charCodeAt(i);
-    pct += "%" + (c < 16 ? "0" : "") + c.toString(16);
-  }
-  try { return decodeURIComponent(pct); } catch { return raw; }
-}
-
-// Extract /prorcp/{token} path from rcp page inline script
 function extractProrcpToken(html: string): string | null {
   const patterns = [
     /src:\s*['"]\/prorcp\/([^'"]+)['"]/,
@@ -74,10 +46,7 @@ function extractProrcpToken(html: string): string | null {
   ];
   for (const p of patterns) {
     const m = html.match(p);
-    if (m?.[1]) {
-      console.log(`${TAG} prorcp token from rcp: ${m[1].slice(0, 60)}...`);
-      return m[1];
-    }
+    if (m?.[1]) return m[1];
   }
   return null;
 }
@@ -87,37 +56,18 @@ function buildProxy(m3u8Url: string): string {
   return `/api/stream/proxy?url=${encodeURIComponent(m3u8Url)}&base=${encodeURIComponent(base)}`;
 }
 
-function searchDomains(text: string, label: string): void {
-  const domains = ["neonhorizon", "tmstr", ".m3u8"];
-  for (const d of domains) {
-    const idx = text.indexOf(d);
-    if (idx >= 0) {
-      console.log(`${TAG} *** '${d}' in ${label} at ${idx}: ...${text.slice(Math.max(0, idx - 300), idx + 300)}...`);
-    }
-  }
-}
-
 async function tryProrcp(proToken: string, referer: string): Promise<string | null> {
   const url = `https://cloudnestra.com/prorcp/${proToken}`;
-  console.log(`${TAG} fetching prorcp: ${url.slice(0, 100)}`);
   const { text, status } = await fetchText(url, referer);
-  if (status !== 200) { console.log(`${TAG} prorcp → ${status}`); return null; }
-  console.log(`${TAG} prorcp HTML size: ${text.length}`);
+  if (status !== 200) return null;
 
-  // 1. Direct m3u8 search in full HTML
   const m3u8 = findM3u8(text);
   if (m3u8) return m3u8;
 
-  // 2. Search for streaming domains anywhere in the full HTML
-  searchDomains(text, "prorcp HTML");
-
-  // 3. Extract /pl/PATH/master.m3u8 path and CDN hosts from test_doms
+  // Extract /pl/PATH/master.m3u8 path and CDN hosts from test_doms
   const plMatch = text.match(/\/pl\/([A-Za-z0-9_\-\.]{100,})\/master\.m3u8/);
   if (plMatch) {
     const plPath = plMatch[1];
-    console.log(`${TAG} /pl/ path found (${plPath.length} chars): ${plPath.slice(0, 60)}...`);
-
-    // Extract CDN hosts from test_doms array
     const cdnHosts: string[] = [];
     const testDomsM = text.match(/test_doms\s*=\s*\[([\s\S]*?)\]/);
     if (testDomsM) {
@@ -126,52 +76,7 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
       }
     }
     if (cdnHosts.length === 0) cdnHosts.push("https://tmstr1.neonhorizonworkshops.com");
-    console.log(`${TAG} CDN hosts:`, cdnHosts);
-
-    const m3u8 = `${cdnHosts[0]}/pl/${plPath}/master.m3u8`;
-    console.log(`${TAG} Constructed m3u8: ${m3u8.slice(0, 120)}`);
-    return m3u8;
-  }
-
-  // 4. Log body content after CSS (chars 2000-8000) to see inline scripts
-  console.log(`${TAG} prorcp HTML [2000-8000]:\n${text.slice(2000, 8000)}`);
-
-  // 5. Check external scripts
-  const allScriptSrcs = [...text.matchAll(/src=["']([^"']+)["']/gi)].map((m) => m[1]);
-  const skipPatterns = ["jquery", "cloudflare", "font-awesome", "unpkg.com", "googleapis"];
-  const scriptSrcs = allScriptSrcs.filter((s) => !skipPatterns.some((p) => s.includes(p)));
-  const prioritized = [
-    ...scriptSrcs.filter((s) => /\/[a-f0-9]{20,}\.js|\/[a-zA-Z0-9]{8,}\/[a-f0-9]{20,}\.js/.test(s)),
-    ...scriptSrcs.filter((s) => !/\/[a-f0-9]{20,}\.js|\/[a-zA-Z0-9]{8,}\/[a-f0-9]{20,}\.js/.test(s)),
-  ];
-  console.log(`${TAG} scripts:`, prioritized);
-
-  for (const src of prioritized) {
-    const scriptUrl = src.startsWith("http") ? src : `https://cloudnestra.com${src}`;
-    const { text: js, status: s } = await fetchText(scriptUrl, url);
-    if (s !== 200) continue;
-
-    const m3u8b = findM3u8(js);
-    if (m3u8b) return m3u8b;
-
-    // Search for streaming domains in raw script text
-    searchDomains(js, src);
-
-    // Try to decode javascript-obfuscator string table
-    const wMatch = js.match(/window\[['"][^'"]{5,50}['"]\]\s*=\s*'([A-Za-z0-9+/=]{100,})'/);
-    if (wMatch) {
-      console.log(`${TAG} Found obfuscator table in ${src}, decoding...`);
-      const decoded = decodeObfuscatorTable(wMatch[1]);
-      console.log(`${TAG} decoded table length: ${decoded.length}, sample[0:200]: ${decoded.slice(0, 200)}`);
-      const m3u8c = findM3u8(decoded);
-      if (m3u8c) { console.log(`${TAG} m3u8 found in decoded table!`); return m3u8c; }
-      searchDomains(decoded, `decoded table from ${src}`);
-    }
-
-    const isPriority = /\/[a-f0-9]{20,}\.js|\/[a-zA-Z0-9]{8,}\/[a-f0-9]{20,}\.js/.test(src);
-    if (!isPriority && js.length < 5000) {
-      console.log(`${TAG} FULL script ${src}:\n${js}`);
-    }
+    return `${cdnHosts[0]}/pl/${plPath}/master.m3u8`;
   }
 
   return null;
@@ -179,19 +84,17 @@ async function tryProrcp(proToken: string, referer: string): Promise<string | nu
 
 async function fetchRcpAndExtract(hash: string, embedUrl: string): Promise<string | null> {
   const rcpUrl = `https://cloudnestra.com/rcp/${hash}`;
-  console.log(`${TAG} fetching rcp: ${rcpUrl}`);
   const { text, status } = await fetchText(rcpUrl, embedUrl);
-  if (status !== 200) { console.log(`${TAG} rcp → ${status}`); return null; }
-  console.log(`${TAG} rcp HTML size: ${text.length}`);
+  if (status !== 200) return null;
+
+  // Turnstile challenge — can't solve server-side, skip
+  if (text.includes("cf-turnstile") && !text.includes("prorcp")) return null;
 
   const directM3u8 = findM3u8(text);
-  if (directM3u8) { console.log(`${TAG} m3u8 in rcp page`); return directM3u8; }
+  if (directM3u8) return directM3u8;
 
   const proToken = extractProrcpToken(text);
-  if (!proToken) {
-    console.log(`${TAG} No prorcp token in rcp page. HTML snippet:\n${text.slice(0, 3000)}`);
-    return null;
-  }
+  if (!proToken) return null;
 
   return tryProrcp(proToken, rcpUrl);
 }
@@ -202,10 +105,6 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") || "movie";
   const season = searchParams.get("season") || "1";
   const episode = searchParams.get("episode") || "1";
-
-  console.log(`\n${"=".repeat(60)}`);
-  console.log(`${TAG} START tmdbId=${tmdbId} type=${type} s=${season} e=${episode}`);
-  console.log("=".repeat(60));
 
   if (!tmdbId) return NextResponse.json({ error: "tmdbId required" }, { status: 400 });
 
@@ -220,29 +119,22 @@ export async function GET(request: NextRequest) {
 
     const hashes = [...embedHtml.matchAll(/data-hash=["']([A-Za-z0-9+/=_\-]{10,})["']/g)]
       .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
-    console.log(`${TAG} data-hash count: ${hashes.length}`);
 
     if (hashes.length === 0) {
-      console.log(`${TAG} No hashes. HTML tail:\n${embedHtml.slice(-2000)}`);
       return NextResponse.json({ error: "no data-hash found" }, { status: 404 });
     }
 
     for (const hash of hashes) {
-      console.log(`\n${TAG} --- hash: ${hash.slice(0, 40)}...`);
       const m3u8 = await fetchRcpAndExtract(hash, embedUrl);
       if (m3u8) {
         const proxy = buildProxy(m3u8);
-        console.log(`${TAG} SUCCESS → ${m3u8}`);
-        console.log("=".repeat(60) + "\n");
         return NextResponse.json({ m3u8: proxy, raw: m3u8 });
       }
     }
 
-    console.log(`${TAG} FAILED: tried ${hashes.length} hashes`);
     return NextResponse.json({ error: "m3u8 not found" }, { status: 404 });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.log(`${TAG} ERROR: ${msg}`);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
