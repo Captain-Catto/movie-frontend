@@ -9,7 +9,8 @@ import { TVSeries, FrontendTVSeries } from "@/types/content.types";
 import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
 export function mapTVSeriesToFrontend(
-  series: Record<string, unknown>
+  series: Record<string, unknown>,
+  language?: string
 ): FrontendTVSeries {
   const ensureString = (value: unknown): string | undefined =>
     typeof value === "string" && value.length > 0 ? value : undefined;
@@ -51,13 +52,20 @@ export function mapTVSeriesToFrontend(
       ? series.id.toString()
       : tmdbId.toString();
 
-  const title =
-    ensureString(series.name) ?? ensureString(series.title) ?? "Unknown";
-
-  const aliasTitle =
+  const originalLanguage = ensureString(series.originalLanguage);
+  const originalTitle =
     ensureString(series.originalName) ??
     ensureString(series.originalTitle) ??
-    title;
+    ensureString(series.name) ??
+    ensureString(series.title) ??
+    "Unknown";
+  const isVietnamese = language?.startsWith("vi");
+  const title =
+    isVietnamese && originalLanguage === "vi" && originalTitle
+      ? originalTitle
+      : ensureString(series.name) ?? ensureString(series.title) ?? originalTitle;
+
+  const aliasTitle = originalTitle !== title ? originalTitle : title;
 
   const posterPath = normalizeTmdbImageUrl(
     ensureString(series.posterUrl),
@@ -150,9 +158,10 @@ export function mapTVSeriesToFrontend(
 }
 
 export function mapTVSeriesToFrontendList(
-  tvSeries: TVSeries[]
+  tvSeries: TVSeries[],
+  language?: string
 ): FrontendTVSeries[] {
   return tvSeries.map((series) =>
-    mapTVSeriesToFrontend(series as unknown as Record<string, unknown>)
+    mapTVSeriesToFrontend(series as unknown as Record<string, unknown>, language)
   );
 }

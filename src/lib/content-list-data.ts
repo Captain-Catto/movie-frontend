@@ -91,7 +91,7 @@ export async function getMovieListData({
     }
 
     const items = extractCategoryItems(response.data);
-    const mappedItems = mapMoviesToFrontend(items as Movie[]);
+    const mappedItems = mapMoviesToFrontend(items as Movie[], language);
     const pagination = extractCategoryPagination(response, mappedItems.length);
 
     return {
@@ -137,7 +137,7 @@ export async function getTVListData({
     }
 
     const items = extractCategoryItems(response.data);
-    const mappedItems = mapTVSeriesToFrontendList(items as TVSeries[]);
+    const mappedItems = mapTVSeriesToFrontendList(items as TVSeries[], language);
     const pagination = extractCategoryPagination(response, mappedItems.length);
 
     return {

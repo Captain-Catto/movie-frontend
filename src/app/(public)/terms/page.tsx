@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getLegalPageContent } from "@/lib/legal-page-content";
 import { resolvePageMetadata } from "@/lib/seo-resolver";
+import Layout from "@/components/layout/Layout";
 
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getServerPreferredLanguage();
@@ -22,6 +23,7 @@ export default async function TermsPage() {
   const content = getLegalPageContent("terms", language);
 
   return (
+    <Layout>
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold text-white mb-8">{content.title}</h1>
@@ -64,5 +66,6 @@ export default async function TermsPage() {
         </div>
       </div>
     </div>
+    </Layout>
   );
 }

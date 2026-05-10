@@ -40,10 +40,21 @@ const toHeroBackdrop = (url: string): string => {
   );
 };
 
+interface FlipAnim {
+  src: string;
+  tx: number;
+  ty: number;
+  sx: number;
+  sy: number;
+  active: boolean;
+  fadingOut: boolean;
+}
+
 const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const { language } = useLanguage();
   const labels = getHeroSectionUiMessages(language);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [flipAnim, setFlipAnim] = useState<FlipAnim | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const { breakpoint } = useWindowWidth();
   const thumbCount =
@@ -51,17 +62,64 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
-  const handleThumbnailClick = (index: number) => {
-    if (swiperRef.current) {
-      swiperRef.current.slideToLoop(index);
-    }
+  const handleThumbnailClick = (index: number, event: React.MouseEvent) => {
+    if (flipAnim || index === activeIndex || !swiperRef.current) return;
+
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const sx = rect.width / window.innerWidth;
+    const sy = rect.height / window.innerHeight;
+    const movie = movies[index];
+    const src =
+      movie.backgroundImage || movie.posterImage || movie.poster || FALLBACK_POSTER;
+
+    setFlipAnim({ src, tx: rect.left, ty: rect.top, sx, sy, active: false, fadingOut: false });
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setFlipAnim((prev) => (prev ? { ...prev, active: true } : null));
+      });
+    });
+
+    // Swiper chuyển slide + overlay bắt đầu fade out cùng lúc → image & text xuất hiện cùng nhau
+    setTimeout(() => {
+      swiperRef.current?.slideToLoop(index);
+    }, 420);
+
+    setTimeout(() => {
+      setFlipAnim((prev) => (prev ? { ...prev, fadingOut: true } : null));
+    }, 450);
+
+    setTimeout(() => {
+      setFlipAnim(null);
+    }, 820);
   };
 
   return (
     <div className="relative min-h-screen">
+      {/* FLIP overlay — thumbnail bay lên fill hero */}
+      {flipAnim && (
+        <div
+          className="fixed inset-0 z-[60] pointer-events-none"
+          style={{
+            backgroundImage: `url(${flipAnim.src})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            transformOrigin: "top left",
+            transform: flipAnim.active
+              ? "translate(0px, 0px) scale(1, 1)"
+              : `translate(${flipAnim.tx}px, ${flipAnim.ty}px) scale(${flipAnim.sx}, ${flipAnim.sy})`,
+            opacity: flipAnim.fadingOut ? 0 : flipAnim.active ? 1 : 0.85,
+            borderRadius: flipAnim.active ? "0px" : "8px",
+            transition:
+              "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.37s ease, border-radius 0.55s ease",
+          }}
+        />
+      )}
+
       <Swiper
         modules={[Pagination, Autoplay]}
         spaceBetween={0}
+        speed={600}
         slidesPerView={1}
         pagination={{
           clickable: true,
@@ -71,7 +129,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
           delay: 5000,
           disableOnInteraction: false,
         }}
-        loop={false}
+        loop={true}
         className="h-screen"
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
@@ -173,16 +231,16 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               {/* Safe Area Content */}
               <div className="safe-area relative z-20 h-full flex items-center">
                 <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                  <div className="media-item max-w-2xl space-y-6">
+                  <div key={activeIndex} className="media-item max-w-2xl space-y-6">
                     {/* Main Title */}
-                    <h1 className="text-5xl font-bold text-white">
+                    <h1 className="hero-content-fade hero-content-fade--title text-5xl font-bold text-white">
                       <Link title={movie.title} href={movie.href} onClick={handleDetailClick}>
                         {movie.title}
                       </Link>
                     </h1>
 
                     {/* Alias Title */}
-                    <p className="media-alias-title">
+                    <p className="hero-content-fade hero-content-fade--subtitle media-alias-title">
                       <Link
                         title={movie.aliasTitle || movie.title}
                         href={movie.href}
@@ -194,7 +252,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     </p>
 
                     {/* Tags */}
-                    <div className="hl-tags flex flex-wrap gap-2">
+                    <div className="hero-content-fade hero-content-fade--tags hl-tags flex flex-wrap gap-2">
                       {/* Media Type */}
                       <div className="tag-media-type">
                         <span className="bg-red-600 text-white px-3 py-1 rounded text-sm font-semibold">
@@ -229,7 +287,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     </div>
 
                     {/* Genre Tags */}
-                    <div className="hl-tags mb-4 flex flex-wrap gap-2">
+                    <div className="hero-content-fade hero-content-fade--tags hl-tags mb-4 flex flex-wrap gap-2">
                       {movie.genres?.map((genre, genreIndex) => {
                         const genreId = movie.genreIds?.[genreIndex];
                         if (typeof genreId !== "number") {
@@ -248,12 +306,12 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     </div>
 
                     {/* Description */}
-                    <div className="description lim-3 text-gray-300 text-base leading-relaxed line-clamp-3">
+                    <div className="hero-content-fade hero-content-fade--desc description lim-3 text-gray-300 text-base leading-relaxed line-clamp-3">
                       {movie.description}
                     </div>
 
                     {/* Touch/Action Buttons */}
-                    <div className="touch flex items-center space-x-4">
+                    <div className="hero-content-fade hero-content-fade--buttons touch flex items-center space-x-4">
                       <Link
                         href={watchHref}
                         className="button-play"
@@ -344,7 +402,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               return (
                 <div
                   key={movie.id}
-                  onClick={() => handleThumbnailClick(index)}
+                  onClick={(e) => handleThumbnailClick(index, e)}
                   className={`
                     cursor-pointer transition-all duration-300 rounded-md overflow-hidden
                     ${

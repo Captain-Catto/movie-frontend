@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FAQPageClient from "@/components/pages/FAQPageClient";
+import Layout from "@/components/layout/Layout";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getStaticPageSeo } from "@/lib/page-seo";
 import { resolvePageMetadata } from "@/lib/seo-resolver";
@@ -16,5 +17,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function FAQPage() {
-  return <FAQPageClient />;
+  return (
+    <Layout>
+      <FAQPageClient />
+    </Layout>
+  );
 }

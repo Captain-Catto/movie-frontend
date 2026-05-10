@@ -9,7 +9,7 @@ import { TMDB_ENGLISH_GENRE_MAP } from "@/utils/genreMapping";
 import { detectContentType } from "@/utils/contentType";
 import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
-export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
+export function mapMovieToFrontend(movie: MovieInput, language?: string): FrontendMovie {
   // TMDB ID is REQUIRED since all data comes from TMDB
   // Use tmdbId if available, fallback to id (which is also TMDB ID from API)
   const tmdbId = movie.tmdbId || movie.id;
@@ -42,13 +42,24 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   const genreIds = movie.genreIds || movie.genre_ids;
 
   // Handle title and original title for both movies and TV series
-  const title = movie.title || movie.name || "Untitled";
+  const originalLanguage =
+    (movie as Record<string, unknown>).originalLanguage as string | null | undefined ??
+    (movie as Record<string, unknown>).original_language as string | null | undefined;
   const originalTitle =
     movie.original_title ||
     movie.originalTitle ||
     movie.original_name ||
     movie.originalName ||
-    title;
+    movie.title ||
+    movie.name ||
+    "Untitled";
+  // When browsing in Vietnamese and the movie's original language is Vietnamese,
+  // prefer original_title since TMDB often lacks vi-VN translations and falls back to English.
+  const isVietnamese = language?.startsWith("vi");
+  const title =
+    isVietnamese && originalLanguage === "vi" && originalTitle
+      ? originalTitle
+      : movie.title || movie.name || originalTitle;
 
   // Backend already has full URLs - use them directly, otherwise construct from paths
   const posterUrl =
@@ -120,8 +131,8 @@ export function mapMovieToFrontend(movie: MovieInput): FrontendMovie {
   };
 }
 
-export function mapMoviesToFrontend(movies: Movie[]): FrontendMovie[] {
+export function mapMoviesToFrontend(movies: Movie[], language?: string): FrontendMovie[] {
   return movies.map((movie) =>
-    mapMovieToFrontend(movie as unknown as MovieInput)
+    mapMovieToFrontend(movie as unknown as MovieInput, language)
   );
 }

@@ -444,6 +444,29 @@ body {
   transform: scale(1.2);
 }
 
+/* Hero content fade-in animation */
+@keyframes heroContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-content-fade {
+  opacity: 0;
+  animation: heroContentFadeIn 0.5s ease forwards;
+}
+
+.hero-content-fade--title    { animation-delay: 0.05s; }
+.hero-content-fade--subtitle { animation-delay: 0.15s; }
+.hero-content-fade--tags     { animation-delay: 0.25s; }
+.hero-content-fade--desc     { animation-delay: 0.32s; }
+.hero-content-fade--buttons  { animation-delay: 0.38s; }
+
 /* Mobile Responsiveness */
 @media (max-width: 1023px) {
   .safe-area {
