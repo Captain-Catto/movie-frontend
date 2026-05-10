@@ -82,7 +82,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
     // Swiper chuyển slide + overlay bắt đầu fade out cùng lúc → image & text xuất hiện cùng nhau
     setTimeout(() => {
-      swiperRef.current?.slideToLoop(index);
+      swiperRef.current?.slideToLoop(index, 0);
     }, 420);
 
     setTimeout(() => {
