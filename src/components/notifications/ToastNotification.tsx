@@ -91,7 +91,7 @@ export function ToastNotificationProvider({
     <>
       {children}
       {toasts.length > 0 && (
-        <div className="fixed top-4 right-4 z-50 space-y-2">
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col gap-3 items-center w-full max-w-sm px-4">
           {toasts.map((toast) => {
             const config = typeConfig[toast.type];
             const Icon = config.icon;
