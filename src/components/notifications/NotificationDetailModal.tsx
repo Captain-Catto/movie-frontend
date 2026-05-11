@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { RelativeTime } from "@/utils/hydration-safe-date";
@@ -90,6 +91,9 @@ export default function NotificationDetailModal({ notification, onClose }: Props
   const { title, message } = getLocalizedNotif(notification, language);
   const config = TYPE_CONFIG[notification.type] ?? TYPE_CONFIG.info;
   const imageUrl = notification.metadata?.imageUrl as string | undefined;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -97,13 +101,14 @@ export default function NotificationDetailModal({ notification, onClose }: Props
     return () => document.removeEventListener("keydown", handleKey);
   }, [onClose]);
 
-  // Prevent body scroll
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
       onClick={onClose}
@@ -167,6 +172,7 @@ export default function NotificationDetailModal({ notification, onClose }: Props
           <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{message}</p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

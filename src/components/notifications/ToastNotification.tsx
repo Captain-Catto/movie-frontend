@@ -91,7 +91,7 @@ export function ToastNotificationProvider({
     <>
       {children}
       {toasts.length > 0 && (
-        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex flex-col gap-3 items-center w-full max-w-sm px-4">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 pointer-events-none">
           {toasts.map((toast) => {
             const config = typeConfig[toast.type];
             const Icon = config.icon;
@@ -100,10 +100,10 @@ export function ToastNotificationProvider({
               <div
                 key={toast.id}
                 className={cn(
-                  "relative w-80 p-4 rounded-lg shadow-lg border-l-4 backdrop-blur-sm",
+                  "relative w-80 p-4 rounded-lg shadow-lg border-l-4 backdrop-blur-sm pointer-events-auto",
                   "bg-gray-800/90 border-gray-600",
                   config.borderColor,
-                  "animate-in slide-in-from-right duration-300"
+                  "animate-in slide-in-from-top duration-300"
                 )}
               >
                 <div className="flex items-start space-x-3">
