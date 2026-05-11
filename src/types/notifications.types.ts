@@ -67,6 +67,7 @@ export interface NotificationFormData {
   maintenanceStartTime: string;
   maintenanceEndTime: string;
   actionUrl: string;
+  imageUrl: string;
 }
 
 // Type badge colors mapping

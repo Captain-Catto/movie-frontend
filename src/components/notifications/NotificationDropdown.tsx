@@ -9,6 +9,7 @@ import { RelativeTime } from "@/utils/hydration-safe-date";
 import { useNotificationDropdown } from "@/hooks/components/useNotificationDropdown";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getNotificationDropdownUiMessages } from "@/lib/ui-messages";
+import NotificationDetailModal from "@/components/notifications/NotificationDetailModal";
 
 interface NotificationDropdownProps {
   className?: string;
@@ -33,9 +34,11 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     isMarkingAllAsRead,
     unreadCount,
     isConnected,
+    selectedNotification,
     handleBellClick,
     handleMarkAsRead,
     handleNotificationClick,
+    handleCloseDetail,
     goToNotificationsPage,
     handleMarkAllAsRead,
   } = useNotificationDropdown();
@@ -57,6 +60,10 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
   };
 
   return (
+    <>
+    {selectedNotification && (
+      <NotificationDetailModal notification={selectedNotification} onClose={handleCloseDetail} />
+    )}
     <div className={cn("relative", className)} ref={dropdownRef}>
       {/* Notification Bell Button */}
       <Button
@@ -184,6 +191,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
         </div>
       )}
     </div>
+    </>
   );
 }
 

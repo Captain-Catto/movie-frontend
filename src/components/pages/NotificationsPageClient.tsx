@@ -14,6 +14,7 @@ import {
   type NotificationUiType,
 } from "@/lib/ui-messages";
 import { formatRelativeTimeByLanguage } from "@/utils/dateFormatter";
+import NotificationDetailModal, { type NotificationDetailItem } from "@/components/notifications/NotificationDetailModal";
 
 interface NotificationItem {
   id: string | number;
@@ -55,6 +56,7 @@ export default function NotificationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<NotificationDetailItem | null>(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -135,8 +137,23 @@ export default function NotificationsPage() {
     return null;
   };
 
+  const handleNotificationClick = (notif: NotificationItem) => {
+    const url = resolveTargetUrl(notif);
+    if (url) {
+      router.push(url);
+    } else {
+      setSelectedNotification(notif);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
+      {selectedNotification && (
+        <NotificationDetailModal
+          notification={selectedNotification}
+          onClose={() => setSelectedNotification(null)}
+        />
+      )}
       <Header />
       <main>
         <Container size="narrow" withHeaderOffset className="pb-12">
@@ -221,26 +238,21 @@ export default function NotificationsPage() {
                       {dayLabel}
                     </div>
                     {groupedByDate[dateKey].map((notif) => {
-                      const targetUrl = resolveTargetUrl(notif);
-                      const isClickable = Boolean(targetUrl);
                       return (
                         <div
                           key={notif.id}
-                          className={`bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl ${
+                          className={`bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl cursor-pointer ${
                             notif.isRead
                               ? "border-gray-750/50"
                               : "border-blue-700/40 bg-gray-850/80"
-                          } ${isClickable ? "cursor-pointer" : ""}`}
-                          role={isClickable ? "button" : undefined}
-                          tabIndex={isClickable ? 0 : undefined}
-                          onClick={() => {
-                            if (targetUrl) router.push(targetUrl);
-                          }}
+                          }`}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => handleNotificationClick(notif)}
                           onKeyDown={(e) => {
-                            if (!isClickable) return;
                             if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              if (targetUrl) router.push(targetUrl);
+                              handleNotificationClick(notif);
                             }
                           }}
                         >

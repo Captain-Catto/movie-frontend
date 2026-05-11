@@ -49,9 +49,11 @@ export interface UseNotificationDropdownResult {
   isMarkingAllAsRead: boolean;
   unreadCount: number;
   isConnected: boolean;
+  selectedNotification: NotificationItem | null;
   handleBellClick: () => void;
   handleMarkAsRead: (notificationId: number) => void;
   handleNotificationClick: (notification: NotificationItem) => void;
+  handleCloseDetail: () => void;
   goToNotificationsPage: () => void;
   handleMarkAllAsRead: () => Promise<void>;
 }
@@ -59,6 +61,7 @@ export interface UseNotificationDropdownResult {
 export function useNotificationDropdown(): UseNotificationDropdownResult {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [selectedNotification, setSelectedNotification] = useState<NotificationItem | null>(null);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -129,21 +132,31 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
   );
 
   const resolveTargetUrl = useCallback(
-    (notification: NotificationItem): string => {
+    (notification: NotificationItem): string | null => {
       if (notification.actionUrl) return notification.actionUrl;
       const meta = notification.metadata;
       if (meta?.movieId) return `/watch/movie-${meta.movieId}`;
       if (meta?.tvId) return `/watch/tv-${meta.tvId}`;
-      return "/notifications";
+      return null;
     },
     []
   );
 
+  const handleCloseDetail = useCallback(() => {
+    setSelectedNotification(null);
+  }, []);
+
   const handleNotificationClick = useCallback(
     (notification: NotificationItem) => {
       handleMarkAsRead(notification.id);
-      router.push(resolveTargetUrl(notification));
-      setIsOpen(false);
+      const url = resolveTargetUrl(notification);
+      if (url) {
+        router.push(url);
+        setIsOpen(false);
+      } else {
+        setIsOpen(false);
+        setSelectedNotification(notification);
+      }
     },
     [handleMarkAsRead, resolveTargetUrl, router]
   );
@@ -186,9 +199,11 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
     isMarkingAllAsRead,
     unreadCount,
     isConnected,
+    selectedNotification,
     handleBellClick,
     handleMarkAsRead,
     handleNotificationClick,
+    handleCloseDetail,
     goToNotificationsPage,
     handleMarkAllAsRead,
   };

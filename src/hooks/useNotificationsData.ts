@@ -45,6 +45,7 @@ const DEFAULT_FORM_DATA: NotificationFormData = {
   maintenanceStartTime: "",
   maintenanceEndTime: "",
   actionUrl: "",
+  imageUrl: "",
 };
 
 export function useNotificationsData(): UseNotificationsDataReturn {
@@ -228,6 +229,10 @@ export function useNotificationsData(): UseNotificationsDataReturn {
         actionUrl: formData.actionUrl || undefined,
       };
 
+      if (formData.imageUrl) {
+        payload.metadata = { ...(payload.metadata || {}), imageUrl: formData.imageUrl };
+      }
+
       switch (sendModal.type) {
         case "broadcast":
           url += "broadcast";
@@ -244,14 +249,17 @@ export function useNotificationsData(): UseNotificationsDataReturn {
         case "maintenance":
           url += "maintenance";
           payload.targetType = "all";
-          payload.priority = 3; // High priority
-          payload.type = "warning"; // Force warning type for maintenance
+          payload.priority = 3;
+          payload.type = "warning";
           payload.metadata = {};
           if (formData.maintenanceStartTime) {
             payload.metadata.startTime = formData.maintenanceStartTime;
           }
           if (formData.maintenanceEndTime) {
             payload.metadata.endTime = formData.maintenanceEndTime;
+          }
+          if (formData.imageUrl) {
+            payload.metadata.imageUrl = formData.imageUrl;
           }
           break;
       }
