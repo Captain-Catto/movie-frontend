@@ -66,6 +66,7 @@ export interface NotificationFormData {
   role: "user" | "admin";
   maintenanceStartTime: string;
   maintenanceEndTime: string;
+  actionUrl: string;
 }
 
 // Type badge colors mapping

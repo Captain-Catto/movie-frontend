@@ -44,6 +44,7 @@ const DEFAULT_FORM_DATA: NotificationFormData = {
   role: "user",
   maintenanceStartTime: "",
   maintenanceEndTime: "",
+  actionUrl: "",
 };
 
 export function useNotificationsData(): UseNotificationsDataReturn {
@@ -210,6 +211,7 @@ export function useNotificationsData(): UseNotificationsDataReturn {
         titleEn?: string;
         messageEn?: string;
         type: string;
+        actionUrl?: string;
         targetType?: string;
         role?: string;
         userId?: number;
@@ -223,6 +225,7 @@ export function useNotificationsData(): UseNotificationsDataReturn {
         titleEn: formData.titleEn || undefined,
         messageEn: formData.messageEn || undefined,
         type: formData.notificationType,
+        actionUrl: formData.actionUrl || undefined,
       };
 
       switch (sendModal.type) {

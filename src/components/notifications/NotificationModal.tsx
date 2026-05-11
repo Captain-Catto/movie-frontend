@@ -235,6 +235,20 @@ export default function NotificationModal({
               </div>
             </div>
           )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1.5">
+              Link (optional)
+            </label>
+            <input
+              type="text"
+              value={formData.actionUrl}
+              onChange={(e) => onFormDataChange({ ...formData, actionUrl: e.target.value })}
+              className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="/movie/12345 hoặc /tv/67890"
+            />
+            <p className="text-xs text-gray-500 mt-1">Người dùng sẽ được dẫn đến trang này khi bấm vào thông báo</p>
+          </div>
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
