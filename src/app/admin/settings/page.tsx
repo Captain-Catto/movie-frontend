@@ -32,7 +32,6 @@ export default function AdminSettingsPage() {
   const [streamSaving, setStreamSaving] = useState(false);
 
   const fetchSettings = useCallback(async () => {
-    if (!adminApi.isAuthenticated) return;
     setLoading(true);
     try {
       const [registrationRes, streamDomainsRes] = await Promise.all([
@@ -58,11 +57,14 @@ export default function AdminSettingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [adminApi, showError]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminApi.get, showError]);
 
   useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+    if (adminApi.isAuthenticated) {
+      fetchSettings();
+    }
+  }, [adminApi.isAuthenticated, fetchSettings]);
 
   const updateValue = (
     key: keyof RegistrationSettings,
