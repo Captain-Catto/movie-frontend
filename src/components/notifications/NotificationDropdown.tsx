@@ -18,7 +18,7 @@ function getLocalizedNotif(
   n: { title: string; message: string; titleVi?: string; messageVi?: string; titleEn?: string; messageEn?: string },
   language: string
 ) {
-  if (language === "vi") return { title: n.titleVi || n.title, message: n.messageVi || n.message };
+  if (language.startsWith("vi")) return { title: n.titleVi || n.title, message: n.messageVi || n.message };
   return { title: n.titleEn || n.title, message: n.messageEn || n.message };
 }
 

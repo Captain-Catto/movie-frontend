@@ -118,10 +118,10 @@ export function ToastNotificationProvider({
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white">
-                      {language === "vi" ? (toast.titleVi || toast.title) : (toast.titleEn || toast.title)}
+                      {language.startsWith("vi") ? (toast.titleVi || toast.title) : (toast.titleEn || toast.title)}
                     </p>
                     <p className="text-sm text-gray-300 mt-1">
-                      {language === "vi" ? (toast.messageVi || toast.message) : (toast.messageEn || toast.message)}
+                      {language.startsWith("vi") ? (toast.messageVi || toast.message) : (toast.messageEn || toast.message)}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
                       {new Date(toast.createdAt).toLocaleTimeString()}
