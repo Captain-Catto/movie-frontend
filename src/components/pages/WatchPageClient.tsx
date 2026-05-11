@@ -1,7 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useState, useEffect, useRef, useCallback } from "react";
-import HLSPlayer from "@/components/player/HLSPlayer";
+import { lazy, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
@@ -58,11 +57,6 @@ const WatchPageClient = ({
   const { language } = useLanguage();
   const labels = getWatchPageUiMessages(language);
 
-  const [adShieldVisible, setAdShieldVisible] = useState(false);
-  const [m3u8Url, setM3u8Url] = useState<string | null>(null);
-  const [m3u8Extracting, setM3u8Extracting] = useState(false);
-  const lastExtractKeyRef = useRef<string | null>(null);
-
   const {
     movieData,
     loading,
@@ -99,46 +93,6 @@ const WatchPageClient = ({
     initialEpisode,
   });
 
-  useEffect(() => {
-    if (activeStreamUrl) setAdShieldVisible(true);
-  }, [activeStreamUrl]);
-
-  const handleHLSReady = useCallback(() => {
-    handleStreamLoadSuccess();
-  }, [handleStreamLoadSuccess]);
-
-  const handleHLSError = useCallback(() => {
-    setM3u8Url(null);
-    handleStreamLoadError();
-  }, [handleStreamLoadError]);
-
-  useEffect(() => {
-    if (!isPlaying || !movieData?.tmdbId || !activeStreamUrl) return;
-
-    const key = `${movieData.tmdbId}|${movieData.contentType}|${season}|${episode}`;
-    if (lastExtractKeyRef.current === key) return;
-
-    lastExtractKeyRef.current = key;
-    setM3u8Url(null);
-    setM3u8Extracting(true);
-
-    const params = new URLSearchParams({
-      tmdbId: String(movieData.tmdbId),
-      type: movieData.contentType === "tv" ? "tv" : "movie",
-      ...(movieData.contentType === "tv"
-        ? { season: String(season), episode: String(episode) }
-        : {}),
-    });
-
-    fetch(`/api/stream/extract?${params}`)
-      .then((r) => r.json())
-      .then((data: { m3u8?: string }) => {
-        if (data.m3u8) setM3u8Url(data.m3u8);
-      })
-      .catch(() => {})
-      .finally(() => setM3u8Extracting(false));
-  }, [isPlaying, activeStreamUrl, movieData, season, episode]);
-
   if (loading) {
     return (
       <Layout>
@@ -168,33 +122,16 @@ const WatchPageClient = ({
             {isPlaying ? (
               activeStreamUrl ? (
                 <div className="relative w-full h-full">
-                  {m3u8Url ? (
-                    <HLSPlayer
-                      key={m3u8Url}
-                      src={m3u8Url}
-                      onReady={handleHLSReady}
-                      onError={handleHLSError}
-                    />
-                  ) : (
-                    <>
-                      <iframe
-                        key={activeStreamUrl}
-                        src={activeStreamUrl}
-                        className="w-full h-full"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                        referrerPolicy="origin"
-                        onLoad={handleStreamLoadSuccess}
-                        onError={handleStreamLoadError}
-                      />
-                      {adShieldVisible && !m3u8Extracting && (
-                        <div
-                          className="absolute inset-0 z-10 cursor-pointer"
-                          onClick={() => setAdShieldVisible(false)}
-                        />
-                      )}
-                    </>
-                  )}
+                  <iframe
+                    key={activeStreamUrl}
+                    src={activeStreamUrl}
+                    className="w-full h-full"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    referrerPolicy="origin"
+                    onLoad={handleStreamLoadSuccess}
+                    onError={handleStreamLoadError}
+                  />
                   {activeStreamIndex > 0 && (
                     <div className="absolute top-4 left-4 px-3 py-1 rounded bg-black/70 text-xs text-white">
                       {labels.fallbackSource} {activeStreamIndex + 1}/
