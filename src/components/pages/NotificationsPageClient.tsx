@@ -19,6 +19,10 @@ interface NotificationItem {
   id: string | number;
   title: string;
   message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
   type: NotificationUiType;
   createdAt: string;
   isRead?: boolean;
@@ -29,6 +33,14 @@ interface NotificationItem {
     parentId?: number;
     [key: string]: unknown;
   };
+}
+
+function getLocalizedNotif(
+  n: { title: string; message: string; titleVi?: string; messageVi?: string; titleEn?: string; messageEn?: string },
+  language: string
+) {
+  if (language === "vi") return { title: n.titleVi || n.title, message: n.messageVi || n.message };
+  return { title: n.titleEn || n.title, message: n.messageEn || n.message };
 }
 
 export default function NotificationsPage() {
@@ -59,6 +71,10 @@ export default function NotificationsPage() {
               id: n.id ?? crypto.randomUUID(),
               title: n.title ?? labels.fallbackTitle,
               message: n.message ?? "",
+              titleVi: n.titleVi,
+              messageVi: n.messageVi,
+              titleEn: n.titleEn,
+              messageEn: n.messageEn,
               type: (n.type as NotificationItem["type"]) || "info",
               createdAt: n.createdAt ?? new Date().toISOString(),
               isRead: n.isRead,
@@ -239,21 +255,27 @@ export default function NotificationsPage() {
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-3 mb-2">
-                              <h3 className="text-white font-semibold text-base leading-tight">
-                                {notif.title}
-                              </h3>
-                              <div className="text-xs text-gray-500 whitespace-nowrap">
-                                {formatRelativeTimeByLanguage(
-                                  new Date(notif.createdAt),
-                                  language
-                                )}
-                              </div>
-                            </div>
-
-                            <p className="text-gray-300 text-sm leading-relaxed">
-                              {notif.message}
-                            </p>
+                            {(() => {
+                              const { title, message } = getLocalizedNotif(notif, language);
+                              return (
+                                <>
+                                  <div className="flex items-start justify-between gap-3 mb-2">
+                                    <h3 className="text-white font-semibold text-base leading-tight">
+                                      {title}
+                                    </h3>
+                                    <div className="text-xs text-gray-500 whitespace-nowrap">
+                                      {formatRelativeTimeByLanguage(
+                                        new Date(notif.createdAt),
+                                        language
+                                      )}
+                                    </div>
+                                  </div>
+                                  <p className="text-gray-300 text-sm leading-relaxed">
+                                    {message}
+                                  </p>
+                                </>
+                              );
+                            })()}
 
                             {/* Unread indicator */}
                             {!notif.isRead && (

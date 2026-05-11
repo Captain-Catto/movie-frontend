@@ -14,6 +14,10 @@ export interface Notification {
   id: number;
   title: string;
   message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
   type: "info" | "warning" | "success" | "error";
   targetType: "all" | "role" | "user";
   targetValue?: string;
@@ -51,6 +55,10 @@ export interface SendModalState {
 export interface NotificationFormData {
   title: string;
   message: string;
+  titleVi: string;
+  messageVi: string;
+  titleEn: string;
+  messageEn: string;
   targetType: "all" | "role" | "user";
   targetValue: string;
   notificationType: "info" | "warning" | "success" | "error";

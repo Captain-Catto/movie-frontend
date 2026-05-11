@@ -14,6 +14,14 @@ interface NotificationDropdownProps {
   className?: string;
 }
 
+function getLocalizedNotif(
+  n: { title: string; message: string; titleVi?: string; messageVi?: string; titleEn?: string; messageEn?: string },
+  language: string
+) {
+  if (language === "vi") return { title: n.titleVi || n.title, message: n.messageVi || n.message };
+  return { title: n.titleEn || n.title, message: n.messageEn || n.message };
+}
+
 export function NotificationDropdown({ className }: NotificationDropdownProps) {
   const { language } = useLanguage();
   const labels = getNotificationDropdownUiMessages(language);
@@ -126,12 +134,15 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                       {getTypeIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white">
-                        {notification.title}
-                      </p>
-                      <p className="text-sm text-gray-300 mt-1">
-                        {notification.message}
-                      </p>
+                      {(() => {
+                        const { title, message } = getLocalizedNotif(notification, language);
+                        return (
+                          <>
+                            <p className="text-sm font-medium text-white">{title}</p>
+                            <p className="text-sm text-gray-300 mt-1">{message}</p>
+                          </>
+                        );
+                      })()}
                       <RelativeTime
                         date={notification.createdAt}
                         className="text-xs text-gray-400 mt-1 block"

@@ -59,34 +59,54 @@ export default function NotificationModal({
         </div>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Title
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, title: e.target.value })
-              }
-              className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter notification title"
-            />
+          {/* Vietnamese */}
+          <div className="rounded-lg border border-gray-600 p-3 space-y-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🇻🇳 Tiếng Việt</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Tiêu đề</label>
+              <input
+                type="text"
+                value={formData.titleVi}
+                onChange={(e) => onFormDataChange({ ...formData, titleVi: e.target.value })}
+                className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tiêu đề thông báo"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Nội dung</label>
+              <textarea
+                value={formData.messageVi}
+                onChange={(e) => onFormDataChange({ ...formData, messageVi: e.target.value })}
+                className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+                placeholder="Nhập nội dung thông báo"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Message
-            </label>
-            <textarea
-              value={formData.message}
-              onChange={(e) =>
-                onFormDataChange({ ...formData, message: e.target.value })
-              }
-              className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={4}
-              placeholder="Enter notification message"
-            />
+          {/* English */}
+          <div className="rounded-lg border border-gray-600 p-3 space-y-3">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🇺🇸 English</p>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Title</label>
+              <input
+                type="text"
+                value={formData.titleEn}
+                onChange={(e) => onFormDataChange({ ...formData, titleEn: e.target.value })}
+                className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter notification title"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">Message</label>
+              <textarea
+                value={formData.messageEn}
+                onChange={(e) => onFormDataChange({ ...formData, messageEn: e.target.value })}
+                className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
+                placeholder="Enter notification message"
+              />
+            </div>
           </div>
 
           {sendModal.type === "maintenance" && (

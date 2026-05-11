@@ -10,6 +10,10 @@ export interface NotificationItem {
   id: number;
   title: string;
   message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: Date;
   isRead: boolean;
@@ -26,6 +30,10 @@ interface RawNotification {
   id: number | string;
   title: string;
   message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
   type: NotificationItem["type"];
   createdAt: string;
   isRead: boolean;
@@ -76,6 +84,10 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
             id: Number(notif.id),
             title: notif.title,
             message: notif.message,
+            titleVi: notif.titleVi,
+            messageVi: notif.messageVi,
+            titleEn: notif.titleEn,
+            messageEn: notif.messageEn,
             type: notif.type,
             createdAt: new Date(notif.createdAt),
             isRead: notif.isRead,

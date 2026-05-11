@@ -69,9 +69,12 @@ export default function NotificationsHeader({
     onOpenSendModal("maintenance");
     setFormData({
       ...formData,
-      title: "Scheduled System Maintenance",
-      message:
-        "We will be performing scheduled maintenance. Services may be temporarily unavailable during this time. Please specify the maintenance time below. We apologize for any inconvenience.",
+      titleVi: "Bảo trì hệ thống định kỳ",
+      messageVi:
+        "Hệ thống sẽ được bảo trì định kỳ. Dịch vụ có thể tạm thời không khả dụng trong thời gian này. Chúng tôi xin lỗi vì sự bất tiện này.",
+      titleEn: "Scheduled System Maintenance",
+      messageEn:
+        "We will be performing scheduled maintenance. Services may be temporarily unavailable during this time. We apologize for any inconvenience.",
       notificationType: "warning",
     });
   };

@@ -33,6 +33,10 @@ interface UseNotificationsDataReturn {
 const DEFAULT_FORM_DATA: NotificationFormData = {
   title: "",
   message: "",
+  titleVi: "",
+  messageVi: "",
+  titleEn: "",
+  messageEn: "",
   targetType: "all",
   targetValue: "",
   notificationType: "info",
@@ -201,6 +205,10 @@ export function useNotificationsData(): UseNotificationsDataReturn {
       const payload: {
         title: string;
         message: string;
+        titleVi?: string;
+        messageVi?: string;
+        titleEn?: string;
+        messageEn?: string;
         type: string;
         targetType?: string;
         role?: string;
@@ -208,8 +216,12 @@ export function useNotificationsData(): UseNotificationsDataReturn {
         priority?: number;
         metadata?: Record<string, string>;
       } = {
-        title: formData.title,
-        message: formData.message,
+        title: formData.titleEn || formData.titleVi || formData.title,
+        message: formData.messageEn || formData.messageVi || formData.message,
+        titleVi: formData.titleVi || undefined,
+        messageVi: formData.messageVi || undefined,
+        titleEn: formData.titleEn || undefined,
+        messageEn: formData.messageEn || undefined,
         type: formData.notificationType,
       };
 

@@ -8,6 +8,10 @@ interface NotificationData {
   id: number;
   title: string;
   message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: Date;
   metadata?: {

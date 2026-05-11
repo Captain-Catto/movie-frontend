@@ -3,12 +3,17 @@
 import { useEffect, useState } from "react";
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { cn } from "@/lib/utils";
 
 interface ToastNotification {
   id: number;
   title: string;
   message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: Date;
 }
@@ -52,6 +57,7 @@ export function ToastNotificationProvider({
   children?: React.ReactNode;
 }) {
   const { latestNotification } = useNotificationSocket();
+  const { language } = useLanguage();
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   useEffect(() => {
@@ -60,6 +66,10 @@ export function ToastNotificationProvider({
         id: latestNotification.id,
         title: latestNotification.title,
         message: latestNotification.message,
+        titleVi: latestNotification.titleVi,
+        messageVi: latestNotification.messageVi,
+        titleEn: latestNotification.titleEn,
+        messageEn: latestNotification.messageEn,
         type: latestNotification.type,
         createdAt: latestNotification.createdAt,
       };
@@ -108,10 +118,10 @@ export function ToastNotificationProvider({
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-white">
-                      {toast.title}
+                      {language === "vi" ? (toast.titleVi || toast.title) : (toast.titleEn || toast.title)}
                     </p>
                     <p className="text-sm text-gray-300 mt-1">
-                      {toast.message}
+                      {language === "vi" ? (toast.messageVi || toast.message) : (toast.messageEn || toast.message)}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
                       {new Date(toast.createdAt).toLocaleTimeString()}
