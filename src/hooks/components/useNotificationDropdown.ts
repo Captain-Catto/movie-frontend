@@ -14,6 +14,7 @@ export interface NotificationItem {
   messageVi?: string;
   titleEn?: string;
   messageEn?: string;
+  actionUrl?: string;
   type: "info" | "success" | "warning" | "error" | "system";
   createdAt: Date;
   isRead: boolean;
@@ -34,6 +35,7 @@ interface RawNotification {
   messageVi?: string;
   titleEn?: string;
   messageEn?: string;
+  actionUrl?: string;
   type: NotificationItem["type"];
   createdAt: string;
   isRead: boolean;
@@ -88,6 +90,7 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
             messageVi: notif.messageVi,
             titleEn: notif.titleEn,
             messageEn: notif.messageEn,
+            actionUrl: notif.actionUrl,
             type: notif.type,
             createdAt: new Date(notif.createdAt),
             isRead: notif.isRead,
@@ -126,23 +129,21 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
   );
 
   const resolveTargetUrl = useCallback(
-    (metadata?: NotificationItem["metadata"]): string | null => {
-      if (!metadata) return null;
-      if (metadata.movieId) return `/watch/movie-${metadata.movieId}`;
-      if (metadata.tvId) return `/watch/tv-${metadata.tvId}`;
-      return null;
+    (notification: NotificationItem): string => {
+      if (notification.actionUrl) return notification.actionUrl;
+      const meta = notification.metadata;
+      if (meta?.movieId) return `/watch/movie-${meta.movieId}`;
+      if (meta?.tvId) return `/watch/tv-${meta.tvId}`;
+      return "/notifications";
     },
     []
   );
 
   const handleNotificationClick = useCallback(
     (notification: NotificationItem) => {
-      const targetUrl = resolveTargetUrl(notification.metadata);
-      if (targetUrl) {
-        handleMarkAsRead(notification.id);
-        router.push(targetUrl);
-        setIsOpen(false);
-      }
+      handleMarkAsRead(notification.id);
+      router.push(resolveTargetUrl(notification));
+      setIsOpen(false);
     },
     [handleMarkAsRead, resolveTargetUrl, router]
   );

@@ -23,6 +23,7 @@ interface NotificationItem {
   messageVi?: string;
   titleEn?: string;
   messageEn?: string;
+  actionUrl?: string;
   type: NotificationUiType;
   createdAt: string;
   isRead?: boolean;
@@ -75,6 +76,7 @@ export default function NotificationsPage() {
               messageVi: n.messageVi,
               titleEn: n.titleEn,
               messageEn: n.messageEn,
+              actionUrl: n.actionUrl,
               type: (n.type as NotificationItem["type"]) || "info",
               createdAt: n.createdAt ?? new Date().toISOString(),
               isRead: n.isRead,
@@ -125,10 +127,11 @@ export default function NotificationsPage() {
     a < b ? 1 : -1
   );
 
-  const resolveTargetUrl = (metadata?: NotificationItem["metadata"]) => {
-    if (!metadata) return null;
-    if (metadata.movieId) return `/watch/movie-${metadata.movieId}`;
-    if (metadata.tvId) return `/watch/tv-${metadata.tvId}`;
+  const resolveTargetUrl = (notif: NotificationItem): string | null => {
+    if (notif.actionUrl) return notif.actionUrl;
+    const meta = notif.metadata;
+    if (meta?.movieId) return `/watch/movie-${meta.movieId}`;
+    if (meta?.tvId) return `/watch/tv-${meta.tvId}`;
     return null;
   };
 
@@ -218,7 +221,7 @@ export default function NotificationsPage() {
                       {dayLabel}
                     </div>
                     {groupedByDate[dateKey].map((notif) => {
-                      const targetUrl = resolveTargetUrl(notif.metadata);
+                      const targetUrl = resolveTargetUrl(notif);
                       const isClickable = Boolean(targetUrl);
                       return (
                         <div
@@ -231,9 +234,7 @@ export default function NotificationsPage() {
                           role={isClickable ? "button" : undefined}
                           tabIndex={isClickable ? 0 : undefined}
                           onClick={() => {
-                            if (targetUrl) {
-                              router.push(targetUrl);
-                            }
+                            if (targetUrl) router.push(targetUrl);
                           }}
                           onKeyDown={(e) => {
                             if (!isClickable) return;
