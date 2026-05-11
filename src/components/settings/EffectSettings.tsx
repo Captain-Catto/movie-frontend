@@ -7,6 +7,7 @@ import {
   toggleEffects,
   toggleEffect,
   updateEffectSettings,
+  fetchEffectSettings,
   setRedEnvelopeSettings,
   resetRedEnvelopeSettings,
   setSnowSettings,
@@ -47,6 +48,10 @@ export default function EffectSettings() {
   const [isDirty, setIsDirty] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [newExcludedPath, setNewExcludedPath] = useState('');
+
+  useEffect(() => {
+    dispatch(fetchEffectSettings());
+  }, [dispatch]);
 
   // Snapshot on mount and after initial load from API
   useEffect(() => {
