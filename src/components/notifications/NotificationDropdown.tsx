@@ -117,7 +117,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 <div
                   key={notification.id}
                   className={cn(
-                    "p-4 border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50 transition-colors",
+                    "p-4 border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50 transition-colors cursor-pointer",
                     !notification.isRead && "bg-blue-900/20"
                   )}
                   onClick={() => handleNotificationClick(notification)}
