@@ -25,9 +25,6 @@ export type {
   UseNotificationDropdownResult,
 } from "./useNotificationDropdown";
 
-export { useVideoUploader } from "./useVideoUploader";
-export { useMovieUploader } from "./useMovieUploader";
-
 export { useCommentForm } from "./useCommentForm";
 export type { UseCommentFormResult } from "./useCommentForm";
 
