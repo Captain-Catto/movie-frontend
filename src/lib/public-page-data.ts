@@ -87,7 +87,10 @@ export async function getPeoplePageData(
   currentPage: number
 ): Promise<PageListDataResult<PersonData>> {
   try {
-    const response = await apiService.getPopularPeople(currentPage);
+    const response = await apiService.getPopularPeople(
+      currentPage,
+      DEFAULT_BROWSE_PAGE_SIZE
+    );
     const people = Array.isArray(response.results)
       ? response.results.map(mapCastMemberToPersonData)
       : [];

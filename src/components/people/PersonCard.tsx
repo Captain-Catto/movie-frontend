@@ -43,14 +43,14 @@ const PersonCard = ({ person }: PersonCardProps) => {
   };
 
   return (
-    <div className="group relative bg-gray-900 rounded-lg p-4">
+    <div className="group relative w-full max-w-[180px] rounded-lg">
       <Link href={`/people/${person.id}`} className="block">
-        <div className="w-full h-64 rounded-lg overflow-hidden bg-gray-700 mb-4">
+        <div className="aspect-[2/3] w-full overflow-hidden rounded-lg bg-gray-700 mb-4">
           <Image
             src={getProfileImage()}
             alt={person.name}
             width={300}
-            height={256}
+            height={450}
             className="w-full h-full object-cover"
             onError={(e: SyntheticEvent<HTMLImageElement>) => {
               console.error(

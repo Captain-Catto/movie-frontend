@@ -356,8 +356,8 @@ class ApiService {
   // People Endpoints
   // ===========================
 
-  async getPopularPeople(page: number = 1): Promise<PopularPeopleResponse> {
-    const params = this.buildQueryParams({ page });
+  async getPopularPeople(page: number = 1, limit: number = 24): Promise<PopularPeopleResponse> {
+    const params = this.buildQueryParams({ page, limit });
     const url = `${API_BASE_URL}/people/popular${params ? `?${params}` : ""}`;
     const response = await this.fetchWithErrorHandling<ApiResponse<PopularPeopleResponse>>(url);
 

@@ -25,9 +25,9 @@ const PeopleGrid = ({
   return (
     <div className="space-y-8">
       {/* People Grid */}
-      <div className="flex flex-wrap justify-center -mx-2">
+      <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 2xl:gap-x-8">
         {people.map((person) => (
-          <div key={person.id} className="px-2 mb-4 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6">
+          <div key={person.id} className="flex justify-center">
             <PersonCard person={person} />
           </div>
         ))}
@@ -35,7 +35,7 @@ const PeopleGrid = ({
         {/* Loading skeletons */}
         {loading &&
           Array.from({ length: 12 }).map((_, index) => (
-            <div key={`skeleton-${index}`} className="px-2 mb-4 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 xl:w-1/6">
+            <div key={`skeleton-${index}`} className="flex justify-center">
               <PersonCardSkeleton />
             </div>
           ))
