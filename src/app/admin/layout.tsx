@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { AdminBootstrap } from "@/components/providers/AdminBootstrap";
+import { NotificationSocketProvider } from "@/contexts/NotificationSocketContext";
 
 export const metadata: Metadata = {
   robots: {
@@ -17,8 +18,10 @@ export default function AdminRootLayout({
 }) {
   return (
     <ReduxProvider>
-      <AdminBootstrap />
-      <AdminLayout>{children}</AdminLayout>
+      <NotificationSocketProvider>
+        <AdminBootstrap />
+        <AdminLayout>{children}</AdminLayout>
+      </NotificationSocketProvider>
     </ReduxProvider>
   );
 }

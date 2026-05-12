@@ -1,5 +1,6 @@
 import { ReduxProvider } from "@/components/providers/ReduxProvider";
 import { ClientBootstrap } from "@/components/providers/ClientBootstrap";
+import { NotificationSocketProvider } from "@/contexts/NotificationSocketContext";
 
 export default function PublicLayout({
   children,
@@ -8,8 +9,10 @@ export default function PublicLayout({
 }) {
   return (
     <ReduxProvider>
-      <ClientBootstrap />
-      {children}
+      <NotificationSocketProvider>
+        <ClientBootstrap />
+        {children}
+      </NotificationSocketProvider>
     </ReduxProvider>
   );
 }

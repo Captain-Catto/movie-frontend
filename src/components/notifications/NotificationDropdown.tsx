@@ -33,7 +33,6 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     notifications,
     isMarkingAllAsRead,
     unreadCount,
-    isConnected,
     selectedNotification,
     handleBellClick,
     handleMarkAsRead,
@@ -97,12 +96,10 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleMarkAllAsRead}
-                disabled={!isConnected || isMarkingAllAsRead}
+                disabled={isMarkingAllAsRead}
                 className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
                 title={
-                  !isConnected
-                    ? `⚠ ${labels.cannotConnect}`
-                    : notifications.every((n) => n.isRead)
+                  notifications.every((n) => n.isRead)
                     ? labels.allRead
                     : labels.markAllRead
                 }
@@ -161,7 +158,10 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleMarkAsRead(notification.id)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMarkAsRead(notification.id);
+                          }}
                           className="text-blue-400 hover:text-blue-300 text-xs p-1"
                           title={labels.markAsRead}
                         >

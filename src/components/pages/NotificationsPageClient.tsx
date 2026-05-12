@@ -62,7 +62,7 @@ export default function NotificationsPage() {
     const fetchNotifications = async () => {
       try {
         const response = await axiosInstance.get("/notifications", {
-          params: { limit: 50 },
+          params: { limit: 50, unreadOnly: showUnreadOnly || undefined },
         });
 
         if (
@@ -101,7 +101,12 @@ export default function NotificationsPage() {
     };
 
     fetchNotifications();
-  }, [labels.cannotLoadNotifications, labels.fallbackTitle, labels.noNotificationsFound]);
+  }, [
+    labels.cannotLoadNotifications,
+    labels.fallbackTitle,
+    labels.noNotificationsFound,
+    showUnreadOnly,
+  ]);
 
   const badgeStyles: Record<NotificationItem["type"], string> = {
     info: "bg-blue-900/50 text-blue-200 border border-blue-700/60",
@@ -137,7 +142,29 @@ export default function NotificationsPage() {
     return null;
   };
 
+  const markNotificationAsRead = async (notif: NotificationItem) => {
+    if (notif.isRead) return;
+
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === notif.id ? { ...item, isRead: true } : item
+      )
+    );
+
+    try {
+      await axiosInstance.put(`/notifications/${notif.id}/read`);
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+      setNotifications((prev) =>
+        prev.map((item) =>
+          item.id === notif.id ? { ...item, isRead: false } : item
+        )
+      );
+    }
+  };
+
   const handleNotificationClick = (notif: NotificationItem) => {
+    markNotificationAsRead(notif);
     const url = resolveTargetUrl(notif);
     if (url) {
       router.push(url);

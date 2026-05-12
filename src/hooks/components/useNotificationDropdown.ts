@@ -51,7 +51,7 @@ export interface UseNotificationDropdownResult {
   isConnected: boolean;
   selectedNotification: NotificationItem | null;
   handleBellClick: () => void;
-  handleMarkAsRead: (notificationId: number) => void;
+  handleMarkAsRead: (notificationId: number) => Promise<void>;
   handleNotificationClick: (notification: NotificationItem) => void;
   handleCloseDetail: () => void;
   goToNotificationsPage: () => void;
@@ -71,6 +71,7 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
     latestNotification,
     markAsRead,
     markAllAsRead,
+    setUnreadCount,
   } = useNotificationSocket();
 
   useEffect(() => {
@@ -115,20 +116,41 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
         ...latestNotification,
         isRead: false,
       };
-      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
+      setNotifications((prev) => [
+        newNotification,
+        ...prev.filter((item) => item.id !== newNotification.id).slice(0, 9),
+      ]);
     }
   }, [latestNotification]);
 
   const handleMarkAsRead = useCallback(
-    (notificationId: number) => {
-      markAsRead(notificationId);
+    async (notificationId: number) => {
+      const target = notifications.find((notif) => notif.id === notificationId);
+      if (!target || target.isRead) return;
+
+      const emitted = markAsRead(notificationId);
       setNotifications((prev) =>
         prev.map((notif) =>
           notif.id === notificationId ? { ...notif, isRead: true } : notif
         )
       );
+      setUnreadCount((count) => Math.max(0, count - 1));
+
+      if (!emitted) {
+        try {
+          await axiosInstance.put(`/notifications/${notificationId}/read`);
+        } catch (error) {
+          console.error("Error marking notification as read:", error);
+          setNotifications((prev) =>
+            prev.map((notif) =>
+              notif.id === notificationId ? { ...notif, isRead: false } : notif
+            )
+          );
+          setUnreadCount((count) => count + 1);
+        }
+      }
     },
-    [markAsRead]
+    [markAsRead, notifications, setUnreadCount]
   );
 
   const resolveTargetUrl = useCallback(
@@ -175,22 +197,22 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
   }, [goToNotificationsPage]);
 
   const handleMarkAllAsRead = useCallback(async () => {
-    if (!isConnected) {
-      console.warn("Cannot mark all as read: Socket not connected");
-      return;
-    }
-
     setIsMarkingAllAsRead(true);
 
     try {
-      markAllAsRead();
+      const emitted = markAllAsRead();
       setNotifications((prev) => prev.map((notif) => ({ ...notif, isRead: true })));
+      setUnreadCount(0);
+
+      if (!emitted) {
+        await axiosInstance.put("/notifications/read-all");
+      }
     } catch (error) {
       console.error("Error marking all as read:", error);
     } finally {
       setTimeout(() => setIsMarkingAllAsRead(false), 500);
     }
-  }, [isConnected, markAllAsRead]);
+  }, [markAllAsRead, setUnreadCount]);
 
   return {
     isOpen,

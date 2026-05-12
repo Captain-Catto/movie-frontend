@@ -101,6 +101,8 @@ export function useNotificationsData(): UseNotificationsDataReturn {
 
       const response = await adminApi.get<{
         notifications?: unknown[];
+        total?: number;
+        totalPages?: number;
         meta?: unknown;
         pagination?: unknown;
       }>(`/admin/notifications?${params.toString()}`);
@@ -145,7 +147,19 @@ export function useNotificationsData(): UseNotificationsDataReturn {
         setNotifications(normalizedNotifications);
 
         // Update pagination meta if available
-        if (response.data.meta || response.data.pagination) {
+        if (
+          typeof response.data.total === "number" ||
+          typeof response.data.totalPages === "number"
+        ) {
+          setPagination({
+            total: response.data?.total ?? 0,
+            page: pagination.page,
+            limit: pagination.limit,
+            totalPages:
+              response.data?.totalPages ??
+              Math.ceil((response.data?.total ?? 0) / pagination.limit),
+          });
+        } else if (response.data.meta || response.data.pagination) {
           const meta = response.data.meta || response.data.pagination;
           const metaObj = meta as Record<string, unknown>;
           setPagination({

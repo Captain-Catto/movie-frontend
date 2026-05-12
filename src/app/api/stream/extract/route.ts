@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const TAG = "[stream/extract]";
 const BASE = "https://vidsrcme.ru";
 
 const HEADERS = {
