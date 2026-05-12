@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import {
   getNotificationsPageUiMessages,
   type NotificationUiType,
@@ -173,6 +174,34 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleDeleteNotification = async (notif: NotificationItem) => {
+    const previousNotifications = notifications;
+    setNotifications((prev) => prev.filter((item) => item.id !== notif.id));
+    setIsEmpty(previousNotifications.length <= 1);
+
+    try {
+      await axiosInstance.delete(`/notifications/${notif.id}`);
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+      setNotifications(previousNotifications);
+      setIsEmpty(previousNotifications.length === 0);
+    }
+  };
+
+  const handleClearNotifications = async () => {
+    const previousNotifications = notifications;
+    setNotifications([]);
+    setIsEmpty(true);
+
+    try {
+      await axiosInstance.delete("/notifications");
+    } catch (error) {
+      console.error("Failed to clear notifications:", error);
+      setNotifications(previousNotifications);
+      setIsEmpty(previousNotifications.length === 0);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black">
       {selectedNotification && (
@@ -198,6 +227,16 @@ export default function NotificationsPage() {
                     ? labels.notificationsCount(notifications.length)
                     : labels.noNotifications}
                 </span>
+                {notifications.length > 0 && (
+                  <button
+                    onClick={handleClearNotifications}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors border bg-red-950/40 border-red-800/60 text-red-200 hover:bg-red-900/50 cursor-pointer"
+                    title={labels.clearNotifications}
+                  >
+                    <Trash2 size={14} />
+                    {labels.clearNotifications}
+                  </button>
+                )}
                 <button
                   onClick={() => setShowUnreadOnly((v) => !v)}
                   className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors border cursor-pointer ${
@@ -303,11 +342,24 @@ export default function NotificationsPage() {
                                     <h3 className="text-white font-semibold text-base leading-tight">
                                       {title}
                                     </h3>
-                                    <div className="text-xs text-gray-500 whitespace-nowrap">
-                                      {formatRelativeTimeByLanguage(
-                                        new Date(notif.createdAt),
-                                        language
-                                      )}
+                                    <div className="flex items-center gap-2">
+                                      <div className="text-xs text-gray-500 whitespace-nowrap">
+                                        {formatRelativeTimeByLanguage(
+                                          new Date(notif.createdAt),
+                                          language
+                                        )}
+                                      </div>
+                                      <button
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleDeleteNotification(notif);
+                                        }}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer"
+                                        title={labels.deleteNotification}
+                                        aria-label={labels.deleteNotification}
+                                      >
+                                        <Trash2 size={15} />
+                                      </button>
                                     </div>
                                   </div>
                                   <p className="text-gray-300 text-sm leading-relaxed">

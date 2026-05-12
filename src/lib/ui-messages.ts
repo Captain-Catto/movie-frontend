@@ -297,6 +297,8 @@ export interface NotificationsPageUiMessages {
   noUnread: string;
   noUnreadDesc: string;
   new: string;
+  deleteNotification: string;
+  clearNotifications: string;
   notificationsCount: (count: number) => string;
   typeLabels: Record<NotificationUiType, string>;
 }
@@ -317,6 +319,8 @@ const NOTIFICATIONS_PAGE_MESSAGES = {
     noUnread: "Không có thông báo chưa đọc",
     noUnreadDesc: 'Bạn đã đọc hết thông báo. Chuyển sang "Hiện tất cả" để xem lịch sử.',
     new: "Mới",
+    deleteNotification: "Xóa thông báo",
+    clearNotifications: "Xóa tất cả",
     typeLabels: {
       info: "Thông tin",
       success: "Thành công",
@@ -340,6 +344,8 @@ const NOTIFICATIONS_PAGE_MESSAGES = {
     noUnread: "No unread notifications",
     noUnreadDesc: `You've read all notifications. Switch to "Show all" to view history.`,
     new: "New",
+    deleteNotification: "Delete notification",
+    clearNotifications: "Clear all",
     typeLabels: {
       info: "Info",
       success: "Success",
@@ -1106,6 +1112,8 @@ export interface NotificationDropdownUiMessages {
   marking: string;
   noNotificationsYet: string;
   markAsRead: string;
+  deleteNotification: string;
+  clearNotifications: string;
   viewAllNotifications: string;
   connected: string;
   disconnected: string;
@@ -1120,6 +1128,8 @@ const NOTIFICATION_DROPDOWN_MESSAGES = {
     marking: "Đang đánh dấu...",
     noNotificationsYet: "Chưa có thông báo",
     markAsRead: "Đánh dấu đã đọc",
+    deleteNotification: "Xóa thông báo",
+    clearNotifications: "Xóa tất cả",
     viewAllNotifications: "Xem tất cả thông báo",
     connected: "Đã kết nối",
     disconnected: "Mất kết nối",
@@ -1132,6 +1142,8 @@ const NOTIFICATION_DROPDOWN_MESSAGES = {
     marking: "Marking...",
     noNotificationsYet: "No notifications yet",
     markAsRead: "Mark as read",
+    deleteNotification: "Delete notification",
+    clearNotifications: "Clear all",
     viewAllNotifications: "View all notifications",
     connected: "Connected",
     disconnected: "Disconnected",

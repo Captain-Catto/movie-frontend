@@ -56,6 +56,8 @@ export interface UseNotificationDropdownResult {
   handleCloseDetail: () => void;
   goToNotificationsPage: () => void;
   handleMarkAllAsRead: () => Promise<void>;
+  handleDeleteNotification: (notificationId: number) => Promise<void>;
+  handleClearNotifications: () => Promise<void>;
 }
 
 export function useNotificationDropdown(): UseNotificationDropdownResult {
@@ -214,6 +216,47 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
     }
   }, [markAllAsRead, setUnreadCount]);
 
+  const handleDeleteNotification = useCallback(
+    async (notificationId: number) => {
+      const target = notifications.find((notif) => notif.id === notificationId);
+      if (!target) return;
+
+      setNotifications((prev) =>
+        prev.filter((notif) => notif.id !== notificationId)
+      );
+      if (!target.isRead) {
+        setUnreadCount((count) => Math.max(0, count - 1));
+      }
+
+      try {
+        await axiosInstance.delete(`/notifications/${notificationId}`);
+      } catch (error) {
+        console.error("Error deleting notification:", error);
+        setNotifications((prev) => [target, ...prev].slice(0, 10));
+        if (!target.isRead) {
+          setUnreadCount((count) => count + 1);
+        }
+      }
+    },
+    [notifications, setUnreadCount]
+  );
+
+  const handleClearNotifications = useCallback(async () => {
+    const previousNotifications = notifications;
+    const unreadRemoved = previousNotifications.filter((notif) => !notif.isRead).length;
+
+    setNotifications([]);
+    setUnreadCount((count) => Math.max(0, count - unreadRemoved));
+
+    try {
+      await axiosInstance.delete("/notifications");
+    } catch (error) {
+      console.error("Error clearing notifications:", error);
+      setNotifications(previousNotifications);
+      setUnreadCount((count) => count + unreadRemoved);
+    }
+  }, [notifications, setUnreadCount]);
+
   return {
     isOpen,
     setIsOpen,
@@ -228,5 +271,7 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
     handleCloseDetail,
     goToNotificationsPage,
     handleMarkAllAsRead,
+    handleDeleteNotification,
+    handleClearNotifications,
   };
 }

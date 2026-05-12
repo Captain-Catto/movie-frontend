@@ -21,6 +21,8 @@ interface SyncSettings {
   movieCatalogLimit: number;
   tvCatalogLimit: number;
   trendingCatalogLimit: number;
+  peopleCacheLimit: number;
+  recommendationCacheLimit: number;
   updatedAt?: string;
 }
 
@@ -66,6 +68,8 @@ export default function AdminSyncDataPage() {
     movieCatalogLimit: 500000,
     tvCatalogLimit: 200000,
     trendingCatalogLimit: 100,
+    peopleCacheLimit: 10000,
+    recommendationCacheLimit: 10000,
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -97,6 +101,8 @@ export default function AdminSyncDataPage() {
           movieCatalogLimit: response.data.movieCatalogLimit,
           tvCatalogLimit: response.data.tvCatalogLimit,
           trendingCatalogLimit: response.data.trendingCatalogLimit,
+          peopleCacheLimit: response.data.peopleCacheLimit,
+          recommendationCacheLimit: response.data.recommendationCacheLimit,
         });
       }
     } catch (error) {
@@ -391,6 +397,50 @@ export default function AdminSyncDataPage() {
               />
               <p className="mt-1 text-xs text-gray-400">
                 Current: {settings?.trendingCatalogLimit.toLocaleString() || "Loading..."}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                People Cache Limit
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1000"
+                value={settingsForm.peopleCacheLimit}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    peopleCacheLimit: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+              <p className="mt-1 text-xs text-gray-400">
+                Current: {settings?.peopleCacheLimit.toLocaleString() || "Loading..."}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Recommendation Cache Limit
+              </label>
+              <input
+                type="number"
+                min="0"
+                step="1000"
+                value={settingsForm.recommendationCacheLimit}
+                onChange={(e) =>
+                  setSettingsForm({
+                    ...settingsForm,
+                    recommendationCacheLimit: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+              />
+              <p className="mt-1 text-xs text-gray-400">
+                Current: {settings?.recommendationCacheLimit.toLocaleString() || "Loading..."}
               </p>
             </div>
           </div>

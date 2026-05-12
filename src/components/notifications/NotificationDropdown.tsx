@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Bell, CheckCircle, X } from "lucide-react";
+import { Bell, CheckCircle, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,8 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
     handleCloseDetail,
     goToNotificationsPage,
     handleMarkAllAsRead,
+    handleDeleteNotification,
+    handleClearNotifications,
   } = useNotificationDropdown();
 
   // Close dropdown when clicking outside
@@ -92,20 +94,31 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
           <div className="flex items-center justify-between p-4 border-b border-gray-700">
             <h3 className="text-white font-semibold">{labels.notifications}</h3>
             {notifications.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-                disabled={isMarkingAllAsRead}
-                className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
-                title={
-                  notifications.every((n) => n.isRead)
-                    ? labels.allRead
-                    : labels.markAllRead
-                }
-              >
-                {isMarkingAllAsRead ? labels.marking : labels.markAllRead}
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleMarkAllAsRead}
+                  disabled={isMarkingAllAsRead}
+                  className="text-blue-400 hover:text-blue-300 text-xs disabled:opacity-50"
+                  title={
+                    notifications.every((n) => n.isRead)
+                      ? labels.allRead
+                      : labels.markAllRead
+                  }
+                >
+                  {isMarkingAllAsRead ? labels.marking : labels.markAllRead}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearNotifications}
+                  className="text-red-400 hover:text-red-300 text-xs"
+                  title={labels.clearNotifications}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
             )}
           </div>
 
@@ -168,6 +181,18 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                           <CheckCircle size={14} />
                         </Button>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleDeleteNotification(notification.id);
+                        }}
+                        className="text-red-400 hover:text-red-300 text-xs p-1"
+                        title={labels.deleteNotification}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
                     </div>
                   </div>
                 </div>
