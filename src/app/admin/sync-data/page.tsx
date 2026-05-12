@@ -18,11 +18,11 @@ interface DashboardStats {
 
 interface SyncSettings {
   id: number;
-  movieCatalogLimit: number;
-  tvCatalogLimit: number;
-  trendingCatalogLimit: number;
-  peopleCacheLimit: number;
-  recommendationCacheLimit: number;
+  movieCatalogLimit?: number;
+  tvCatalogLimit?: number;
+  trendingCatalogLimit?: number;
+  peopleCacheLimit?: number;
+  recommendationCacheLimit?: number;
   updatedAt?: string;
 }
 
@@ -98,11 +98,12 @@ export default function AdminSyncDataPage() {
       if (response.success && response.data) {
         setSettings(response.data);
         setSettingsForm({
-          movieCatalogLimit: response.data.movieCatalogLimit,
-          tvCatalogLimit: response.data.tvCatalogLimit,
-          trendingCatalogLimit: response.data.trendingCatalogLimit,
-          peopleCacheLimit: response.data.peopleCacheLimit,
-          recommendationCacheLimit: response.data.recommendationCacheLimit,
+          movieCatalogLimit: response.data.movieCatalogLimit ?? 500000,
+          tvCatalogLimit: response.data.tvCatalogLimit ?? 200000,
+          trendingCatalogLimit: response.data.trendingCatalogLimit ?? 100,
+          peopleCacheLimit: response.data.peopleCacheLimit ?? 10000,
+          recommendationCacheLimit:
+            response.data.recommendationCacheLimit ?? 10000,
         });
       }
     } catch (error) {
@@ -352,7 +353,7 @@ export default function AdminSyncDataPage() {
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <p className="mt-1 text-xs text-gray-400">
-                Current: {settings?.movieCatalogLimit.toLocaleString() || "Loading..."}
+                Current: {(settings?.movieCatalogLimit ?? 500000).toLocaleString()}
               </p>
             </div>
 
@@ -374,7 +375,7 @@ export default function AdminSyncDataPage() {
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <p className="mt-1 text-xs text-gray-400">
-                Current: {settings?.tvCatalogLimit.toLocaleString() || "Loading..."}
+                Current: {(settings?.tvCatalogLimit ?? 200000).toLocaleString()}
               </p>
             </div>
 
@@ -396,7 +397,7 @@ export default function AdminSyncDataPage() {
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <p className="mt-1 text-xs text-gray-400">
-                Current: {settings?.trendingCatalogLimit.toLocaleString() || "Loading..."}
+                Current: {(settings?.trendingCatalogLimit ?? 100).toLocaleString()}
               </p>
             </div>
 
@@ -418,7 +419,7 @@ export default function AdminSyncDataPage() {
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <p className="mt-1 text-xs text-gray-400">
-                Current: {settings?.peopleCacheLimit.toLocaleString() || "Loading..."}
+                Current: {(settings?.peopleCacheLimit ?? 10000).toLocaleString()}
               </p>
             </div>
 
@@ -440,7 +441,7 @@ export default function AdminSyncDataPage() {
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <p className="mt-1 text-xs text-gray-400">
-                Current: {settings?.recommendationCacheLimit.toLocaleString() || "Loading..."}
+                Current: {(settings?.recommendationCacheLimit ?? 10000).toLocaleString()}
               </p>
             </div>
           </div>
