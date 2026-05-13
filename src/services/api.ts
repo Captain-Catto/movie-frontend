@@ -364,6 +364,18 @@ class ApiService {
     return response.data;
   }
 
+  async searchPeople(
+    query: string,
+    page: number = 1,
+    limit: number = 24
+  ): Promise<PopularPeopleResponse> {
+    const params = this.buildQueryParams({ q: query, page, limit });
+    const url = `${API_BASE_URL}/people/search${params ? `?${params}` : ""}`;
+    const response = await this.fetchWithErrorHandling<ApiResponse<PopularPeopleResponse>>(url);
+
+    return response.data;
+  }
+
   async getPersonDetails(id: number): Promise<PersonDetails> {
     const url = `${API_BASE_URL}/people/${id}`;
     const response = await this.fetchWithErrorHandling<ApiResponse<PersonDetails>>(url);

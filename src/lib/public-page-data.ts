@@ -84,13 +84,21 @@ export async function getTrendingPageData(
 }
 
 export async function getPeoplePageData(
-  currentPage: number
+  currentPage: number,
+  searchQuery: string = ""
 ): Promise<PageListDataResult<PersonData>> {
   try {
-    const response = await apiService.getPopularPeople(
-      currentPage,
-      DEFAULT_BROWSE_PAGE_SIZE
-    );
+    const normalizedQuery = searchQuery.trim();
+    const response = normalizedQuery
+      ? await apiService.searchPeople(
+          normalizedQuery,
+          currentPage,
+          DEFAULT_BROWSE_PAGE_SIZE
+        )
+      : await apiService.getPopularPeople(
+          currentPage,
+          DEFAULT_BROWSE_PAGE_SIZE
+        );
     const people = Array.isArray(response.results)
       ? response.results.map(mapCastMemberToPersonData)
       : [];
