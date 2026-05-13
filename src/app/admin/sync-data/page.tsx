@@ -26,7 +26,13 @@ interface SyncSettings {
   updatedAt?: string;
 }
 
-type SyncTarget = "all" | "movies" | "tv" | "today" | "popular";
+type SyncTarget =
+  | "all"
+  | "movies"
+  | "tv"
+  | "today"
+  | "popular"
+  | "trending";
 
 const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string }> =
   [
@@ -49,6 +55,11 @@ const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string 
       key: "popular",
       label: "Sync Popular Content",
       description: "Refresh popular movies, TV series, and trending lists.",
+    },
+    {
+      key: "trending",
+      label: "Sync Trending Only",
+      description: "Refresh the homepage hero and trending page cache.",
     },
     {
       key: "today",
