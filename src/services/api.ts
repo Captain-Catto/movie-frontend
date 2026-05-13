@@ -36,6 +36,7 @@ type CacheEntry<T> = {
 
 const responseCache = new Map<string, CacheEntry<unknown>>();
 const DEFAULT_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
+const TRENDING_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 class ApiService {
   /**
@@ -349,7 +350,11 @@ class ApiService {
     });
 
     const url = `${API_BASE_URL}/trending${params ? `?${params}` : ""}`;
-    return this.fetchWithCache<ApiResponse<TrendingItem[]>>(url);
+    return this.fetchWithCache<ApiResponse<TrendingItem[]>>(
+      url,
+      undefined,
+      TRENDING_CACHE_TTL
+    );
   }
 
   // ===========================

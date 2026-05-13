@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -59,40 +59,17 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const { breakpoint } = useWindowWidth();
   const thumbCount =
     breakpoint === "desktop" ? 10 : breakpoint === "tablet" ? 8 : 5;
-
-  useEffect(() => {
-    const firstMovie = movies?.[0];
-
-    console.info("[HeroSection] Render data", {
-      isLoading,
-      movieCount: movies?.length ?? 0,
-      language,
-      firstMovie: firstMovie
-        ? {
-            id: firstMovie.id,
-            tmdbId: firstMovie.tmdbId,
-            title: firstMovie.title,
-            href: firstMovie.href,
-            hasPoster: Boolean(
-              firstMovie.posterImage || firstMovie.poster
-            ),
-            hasBackdrop: Boolean(firstMovie.backgroundImage),
-          }
-        : null,
-    });
-
-    if (!isLoading && (!movies || movies.length === 0)) {
-      console.warn("[HeroSection] Empty movies, showing skeleton", {
-        language,
-        isLoading,
-      });
-    }
-  }, [isLoading, language, movies]);
+  const isMobile = breakpoint === "mobile";
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
   const handleThumbnailClick = (index: number, event: React.MouseEvent) => {
     if (flipAnim || index === activeIndex || !swiperRef.current) return;
+
+    if (isMobile) {
+      swiperRef.current.slideToLoop(index);
+      return;
+    }
 
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
     const sx = rect.width / window.innerWidth;
@@ -412,14 +389,16 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       {movies.length > 1 && (
         <div
           className={`absolute bottom-6 z-30 ${
-            breakpoint === "mobile"
+            isMobile
               ? "left-1/2 -translate-x-1/2 w-full px-4"
               : "right-6"
           }`}
         >
           <div
-            className={`flex flex-wrap gap-2 ${
-              breakpoint === "mobile" ? "justify-center" : "justify-end"
+            className={`flex ${
+              isMobile
+                ? "flex-nowrap justify-center gap-1"
+                : "flex-wrap justify-end gap-2"
             }`}
           >
             {movies.slice(0, thumbCount).map((movie, index) => {
@@ -436,7 +415,9 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     cursor-pointer transition-all duration-300 rounded-md overflow-hidden
                     ${
                       activeIndex === index
-                        ? "ring-2 ring-white scale-110 opacity-100"
+                        ? `ring-2 ring-white ${
+                            isMobile ? "scale-105" : "scale-110"
+                          } opacity-100`
                         : "opacity-70 hover:opacity-90 hover:scale-105"
                     }
                   `}
@@ -446,9 +427,9 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     alt={movie.title}
                     width={80}
                     height={48}
-                    sizes="80px"
+                    sizes={isMobile ? "48px" : "80px"}
                     quality={45}
-                    className="w-20 h-12 object-cover"
+                    className={isMobile ? "h-8 w-12 object-cover" : "w-20 h-12 object-cover"}
                   />
                 </div>
               );
