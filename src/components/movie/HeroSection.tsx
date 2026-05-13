@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -59,6 +59,35 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const { breakpoint } = useWindowWidth();
   const thumbCount =
     breakpoint === "desktop" ? 10 : breakpoint === "tablet" ? 8 : 5;
+
+  useEffect(() => {
+    const firstMovie = movies?.[0];
+
+    console.info("[HeroSection] Render data", {
+      isLoading,
+      movieCount: movies?.length ?? 0,
+      language,
+      firstMovie: firstMovie
+        ? {
+            id: firstMovie.id,
+            tmdbId: firstMovie.tmdbId,
+            title: firstMovie.title,
+            href: firstMovie.href,
+            hasPoster: Boolean(
+              firstMovie.posterImage || firstMovie.poster
+            ),
+            hasBackdrop: Boolean(firstMovie.backgroundImage),
+          }
+        : null,
+    });
+
+    if (!isLoading && (!movies || movies.length === 0)) {
+      console.warn("[HeroSection] Empty movies, showing skeleton", {
+        language,
+        isLoading,
+      });
+    }
+  }, [isLoading, language, movies]);
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 

@@ -1,4 +1,4 @@
-import { apiService } from "@/services/api";
+import { API_BASE_URL, apiService } from "@/services/api";
 import type { MovieCardData, TVSeries } from "@/types/content.types";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
@@ -80,10 +80,45 @@ export async function getHomePageData(
     }),
   ]);
 
-  const heroMovies =
-    trendingRes.success && Array.isArray(trendingRes.data)
-      ? (mapTrendingDataToFrontend(trendingRes.data) as MovieCardData[])
-      : [];
+  const trendingItems = Array.isArray(trendingRes.data) ? trendingRes.data : [];
+
+  console.info("[HomePageData] Hero trending fetch result", {
+    apiBaseUrl: API_BASE_URL,
+    language,
+    success: trendingRes.success,
+    itemCount: trendingItems.length,
+    pagination: trendingRes.pagination,
+    message: trendingRes.message,
+    firstItem: trendingItems[0]
+      ? {
+          tmdbId: trendingItems[0].tmdbId,
+          mediaType: trendingItems[0].mediaType,
+          title: trendingItems[0].title,
+          hasPoster: Boolean(trendingItems[0].posterUrl),
+          hasBackdrop: Boolean(trendingItems[0].backdropUrl),
+        }
+      : null,
+  });
+
+  let heroMovies: MovieCardData[] = [];
+
+  if (trendingRes.success && trendingItems.length > 0) {
+    try {
+      heroMovies = mapTrendingDataToFrontend(trendingItems) as MovieCardData[];
+    } catch (error) {
+      console.error("[HomePageData] Failed to map hero trending data", {
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (heroMovies.length === 0) {
+    console.warn("[HomePageData] Hero movies resolved empty", {
+      trendingSuccess: trendingRes.success,
+      rawTrendingCount: trendingItems.length,
+      language,
+    });
+  }
 
   return {
     heroMovies,
