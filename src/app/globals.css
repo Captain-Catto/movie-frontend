@@ -458,6 +458,10 @@ body {
 
 .hero-content-fade {
   opacity: 0;
+  animation: none;
+}
+
+.media-item.hero-content-ready .hero-content-fade {
   animation: heroContentFadeIn 0.5s ease forwards;
 }
 

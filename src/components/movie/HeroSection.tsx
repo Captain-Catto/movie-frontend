@@ -54,6 +54,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const { language } = useLanguage();
   const labels = getHeroSectionUiMessages(language);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [visibleContentIndex, setVisibleContentIndex] = useState(0);
   const [flipAnim, setFlipAnim] = useState<FlipAnim | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const { breakpoint } = useWindowWidth();
@@ -89,6 +90,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
     // Swiper chuyển slide + overlay bắt đầu fade out cùng lúc → image & text xuất hiện cùng nhau
     setTimeout(() => {
       swiperRef.current?.slideToLoop(index, 0);
+      setActiveIndex(index);
+      setVisibleContentIndex(index);
     }, 420);
 
     setTimeout(() => {
@@ -139,6 +142,10 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
         className="h-screen"
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+        onSlideChangeTransitionStart={() => setVisibleContentIndex(-1)}
+        onSlideChangeTransitionEnd={(swiper) =>
+          setVisibleContentIndex(swiper.realIndex)
+        }
       >
         {movies.map((movie, index) => {
           const backgroundImage =
@@ -237,7 +244,11 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               {/* Safe Area Content */}
               <div className="safe-area relative z-20 h-full flex items-center">
                 <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                  <div key={activeIndex} className="media-item max-w-2xl space-y-6">
+                  <div
+                    className={`media-item max-w-2xl space-y-6 ${
+                      index === visibleContentIndex ? "hero-content-ready" : ""
+                    }`}
+                  >
                     {/* Main Title */}
                     <h1 className="hero-content-fade hero-content-fade--title text-5xl font-bold text-white">
                       <Link title={movie.title} href={movie.href} onClick={handleDetailClick}>
