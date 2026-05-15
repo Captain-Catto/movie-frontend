@@ -1165,7 +1165,7 @@ export const getNotificationDropdownUiMessages = (
   };
 };
 
-export type SearchFilterType = "movie" | "tv" | "all";
+export type SearchFilterType = "movie" | "tv" | "person" | "all";
 
 export interface SearchUiMessages {
   title: string;
@@ -1174,6 +1174,7 @@ export interface SearchUiMessages {
   tabAll: string;
   tabMovies: string;
   tabTvSeries: string;
+  tabActors: string;
   noResultsTitle: string;
   noResultsDescription: string;
   updating: string;
@@ -1193,11 +1194,12 @@ const SEARCH_MESSAGES: Record<UiLocale, Omit<SearchUiMessages, "foundResults" | 
   {
     vi: {
       title: "Tìm kiếm",
-      placeholder: "Tìm phim lẻ, phim bộ...",
+      placeholder: "Tìm phim lẻ, phim bộ, diễn viên...",
       minCharsHint: "Nhập ít nhất 2 ký tự để tìm kiếm",
       tabAll: "Tất cả",
       tabMovies: "Phim lẻ",
       tabTvSeries: "Phim bộ",
+      tabActors: "Diễn viên",
       noResultsTitle: "Không tìm thấy kết quả",
       noResultsDescription: "Hãy thử tìm bằng từ khóa khác",
       updating: "Đang cập nhật...",
@@ -1212,11 +1214,12 @@ const SEARCH_MESSAGES: Record<UiLocale, Omit<SearchUiMessages, "foundResults" | 
     },
     en: {
       title: "Search",
-      placeholder: "Search movies, TV shows...",
+      placeholder: "Search movies, TV shows, actors...",
       minCharsHint: "Enter at least 2 characters to search",
       tabAll: "All",
       tabMovies: "Movies",
       tabTvSeries: "TV Series",
+      tabActors: "Actors",
       noResultsTitle: "No results found",
       noResultsDescription: "Try searching with different keywords",
       updating: "Updating...",
@@ -1247,6 +1250,9 @@ export const getSearchUiMessages = (language: string | undefined): SearchUiMessa
       }
       if (type === "tv") {
         return base.tabTvSeries;
+      }
+      if (type === "person") {
+        return base.tabActors;
       }
       return base.tabAll;
     },

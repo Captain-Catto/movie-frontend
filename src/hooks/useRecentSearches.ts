@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { RecentSearch } from "@/types/search";
+import type { SearchFilterType } from "@/types/search";
 import axiosInstance from "@/lib/axios-instance";
 
 interface User {
@@ -12,7 +13,7 @@ interface User {
 
 interface UseRecentSearchesReturn {
   searches: RecentSearch[];
-  addSearch: (query: string, type: "movie" | "tv" | "all") => Promise<void>;
+  addSearch: (query: string, type: SearchFilterType) => Promise<void>;
   removeSearch: (search: RecentSearch) => Promise<void>;
   clearSearches: () => Promise<void>;
   syncSearches: () => Promise<void>;
@@ -54,7 +55,7 @@ export const useRecentSearches = (
         interface DbSearch {
           id?: string;
           query: string;
-          type: "movie" | "tv" | "all";
+          type: SearchFilterType;
           createdAt: string;
         }
         const dbSearches = response.data.data.map((search: DbSearch) => ({
@@ -163,7 +164,7 @@ export const useRecentSearches = (
 
   // Add new search
   const addSearch = useCallback(
-    async (query: string, type: "movie" | "tv" | "all") => {
+    async (query: string, type: SearchFilterType) => {
       const trimmedQuery = query.trim();
       if (!trimmedQuery || trimmedQuery.length < 2) return;
 

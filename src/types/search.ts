@@ -13,15 +13,18 @@ export interface SearchResult {
   popularity?: number;
   genreIds?: number[]; // Backend returns number array
   originalLanguage?: string;
-  mediaType: "movie" | "tv";
-  media_type?: "movie" | "tv"; // Backend field
+  profilePath?: string;
+  mediaType: "movie" | "tv" | "person";
+  media_type?: "movie" | "tv" | "person"; // Backend field
   adult?: boolean;
 }
+
+export type SearchFilterType = "movie" | "tv" | "person" | "all";
 
 export interface RecentSearch {
   id?: number; // DB ID (if logged in)
   query: string;
-  type: "movie" | "tv" | "all";
+  type: SearchFilterType;
   timestamp: Date;
   source: "local" | "database";
 }
@@ -32,7 +35,7 @@ export interface SearchState {
   results: SearchResult[];
   recentSearches: RecentSearch[];
   isLoading: boolean;
-  selectedType: "movie" | "tv" | "all";
+  selectedType: SearchFilterType;
   hasMore: boolean;
   page: number;
 }

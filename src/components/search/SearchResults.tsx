@@ -101,7 +101,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <div className="space-y-2">
           {safeResults.map((result) => (
             <SearchResultItem
-              key={`${result.mediaType}-${result.tmdbId}`}
+              key={`${result.mediaType}-${result.tmdbId}-${result.id}`}
               result={result}
               onClose={onClose}
               onResultClick={onResultClick}

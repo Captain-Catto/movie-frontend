@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Film, Tv, Grid3X3 } from "lucide-react";
+import { Film, Tv, Grid3X3, UserRound } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSearchUiMessages } from "@/lib/ui-messages";
+import type { SearchFilterType } from "@/types/search";
 
 interface SearchTabsProps {
-  selectedType: "movie" | "tv" | "all";
-  onTypeChange: (type: "movie" | "tv" | "all") => void;
+  selectedType: SearchFilterType;
+  onTypeChange: (type: SearchFilterType) => void;
 }
 
 const SearchTabs: React.FC<SearchTabsProps> = ({
@@ -32,6 +33,11 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       id: "tv" as const,
       label: labels.tabTvSeries,
       icon: Tv,
+    },
+    {
+      id: "person" as const,
+      label: labels.tabActors,
+      icon: UserRound,
     },
   ];
 

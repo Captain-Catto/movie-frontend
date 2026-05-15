@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { SearchResult } from "@/types/search";
-import { Calendar, Star, Film, Tv } from "lucide-react";
+import { Calendar, Star, Film, Tv, UserRound } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSearchUiMessages } from "@/lib/ui-messages";
 import {
@@ -36,6 +36,15 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
   };
 
   const getMediaTypeInfo = () => {
+    if (result.mediaType === "person") {
+      return {
+        icon: UserRound,
+        label: labels.typeLabel("person"),
+        href: `/people/${result.tmdbId}`,
+        color: "text-purple-400",
+      };
+    }
+
     if (result.mediaType === "tv") {
       return {
         icon: Tv,
@@ -67,6 +76,8 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           src={
             result.posterPath
               ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${result.posterPath}`
+              : result.profilePath
+              ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${result.profilePath}`
               : FALLBACK_POSTER
           }
           alt={result.title}

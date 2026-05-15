@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { SearchResult } from "@/types/search";
+import type { SearchFilterType } from "@/types/search";
 import { API_BASE_URL } from "@/services/api";
 import { useDebounce } from "./core/useDebounce";
 import { analyticsService } from "@/services/analytics.service";
@@ -11,8 +12,8 @@ interface UseSearchReturn {
   setQuery: (query: string) => void;
   results: SearchResult[];
   isLoading: boolean;
-  selectedType: "movie" | "tv" | "all";
-  setSelectedType: (type: "movie" | "tv" | "all") => void;
+  selectedType: SearchFilterType;
+  setSelectedType: (type: SearchFilterType) => void;
   hasMore: boolean;
   page: number;
   loadMore: () => void;
@@ -26,9 +27,7 @@ export const useSearch = (): UseSearchReturn => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedType, setSelectedType] = useState<"movie" | "tv" | "all">(
-    "all"
-  );
+  const [selectedType, setSelectedType] = useState<SearchFilterType>("all");
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
 
