@@ -101,7 +101,18 @@ export const useSearch = (): UseSearchReturn => {
                 ...item,
                 id: item.id?.toString() || item.tmdbId?.toString(),
                 tmdbId: item.tmdbId || Number(item.id),
-                mediaType: item.media_type || "movie",
+                title: item.title || (item as { name?: string }).name || "",
+                originalTitle:
+                  item.originalTitle ||
+                  (item as { original_name?: string }).original_name,
+                posterPath:
+                  item.posterPath ||
+                  (item as { poster_path?: string }).poster_path ||
+                  (item as { profile_path?: string }).profile_path,
+                profilePath:
+                  item.profilePath || (item as { profile_path?: string }).profile_path,
+                mediaType:
+                  searchType === "person" ? "person" : item.media_type || "movie",
               }))
             : [];
 
