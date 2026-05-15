@@ -87,9 +87,11 @@ export default function ChatWidget() {
   const dragStartRef = useRef<{ cx: number; cy: number; px: number; py: number } | null>(null);
   const hasDraggedRef = useRef(false);
 
-  // Panel opens below the button when button is in the top half of the screen
+  // Panel opens below when button is in top half; aligns right when button is on right side
   const panelOpensDown =
-    typeof window !== "undefined" && pos !== null && pos.y < window.innerHeight / 2;
+    typeof window !== "undefined" && pos !== null && pos.y + 24 < window.innerHeight / 2;
+  const buttonOnRightSide =
+    typeof window === "undefined" || !pos || pos.x + 24 >= window.innerWidth / 2;
 
   const lastRecommendations = useMemo(() => {
     const assistantMessages = messages
@@ -248,10 +250,9 @@ export default function ChatWidget() {
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       hasDraggedRef.current = true;
     }
-    const w = containerRef.current?.offsetWidth ?? 48;
-    const h = containerRef.current?.offsetHeight ?? 48;
-    const newX = Math.max(0, Math.min(window.innerWidth - w, dragStartRef.current.px + dx));
-    const newY = Math.max(0, Math.min(window.innerHeight - h, dragStartRef.current.py + dy));
+    // Constrain by button size only (48px) — panel is absolutely positioned and doesn't affect bounds
+    const newX = Math.max(0, Math.min(window.innerWidth - 48, dragStartRef.current.px + dx));
+    const newY = Math.max(0, Math.min(window.innerHeight - 48, dragStartRef.current.py + dy));
     setPos({ x: newX, y: newY });
   };
 
@@ -267,8 +268,16 @@ export default function ChatWidget() {
     setOpen((v) => !v);
   };
 
+  const panelPos = {
+    ...(panelOpensDown ? { top: "3.75rem" } : { bottom: "3.75rem" }),
+    ...(buttonOnRightSide ? { right: 0 } : { left: 0 }),
+  };
+
   const panel = open && (
-    <div className="flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl">
+    <div
+      className="absolute flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl"
+      style={panelPos}
+    >
       <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-red-600">
@@ -483,10 +492,10 @@ export default function ChatWidget() {
 
       <div
         ref={containerRef}
-        className="fixed z-40 flex flex-col items-end"
+        className="fixed z-40"
         style={pos ? { left: pos.x, top: pos.y } : { bottom: "1rem", right: "1rem" }}
       >
-        {!panelOpensDown && panel && <div className="mb-3">{panel}</div>}
+        {panel}
 
         <button
           type="button"
@@ -501,8 +510,6 @@ export default function ChatWidget() {
         >
           {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
         </button>
-
-        {panelOpensDown && panel && <div className="mt-3">{panel}</div>}
       </div>
     </>
   );
