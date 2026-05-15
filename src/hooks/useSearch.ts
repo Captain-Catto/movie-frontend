@@ -100,6 +100,7 @@ export const useSearch = (): UseSearchReturn => {
             ? responseData.map((item: SearchResult) => ({
                 ...item,
                 id: item.id?.toString() || item.tmdbId?.toString(),
+                tmdbId: item.tmdbId || Number(item.id),
                 mediaType: item.media_type || "movie",
               }))
             : [];
