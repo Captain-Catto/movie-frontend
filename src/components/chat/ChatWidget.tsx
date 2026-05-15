@@ -10,6 +10,7 @@ import {
   MessageCircle,
   Plus,
   Send,
+  Trash2,
   X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,6 +40,7 @@ const labels = {
     history: "Lịch sử",
     newChat: "Mới",
     noHistory: "Chưa có lịch sử gợi ý.",
+    deleteChat: "Xoá cuộc trò chuyện",
   },
   en: {
     title: "Movie assistant",
@@ -51,6 +53,7 @@ const labels = {
     history: "History",
     newChat: "New",
     noHistory: "No recommendation history yet.",
+    deleteChat: "Delete conversation",
   },
 };
 
@@ -185,6 +188,28 @@ export default function ChatWidget() {
     }
   };
 
+  const deleteSession = async (target: ChatSession) => {
+    setError("");
+    try {
+      await chatApi.deleteSession(target.id);
+      const remainingSessions = await chatApi.getSessions();
+      setSessions(remainingSessions);
+
+      if (session?.id !== target.id) return;
+
+      const nextSession = remainingSessions[0] || (await chatApi.createOrGetSession());
+      setSession(nextSession);
+      const existingMessages = await chatApi.getMessages(nextSession.id);
+      setMessages(existingMessages);
+      if (remainingSessions.length === 0) {
+        const loadedSessions = await chatApi.getSessions();
+        setSessions(loadedSessions);
+      }
+    } catch {
+      setError(text.error);
+    }
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-40">
       {open && (
@@ -251,23 +276,43 @@ export default function ChatWidget() {
                       </div>
                     ) : (
                       sessions.map((item) => (
-                        <button
+                        <div
                           key={item.id}
-                          type="button"
-                          onClick={() => loadSession(item)}
-                          className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${
+                          className={`group flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${
                             session?.id === item.id
                               ? "bg-red-600 text-white"
                               : "bg-gray-800 text-gray-300 hover:bg-gray-700"
                           }`}
                         >
-                          <div className="line-clamp-1 font-medium">
-                            {item.title || text.title}
-                          </div>
-                          <div className="mt-0.5 text-xs opacity-70">
-                            {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
-                          </div>
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => loadSession(item)}
+                            className="min-w-0 flex-1 text-left"
+                          >
+                            <div className="line-clamp-1 font-medium">
+                              {item.title || text.title}
+                            </div>
+                            <div className="mt-0.5 text-xs opacity-70">
+                              {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+                            </div>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              deleteSession(item);
+                            }}
+                            className={`rounded p-1 transition ${
+                              session?.id === item.id
+                                ? "text-white/75 hover:bg-red-700 hover:text-white"
+                                : "text-gray-500 opacity-100 hover:bg-gray-600 hover:text-red-300 sm:opacity-0 sm:group-hover:opacity-100"
+                            }`}
+                            aria-label={text.deleteChat}
+                            title={text.deleteChat}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       ))
                     )}
                   </div>

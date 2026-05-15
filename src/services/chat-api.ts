@@ -33,6 +33,10 @@ export const chatApi = {
     return Array.isArray(response.data.data) ? response.data.data : [];
   },
 
+  async deleteSession(sessionId: number): Promise<void> {
+    await axiosInstance.delete<ApiResponse<null>>(`/chat/sessions/${sessionId}`);
+  },
+
   async sendMessage(
     sessionId: number,
     message: string,
