@@ -41,6 +41,10 @@ const labels = {
     newChat: "Mới",
     noHistory: "Chưa có lịch sử gợi ý.",
     deleteChat: "Xoá cuộc trò chuyện",
+    confirmTitle: "Xoá cuộc trò chuyện",
+    confirmMessage: "Bạn có chắc chắn muốn xoá cuộc trò chuyện này không?",
+    confirm: "Xoá",
+    cancel: "Huỷ",
   },
   en: {
     title: "Movie assistant",
@@ -54,6 +58,10 @@ const labels = {
     newChat: "New",
     noHistory: "No recommendation history yet.",
     deleteChat: "Delete conversation",
+    confirmTitle: "Delete conversation",
+    confirmMessage: "Are you sure you want to delete this conversation?",
+    confirm: "Delete",
+    cancel: "Cancel",
   },
 };
 
@@ -71,7 +79,17 @@ export default function ChatWidget() {
   const [initializing, setInitializing] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
+  const [confirmTarget, setConfirmTarget] = useState<ChatSession | null>(null);
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+
   const listRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const dragStartRef = useRef<{ cx: number; cy: number; px: number; py: number } | null>(null);
+  const hasDraggedRef = useRef(false);
+
+  // Panel opens below the button when button is in the top half of the screen
+  const panelOpensDown =
+    typeof window !== "undefined" && pos !== null && pos.y < window.innerHeight / 2;
 
   const lastRecommendations = useMemo(() => {
     const assistantMessages = messages
@@ -210,195 +228,283 @@ export default function ChatWidget() {
     }
   };
 
-  return (
-    <div className="fixed bottom-4 right-4 z-40">
-      {open && (
-        <div className="mb-3 flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-red-600">
-                <Bot className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-white">{text.title}</div>
-                <div className="text-xs text-gray-400">{text.subtitle}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              {isAuthenticated && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => setShowHistory((value) => !value)}
-                    className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
-                    aria-label="Chat history"
-                    title={text.history}
-                  >
-                    <Clock3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={startNewChat}
-                    className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
-                    aria-label="New chat"
-                    title={text.newChat}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </button>
-                </>
-              )}
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.button !== 0) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    hasDraggedRef.current = false;
+    const rect = containerRef.current?.getBoundingClientRect();
+    dragStartRef.current = {
+      cx: e.clientX,
+      cy: e.clientY,
+      px: rect?.left ?? window.innerWidth - 64,
+      py: rect?.top ?? window.innerHeight - 64,
+    };
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragStartRef.current) return;
+    const dx = e.clientX - dragStartRef.current.cx;
+    const dy = e.clientY - dragStartRef.current.cy;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+      hasDraggedRef.current = true;
+    }
+    const w = containerRef.current?.offsetWidth ?? 48;
+    const h = containerRef.current?.offsetHeight ?? 48;
+    const newX = Math.max(0, Math.min(window.innerWidth - w, dragStartRef.current.px + dx));
+    const newY = Math.max(0, Math.min(window.innerHeight - h, dragStartRef.current.py + dy));
+    setPos({ x: newX, y: newY });
+  };
+
+  const handlePointerUp = () => {
+    dragStartRef.current = null;
+  };
+
+  const handleToggle = () => {
+    if (hasDraggedRef.current) {
+      hasDraggedRef.current = false;
+      return;
+    }
+    setOpen((v) => !v);
+  };
+
+  const panel = open && (
+    <div className="flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl">
+      <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-red-600">
+            <Bot className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-white">{text.title}</div>
+            <div className="text-xs text-gray-400">{text.subtitle}</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          {isAuthenticated && (
+            <>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={() => setShowHistory((value) => !value)}
                 className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
-                aria-label="Close chat"
+                aria-label="Chat history"
+                title={text.history}
               >
-                <X className="h-4 w-4" />
+                <Clock3 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={startNewChat}
+                className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+                aria-label="New chat"
+                title={text.newChat}
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+            aria-label="Close chat"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {!isAuthenticated && !isLoading ? (
+        <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-gray-300">
+          {text.login}
+        </div>
+      ) : (
+        <>
+          {showHistory && (
+            <div className="border-b border-gray-800 bg-gray-950/40 px-3 py-3">
+              <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                {text.history}
+              </div>
+              <div className="max-h-40 space-y-2 overflow-y-auto">
+                {sessions.length === 0 ? (
+                  <div className="rounded-md bg-gray-800 px-3 py-2 text-xs text-gray-400">
+                    {text.noHistory}
+                  </div>
+                ) : (
+                  sessions.map((item) => (
+                    <div
+                      key={item.id}
+                      className={`group flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${
+                        session?.id === item.id
+                          ? "bg-red-600 text-white"
+                          : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => loadSession(item)}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <div className="line-clamp-1 font-medium">
+                          {item.title || text.title}
+                        </div>
+                        <div className="mt-0.5 text-xs opacity-70">
+                          {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setConfirmTarget(item);
+                        }}
+                        className={`rounded p-1 transition ${
+                          session?.id === item.id
+                            ? "text-white/75 hover:bg-red-700 hover:text-white"
+                            : "text-gray-500 opacity-100 hover:bg-gray-600 hover:text-red-300 sm:opacity-0 sm:group-hover:opacity-100"
+                        }`}
+                        aria-label={text.deleteChat}
+                        title={text.deleteChat}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+            {messages.length === 0 && !initializing && !sending && (
+              <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
+                {text.empty}
+              </div>
+            )}
+
+            {messages.map((message) => (
+              <div
+                key={`${message.id}-${message.createdAt}`}
+                className={`flex ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`max-w-[82%] rounded-lg px-3 py-2 text-sm ${
+                    message.role === "user"
+                      ? "bg-red-600 text-white"
+                      : "bg-gray-800 text-gray-100"
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+
+            {sending && (
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                {text.title}
+              </div>
+            )}
+
+            {lastRecommendations.length > 0 && (
+              <div className="space-y-2 pt-1">
+                {lastRecommendations.map((item) => (
+                  <RecommendationCard key={`${item.type}-${item.tmdbId}`} item={item} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {error && (
+            <div className="border-t border-gray-800 px-4 py-2 text-xs text-amber-300">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 p-3">
+            <input
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              maxLength={2000}
+              placeholder={text.placeholder}
+              disabled={initializing && !session}
+              className="min-w-0 flex-1 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:border-red-500"
+            />
+            <button
+              type="submit"
+              disabled={!input.trim() || sending || !session}
+              className="flex h-10 w-10 items-center justify-center rounded-md bg-red-600 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Send message"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </form>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      {confirmTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setConfirmTarget(null)}
+        >
+          <div
+            className="mx-4 w-full max-w-sm rounded-lg border border-gray-700 bg-gray-900 p-5 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-semibold text-white">{text.confirmTitle}</h3>
+            <p className="mt-2 text-sm text-gray-400">{text.confirmMessage}</p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmTarget(null)}
+                className="rounded-md px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
+              >
+                {text.cancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteSession(confirmTarget);
+                  setConfirmTarget(null);
+                }}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+              >
+                {text.confirm}
               </button>
             </div>
           </div>
-
-          {!isAuthenticated && !isLoading ? (
-            <div className="flex flex-1 items-center justify-center px-6 text-center text-sm text-gray-300">
-              {text.login}
-            </div>
-          ) : (
-            <>
-              {showHistory && (
-                <div className="border-b border-gray-800 bg-gray-950/40 px-3 py-3">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    {text.history}
-                  </div>
-                  <div className="max-h-40 space-y-2 overflow-y-auto">
-                    {sessions.length === 0 ? (
-                      <div className="rounded-md bg-gray-800 px-3 py-2 text-xs text-gray-400">
-                        {text.noHistory}
-                      </div>
-                    ) : (
-                      sessions.map((item) => (
-                        <div
-                          key={item.id}
-                          className={`group flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${
-                            session?.id === item.id
-                              ? "bg-red-600 text-white"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          }`}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => loadSession(item)}
-                            className="min-w-0 flex-1 text-left"
-                          >
-                            <div className="line-clamp-1 font-medium">
-                              {item.title || text.title}
-                            </div>
-                            <div className="mt-0.5 text-xs opacity-70">
-                              {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
-                            </div>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              deleteSession(item);
-                            }}
-                            className={`rounded p-1 transition ${
-                              session?.id === item.id
-                                ? "text-white/75 hover:bg-red-700 hover:text-white"
-                                : "text-gray-500 opacity-100 hover:bg-gray-600 hover:text-red-300 sm:opacity-0 sm:group-hover:opacity-100"
-                            }`}
-                            aria-label={text.deleteChat}
-                            title={text.deleteChat}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-                {messages.length === 0 && !initializing && !sending && (
-                  <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
-                    {text.empty}
-                  </div>
-                )}
-
-                {messages.map((message) => (
-                  <div
-                    key={`${message.id}-${message.createdAt}`}
-                    className={`flex ${
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-[82%] rounded-lg px-3 py-2 text-sm ${
-                        message.role === "user"
-                          ? "bg-red-600 text-white"
-                          : "bg-gray-800 text-gray-100"
-                      }`}
-                    >
-                      {message.content}
-                    </div>
-                  </div>
-                ))}
-
-                {sending && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {text.title}
-                  </div>
-                )}
-
-                {lastRecommendations.length > 0 && (
-                  <div className="space-y-2 pt-1">
-                    {lastRecommendations.map((item) => (
-                      <RecommendationCard key={`${item.type}-${item.tmdbId}`} item={item} />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {error && (
-                <div className="border-t border-gray-800 px-4 py-2 text-xs text-amber-300">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 p-3">
-                <input
-                  value={input}
-                  onChange={(event) => setInput(event.target.value)}
-                  maxLength={2000}
-                  placeholder={text.placeholder}
-                  disabled={initializing && !session}
-                  className="min-w-0 flex-1 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:border-red-500"
-                />
-                <button
-                  type="submit"
-                  disabled={!input.trim() || sending || !session}
-                  className="flex h-10 w-10 items-center justify-center rounded-md bg-red-600 text-white disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label="Send message"
-                >
-                  <Send className="h-4 w-4" />
-                </button>
-              </form>
-            </>
-          )}
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex h-12 w-12 items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition hover:bg-red-700"
-        aria-label="Open movie assistant"
+      <div
+        ref={containerRef}
+        className="fixed z-40 flex flex-col items-end"
+        style={pos ? { left: pos.x, top: pos.y } : { bottom: "1rem", right: "1rem" }}
       >
-        {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
-      </button>
-    </div>
+        {!panelOpensDown && panel && <div className="mb-3">{panel}</div>}
+
+        <button
+          type="button"
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          onClick={handleToggle}
+          style={{ touchAction: "none" }}
+          className="flex h-12 w-12 cursor-grab items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition hover:bg-red-700 active:cursor-grabbing"
+          aria-label="Open movie assistant"
+        >
+          {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+        </button>
+
+        {panelOpensDown && panel && <div className="mt-3">{panel}</div>}
+      </div>
+    </>
   );
 }
 
