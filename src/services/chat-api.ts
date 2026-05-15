@@ -12,11 +12,18 @@ interface ApiResponse<T> {
 }
 
 export const chatApi = {
-  async createOrGetSession(): Promise<ChatSession> {
+  async createOrGetSession(createNew = false): Promise<ChatSession> {
     const response = await axiosInstance.post<ApiResponse<ChatSession>>(
-      "/chat/sessions"
+      `/chat/sessions${createNew ? "?new=true" : ""}`
     );
     return response.data.data;
+  },
+
+  async getSessions(): Promise<ChatSession[]> {
+    const response = await axiosInstance.get<ApiResponse<ChatSession[]>>(
+      "/chat/sessions"
+    );
+    return Array.isArray(response.data.data) ? response.data.data : [];
   },
 
   async getMessages(sessionId: number): Promise<ChatMessage[]> {

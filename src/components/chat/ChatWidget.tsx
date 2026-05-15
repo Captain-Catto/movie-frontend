@@ -3,7 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Bot, Loader2, MessageCircle, Send, X } from "lucide-react";
+import {
+  Bot,
+  Clock3,
+  Loader2,
+  MessageCircle,
+  Plus,
+  Send,
+  X,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { chatApi } from "@/services/chat-api";
@@ -28,6 +36,9 @@ const labels = {
     empty: "Hỏi mình về phim hành động, phim bộ mới, hoặc phim giống nội dung bạn đã thích.",
     error: "Không gửi được tin nhắn. Vui lòng thử lại.",
     flagged: "Tin nhắn đã được ghi nhận để kiểm tra an toàn.",
+    history: "Lịch sử",
+    newChat: "Mới",
+    noHistory: "Chưa có lịch sử gợi ý.",
   },
   en: {
     title: "Movie assistant",
@@ -37,6 +48,9 @@ const labels = {
     empty: "Ask for action movies, new series, or something similar to what you liked.",
     error: "Could not send message. Please try again.",
     flagged: "This message was flagged for safety review.",
+    history: "History",
+    newChat: "New",
+    noHistory: "No recommendation history yet.",
   },
 };
 
@@ -47,6 +61,8 @@ export default function ChatWidget() {
   const text = labels[locale];
   const [open, setOpen] = useState(false);
   const [session, setSession] = useState<ChatSession | null>(null);
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [initializing, setInitializing] = useState(false);
@@ -66,10 +82,10 @@ export default function ChatWidget() {
 
     let cancelled = false;
     setInitializing(true);
-    chatApi
-      .createOrGetSession()
-      .then(async (created) => {
+    Promise.all([chatApi.createOrGetSession(), chatApi.getSessions().catch(() => [])])
+      .then(async ([created, loadedSessions]) => {
         if (cancelled) return;
+        setSessions(loadedSessions);
         setSession(created);
         setInitializing(false);
         try {
@@ -124,6 +140,7 @@ export default function ChatWidget() {
         result.userMessage,
         result.message,
       ]);
+      chatApi.getSessions().then(setSessions).catch(() => undefined);
       if (result.flagged) {
         setError(text.flagged);
       }
@@ -132,6 +149,39 @@ export default function ChatWidget() {
       setMessages((prev) => prev.filter((message) => message.id !== optimistic.id));
     } finally {
       setSending(false);
+    }
+  };
+
+  const loadSession = async (target: ChatSession) => {
+    setSession(target);
+    setShowHistory(false);
+    setError("");
+    setInitializing(true);
+    try {
+      const existingMessages = await chatApi.getMessages(target.id);
+      setMessages(existingMessages);
+    } catch {
+      setMessages([]);
+      setError(text.error);
+    } finally {
+      setInitializing(false);
+    }
+  };
+
+  const startNewChat = async () => {
+    setShowHistory(false);
+    setMessages([]);
+    setError("");
+    setInitializing(true);
+    try {
+      const created = await chatApi.createOrGetSession(true);
+      setSession(created);
+      const loadedSessions = await chatApi.getSessions();
+      setSessions(loadedSessions);
+    } catch {
+      setError(text.error);
+    } finally {
+      setInitializing(false);
     }
   };
 
@@ -149,14 +199,38 @@ export default function ChatWidget() {
                 <div className="text-xs text-gray-400">{text.subtitle}</div>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
-              aria-label="Close chat"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              {isAuthenticated && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowHistory((value) => !value)}
+                    className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+                    aria-label="Chat history"
+                    title={text.history}
+                  >
+                    <Clock3 className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={startNewChat}
+                    className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+                    aria-label="New chat"
+                    title={text.newChat}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </>
+              )}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+                aria-label="Close chat"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           {!isAuthenticated && !isLoading ? (
@@ -165,6 +239,41 @@ export default function ChatWidget() {
             </div>
           ) : (
             <>
+              {showHistory && (
+                <div className="border-b border-gray-800 bg-gray-950/40 px-3 py-3">
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+                    {text.history}
+                  </div>
+                  <div className="max-h-40 space-y-2 overflow-y-auto">
+                    {sessions.length === 0 ? (
+                      <div className="rounded-md bg-gray-800 px-3 py-2 text-xs text-gray-400">
+                        {text.noHistory}
+                      </div>
+                    ) : (
+                      sessions.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => loadSession(item)}
+                          className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${
+                            session?.id === item.id
+                              ? "bg-red-600 text-white"
+                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                          }`}
+                        >
+                          <div className="line-clamp-1 font-medium">
+                            {item.title || text.title}
+                          </div>
+                          <div className="mt-0.5 text-xs opacity-70">
+                            {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
                 {messages.length === 0 && !initializing && !sending && (
                   <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
