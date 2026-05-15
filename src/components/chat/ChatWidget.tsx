@@ -250,9 +250,9 @@ export default function ChatWidget() {
     if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
       hasDraggedRef.current = true;
     }
-    // Constrain by button size only (48px) — panel is absolutely positioned and doesn't affect bounds
+    // Keep button inside viewport; 68px top margin keeps it below the fixed header (h-16 = 64px)
     const newX = Math.max(0, Math.min(window.innerWidth - 48, dragStartRef.current.px + dx));
-    const newY = Math.max(0, Math.min(window.innerHeight - 48, dragStartRef.current.py + dy));
+    const newY = Math.max(68, Math.min(window.innerHeight - 48, dragStartRef.current.py + dy));
     setPos({ x: newX, y: newY });
   };
 
@@ -275,7 +275,7 @@ export default function ChatWidget() {
 
   const panel = open && (
     <div
-      className="absolute flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl"
+      className="absolute flex h-[min(420px,calc(100svh-8rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl sm:h-[min(680px,calc(100svh-7rem))]"
       style={panelPos}
     >
       <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
@@ -458,7 +458,7 @@ export default function ChatWidget() {
     <>
       {confirmTarget && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={() => setConfirmTarget(null)}
         >
           <div
@@ -492,7 +492,7 @@ export default function ChatWidget() {
 
       <div
         ref={containerRef}
-        className="fixed z-40"
+        className="fixed z-[110]"
         style={pos ? { left: pos.x, top: pos.y } : { bottom: "1rem", right: "1rem" }}
       >
         {panel}

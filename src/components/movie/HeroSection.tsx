@@ -104,7 +104,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-[100dvh]">
       {/* FLIP overlay — thumbnail bay lên fill hero */}
       {flipAnim && (
         <div
@@ -139,7 +139,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
           disableOnInteraction: false,
         }}
         loop={true}
-        className="h-screen"
+        className="h-[100dvh]"
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
         onSlideChangeTransitionStart={() => setVisibleContentIndex(-1)}

@@ -5,7 +5,7 @@ import Skeleton from './Skeleton';
 
 const HeroSkeleton = () => {
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-[100dvh] flex flex-col">
       {/* Background Skeleton */}
       <div className="absolute inset-0">
         <Skeleton className="absolute inset-0" />
