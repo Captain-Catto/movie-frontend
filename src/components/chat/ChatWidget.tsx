@@ -71,6 +71,7 @@ export default function ChatWidget() {
       .then(async (created) => {
         if (cancelled) return;
         setSession(created);
+        setInitializing(false);
         try {
           const existingMessages = await chatApi.getMessages(created.id);
           if (!cancelled) setMessages(existingMessages);
@@ -190,7 +191,7 @@ export default function ChatWidget() {
                   </div>
                 ))}
 
-                {(initializing || sending) && (
+                {sending && (
                   <div className="flex items-center gap-2 text-sm text-gray-400">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     {text.title}
