@@ -462,7 +462,10 @@ body {
 }
 
 .media-item.hero-content-ready .hero-content-fade {
-  animation: heroContentFadeIn 0.5s ease forwards;
+  animation-name: heroContentFadeIn;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
 }
 
 .hero-content-fade--title    { animation-delay: 0.05s; }
