@@ -34,6 +34,41 @@ interface UserLog {
   metadata?: Record<string, unknown>;
 }
 
+type WatchActionType = "all" | "view" | "play" | "complete";
+type WatchContentType = "all" | "movie" | "tv_series";
+
+interface WatchHistoryItem {
+  id: number;
+  contentId: string;
+  tmdbId: number | null;
+  contentType: "movie" | "tv_series";
+  actionType: "view" | "play" | "complete";
+  contentTitle: string;
+  duration: number;
+  deviceType?: string | null;
+  country?: string | null;
+  createdAt: string;
+  posterUrl?: string | null;
+  href?: string | null;
+}
+
+interface WatchHistorySummary {
+  totalViews: number;
+  totalPlays: number;
+  totalCompletes: number;
+  totalWatchTimeSeconds: number;
+  lastWatchedAt: string | null;
+}
+
+interface WatchHistoryResponse {
+  data: WatchHistoryItem[];
+  summary: WatchHistorySummary;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export default function AdminUsersPage() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
@@ -59,10 +94,17 @@ export default function AdminUsersPage() {
   });
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
-  const [activeTab, setActiveTab] = useState<"info" | "logs">("info");
+  const [activeTab, setActiveTab] = useState<"info" | "watch" | "logs">("info");
   const [userLogs, setUserLogs] = useState<UserLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [logFilter, setLogFilter] = useState<string>("all");
+  const [watchHistory, setWatchHistory] = useState<WatchHistoryResponse | null>(null);
+  const [watchLoading, setWatchLoading] = useState(false);
+  const [watchPage, setWatchPage] = useState(1);
+  const [watchAction, setWatchAction] = useState<WatchActionType>("all");
+  const [watchContentType, setWatchContentType] = useState<WatchContentType>("all");
+  const [watchStartDate, setWatchStartDate] = useState("");
+  const [watchEndDate, setWatchEndDate] = useState("");
   const adminApi = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
 
@@ -140,6 +182,17 @@ export default function AdminUsersPage() {
     return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
   };
 
+  const formatDuration = (seconds?: number | null) => {
+    const value = Number(seconds || 0);
+    if (!value) return "N/A";
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor((value % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${Math.max(minutes, 1)}m`;
+  };
+
+  const fallbackPoster = "/images/no-poster.svg";
+
   const countryCodeToFlag = (code?: string | null) => {
     if (!code || code.length !== 2) return "🏳️";
     const upper = code.toUpperCase();
@@ -204,6 +257,47 @@ export default function AdminUsersPage() {
     }
   }, [adminApi]);
 
+  const fetchWatchHistory = useCallback(
+    async (userId: number, page = watchPage) => {
+      setWatchLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: "10",
+        });
+
+        if (watchAction !== "all") params.set("actionType", watchAction);
+        if (watchContentType !== "all") params.set("contentType", watchContentType);
+        if (watchStartDate) params.set("startDate", watchStartDate);
+        if (watchEndDate) params.set("endDate", watchEndDate);
+
+        const response = await adminApi.get<WatchHistoryResponse>(
+          `/admin/users/${userId}/watch-history?${params.toString()}`
+        );
+
+        if (response.success && response.data) {
+          setWatchHistory(response.data);
+          setWatchPage(response.data.page || page);
+        } else {
+          setWatchHistory(null);
+        }
+      } catch (error) {
+        console.error("Error fetching watch history:", error);
+        setWatchHistory(null);
+      } finally {
+        setWatchLoading(false);
+      }
+    },
+    [
+      adminApi,
+      watchAction,
+      watchContentType,
+      watchEndDate,
+      watchPage,
+      watchStartDate,
+    ]
+  );
+
   const openEditModal = (user: User) => {
     setEditModal({ open: true, user });
     setEditForm({
@@ -214,6 +308,12 @@ export default function AdminUsersPage() {
     setEditError("");
     setActiveTab("info");
     setUserLogs([]);
+    setWatchHistory(null);
+    setWatchPage(1);
+    setWatchAction("all");
+    setWatchContentType("all");
+    setWatchStartDate("");
+    setWatchEndDate("");
     setLogFilter("all");
   };
 
@@ -223,6 +323,7 @@ export default function AdminUsersPage() {
     setEditSaving(false);
     setActiveTab("info");
     setUserLogs([]);
+    setWatchHistory(null);
   };
 
   const handleUpdateUser = async () => {
@@ -276,6 +377,17 @@ export default function AdminUsersPage() {
       setEditSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (activeTab !== "watch" || !editModal.open || !editModal.user) return;
+    fetchWatchHistory(editModal.user.id, watchPage);
+  }, [
+    activeTab,
+    editModal.open,
+    editModal.user,
+    fetchWatchHistory,
+    watchPage,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -528,6 +640,19 @@ export default function AdminUsersPage() {
                 </button>
                 <button
                   onClick={() => {
+                    setActiveTab("watch");
+                    setWatchPage(1);
+                  }}
+                  className={`px-4 py-2 font-medium transition-colors cursor-pointer ${
+                    activeTab === "watch"
+                      ? "text-white border-b-2 border-red-600"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  Watch History
+                </button>
+                <button
+                  onClick={() => {
                     setActiveTab("logs");
                     if (userLogs.length === 0 && !logsLoading && editModal.user) {
                       fetchUserLogs(editModal.user.id);
@@ -679,6 +804,187 @@ export default function AdminUsersPage() {
                       className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {editSaving ? "Saving..." : "Save changes"}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {/* Tab Content: Watch History */}
+              {activeTab === "watch" && (
+                <>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                    <div className="rounded-lg border border-gray-700 bg-gray-700/40 p-3">
+                      <div className="text-xs text-gray-400">Views</div>
+                      <div className="mt-1 text-xl font-semibold text-white">
+                        {watchHistory?.summary.totalViews ?? 0}
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-gray-700 bg-gray-700/40 p-3">
+                      <div className="text-xs text-gray-400">Plays</div>
+                      <div className="mt-1 text-xl font-semibold text-white">
+                        {watchHistory?.summary.totalPlays ?? 0}
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-gray-700 bg-gray-700/40 p-3">
+                      <div className="text-xs text-gray-400">Completed</div>
+                      <div className="mt-1 text-xl font-semibold text-white">
+                        {watchHistory?.summary.totalCompletes ?? 0}
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-gray-700 bg-gray-700/40 p-3">
+                      <div className="text-xs text-gray-400">Watch time</div>
+                      <div className="mt-1 text-xl font-semibold text-white">
+                        {formatDuration(watchHistory?.summary.totalWatchTimeSeconds)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-5">
+                    <select
+                      value={watchAction}
+                      onChange={(e) => {
+                        setWatchAction(e.target.value as WatchActionType);
+                        setWatchPage(1);
+                      }}
+                      className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                    >
+                      <option value="all">All actions</option>
+                      <option value="view">View</option>
+                      <option value="play">Play</option>
+                      <option value="complete">Complete</option>
+                    </select>
+                    <select
+                      value={watchContentType}
+                      onChange={(e) => {
+                        setWatchContentType(e.target.value as WatchContentType);
+                        setWatchPage(1);
+                      }}
+                      className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                    >
+                      <option value="all">All content</option>
+                      <option value="movie">Movies</option>
+                      <option value="tv_series">TV series</option>
+                    </select>
+                    <input
+                      type="date"
+                      value={watchStartDate}
+                      onChange={(e) => {
+                        setWatchStartDate(e.target.value);
+                        setWatchPage(1);
+                      }}
+                      className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                    />
+                    <input
+                      type="date"
+                      value={watchEndDate}
+                      onChange={(e) => {
+                        setWatchEndDate(e.target.value);
+                        setWatchPage(1);
+                      }}
+                      className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => editModal.user && fetchWatchHistory(editModal.user.id, 1)}
+                      className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-colors"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+
+                  <div className="bg-gray-700/30 rounded-lg border border-gray-600 max-h-[420px] overflow-y-auto">
+                    {watchLoading ? (
+                      <div className="p-8 text-center text-gray-400">
+                        Loading watch history...
+                      </div>
+                    ) : !watchHistory || watchHistory.data.length === 0 ? (
+                      <div className="p-8 text-center text-gray-400">
+                        No watch history found
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-600">
+                        {watchHistory.data.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex gap-3 p-4 hover:bg-gray-700/50 transition-colors"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.posterUrl || fallbackPoster}
+                              alt={item.contentTitle}
+                              className="h-20 w-14 rounded object-cover bg-gray-800"
+                              onError={(e) => {
+                                e.currentTarget.src = fallbackPoster;
+                              }}
+                            />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                {item.href ? (
+                                  <a
+                                    href={item.href}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="line-clamp-1 font-medium text-white hover:text-red-300"
+                                  >
+                                    {item.contentTitle}
+                                  </a>
+                                ) : (
+                                  <div className="line-clamp-1 font-medium text-white">
+                                    {item.contentTitle}
+                                  </div>
+                                )}
+                                <span className="rounded bg-gray-600 px-2 py-0.5 text-[11px] uppercase text-gray-100">
+                                  {item.contentType === "tv_series" ? "TV" : "Movie"}
+                                </span>
+                                <span className="rounded bg-red-600 px-2 py-0.5 text-[11px] uppercase text-white">
+                                  {item.actionType}
+                                </span>
+                              </div>
+                              <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-gray-400 sm:grid-cols-2">
+                                <div>{formatDateTime(item.createdAt)}</div>
+                                <div>Duration: {formatDuration(item.duration)}</div>
+                                <div className="capitalize">Device: {item.deviceType || "N/A"}</div>
+                                <div>Country: {item.country || "N/A"}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {watchHistory && watchHistory.totalPages > 1 && (
+                    <div className="mt-4 flex items-center justify-between text-sm text-gray-300">
+                      <span>
+                        Page {watchHistory.page} of {watchHistory.totalPages} · {watchHistory.total} records
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          disabled={watchHistory.page <= 1 || watchLoading}
+                          onClick={() => setWatchPage((page) => Math.max(1, page - 1))}
+                          className="px-3 py-1.5 rounded bg-gray-700 text-white disabled:opacity-50"
+                        >
+                          Previous
+                        </button>
+                        <button
+                          type="button"
+                          disabled={watchHistory.page >= watchHistory.totalPages || watchLoading}
+                          onClick={() => setWatchPage((page) => page + 1)}
+                          className="px-3 py-1.5 rounded bg-gray-700 text-white disabled:opacity-50"
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end mt-6">
+                    <button
+                      onClick={closeEditModal}
+                      className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+                    >
+                      Close
                     </button>
                   </div>
                 </>

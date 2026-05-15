@@ -8,6 +8,7 @@ import {
   Clock3,
   Loader2,
   MessageCircle,
+  Minus,
   Plus,
   Send,
   X,
@@ -39,6 +40,7 @@ const labels = {
     history: "Lịch sử",
     newChat: "Mới",
     noHistory: "Chưa có lịch sử gợi ý.",
+    suggestions: ["Phim giống tôi đã thích", "Phim bộ mới", "Phim hành động"],
   },
   en: {
     title: "Movie assistant",
@@ -51,6 +53,7 @@ const labels = {
     history: "History",
     newChat: "New",
     noHistory: "No recommendation history yet.",
+    suggestions: ["Similar to my favorites", "New TV shows", "Action movies"],
   },
 };
 
@@ -70,12 +73,7 @@ export default function ChatWidget() {
   const [error, setError] = useState("");
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  const lastRecommendations = useMemo(() => {
-    const assistantMessages = messages
-      .filter((message) => message.role === "assistant")
-      .reverse();
-    return assistantMessages[0]?.metadata?.recommendations || [];
-  }, [messages]);
+  const hasMessages = useMemo(() => messages.length > 0, [messages.length]);
 
   useEffect(() => {
     if (!open || !isAuthenticated || session || isLoading) return;
@@ -116,7 +114,11 @@ export default function ChatWidget() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    const content = input.trim();
+    await sendContent(input);
+  };
+
+  const sendContent = async (rawContent: string) => {
+    const content = rawContent.trim();
     if (!content || !session || sending) return;
 
     setInput("");
@@ -186,17 +188,17 @@ export default function ChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-40">
+    <div className="fixed bottom-3 right-3 z-40 sm:bottom-4 sm:right-4">
       {open && (
-        <div className="mb-3 flex h-[min(680px,calc(100vh-7rem))] w-[calc(100vw-2rem)] max-w-[390px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
+        <div className="mb-3 flex h-[min(560px,calc(100vh-6rem))] w-[calc(100vw-1.5rem)] max-w-[380px] flex-col overflow-hidden rounded-lg border border-gray-700 bg-gray-900 shadow-2xl max-sm:fixed max-sm:bottom-16 max-sm:left-3 max-sm:right-3 max-sm:mb-0 max-sm:h-[min(620px,calc(100vh-5.5rem))] max-sm:w-auto max-sm:max-w-none">
+          <div className="relative flex items-center justify-between border-b border-gray-800 px-3 py-2.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-md bg-red-600">
-                <Bot className="h-5 w-5 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-red-600">
+                <Bot className="h-4 w-4 text-white" />
               </div>
               <div>
                 <div className="text-sm font-semibold text-white">{text.title}</div>
-                <div className="text-xs text-gray-400">{text.subtitle}</div>
+                <div className="text-[11px] text-gray-400">{text.subtitle}</div>
               </div>
             </div>
             <div className="flex items-center gap-1">
@@ -226,9 +228,9 @@ export default function ChatWidget() {
                 type="button"
                 onClick={() => setOpen(false)}
                 className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
-                aria-label="Close chat"
+                aria-label="Minimize chat"
               >
-                <X className="h-4 w-4" />
+                <Minus className="h-4 w-4" />
               </button>
             </div>
           </div>
@@ -240,63 +242,111 @@ export default function ChatWidget() {
           ) : (
             <>
               {showHistory && (
-                <div className="border-b border-gray-800 bg-gray-950/40 px-3 py-3">
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                    {text.history}
-                  </div>
-                  <div className="max-h-40 space-y-2 overflow-y-auto">
-                    {sessions.length === 0 ? (
-                      <div className="rounded-md bg-gray-800 px-3 py-2 text-xs text-gray-400">
-                        {text.noHistory}
-                      </div>
-                    ) : (
-                      sessions.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => loadSession(item)}
-                          className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${
-                            session?.id === item.id
-                              ? "bg-red-600 text-white"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          }`}
-                        >
-                          <div className="line-clamp-1 font-medium">
-                            {item.title || text.title}
-                          </div>
-                          <div className="mt-0.5 text-xs opacity-70">
-                            {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
-                          </div>
-                        </button>
-                      ))
-                    )}
+                <div className="absolute inset-0 z-10 flex bg-gray-950/60">
+                  <button
+                    type="button"
+                    className="flex-1"
+                    aria-label="Close chat history"
+                    onClick={() => setShowHistory(false)}
+                  />
+                  <div className="flex h-full w-[82%] max-w-[310px] flex-col border-l border-gray-800 bg-gray-900 shadow-2xl">
+                    <div className="flex items-center justify-between border-b border-gray-800 px-3 py-3">
+                      <div className="text-sm font-semibold text-white">{text.history}</div>
+                      <button
+                        type="button"
+                        onClick={() => setShowHistory(false)}
+                        className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
+                        aria-label="Close chat history"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <div className="flex-1 space-y-2 overflow-y-auto p-3">
+                      {sessions.length === 0 ? (
+                        <div className="rounded-md bg-gray-800 px-3 py-2 text-xs text-gray-400">
+                          {text.noHistory}
+                        </div>
+                      ) : (
+                        sessions.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => loadSession(item)}
+                            className={`w-full rounded-md px-3 py-2 text-left text-sm transition ${
+                              session?.id === item.id
+                                ? "bg-red-600 text-white"
+                                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                            }`}
+                          >
+                            <div className="line-clamp-1 font-medium">
+                              {item.title || text.title}
+                            </div>
+                            <div className="mt-0.5 text-xs opacity-70">
+                              {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
 
-              <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-                {messages.length === 0 && !initializing && !sending && (
-                  <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
-                    {text.empty}
+              <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-3 py-3">
+                {initializing && !hasMessages && (
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {text.title}
+                  </div>
+                )}
+
+                {!hasMessages && !initializing && !sending && (
+                  <div className="space-y-3">
+                    <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
+                      {text.empty}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {text.suggestions.map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => sendContent(suggestion)}
+                          disabled={!session || sending}
+                          className="rounded-full border border-gray-700 bg-gray-800 px-3 py-1.5 text-xs text-gray-200 hover:border-red-500/70 hover:text-white disabled:opacity-50"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {messages.map((message) => (
-                  <div
-                    key={`${message.id}-${message.createdAt}`}
-                    className={`flex ${
-                      message.role === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
+                  <div key={`${message.id}-${message.createdAt}`} className="space-y-2">
                     <div
-                      className={`max-w-[82%] rounded-lg px-3 py-2 text-sm ${
-                        message.role === "user"
-                          ? "bg-red-600 text-white"
-                          : "bg-gray-800 text-gray-100"
+                      className={`flex ${
+                        message.role === "user" ? "justify-end" : "justify-start"
                       }`}
                     >
-                      {message.content}
+                      <div
+                        className={`max-w-[84%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
+                          message.role === "user"
+                            ? "bg-red-600 text-white"
+                            : "bg-gray-800 text-gray-100"
+                        }`}
+                      >
+                        {message.content}
+                      </div>
                     </div>
+                    {message.role === "assistant" &&
+                      message.metadata?.recommendations &&
+                      message.metadata.recommendations.length > 0 && (
+                        <div className="ml-0 flex gap-2 overflow-x-auto pb-1">
+                          {message.metadata.recommendations.map((item) => (
+                            <RecommendationCard key={`${message.id}-${item.type}-${item.tmdbId}`} item={item} />
+                          ))}
+                        </div>
+                      )}
                   </div>
                 ))}
 
@@ -307,10 +357,18 @@ export default function ChatWidget() {
                   </div>
                 )}
 
-                {lastRecommendations.length > 0 && (
-                  <div className="space-y-2 pt-1">
-                    {lastRecommendations.map((item) => (
-                      <RecommendationCard key={`${item.type}-${item.tmdbId}`} item={item} />
+                {hasMessages && !sending && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {text.suggestions.slice(0, 2).map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => sendContent(suggestion)}
+                        disabled={!session || sending}
+                        className="rounded-full border border-gray-800 bg-gray-800/70 px-3 py-1.5 text-xs text-gray-300 hover:border-red-500/70 hover:text-white disabled:opacity-50"
+                      >
+                        {suggestion}
+                      </button>
                     ))}
                   </div>
                 )}
@@ -322,7 +380,7 @@ export default function ChatWidget() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 p-3">
+              <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 p-2.5">
                 <input
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
@@ -361,14 +419,14 @@ function RecommendationCard({ item }: { item: ChatRecommendation }) {
   return (
     <Link
       href={item.href}
-      className="flex gap-3 rounded-lg border border-gray-800 bg-gray-800/70 p-2 transition hover:border-red-500/60"
+      className="flex min-w-[230px] max-w-[250px] gap-2 rounded-lg border border-gray-800 bg-gray-800/70 p-2 transition hover:border-red-500/60"
     >
       <Image
         src={imageUrl(item.posterPath)}
         alt={item.title}
         width={46}
         height={68}
-        className="h-[68px] w-[46px] rounded object-cover"
+        className="h-[64px] w-[44px] shrink-0 rounded object-cover"
       />
       <div className="min-w-0">
         <div className="line-clamp-1 text-sm font-semibold text-white">
