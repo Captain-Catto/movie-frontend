@@ -49,7 +49,8 @@ export default function ChatWidget() {
   const [session, setSession] = useState<ChatSession | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(false);
+  const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -64,20 +65,24 @@ export default function ChatWidget() {
     if (!open || !isAuthenticated || session || isLoading) return;
 
     let cancelled = false;
-    setLoading(true);
+    setInitializing(true);
     chatApi
       .createOrGetSession()
       .then(async (created) => {
         if (cancelled) return;
         setSession(created);
-        const existingMessages = await chatApi.getMessages(created.id);
-        if (!cancelled) setMessages(existingMessages);
+        try {
+          const existingMessages = await chatApi.getMessages(created.id);
+          if (!cancelled) setMessages(existingMessages);
+        } catch {
+          if (!cancelled) setMessages([]);
+        }
       })
       .catch(() => {
         if (!cancelled) setError(text.error);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setInitializing(false);
       });
 
     return () => {
@@ -90,12 +95,12 @@ export default function ChatWidget() {
       top: listRef.current.scrollHeight,
       behavior: "smooth",
     });
-  }, [messages, loading]);
+  }, [messages, initializing, sending]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     const content = input.trim();
-    if (!content || !session || loading) return;
+    if (!content || !session || sending) return;
 
     setInput("");
     setError("");
@@ -109,7 +114,7 @@ export default function ChatWidget() {
       createdAt: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimistic]);
-    setLoading(true);
+    setSending(true);
 
     try {
       const result = await chatApi.sendMessage(session.id, content);
@@ -125,7 +130,7 @@ export default function ChatWidget() {
       setError(text.error);
       setMessages((prev) => prev.filter((message) => message.id !== optimistic.id));
     } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
@@ -160,7 +165,7 @@ export default function ChatWidget() {
           ) : (
             <>
               <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-                {messages.length === 0 && !loading && (
+                {messages.length === 0 && !initializing && !sending && (
                   <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
                     {text.empty}
                   </div>
@@ -185,7 +190,7 @@ export default function ChatWidget() {
                   </div>
                 ))}
 
-                {loading && (
+                {(initializing || sending) && (
                   <div className="flex items-center gap-2 text-sm text-gray-400">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     {text.title}
@@ -213,11 +218,12 @@ export default function ChatWidget() {
                   onChange={(event) => setInput(event.target.value)}
                   maxLength={2000}
                   placeholder={text.placeholder}
+                  disabled={initializing && !session}
                   className="min-w-0 flex-1 rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:border-red-500"
                 />
                 <button
                   type="submit"
-                  disabled={!input.trim() || loading || !session}
+                  disabled={!input.trim() || sending || !session}
                   className="flex h-10 w-10 items-center justify-center rounded-md bg-red-600 text-white disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label="Send message"
                 >

@@ -23,7 +23,7 @@ export const chatApi = {
     const response = await axiosInstance.get<ApiResponse<ChatMessage[]>>(
       `/chat/sessions/${sessionId}/messages`
     );
-    return response.data.data;
+    return Array.isArray(response.data.data) ? response.data.data : [];
   },
 
   async sendMessage(
