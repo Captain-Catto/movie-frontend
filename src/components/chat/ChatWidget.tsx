@@ -134,7 +134,7 @@ export default function ChatWidget() {
     setSending(true);
 
     try {
-      const result = await chatApi.sendMessage(session.id, content);
+      const result = await chatApi.sendMessage(session.id, content, language);
       setMessages((prev) => [
         ...prev.filter((message) => message.id !== optimistic.id),
         result.userMessage,

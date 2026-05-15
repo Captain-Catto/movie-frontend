@@ -35,11 +35,12 @@ export const chatApi = {
 
   async sendMessage(
     sessionId: number,
-    message: string
+    message: string,
+    language: string
   ): Promise<SendChatResponse> {
     const response = await axiosInstance.post<ApiResponse<SendChatResponse>>(
       `/chat/sessions/${sessionId}/messages`,
-      { message }
+      { message, language }
     );
     return response.data.data;
   },
