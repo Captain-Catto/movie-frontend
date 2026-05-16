@@ -17,6 +17,7 @@ import {
 } from "@/lib/ui-messages";
 import { getStaticPageSeo } from "@/lib/page-seo";
 import { resolvePageMetadata } from "@/lib/seo-resolver";
+import { buildStaticPageMetadataExtras } from "@/lib/static-page-metadata";
 
 interface MoviesPageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
@@ -30,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/movies",
     language,
     fallback: seo.movies,
+    extras: buildStaticPageMetadataExtras("movies", "/movies", seo.movies),
   });
 }
 

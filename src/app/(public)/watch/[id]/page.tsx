@@ -66,15 +66,47 @@ export async function generateMetadata({
     initialData.movieData.contentType === "tv"
       ? ` - S${season}E${episode}`
       : "";
+  const title = `${initialData.movieData.title}${suffix}`;
+  const description =
+    initialData.movieData.description || seo.watchFallback.description;
+  const previewImage =
+    initialData.movieData.backgroundImage || initialData.movieData.posterImage;
 
   return resolvePageMetadata({
     path: `/watch/${movieId}`,
     lookupPaths: ["/watch/[id]"],
     language,
     fallback: {
-      title: `${initialData.movieData.title}${suffix}`,
-      description: initialData.movieData.description || seo.watchFallback.description,
+      title,
+      description,
     },
+    extras: previewImage
+      ? {
+          openGraph: {
+            type:
+              initialData.movieData.contentType === "tv"
+                ? "video.tv_show"
+                : "video.movie",
+            url: `/watch/${movieId}`,
+            title,
+            description,
+            images: [
+              {
+                url: previewImage,
+                width: 1280,
+                height: 720,
+                alt: title,
+              },
+            ],
+          },
+          twitter: {
+            card: "summary_large_image",
+            title,
+            description,
+            images: [previewImage],
+          },
+        }
+      : undefined,
   });
 }
 

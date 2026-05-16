@@ -28,6 +28,7 @@ export async function generateMetadata({
   }
 
   const { tvData } = await getTVDetailPageDataByTmdbId(parsedTmdbId, language);
+  const previewImage = tvData?.backdropPath || tvData?.posterPath;
 
   return resolvePageMetadata({
     path: `/tv/${parsedTmdbId}`,
@@ -37,6 +38,30 @@ export async function generateMetadata({
       title: tvData?.title || seo.tvDetailFallback.title,
       description: tvData?.overview || seo.tvDetailFallback.description,
     },
+    extras: previewImage
+      ? {
+          openGraph: {
+            type: "video.tv_show",
+            url: `/tv/${parsedTmdbId}`,
+            title: tvData?.title || seo.tvDetailFallback.title,
+            description: tvData?.overview || seo.tvDetailFallback.description,
+            images: [
+              {
+                url: previewImage,
+                width: 1280,
+                height: 720,
+                alt: tvData?.title || seo.tvDetailFallback.title,
+              },
+            ],
+          },
+          twitter: {
+            card: "summary_large_image",
+            title: tvData?.title || seo.tvDetailFallback.title,
+            description: tvData?.overview || seo.tvDetailFallback.description,
+            images: [previewImage],
+          },
+        }
+      : undefined,
   });
 }
 

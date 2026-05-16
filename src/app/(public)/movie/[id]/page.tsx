@@ -28,6 +28,7 @@ export async function generateMetadata({
   }
 
   const { movieData } = await getMovieDetailPageDataByTmdbId(parsedTmdbId, language);
+  const previewImage = movieData?.backgroundImage || movieData?.posterImage;
 
   return resolvePageMetadata({
     path: `/movie/${parsedTmdbId}`,
@@ -37,6 +38,32 @@ export async function generateMetadata({
       title: movieData?.title || seo.movieDetailFallback.title,
       description: movieData?.description || seo.movieDetailFallback.description,
     },
+    extras: previewImage
+      ? {
+          openGraph: {
+            type: "video.movie",
+            url: `/movie/${parsedTmdbId}`,
+            title: movieData?.title || seo.movieDetailFallback.title,
+            description:
+              movieData?.description || seo.movieDetailFallback.description,
+            images: [
+              {
+                url: previewImage,
+                width: 1280,
+                height: 720,
+                alt: movieData?.title || seo.movieDetailFallback.title,
+              },
+            ],
+          },
+          twitter: {
+            card: "summary_large_image",
+            title: movieData?.title || seo.movieDetailFallback.title,
+            description:
+              movieData?.description || seo.movieDetailFallback.description,
+            images: [previewImage],
+          },
+        }
+      : undefined,
   });
 }
 

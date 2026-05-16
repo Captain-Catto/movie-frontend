@@ -12,6 +12,7 @@ import { getPeoplePageData } from "@/lib/public-page-data";
 import { getPeopleUiMessages } from "@/lib/ui-messages";
 import { getStaticPageSeo } from "@/lib/page-seo";
 import { resolvePageMetadata } from "@/lib/seo-resolver";
+import { buildStaticPageMetadataExtras } from "@/lib/static-page-metadata";
 
 interface PeoplePageProps {
   searchParams?: Promise<SearchParamsRecord> | SearchParamsRecord;
@@ -25,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/people",
     language,
     fallback: seo.people,
+    extras: buildStaticPageMetadataExtras("people", "/people", seo.people),
   });
 }
 

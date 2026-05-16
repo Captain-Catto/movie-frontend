@@ -9,6 +9,7 @@ import { getHomePageData } from "@/lib/home-page-data";
 import { getHomePageUiMessages } from "@/lib/ui-messages";
 import { getStaticPageSeo } from "@/lib/page-seo";
 import { resolvePageMetadata } from "@/lib/seo-resolver";
+import { buildStaticPageMetadataExtras } from "@/lib/static-page-metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getServerPreferredLanguage();
@@ -18,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/",
     language,
     fallback: seo.home,
+    extras: buildStaticPageMetadataExtras("home", "/", seo.home),
   });
 }
 
