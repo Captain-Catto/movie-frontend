@@ -42,10 +42,6 @@ const toHeroBackdrop = (url: string): string => {
 
 interface FlipAnim {
   src: string;
-  tx: number;
-  ty: number;
-  sx: number;
-  sy: number;
   active: boolean;
   fadingOut: boolean;
 }
@@ -65,7 +61,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
-  const handleThumbnailClick = (index: number, event: React.MouseEvent) => {
+  const handleThumbnailClick = (index: number) => {
     if (flipAnim || index === activeIndex || !swiperRef.current) return;
 
     if (isMobile) {
@@ -73,28 +69,12 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       return;
     }
 
-    const heroEl = heroRef.current;
-    if (!heroEl) {
-      swiperRef.current.slideToLoop(index);
-      setActiveIndex(index);
-      setVisibleContentIndex(index);
-      return;
-    }
-
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const heroRect = heroEl.getBoundingClientRect();
-    const sx = rect.width / heroRect.width;
-    const sy = rect.height / heroRect.height;
     const movie = movies[index];
     const src =
       movie.backgroundImage || movie.posterImage || movie.poster || FALLBACK_POSTER;
 
     setFlipAnim({
       src,
-      tx: rect.left - heroRect.left,
-      ty: rect.top - heroRect.top,
-      sx,
-      sy,
       active: false,
       fadingOut: false,
     });
@@ -105,25 +85,24 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       });
     });
 
-    // Swiper chuyển slide + overlay bắt đầu fade out cùng lúc → image & text xuất hiện cùng nhau
     setTimeout(() => {
       swiperRef.current?.slideToLoop(index, 0);
       setActiveIndex(index);
       setVisibleContentIndex(index);
-    }, 420);
+    }, 180);
 
     setTimeout(() => {
       setFlipAnim((prev) => (prev ? { ...prev, fadingOut: true } : null));
-    }, 450);
+    }, 240);
 
     setTimeout(() => {
       setFlipAnim(null);
-    }, 820);
+    }, 560);
   };
 
   return (
     <div ref={heroRef} className="relative min-h-[100dvh] overflow-hidden">
-      {/* FLIP overlay — thumbnail bay lên fill hero */}
+      {/* Hero-local crossfade overlay. No scale transform, so background never zooms. */}
       {flipAnim && (
         <div
           className="absolute inset-0 z-[60] pointer-events-none"
@@ -131,14 +110,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
             backgroundImage: `url(${flipAnim.src})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            transformOrigin: "top left",
-            transform: flipAnim.active
-              ? "translate(0px, 0px) scale(1, 1)"
-              : `translate(${flipAnim.tx}px, ${flipAnim.ty}px) scale(${flipAnim.sx}, ${flipAnim.sy})`,
-            opacity: flipAnim.fadingOut ? 0 : flipAnim.active ? 1 : 0.85,
-            borderRadius: flipAnim.active ? "0px" : "8px",
-            transition:
-              "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.37s ease, border-radius 0.55s ease",
+            opacity: flipAnim.fadingOut ? 0 : flipAnim.active ? 1 : 0,
+            transition: "opacity 0.28s ease",
           }}
         />
       )}
@@ -439,7 +412,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               return (
                 <div
                   key={movie.id}
-                  onClick={(e) => handleThumbnailClick(index, e)}
+                  onClick={() => handleThumbnailClick(index)}
                   className={`
                     cursor-pointer transition-all duration-300 rounded-md overflow-hidden
                     ${
