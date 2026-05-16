@@ -115,11 +115,18 @@ export function GET(request: Request) {
                 alignItems: "center",
                 justifyContent: "center",
                 background: style.accent,
-                fontSize: 30,
-                fontWeight: 900,
               }}
             >
-              ▶
+              <div
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderTop: "12px solid transparent",
+                  borderBottom: "12px solid transparent",
+                  borderLeft: "18px solid #ffffff",
+                  marginLeft: 4,
+                }}
+              />
             </div>
             <div style={{ fontSize: 34, fontWeight: 800 }}>MovieStream</div>
             <div
