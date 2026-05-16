@@ -9,25 +9,25 @@ const HOME_SECTION_LIMIT = 10;
 const HOME_HERO_LIMIT = 6;
 const HOME_TV_SECTION_LIMIT = 6;
 
-const toMovieCards = (items: unknown): MovieCardData[] => {
+const toMovieCards = (items: unknown, language: string): MovieCardData[] => {
   if (!Array.isArray(items)) {
     return [];
   }
 
   try {
-    return mapMoviesToFrontend(items as never[]) as MovieCardData[];
+    return mapMoviesToFrontend(items as never[], language) as MovieCardData[];
   } catch {
     return [];
   }
 };
 
-const toTVSeriesCards = (items: unknown): MovieCardData[] => {
+const toTVSeriesCards = (items: unknown, language: string): MovieCardData[] => {
   if (!Array.isArray(items)) {
     return [];
   }
 
   try {
-    return mapTVSeriesToFrontendList(items as TVSeries[]) as MovieCardData[];
+    return mapTVSeriesToFrontendList(items as TVSeries[], language) as MovieCardData[];
   } catch {
     return [];
   }
@@ -87,12 +87,12 @@ export async function getHomePageData(
 
   return {
     heroMovies,
-    nowPlayingMovies: toMovieCards(nowPlayingRes.success ? nowPlayingRes.data : []),
-    popularMovies: toMovieCards(popularRes.success ? popularRes.data : []),
-    topRatedMovies: toMovieCards(topRatedRes.success ? topRatedRes.data : []),
-    upcomingMovies: toMovieCards(upcomingRes.success ? upcomingRes.data : []),
-    onTheAirTVSeries: toTVSeriesCards(onTheAirTVRes.success ? onTheAirTVRes.data : []),
-    popularTVSeries: toTVSeriesCards(popularTVRes.success ? popularTVRes.data : []),
-    topRatedTVSeries: toTVSeriesCards(topRatedTVRes.success ? topRatedTVRes.data : []),
+    nowPlayingMovies: toMovieCards(nowPlayingRes.success ? nowPlayingRes.data : [], language),
+    popularMovies: toMovieCards(popularRes.success ? popularRes.data : [], language),
+    topRatedMovies: toMovieCards(topRatedRes.success ? topRatedRes.data : [], language),
+    upcomingMovies: toMovieCards(upcomingRes.success ? upcomingRes.data : [], language),
+    onTheAirTVSeries: toTVSeriesCards(onTheAirTVRes.success ? onTheAirTVRes.data : [], language),
+    popularTVSeries: toTVSeriesCards(popularTVRes.success ? popularTVRes.data : [], language),
+    topRatedTVSeries: toTVSeriesCards(topRatedTVRes.success ? topRatedTVRes.data : [], language),
   };
 }

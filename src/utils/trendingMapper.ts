@@ -11,6 +11,12 @@ import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 type TrendingItem = {
   tmdbId: number | string;
   title: string;
+  defaultTitle?: string | null;
+  originalTitle?: string | null;
+  original_title?: string | null;
+  originalName?: string | null;
+  original_name?: string | null;
+  name?: string | null;
   overview?: string;
   posterUrl?: string | null;
   backdropUrl?: string | null;
@@ -70,12 +76,20 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
 
   const mediaType = detectContentType(trending as Record<string, unknown>);
   const href = mediaType === "tv" ? `/tv/${tmdbId}` : `/movie/${tmdbId}`;
+  const sourceTitle =
+    trending.defaultTitle ||
+    trending.originalTitle ||
+    trending.original_title ||
+    trending.originalName ||
+    trending.original_name ||
+    trending.name ||
+    trending.title;
 
   return {
     id: tmdbId.toString(),
     tmdbId,
     title: trending.title,
-    aliasTitle: trending.title,
+    aliasTitle: sourceTitle !== trending.title ? sourceTitle : sourceTitle,
     poster: posterUrl,
     href,
     year,
