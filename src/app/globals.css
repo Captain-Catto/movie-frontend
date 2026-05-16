@@ -229,6 +229,12 @@ body {
   max-width: 600px;
 }
 
+@media (min-width: 1024px) {
+  .media-item {
+    max-width: min(64rem, calc(100vw - 28rem));
+  }
+}
+
 .media-title-image {
   margin-bottom: 1rem;
 }
