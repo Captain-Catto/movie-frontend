@@ -426,7 +426,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
             className={`flex ${
               isMobile
                 ? "flex-nowrap justify-center gap-2"
-                : "flex-wrap justify-end gap-4"
+                : "flex-wrap justify-end gap-6"
             }`}
           >
             {movies.slice(0, thumbCount).map((movie, index) => {
@@ -444,7 +444,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     ${
                       activeIndex === index
                         ? `ring-2 ring-white ${
-                            isMobile ? "scale-105" : "scale-110"
+                            isMobile ? "scale-105" : "scale-105"
                           } opacity-100`
                         : "opacity-70 hover:opacity-90 hover:scale-105"
                     }
