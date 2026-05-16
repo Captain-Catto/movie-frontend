@@ -42,6 +42,10 @@ const toHeroBackdrop = (url: string): string => {
 
 interface FlipAnim {
   src: string;
+  tx: number;
+  ty: number;
+  sx: number;
+  sy: number;
   active: boolean;
   fadingOut: boolean;
 }
@@ -61,7 +65,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
-  const handleThumbnailClick = (index: number) => {
+  const handleThumbnailClick = (index: number, event: React.MouseEvent) => {
     if (flipAnim || index === activeIndex || !swiperRef.current) return;
 
     if (isMobile) {
@@ -69,12 +73,28 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       return;
     }
 
+    const heroEl = heroRef.current;
+    if (!heroEl) {
+      swiperRef.current.slideToLoop(index);
+      setActiveIndex(index);
+      setVisibleContentIndex(index);
+      return;
+    }
+
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const heroRect = heroEl.getBoundingClientRect();
+    const sx = rect.width / heroRect.width;
+    const sy = rect.height / heroRect.height;
     const movie = movies[index];
     const src =
       movie.backgroundImage || movie.posterImage || movie.poster || FALLBACK_POSTER;
 
     setFlipAnim({
       src,
+      tx: rect.left - heroRect.left,
+      ty: rect.top - heroRect.top,
+      sx,
+      sy,
       active: false,
       fadingOut: false,
     });
@@ -89,20 +109,20 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       swiperRef.current?.slideToLoop(index, 0);
       setActiveIndex(index);
       setVisibleContentIndex(index);
-    }, 180);
+    }, 420);
 
     setTimeout(() => {
       setFlipAnim((prev) => (prev ? { ...prev, fadingOut: true } : null));
-    }, 240);
+    }, 450);
 
     setTimeout(() => {
       setFlipAnim(null);
-    }, 560);
+    }, 820);
   };
 
   return (
     <div ref={heroRef} className="relative min-h-[100dvh] overflow-hidden">
-      {/* Hero-local crossfade overlay. No scale transform, so background never zooms. */}
+      {/* Hero-local FLIP overlay. It zooms only inside the hero container. */}
       {flipAnim && (
         <div
           className="absolute inset-0 z-[60] pointer-events-none"
@@ -110,8 +130,14 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
             backgroundImage: `url(${flipAnim.src})`,
             backgroundSize: "cover",
             backgroundPosition: "center",
-            opacity: flipAnim.fadingOut ? 0 : flipAnim.active ? 1 : 0,
-            transition: "opacity 0.28s ease",
+            transformOrigin: "top left",
+            transform: flipAnim.active
+              ? "translate(0px, 0px) scale(1, 1)"
+              : `translate(${flipAnim.tx}px, ${flipAnim.ty}px) scale(${flipAnim.sx}, ${flipAnim.sy})`,
+            opacity: flipAnim.fadingOut ? 0 : flipAnim.active ? 1 : 0.85,
+            borderRadius: flipAnim.active ? "0px" : "8px",
+            transition:
+              "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.37s ease, border-radius 0.55s ease",
           }}
         />
       )}
@@ -412,7 +438,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               return (
                 <div
                   key={movie.id}
-                  onClick={() => handleThumbnailClick(index)}
+                  onClick={(event) => handleThumbnailClick(index, event)}
                   className={`
                     cursor-pointer transition-all duration-300 rounded-md overflow-hidden
                     ${
