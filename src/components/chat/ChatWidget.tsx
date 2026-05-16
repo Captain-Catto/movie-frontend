@@ -239,7 +239,7 @@ export default function ChatWidget() {
       cx: e.clientX,
       cy: e.clientY,
       px: rect?.left ?? window.innerWidth - 64,
-      py: rect?.top ?? window.innerHeight - 64,
+      py: rect?.top ?? window.innerHeight - 140,
     };
   };
 
@@ -493,7 +493,7 @@ export default function ChatWidget() {
       <div
         ref={containerRef}
         className="fixed z-[110]"
-        style={pos ? { left: pos.x, top: pos.y } : { bottom: "1rem", right: "1rem" }}
+        style={pos ? { left: pos.x, top: pos.y } : { bottom: "6rem", right: "1rem" }}
       >
         {panel}
 

@@ -453,11 +453,11 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                   <Image
                     src={backgroundImage || posterImage}
                     alt={movie.title}
-                    width={80}
-                    height={48}
-                    sizes={isMobile ? "48px" : "80px"}
+                    width={104}
+                    height={62}
+                    sizes={isMobile ? "48px" : "104px"}
                     quality={45}
-                    className={isMobile ? "h-8 w-12 object-cover" : "w-20 h-12 object-cover"}
+                    className={isMobile ? "h-8 w-12 object-cover" : "h-[62px] w-[104px] object-cover"}
                   />
                 </div>
               );
