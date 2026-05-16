@@ -425,8 +425,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
           <div
             className={`flex ${
               isMobile
-                ? "flex-nowrap justify-center gap-1"
-                : "flex-wrap justify-end gap-2"
+                ? "flex-nowrap justify-center gap-2"
+                : "flex-wrap justify-end gap-4"
             }`}
           >
             {movies.slice(0, thumbCount).map((movie, index) => {
