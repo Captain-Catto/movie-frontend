@@ -56,6 +56,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [visibleContentIndex, setVisibleContentIndex] = useState(0);
   const [flipAnim, setFlipAnim] = useState<FlipAnim | null>(null);
+  const heroRef = useRef<HTMLDivElement | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const { breakpoint } = useWindowWidth();
   const thumbCount =
@@ -72,14 +73,31 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       return;
     }
 
+    const heroEl = heroRef.current;
+    if (!heroEl) {
+      swiperRef.current.slideToLoop(index);
+      setActiveIndex(index);
+      setVisibleContentIndex(index);
+      return;
+    }
+
     const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    const sx = rect.width / window.innerWidth;
-    const sy = rect.height / window.innerHeight;
+    const heroRect = heroEl.getBoundingClientRect();
+    const sx = rect.width / heroRect.width;
+    const sy = rect.height / heroRect.height;
     const movie = movies[index];
     const src =
       movie.backgroundImage || movie.posterImage || movie.poster || FALLBACK_POSTER;
 
-    setFlipAnim({ src, tx: rect.left, ty: rect.top, sx, sy, active: false, fadingOut: false });
+    setFlipAnim({
+      src,
+      tx: rect.left - heroRect.left,
+      ty: rect.top - heroRect.top,
+      sx,
+      sy,
+      active: false,
+      fadingOut: false,
+    });
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -104,11 +122,11 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   };
 
   return (
-    <div className="relative min-h-[100dvh]">
+    <div ref={heroRef} className="relative min-h-[100dvh] overflow-hidden">
       {/* FLIP overlay — thumbnail bay lên fill hero */}
       {flipAnim && (
         <div
-          className="fixed inset-0 z-[60] pointer-events-none"
+          className="absolute inset-0 z-[60] pointer-events-none"
           style={{
             backgroundImage: `url(${flipAnim.src})`,
             backgroundSize: "cover",
