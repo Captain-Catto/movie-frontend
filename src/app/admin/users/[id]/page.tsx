@@ -63,7 +63,7 @@ interface ActivityItem {
   deviceType?: string;
   country?: string;
   createdAt: string;
-  source: "user_activity" | "view_analytics";
+  source: "user_activity" | "user_logs" | "view_analytics";
 }
 
 interface TimelineResponse {
