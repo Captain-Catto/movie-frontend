@@ -25,6 +25,7 @@ import {
   Loader2,
   Save,
   ShieldCheck,
+  X,
 } from "lucide-react";
 
 interface UserDetails {
@@ -69,6 +70,31 @@ interface ActivityItem {
 
 interface TimelineResponse {
   data: ActivityItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+interface WatchTimeSummaryItem {
+  contentId: string;
+  tmdbId: number | null;
+  contentType: "movie" | "tv_series";
+  contentTitle: string;
+  totalWatchTimeSeconds: number;
+  durationEvents: number;
+  totalPlays: number;
+  lastWatchedAt: string | null;
+  posterUrl: string | null;
+  href: string | null;
+}
+
+interface WatchTimeSummaryResponse {
+  data: WatchTimeSummaryItem[];
+  summary: {
+    totalContent: number;
+    totalWatchTimeSeconds: number;
+  };
   total: number;
   page: number;
   limit: number;
@@ -249,6 +275,13 @@ export default function AdminUserDetailPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [total, setTotal] = useState(0);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [watchTimeOpen, setWatchTimeOpen] = useState(false);
+  const [watchTimeLoading, setWatchTimeLoading] = useState(false);
+  const [watchTimeItems, setWatchTimeItems] = useState<WatchTimeSummaryItem[]>([]);
+  const [watchTimeSummary, setWatchTimeSummary] =
+    useState<WatchTimeSummaryResponse["summary"] | null>(null);
+  const [watchTimePage, setWatchTimePage] = useState(1);
+  const [watchTimeTotalPages, setWatchTimeTotalPages] = useState(0);
 
   const fetchUser = useCallback(async () => {
     const res = await api.get<AdminUserDetailsResponse | UserDetails>(
@@ -320,6 +353,43 @@ export default function AdminUserDetailPage() {
   const handleLoadMore = () => {
     if (page < totalPages) {
       fetchTimeline(page + 1, filter, true);
+    }
+  };
+
+  const fetchWatchTimeSummary = useCallback(
+    async (pageNum = 1, append = false) => {
+      setWatchTimeLoading(true);
+      const res = await api.get<WatchTimeSummaryResponse>(
+        `/admin/users/${userId}/watch-time-summary?page=${pageNum}&limit=20`
+      );
+
+      if (res.success && res.data) {
+        setWatchTimeItems((prev) =>
+          append ? [...prev, ...res.data!.data] : res.data!.data
+        );
+        setWatchTimeSummary(res.data.summary);
+        setWatchTimePage(pageNum);
+        setWatchTimeTotalPages(res.data.totalPages);
+      } else {
+        showError(
+          "Load failed",
+          res.error || "Không thể tải chi tiết thời gian xem"
+        );
+      }
+
+      setWatchTimeLoading(false);
+    },
+    [api, showError, userId]
+  );
+
+  const handleOpenWatchTime = () => {
+    setWatchTimeOpen(true);
+    fetchWatchTimeSummary(1);
+  };
+
+  const handleLoadMoreWatchTime = () => {
+    if (watchTimePage < watchTimeTotalPages) {
+      fetchWatchTimeSummary(watchTimePage + 1, true);
     }
   };
 
@@ -604,6 +674,7 @@ export default function AdminUserDetailPage() {
             icon={<Clock className="w-5 h-5 text-green-400" />}
             label="Thời gian xem"
             value={formatWatchTime(displayStats.watchTimeSeconds)}
+            onClick={handleOpenWatchTime}
           />
           <StatCard
             icon={<LogIn className="w-5 h-5 text-emerald-400" />}
@@ -747,6 +818,111 @@ export default function AdminUserDetailPage() {
           </div>
         )}
       </div>
+
+      {watchTimeOpen && (
+        <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-4xl max-h-[85vh] bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between gap-4 p-5 border-b border-gray-700">
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Chi tiết thời gian xem
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  {watchTimeSummary
+                    ? `${watchTimeSummary.totalContent} phim/series - ${formatWatchTime(
+                        watchTimeSummary.totalWatchTimeSeconds
+                      )}`
+                    : "Tổng thời gian xem theo từng phim/series"}
+                </p>
+              </div>
+              <button
+                onClick={() => setWatchTimeOpen(false)}
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="max-h-[65vh] overflow-y-auto divide-y divide-gray-800">
+              {watchTimeLoading && watchTimeItems.length === 0 ? (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="w-7 h-7 animate-spin text-blue-500" />
+                </div>
+              ) : watchTimeItems.length === 0 ? (
+                <div className="text-center py-16 text-gray-500">
+                  Chưa có dữ liệu thời gian xem
+                </div>
+              ) : (
+                watchTimeItems.map((item) => (
+                  <div
+                    key={`${item.contentType}-${item.contentId}`}
+                    className="flex items-center gap-4 p-4 hover:bg-gray-800/60 transition-colors"
+                  >
+                    <div className="relative w-12 h-[72px] bg-gray-800 rounded overflow-hidden flex-shrink-0">
+                      {item.posterUrl ? (
+                        <Image
+                          src={item.posterUrl}
+                          alt={item.contentTitle}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Play className="w-5 h-5 text-gray-500" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <a
+                          href={item.href || "#"}
+                          className="font-medium text-white hover:text-blue-400 truncate"
+                        >
+                          {item.contentTitle}
+                        </a>
+                        <span className="px-2 py-0.5 rounded bg-gray-800 text-xs text-gray-400 uppercase">
+                          {item.contentType === "tv_series" ? "TV" : "Movie"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-400 flex-wrap">
+                        <span>{item.totalPlays} lượt play</span>
+                        <span>{item.durationEvents} lần ghi thời lượng</span>
+                        {item.lastWatchedAt && (
+                          <span>
+                            Gần nhất:{" "}
+                            {new Date(item.lastWatchedAt).toLocaleString("vi-VN")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg font-bold text-white">
+                        {formatWatchTime(item.totalWatchTimeSeconds)}
+                      </div>
+                      <div className="text-xs text-gray-500">tổng thời gian</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {watchTimePage < watchTimeTotalPages && (
+              <div className="p-4 border-t border-gray-700 text-center">
+                <button
+                  onClick={handleLoadMoreWatchTime}
+                  disabled={watchTimeLoading}
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {watchTimeLoading ? "Đang tải..." : "Tải thêm"}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -755,16 +931,26 @@ function StatCard({
   icon,
   label,
   value,
+  onClick,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | number;
+  onClick?: () => void;
 }) {
   return (
-    <div className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+    <button
+      type="button"
+      onClick={onClick}
+      className={`text-left bg-gray-800 rounded-xl p-4 border border-gray-700 ${
+        onClick
+          ? "hover:bg-gray-750 hover:border-gray-600 cursor-pointer"
+          : "cursor-default"
+      }`}
+    >
       <div className="flex items-center gap-2 mb-2">{icon}</div>
       <div className="text-2xl font-bold text-white">{value}</div>
       <div className="text-xs text-gray-400 mt-1">{label}</div>
-    </div>
+    </button>
   );
 }

@@ -20,8 +20,13 @@ class AnalyticsService {
   private trackingMap = new Map<string, number>();
   private readonly DEBOUNCE_MS = 2000;
 
+  private normalizeContentId(contentId: string): string {
+    return contentId.replace(/^(movie|tv)-/i, "");
+  }
+
   async trackEvent(params: TrackEventParams): Promise<void> {
-    const eventKey = `${params.contentId}-${params.actionType}`;
+    const normalizedContentId = this.normalizeContentId(params.contentId);
+    const eventKey = `${normalizedContentId}-${params.actionType}`;
     const now = Date.now();
     const lastTracked = this.trackingMap.get(eventKey);
 
@@ -33,7 +38,7 @@ class AnalyticsService {
       this.trackingMap.set(eventKey, now);
 
       const payload = {
-        contentId: params.contentId,
+        contentId: normalizedContentId,
         contentType: params.contentType,
         actionType: params.actionType,
         contentTitle: params.contentTitle,
@@ -137,8 +142,9 @@ class AnalyticsService {
     durationSeconds: number,
     contentTitle?: string
   ): void {
+    const normalizedContentId = this.normalizeContentId(contentId);
     const payload = {
-      contentId,
+      contentId: normalizedContentId,
       contentType,
       actionType: "view",
       contentTitle,
