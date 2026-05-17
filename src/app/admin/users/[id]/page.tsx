@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useToastRedux } from "@/hooks/useToastRedux";
 import {
   ArrowLeft,
   User as UserIcon,
@@ -21,6 +22,8 @@ import {
   Filter,
   ChevronDown,
   Loader2,
+  Save,
+  ShieldCheck,
 } from "lucide-react";
 
 interface UserDetails {
@@ -70,6 +73,18 @@ interface TimelineResponse {
   totalPages: number;
 }
 
+interface AdminUserDetailsResponse {
+  user: UserDetails;
+  activities?: ActivityItem[];
+  stats?: ActivityStats;
+}
+
+interface UserProfileForm {
+  name: string;
+  role: string;
+  isActive: boolean;
+}
+
 const FILTER_OPTIONS = [
   { value: "all", label: "Tất cả" },
   { value: "view", label: "Lượt xem" },
@@ -79,6 +94,13 @@ const FILTER_OPTIONS = [
   { value: "favorite", label: "Yêu thích" },
   { value: "comment", label: "Bình luận" },
   { value: "login", label: "Đăng nhập" },
+];
+
+const ROLE_OPTIONS = [
+  { value: "user", label: "User" },
+  { value: "viewer", label: "Viewer" },
+  { value: "admin", label: "Admin" },
+  { value: "super_admin", label: "Super admin" },
 ];
 
 function getActivityIcon(type: string) {
@@ -141,11 +163,18 @@ export default function AdminUserDetailPage() {
   const router = useRouter();
   const userId = params.id as string;
   const api = useAdminApi();
+  const { showSuccess, showError } = useToastRedux();
 
   const [user, setUser] = useState<UserDetails | null>(null);
+  const [profileForm, setProfileForm] = useState<UserProfileForm>({
+    name: "",
+    role: "user",
+    isActive: true,
+  });
   const [stats, setStats] = useState<ActivityStats | null>(null);
   const [timeline, setTimeline] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [filter, setFilter] = useState("all");
   const [page, setPage] = useState(1);
@@ -154,9 +183,23 @@ export default function AdminUserDetailPage() {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
 
   const fetchUser = useCallback(async () => {
-    const res = await api.get<UserDetails>(`/admin/users/${userId}`);
+    const res = await api.get<AdminUserDetailsResponse | UserDetails>(
+      `/admin/users/${userId}`
+    );
     if (res.success && res.data) {
-      setUser(res.data);
+      const payload = res.data;
+      const details = "user" in payload ? payload.user : payload;
+
+      setUser(details);
+      setProfileForm({
+        name: details.name || "",
+        role: details.role || "user",
+        isActive: details.isActive,
+      });
+
+      if ("stats" in payload && payload.stats) {
+        setStats(payload.stats);
+      }
     }
   }, [api, userId]);
 
@@ -209,6 +252,36 @@ export default function AdminUserDetailPage() {
   const handleLoadMore = () => {
     if (page < totalPages) {
       fetchTimeline(page + 1, filter, true);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setSavingProfile(true);
+    try {
+      const res = await api.put<UserDetails>(`/admin/users/${user.id}`, {
+        name: profileForm.name.trim(),
+        role: profileForm.role,
+        isActive: profileForm.isActive,
+      });
+
+      if (res.success && res.data) {
+        setUser(res.data);
+        setProfileForm({
+          name: res.data.name || "",
+          role: res.data.role || "user",
+          isActive: res.data.isActive,
+        });
+        showSuccess("User updated", "Thông tin và quyền user đã được cập nhật");
+      } else {
+        showError("Update failed", res.error || "Không thể cập nhật user");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      showError("Update failed", "Không thể cập nhật user");
+    } finally {
+      setSavingProfile(false);
     }
   };
 
@@ -306,6 +379,104 @@ export default function AdminUserDetailPage() {
               {user.lastLoginIp && <span>IP: {user.lastLoginIp}</span>}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Account and permissions */}
+      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+        <div className="flex items-center justify-between gap-4 mb-5">
+          <div>
+            <div className="flex items-center gap-2 text-white">
+              <ShieldCheck className="w-5 h-5 text-blue-400" />
+              <h2 className="text-lg font-semibold">Thông tin & quyền user</h2>
+            </div>
+            <p className="text-sm text-gray-400 mt-1">
+              Kiểm tra thông tin tài khoản, trạng thái và role hiện tại.
+            </p>
+          </div>
+          <button
+            onClick={handleSaveProfile}
+            disabled={savingProfile}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-sm font-medium text-white transition-colors cursor-pointer"
+          >
+            {savingProfile ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            Lưu
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <label className="space-y-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              Tên hiển thị
+            </span>
+            <input
+              value={profileForm.name}
+              onChange={(event) =>
+                setProfileForm((prev) => ({
+                  ...prev,
+                  name: event.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+              placeholder="Unnamed"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              Email
+            </span>
+            <input
+              value={user.email}
+              readOnly
+              className="w-full px-3 py-2 bg-gray-900/70 border border-gray-700 rounded-lg text-sm text-gray-300 cursor-not-allowed"
+            />
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              Quyền
+            </span>
+            <select
+              value={profileForm.role}
+              onChange={(event) =>
+                setProfileForm((prev) => ({
+                  ...prev,
+                  role: event.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+            >
+              {ROLE_OPTIONS.map((role) => (
+                <option key={role.value} value={role.value}>
+                  {role.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="space-y-2">
+            <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
+              Trạng thái
+            </span>
+            <select
+              value={profileForm.isActive ? "active" : "banned"}
+              onChange={(event) =>
+                setProfileForm((prev) => ({
+                  ...prev,
+                  isActive: event.target.value === "active",
+                }))
+              }
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="active">Active</option>
+              <option value="banned">Banned</option>
+            </select>
+          </label>
         </div>
       </div>
 

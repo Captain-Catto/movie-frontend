@@ -17,6 +17,12 @@ type SwaggerAuthSettings = {
   username: string;
   configured: boolean;
   updatedAt?: string;
+  updatedBy?: {
+    id?: number;
+    email?: string;
+    name?: string;
+    role?: string;
+  };
 };
 
 const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
@@ -74,8 +80,10 @@ export default function AdminSettingsPage() {
           username: authSettings.username || "",
           password: "",
         });
-      } else if (swaggerAuthRes.error) {
-        showError("Load failed", swaggerAuthRes.error);
+      } else if (swaggerAuthRes.error || swaggerAuthRes.message) {
+        if (!String(swaggerAuthRes.message || swaggerAuthRes.error).toLowerCase().includes("forbidden")) {
+          showError("Load failed", swaggerAuthRes.error || swaggerAuthRes.message || "Failed to load Swagger access");
+        }
       }
     } catch (err) {
       console.error("Failed to load settings", err);
@@ -370,6 +378,9 @@ export default function AdminSettingsPage() {
           <p className="md:col-span-3 text-xs text-gray-400">
             Status: {swaggerAuth.configured ? "Configured" : "Not configured"}
             {swaggerAuth.updatedAt ? ` · Updated ${new Date(swaggerAuth.updatedAt).toLocaleString()}` : ""}
+            {swaggerAuth.updatedBy?.email
+              ? ` · Modified by ${swaggerAuth.updatedBy.name || swaggerAuth.updatedBy.email} (${swaggerAuth.updatedBy.role || "unknown"})`
+              : ""}
           </p>
         </div>
       </div>
