@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
+import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowLeft,
   User as UserIcon,
@@ -164,6 +165,7 @@ export default function AdminUserDetailPage() {
   const userId = params.id as string;
   const api = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
+  const { user: currentUser } = useAuth();
 
   const [user, setUser] = useState<UserDetails | null>(null);
   const [profileForm, setProfileForm] = useState<UserProfileForm>({
@@ -258,6 +260,17 @@ export default function AdminUserDetailPage() {
   const handleSaveProfile = async () => {
     if (!user) return;
 
+    const isEditingSelf = Number(currentUser?.id) === user.id;
+    if (isEditingSelf && profileForm.role !== user.role) {
+      showError("Không thể cập nhật", "Bạn không thể tự thay đổi quyền của chính mình");
+      return;
+    }
+
+    if (isEditingSelf && !profileForm.isActive) {
+      showError("Không thể cập nhật", "Bạn không thể tự khóa tài khoản của chính mình");
+      return;
+    }
+
     setSavingProfile(true);
     try {
       const res = await api.put<UserDetails>(`/admin/users/${user.id}`, {
@@ -302,6 +315,7 @@ export default function AdminUserDetailPage() {
   }
 
   const selectedFilter = FILTER_OPTIONS.find((f) => f.value === filter);
+  const isEditingSelf = Number(currentUser?.id) === user.id;
 
   return (
     <div className="space-y-6">
@@ -392,6 +406,9 @@ export default function AdminUserDetailPage() {
             </div>
             <p className="text-sm text-gray-400 mt-1">
               Kiểm tra thông tin tài khoản, trạng thái và role hiện tại.
+              {isEditingSelf
+                ? " Bạn không thể tự thay đổi quyền hoặc khóa tài khoản của chính mình."
+                : ""}
             </p>
           </div>
           <button
@@ -443,13 +460,14 @@ export default function AdminUserDetailPage() {
             </span>
             <select
               value={profileForm.role}
+              disabled={isEditingSelf}
               onChange={(event) =>
                 setProfileForm((prev) => ({
                   ...prev,
                   role: event.target.value,
                 }))
               }
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {ROLE_OPTIONS.map((role) => (
                 <option key={role.value} value={role.value}>
@@ -465,13 +483,14 @@ export default function AdminUserDetailPage() {
             </span>
             <select
               value={profileForm.isActive ? "active" : "banned"}
+              disabled={isEditingSelf}
               onChange={(event) =>
                 setProfileForm((prev) => ({
                   ...prev,
                   isActive: event.target.value === "active",
                 }))
               }
-              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white focus:outline-none focus:border-blue-500 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <option value="active">Active</option>
               <option value="banned">Banned</option>
