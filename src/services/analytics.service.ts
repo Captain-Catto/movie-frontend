@@ -1,4 +1,8 @@
 import axiosInstance from "@/lib/axios-instance";
+import { authStorage } from "@/lib/auth-storage";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
 type AnalyticsActionType = "view" | "click" | "play" | "complete" | "search";
 type AnalyticsContentType = "movie" | "tv_series";
@@ -142,11 +146,20 @@ class AnalyticsService {
       metadata: { type: "page_duration" },
     };
 
-    axiosInstance
-      .post("/analytics/track", payload)
-      .catch((error) => {
-        console.error("[Analytics] Failed to track duration:", error);
-      });
+    const token = authStorage.getToken();
+
+    fetch(`${API_BASE_URL}/api/analytics/track`, {
+      method: "POST",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(payload),
+    }).catch((error) => {
+      console.error("[Analytics] Failed to track duration:", error);
+      axiosInstance.post("/analytics/track", payload).catch(() => undefined);
+    });
   }
 }
 
