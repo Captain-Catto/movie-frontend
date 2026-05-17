@@ -13,6 +13,11 @@ type RegistrationSettings = {
 type StreamDomainSettings = {
   domains: string[];
 };
+type SwaggerAuthSettings = {
+  username: string;
+  configured: boolean;
+  updatedAt?: string;
+};
 
 const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
   { key: "nickname", label: "Nickname" },
@@ -30,13 +35,23 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [streamDomainText, setStreamDomainText] = useState("");
   const [streamSaving, setStreamSaving] = useState(false);
+  const [swaggerAuth, setSwaggerAuth] = useState<SwaggerAuthSettings>({
+    username: "",
+    configured: false,
+  });
+  const [swaggerAuthForm, setSwaggerAuthForm] = useState({
+    username: "",
+    password: "",
+  });
+  const [swaggerSaving, setSwaggerSaving] = useState(false);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
     try {
-      const [registrationRes, streamDomainsRes] = await Promise.all([
+      const [registrationRes, streamDomainsRes, swaggerAuthRes] = await Promise.all([
         adminApi.get<RegistrationSettings>("/admin/settings/registration"),
         adminApi.get<StreamDomainSettings>("/admin/settings/stream-domains"),
+        adminApi.get<SwaggerAuthSettings>("/admin/settings/swagger-auth"),
       ]);
 
       if (registrationRes.success && registrationRes.data) {
@@ -50,6 +65,17 @@ export default function AdminSettingsPage() {
         setStreamDomainText((streamDomains.domains || []).join("\n"));
       } else if (streamDomainsRes.error) {
         showError("Load failed", streamDomainsRes.error);
+      }
+
+      if (swaggerAuthRes.success && swaggerAuthRes.data) {
+        const authSettings = swaggerAuthRes.data as SwaggerAuthSettings;
+        setSwaggerAuth(authSettings);
+        setSwaggerAuthForm({
+          username: authSettings.username || "",
+          password: "",
+        });
+      } else if (swaggerAuthRes.error) {
+        showError("Load failed", swaggerAuthRes.error);
       }
     } catch (err) {
       console.error("Failed to load settings", err);
@@ -131,6 +157,48 @@ export default function AdminSettingsPage() {
       showError("Save failed", "Failed to save stream domains");
     } finally {
       setStreamSaving(false);
+    }
+  };
+
+  const handleSaveSwaggerAuth = async () => {
+    const username = swaggerAuthForm.username.trim();
+    const password = swaggerAuthForm.password.trim();
+
+    if (username.length < 3) {
+      showError("Save failed", "Swagger username must be at least 3 characters");
+      return;
+    }
+
+    if (!swaggerAuth.configured && password.length < 8) {
+      showError("Save failed", "Swagger password must be at least 8 characters");
+      return;
+    }
+
+    setSwaggerSaving(true);
+    try {
+      const payload: { username: string; password?: string } = { username };
+      if (password) {
+        payload.password = password;
+      }
+
+      const res = await adminApi.put<SwaggerAuthSettings>(
+        "/admin/settings/swagger-auth",
+        payload
+      );
+
+      if (res.success && res.data) {
+        const saved = res.data as SwaggerAuthSettings;
+        setSwaggerAuth(saved);
+        setSwaggerAuthForm({ username: saved.username || "", password: "" });
+        showSuccess("Saved", "Swagger access updated successfully");
+      } else {
+        showError("Save failed", res.error || "Failed to save Swagger access");
+      }
+    } catch (err) {
+      console.error("Failed to save Swagger auth", err);
+      showError("Save failed", "Failed to save Swagger access");
+    } finally {
+      setSwaggerSaving(false);
     }
   };
 
@@ -243,6 +311,66 @@ export default function AdminSettingsPage() {
           <div className="p-6">
             <EffectSettings />
           </div>
+        </div>
+      </div>
+
+      <div className="bg-gray-800 rounded-lg border border-gray-700">
+        <div className="px-6 py-4 border-b border-gray-700 flex flex-col gap-1">
+          <h2 className="text-lg font-semibold text-white">Swagger Access</h2>
+          <p className="text-xs text-gray-400">
+            Credentials required to open API docs at /api-docs. Password is stored as a hash.
+          </p>
+        </div>
+        <div className="p-6 grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Username
+            </label>
+            <input
+              type="text"
+              value={swaggerAuthForm.username}
+              onChange={(e) =>
+                setSwaggerAuthForm((prev) => ({
+                  ...prev,
+                  username: e.target.value,
+                }))
+              }
+              className="w-full rounded-md border border-gray-600 bg-gray-900 text-white text-sm p-3 focus:outline-none focus:ring-2 focus:ring-red-600"
+              placeholder="docs-admin"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              value={swaggerAuthForm.password}
+              onChange={(e) =>
+                setSwaggerAuthForm((prev) => ({
+                  ...prev,
+                  password: e.target.value,
+                }))
+              }
+              className="w-full rounded-md border border-gray-600 bg-gray-900 text-white text-sm p-3 focus:outline-none focus:ring-2 focus:ring-red-600"
+              placeholder={
+                swaggerAuth.configured
+                  ? "Leave blank to keep current password"
+                  : "At least 8 characters"
+              }
+            />
+          </div>
+          <button
+            onClick={handleSaveSwaggerAuth}
+            disabled={swaggerSaving}
+            className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            {swaggerSaving ? "Saving..." : "Save Access"}
+          </button>
+          <p className="md:col-span-3 text-xs text-gray-400">
+            Status: {swaggerAuth.configured ? "Configured" : "Not configured"}
+            {swaggerAuth.updatedAt ? ` · Updated ${new Date(swaggerAuth.updatedAt).toLocaleString()}` : ""}
+          </p>
         </div>
       </div>
 
