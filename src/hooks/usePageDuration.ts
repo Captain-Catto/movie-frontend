@@ -13,7 +13,9 @@ interface UsePageDurationOptions {
 
 /**
  * Hook to track how long a user stays on a page.
- * Sends duration to analytics on unmount or tab close.
+ * Sends duration while the page is still open, then flushes the remaining
+ * delta on tab hide/unmount. This avoids losing all watch time when the
+ * browser cancels unload requests.
  * Pauses when tab is hidden (Page Visibility API).
  */
 export function usePageDuration({
@@ -26,28 +28,38 @@ export function usePageDuration({
   const startTimeRef = useRef<number>(0);
   const accumulatedRef = useRef<number>(0);
   const isVisibleRef = useRef<boolean>(true);
-  const sentRef = useRef<boolean>(false);
+  const sentSecondsRef = useRef<number>(0);
 
-  const sendDuration = useCallback(() => {
-    if (sentRef.current || !enabled) return;
-
+  const getTotalSeconds = useCallback(() => {
     let totalSeconds = accumulatedRef.current;
+
     if (isVisibleRef.current && startTimeRef.current > 0) {
       totalSeconds += (Date.now() - startTimeRef.current) / 1000;
     }
 
-    totalSeconds = Math.round(totalSeconds);
+    return Math.round(totalSeconds);
+  }, []);
 
-    if (totalSeconds >= minDurationSeconds) {
-      sentRef.current = true;
+  const sendDurationDelta = useCallback(
+    (force = false) => {
+      if (!enabled) return;
+
+      const totalSeconds = getTotalSeconds();
+      const deltaSeconds = totalSeconds - sentSecondsRef.current;
+
+      if (deltaSeconds <= 0) return;
+      if (!force && deltaSeconds < minDurationSeconds) return;
+
+      sentSecondsRef.current = totalSeconds;
       analyticsService.trackDuration(
         contentId,
         contentType,
-        totalSeconds,
+        deltaSeconds,
         contentTitle
       );
-    }
-  }, [contentId, contentType, contentTitle, enabled, minDurationSeconds]);
+    },
+    [contentId, contentType, contentTitle, enabled, getTotalSeconds, minDurationSeconds]
+  );
 
   useEffect(() => {
     if (!enabled) return;
@@ -56,7 +68,7 @@ export function usePageDuration({
     startTimeRef.current = Date.now();
     accumulatedRef.current = 0;
     isVisibleRef.current = true;
-    sentRef.current = false;
+    sentSecondsRef.current = 0;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -66,6 +78,7 @@ export function usePageDuration({
             (Date.now() - startTimeRef.current) / 1000;
         }
         isVisibleRef.current = false;
+        sendDurationDelta(true);
       } else {
         // Tab visible again - restart timer
         startTimeRef.current = Date.now();
@@ -74,16 +87,20 @@ export function usePageDuration({
     };
 
     const handleBeforeUnload = () => {
-      sendDuration();
+      sendDurationDelta(true);
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("beforeunload", handleBeforeUnload);
+    const intervalId = window.setInterval(() => {
+      sendDurationDelta(false);
+    }, 15000);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      sendDuration();
+      window.clearInterval(intervalId);
+      sendDurationDelta(true);
     };
-  }, [enabled, sendDuration]);
+  }, [enabled, sendDurationDelta]);
 }

@@ -50,6 +50,7 @@ interface ActivityStats {
   views: number;
   favorites: number;
   comments: number;
+  plays: number;
   watchTimeSeconds: number;
   lastLogin: string | null;
 }
@@ -190,6 +191,10 @@ function buildStatsFromTimeline(timeline: ActivityItem[]): ActivityStats {
         acc.comments += 1;
       }
 
+      if (type === "PLAY" || type.includes("PLAY") || description.includes("PLAYED")) {
+        acc.plays += 1;
+      }
+
       const duration = Number(item.metadata?.duration || 0);
       if (duration > 0) {
         acc.watchTimeSeconds += duration;
@@ -204,6 +209,7 @@ function buildStatsFromTimeline(timeline: ActivityItem[]): ActivityStats {
       views: 0,
       favorites: 0,
       comments: 0,
+      plays: 0,
       watchTimeSeconds: 0,
       lastLogin: null,
     }
@@ -588,6 +594,11 @@ export default function AdminUserDetailPage() {
             icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
             label="Bình luận"
             value={displayStats.comments}
+          />
+          <StatCard
+            icon={<Play className="w-5 h-5 text-red-400" />}
+            label="Bấm play"
+            value={displayStats.plays || 0}
           />
           <StatCard
             icon={<Clock className="w-5 h-5 text-green-400" />}
