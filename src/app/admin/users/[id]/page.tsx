@@ -63,7 +63,7 @@ interface ActivityItem {
   deviceType?: string;
   country?: string;
   createdAt: string;
-  source: "user_activity" | "user_logs" | "view_analytics";
+  source: "user_activity" | "user_logs" | "recent_searches" | "view_analytics";
 }
 
 interface TimelineResponse {
@@ -148,6 +148,66 @@ function formatWatchTime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   return m > 0 ? `${h}h ${m}m` : `${h} giờ`;
+}
+
+function buildStatsFromTimeline(timeline: ActivityItem[]): ActivityStats {
+  return timeline.reduce<ActivityStats>(
+    (acc, item) => {
+      const type = item.type.toUpperCase();
+      const description = item.description.toUpperCase();
+
+      acc.total += 1;
+
+      if (type.includes("LOGIN") || description.includes("LOGGED IN")) {
+        acc.logins += 1;
+        const createdAt = new Date(item.createdAt).getTime();
+        const currentLastLogin = acc.lastLogin
+          ? new Date(acc.lastLogin).getTime()
+          : 0;
+        if (createdAt > currentLastLogin) {
+          acc.lastLogin = item.createdAt;
+        }
+      }
+
+      if (type.includes("SEARCH") || description.includes("SEARCHED")) {
+        acc.searches += 1;
+      }
+
+      if (
+        type === "VIEW" ||
+        type.includes("VIEW") ||
+        type.includes("WATCH") ||
+        description.includes("WATCHED")
+      ) {
+        acc.views += 1;
+      }
+
+      if (type.includes("FAVORITE") || description.includes("FAVORITES")) {
+        acc.favorites += 1;
+      }
+
+      if (type.includes("COMMENT") || description.includes("COMMENT")) {
+        acc.comments += 1;
+      }
+
+      const duration = Number(item.metadata?.duration || 0);
+      if (duration > 0) {
+        acc.watchTimeSeconds += duration;
+      }
+
+      return acc;
+    },
+    {
+      total: 0,
+      logins: 0,
+      searches: 0,
+      views: 0,
+      favorites: 0,
+      comments: 0,
+      watchTimeSeconds: 0,
+      lastLogin: null,
+    }
+  );
 }
 
 function countryCodeToFlag(code?: string | null) {
@@ -316,6 +376,13 @@ export default function AdminUserDetailPage() {
 
   const selectedFilter = FILTER_OPTIONS.find((f) => f.value === filter);
   const isEditingSelf = Number(currentUser?.id) === user.id;
+  const timelineStats = buildStatsFromTimeline(timeline);
+  const displayStats =
+    stats && stats.total > 0
+      ? stats
+      : timelineStats.total > 0
+        ? timelineStats
+        : stats;
 
   return (
     <div className="space-y-6">
@@ -500,37 +567,37 @@ export default function AdminUserDetailPage() {
       </div>
 
       {/* Stats Cards */}
-      {stats && (
+      {displayStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           <StatCard
             icon={<Eye className="w-5 h-5 text-blue-400" />}
             label="Lượt xem"
-            value={stats.views}
+            value={displayStats.views}
           />
           <StatCard
             icon={<Search className="w-5 h-5 text-yellow-400" />}
             label="Tìm kiếm"
-            value={stats.searches}
+            value={displayStats.searches}
           />
           <StatCard
             icon={<Heart className="w-5 h-5 text-pink-400" />}
             label="Yêu thích"
-            value={stats.favorites}
+            value={displayStats.favorites}
           />
           <StatCard
             icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
             label="Bình luận"
-            value={stats.comments}
+            value={displayStats.comments}
           />
           <StatCard
             icon={<Clock className="w-5 h-5 text-green-400" />}
             label="Thời gian xem"
-            value={formatWatchTime(stats.watchTimeSeconds)}
+            value={formatWatchTime(displayStats.watchTimeSeconds)}
           />
           <StatCard
             icon={<LogIn className="w-5 h-5 text-emerald-400" />}
             label="Đăng nhập"
-            value={stats.logins}
+            value={displayStats.logins}
           />
         </div>
       )}
