@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { Copy } from "lucide-react";
 import { WatchPartyProvider, useWatchParty } from "@/contexts/WatchPartyContext";
 import VideoPlayer from "@/components/ui/VideoPlayer";
@@ -123,7 +122,7 @@ function WatchPartyInner({ inviteCode }: { inviteCode: string }) {
   );
 }
 
-export default function WatchPartyPageClient({ inviteCode, partyInfo }: Props) {
+export default function WatchPartyPageClient({ inviteCode }: Props) {
   return (
     <WatchPartyProvider inviteCode={inviteCode}>
       <WatchPartyInner inviteCode={inviteCode} />

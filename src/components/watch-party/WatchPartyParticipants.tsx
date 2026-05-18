@@ -4,7 +4,7 @@ import { Users } from "lucide-react";
 import { useWatchParty } from "@/contexts/WatchPartyContext";
 
 export default function WatchPartyParticipants() {
-  const { participants, room } = useWatchParty();
+  const { participants } = useWatchParty();
 
   return (
     <div className="px-3 py-2 border-b border-gray-800">
