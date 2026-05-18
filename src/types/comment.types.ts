@@ -10,6 +10,7 @@ export interface Comment {
   tvId?: number; // Backend field (alias for tvSeriesId)
   parentId?: number;
   isHidden: boolean;
+  hiddenReason?: string | null;
   hideReason?: string;
   hiddenBy?: number;
   hiddenAt?: string;

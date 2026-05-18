@@ -144,6 +144,13 @@ interface UserCommentEntry {
   content: string;
   parentId: number | null;
   isHidden: boolean;
+  hiddenReason: string | null;
+  hiddenBy: number | null;
+  hiddenByUser: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
   isDeleted: boolean;
   likeCount: number;
   dislikeCount: number;
@@ -220,6 +227,15 @@ const FILTER_OPTIONS = [
   { value: "favorite", label: "Yêu thích" },
   { value: "comment", label: "Bình luận" },
   { value: "login", label: "Đăng nhập" },
+];
+
+const COMMENT_HIDE_REASONS = [
+  "Nội dung không phù hợp",
+  "Spam hoặc quảng cáo",
+  "Ngôn từ xúc phạm/quấy rối",
+  "Tiết lộ nội dung phim không cảnh báo",
+  "Vi phạm quy định cộng đồng",
+  "Khác",
 ];
 
 const ROLE_OPTIONS = [
@@ -397,11 +413,13 @@ export default function AdminUserDetailPage() {
     group: UserCommentGroupItem | null;
     commentId: number | null;
     reason: string;
+    customReason: string;
     saving: boolean;
   }>({
     group: null,
     commentId: null,
-    reason: "",
+    reason: COMMENT_HIDE_REASONS[0],
+    customReason: "",
     saving: false,
   });
 
@@ -644,8 +662,28 @@ export default function AdminUserDetailPage() {
   const markCommentHidden = (
     group: UserCommentGroupItem,
     commentId: number,
-    isHidden: boolean
+    isHidden: boolean,
+    hiddenReason: string | null = null
   ) => {
+    const hiddenByUser = isHidden && currentUser
+      ? {
+          id: Number(currentUser.id),
+          name: currentUser.name || currentUser.email || "Admin",
+          email: currentUser.email || "",
+        }
+      : null;
+
+    const applyHiddenState = (comment: UserCommentEntry) =>
+      comment.id === commentId
+        ? {
+            ...comment,
+            isHidden,
+            hiddenReason: isHidden ? hiddenReason : null,
+            hiddenBy: isHidden ? Number(currentUser?.id) || null : null,
+            hiddenByUser,
+          }
+        : comment;
+
     setCommentGroupPages((prev) => ({
       ...prev,
       [group.id]: {
@@ -656,9 +694,7 @@ export default function AdminUserDetailPage() {
           total: group.commentCount,
           loading: false,
         }),
-        data: (prev[group.id]?.data || group.comments).map((comment) =>
-          comment.id === commentId ? { ...comment, isHidden } : comment
-        ),
+        data: (prev[group.id]?.data || group.comments).map(applyHiddenState),
       },
     }));
     setDetailItems((prev) =>
@@ -666,9 +702,7 @@ export default function AdminUserDetailPage() {
         if (!("comments" in item) || item.id !== group.id) return item;
         return {
           ...item,
-          comments: item.comments.map((comment) =>
-            comment.id === commentId ? { ...comment, isHidden } : comment
-          ),
+          comments: item.comments.map(applyHiddenState),
         };
       })
     );
@@ -681,18 +715,24 @@ export default function AdminUserDetailPage() {
     setHideCommentModal({
       group,
       commentId,
-      reason: "",
+      reason: COMMENT_HIDE_REASONS[0],
+      customReason: "",
       saving: false,
     });
   };
 
   const handleHideComment = async () => {
-    const { group, commentId, reason } = hideCommentModal;
+    const { group, commentId, reason, customReason } = hideCommentModal;
     if (!group || !commentId) return;
+
+    const finalReason =
+      reason === "Khác"
+        ? customReason.trim() || "Lý do khác"
+        : reason;
 
     setHideCommentModal((prev) => ({ ...prev, saving: true }));
     const res = await api.put(`/admin/comments/${commentId}/hide`, {
-      reason: reason.trim() || "Ẩn bởi admin",
+      reason: finalReason,
     });
 
     if (!res.success) {
@@ -701,11 +741,12 @@ export default function AdminUserDetailPage() {
       return;
     }
 
-    markCommentHidden(group, commentId, true);
+    markCommentHidden(group, commentId, true, finalReason);
     setHideCommentModal({
       group: null,
       commentId: null,
-      reason: "",
+      reason: COMMENT_HIDE_REASONS[0],
+      customReason: "",
       saving: false,
     });
     showSuccess("Đã ẩn", "Bình luận đã được ẩn khỏi nội dung công khai");
@@ -1187,7 +1228,8 @@ export default function AdminUserDetailPage() {
                   setHideCommentModal({
                     group: null,
                     commentId: null,
-                    reason: "",
+                    reason: COMMENT_HIDE_REASONS[0],
+                    customReason: "",
                     saving: false,
                   })
                 }
@@ -1201,7 +1243,7 @@ export default function AdminUserDetailPage() {
               <label className="block text-sm font-medium text-gray-300">
                 Lý do ẩn
               </label>
-              <textarea
+              <select
                 value={hideCommentModal.reason}
                 onChange={(event) =>
                   setHideCommentModal((prev) => ({
@@ -1209,10 +1251,28 @@ export default function AdminUserDetailPage() {
                     reason: event.target.value,
                   }))
                 }
-                rows={4}
-                placeholder="Ví dụ: Nội dung không phù hợp"
                 className="w-full rounded-lg bg-gray-950 border border-gray-700 text-white placeholder:text-gray-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-              />
+              >
+                {COMMENT_HIDE_REASONS.map((reason) => (
+                  <option key={reason} value={reason}>
+                    {reason}
+                  </option>
+                ))}
+              </select>
+              {hideCommentModal.reason === "Khác" && (
+                <textarea
+                  value={hideCommentModal.customReason}
+                  onChange={(event) =>
+                    setHideCommentModal((prev) => ({
+                      ...prev,
+                      customReason: event.target.value,
+                    }))
+                  }
+                  rows={3}
+                  placeholder="Nhập lý do cụ thể"
+                  className="w-full rounded-lg bg-gray-950 border border-gray-700 text-white placeholder:text-gray-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-700">
@@ -1222,7 +1282,8 @@ export default function AdminUserDetailPage() {
                   setHideCommentModal({
                     group: null,
                     commentId: null,
-                    reason: "",
+                    reason: COMMENT_HIDE_REASONS[0],
+                    customReason: "",
                     saving: false,
                   })
                 }
@@ -1654,6 +1715,22 @@ function DetailModalItem({
               <p className={`text-sm text-gray-300 ${isExpanded ? "" : "line-clamp-3"}`}>
                 {comment.content}
               </p>
+              {comment.isHidden && (
+                <div className="mt-2 rounded-lg bg-gray-900 border border-gray-800 px-3 py-2 text-xs text-gray-400 space-y-1">
+                  <p>
+                    <span className="text-gray-500">Lý do ẩn:</span>{" "}
+                    {comment.hiddenReason || "Không có lý do"}
+                  </p>
+                  <p>
+                    <span className="text-gray-500">Ẩn bởi:</span>{" "}
+                    {comment.hiddenByUser
+                      ? `${comment.hiddenByUser.name} (${comment.hiddenByUser.email})`
+                      : comment.hiddenBy
+                        ? `Admin #${comment.hiddenBy}`
+                        : "Không rõ"}
+                  </p>
+                </div>
+              )}
               <div className="flex items-start justify-between gap-3 mt-2">
                 <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
                   <span>{new Date(comment.createdAt).toLocaleString("vi-VN")}</span>

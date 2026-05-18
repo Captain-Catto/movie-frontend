@@ -71,11 +71,12 @@ export function CommentItem(props: CommentItemProps) {
               />
             </div>
           </div>
-          <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-3 py-2">
-            <p className="text-sm text-yellow-200">
-              Bình luận này bị ẩn bởi admin
-            </p>
-          </div>
+          <p className="text-gray-300 text-sm leading-relaxed">
+            Bình luận này bị ẩn bởi admin
+            {currentComment.hiddenReason
+              ? `: ${currentComment.hiddenReason}`
+              : ""}
+          </p>
         </div>
       </div>
     );
