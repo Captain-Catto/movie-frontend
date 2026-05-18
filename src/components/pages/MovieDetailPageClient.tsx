@@ -166,6 +166,7 @@ const MovieDetailPageClient = ({
   // });
 
   return (
+    <>
     <Layout>
       <div className="min-h-screen">
         {error && (
@@ -550,6 +551,7 @@ const MovieDetailPageClient = ({
         onClose={() => setShowWatchPartyModal(false)}
       />
     )}
+    </>
   );
 };
 
