@@ -101,6 +101,59 @@ interface WatchTimeSummaryResponse {
   totalPages: number;
 }
 
+type DetailModalType = "searches" | "favorites" | "comments";
+
+interface UserSearchHistoryItem {
+  id: number;
+  query: string;
+  type: "movie" | "tv" | "person" | "all";
+  dismissedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface UserFavoriteDetailItem {
+  id: number;
+  contentId: string;
+  tmdbId: number | null;
+  contentType: "movie" | "tv";
+  contentTitle: string;
+  posterUrl: string | null;
+  href: string | null;
+  createdAt: string;
+}
+
+interface UserCommentDetailItem {
+  id: number;
+  content: string;
+  contentId: number | null;
+  contentType: "movie" | "tv";
+  contentTitle: string;
+  parentId: number | null;
+  isHidden: boolean;
+  isDeleted: boolean;
+  likeCount: number;
+  dislikeCount: number;
+  replyCount: number;
+  posterUrl: string | null;
+  href: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type DetailItem =
+  | UserSearchHistoryItem
+  | UserFavoriteDetailItem
+  | UserCommentDetailItem;
+
+interface DetailResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 interface AdminUserDetailsResponse {
   user: UserDetails;
   activities?: ActivityItem[];
@@ -282,6 +335,13 @@ export default function AdminUserDetailPage() {
     useState<WatchTimeSummaryResponse["summary"] | null>(null);
   const [watchTimePage, setWatchTimePage] = useState(1);
   const [watchTimeTotalPages, setWatchTimeTotalPages] = useState(0);
+  const [detailModalType, setDetailModalType] =
+    useState<DetailModalType | null>(null);
+  const [detailItems, setDetailItems] = useState<DetailItem[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailPage, setDetailPage] = useState(1);
+  const [detailTotalPages, setDetailTotalPages] = useState(0);
+  const [detailTotal, setDetailTotal] = useState(0);
 
   const fetchUser = useCallback(async () => {
     const res = await api.get<AdminUserDetailsResponse | UserDetails>(
@@ -398,6 +458,53 @@ export default function AdminUserDetailPage() {
   const handleLoadMoreWatchTime = () => {
     if (watchTimePage < watchTimeTotalPages) {
       fetchWatchTimeSummary(watchTimePage + 1, true);
+    }
+  };
+
+  const fetchDetailItems = useCallback(
+    async (type: DetailModalType, pageNum = 1, append = false) => {
+      const endpointByType: Record<DetailModalType, string> = {
+        searches: "search-history",
+        favorites: "favorites",
+        comments: "comments",
+      };
+
+      setDetailLoading(true);
+      const res = await api.get<DetailResponse<DetailItem>>(
+        `/admin/users/${userId}/${endpointByType[type]}?page=${pageNum}&limit=20`
+      );
+
+      if (res.success && res.data) {
+        setDetailItems((prev) =>
+          append ? [...prev, ...res.data!.data] : res.data!.data
+        );
+        setDetailPage(pageNum);
+        setDetailTotalPages(res.data.totalPages);
+        setDetailTotal(res.data.total);
+      } else {
+        showError(
+          "Load failed",
+          res.error || "Không thể tải chi tiết hoạt động"
+        );
+      }
+
+      setDetailLoading(false);
+    },
+    [api, showError, userId]
+  );
+
+  const handleOpenDetailModal = (type: DetailModalType) => {
+    setDetailModalType(type);
+    setDetailItems([]);
+    setDetailPage(1);
+    setDetailTotalPages(0);
+    setDetailTotal(0);
+    fetchDetailItems(type, 1);
+  };
+
+  const handleLoadMoreDetails = () => {
+    if (detailModalType && detailPage < detailTotalPages) {
+      fetchDetailItems(detailModalType, detailPage + 1, true);
     }
   };
 
@@ -666,16 +773,19 @@ export default function AdminUserDetailPage() {
             icon={<Search className="w-5 h-5 text-yellow-400" />}
             label="Tìm kiếm"
             value={displayStats.searches}
+            onClick={() => handleOpenDetailModal("searches")}
           />
           <StatCard
             icon={<Heart className="w-5 h-5 text-pink-400" />}
             label="Yêu thích"
             value={displayStats.favorites}
+            onClick={() => handleOpenDetailModal("favorites")}
           />
           <StatCard
             icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
             label="Bình luận"
             value={displayStats.comments}
+            onClick={() => handleOpenDetailModal("comments")}
           />
           <StatCard
             icon={<Play className="w-5 h-5 text-red-400" />}
@@ -831,6 +941,19 @@ export default function AdminUserDetailPage() {
         )}
       </div>
 
+      {detailModalType && (
+        <DetailModal
+          type={detailModalType}
+          total={detailTotal}
+          items={detailItems}
+          loading={detailLoading}
+          page={detailPage}
+          totalPages={detailTotalPages}
+          onClose={() => setDetailModalType(null)}
+          onLoadMore={handleLoadMoreDetails}
+        />
+      )}
+
       {watchTimeOpen && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-4xl max-h-[85vh] bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
@@ -964,5 +1087,221 @@ function StatCard({
       <div className="text-2xl font-bold text-white">{value}</div>
       <div className="text-xs text-gray-400 mt-1">{label}</div>
     </button>
+  );
+}
+
+function DetailModal({
+  type,
+  total,
+  items,
+  loading,
+  page,
+  totalPages,
+  onClose,
+  onLoadMore,
+}: {
+  type: DetailModalType;
+  total: number;
+  items: DetailItem[];
+  loading: boolean;
+  page: number;
+  totalPages: number;
+  onClose: () => void;
+  onLoadMore: () => void;
+}) {
+  const titleByType: Record<DetailModalType, string> = {
+    searches: "Lịch sử tìm kiếm",
+    favorites: "Danh sách yêu thích",
+    comments: "Bình luận của user",
+  };
+  const emptyByType: Record<DetailModalType, string> = {
+    searches: "User chưa có lịch sử tìm kiếm",
+    favorites: "User chưa có nội dung yêu thích",
+    comments: "User chưa có bình luận",
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl max-h-[85vh] bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between gap-4 p-5 border-b border-gray-700">
+          <div>
+            <h2 className="text-lg font-semibold text-white">
+              {titleByType[type]}
+            </h2>
+            <p className="text-sm text-gray-400 mt-1">{total} mục</p>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="max-h-[65vh] overflow-y-auto divide-y divide-gray-800">
+          {loading && items.length === 0 ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="w-7 h-7 animate-spin text-blue-500" />
+            </div>
+          ) : items.length === 0 ? (
+            <div className="text-center py-16 text-gray-500">
+              {emptyByType[type]}
+            </div>
+          ) : (
+            items.map((item) => (
+              <DetailModalItem
+                key={`${type}-${item.id}`}
+                type={type}
+                item={item}
+              />
+            ))
+          )}
+        </div>
+
+        {page < totalPages && (
+          <div className="p-4 border-t border-gray-700 text-center">
+            <button
+              onClick={onLoadMore}
+              disabled={loading}
+              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              {loading ? "Đang tải..." : "Tải thêm"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DetailModalItem({
+  type,
+  item,
+}: {
+  type: DetailModalType;
+  item: DetailItem;
+}) {
+  if (type === "searches" && "query" in item) {
+    return (
+      <div className="flex items-start gap-3 p-4 hover:bg-gray-800/60 transition-colors">
+        <div className="w-10 h-10 rounded-lg bg-yellow-500/15 text-yellow-400 inline-flex items-center justify-center flex-shrink-0">
+          <Search className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-medium text-white">{item.query}</span>
+            <span className="px-2 py-0.5 rounded bg-gray-800 text-xs text-gray-400 uppercase">
+              {item.type}
+            </span>
+            {item.dismissedAt && (
+              <span className="px-2 py-0.5 rounded bg-gray-800 text-xs text-gray-500">
+                Đã ẩn
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            Tìm lúc {new Date(item.createdAt).toLocaleString("vi-VN")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "favorites" && "contentTitle" in item && !("content" in item)) {
+    return (
+      <ContentDetailRow
+        posterUrl={item.posterUrl}
+        title={item.contentTitle}
+        href={item.href}
+        contentType={item.contentType}
+        meta={`Đã thêm yêu thích lúc ${new Date(item.createdAt).toLocaleString(
+          "vi-VN"
+        )}`}
+        icon={<Heart className="w-5 h-5 text-pink-400" />}
+      />
+    );
+  }
+
+  if (type === "comments" && "content" in item) {
+    return (
+      <ContentDetailRow
+        posterUrl={item.posterUrl}
+        title={item.contentTitle}
+        href={item.href}
+        contentType={item.contentType}
+        meta={`Bình luận lúc ${new Date(item.createdAt).toLocaleString("vi-VN")}`}
+        icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
+      >
+        <p className="mt-2 text-sm text-gray-300 line-clamp-3">{item.content}</p>
+        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
+          <span>{item.likeCount} like</span>
+          <span>{item.dislikeCount} dislike</span>
+          <span>{item.replyCount} replies</span>
+          {item.parentId && <span>Reply #{item.parentId}</span>}
+          {item.isHidden && <span className="text-yellow-400">Hidden</span>}
+          {item.isDeleted && <span className="text-red-400">Deleted</span>}
+        </div>
+      </ContentDetailRow>
+    );
+  }
+
+  return null;
+}
+
+function ContentDetailRow({
+  posterUrl,
+  title,
+  href,
+  contentType,
+  meta,
+  icon,
+  children,
+}: {
+  posterUrl: string | null;
+  title: string;
+  href: string | null;
+  contentType: "movie" | "tv";
+  meta: string;
+  icon: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-4 p-4 hover:bg-gray-800/60 transition-colors">
+      <div className="relative w-12 h-[72px] bg-gray-800 rounded overflow-hidden flex-shrink-0">
+        {posterUrl ? (
+          <Image
+            src={posterUrl}
+            alt={title}
+            fill
+            sizes="48px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            {icon}
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          {href ? (
+            <a
+              href={href}
+              className="font-medium text-white hover:text-blue-400 truncate"
+            >
+              {title}
+            </a>
+          ) : (
+            <span className="font-medium text-white truncate">{title}</span>
+          )}
+          <span className="px-2 py-0.5 rounded bg-gray-800 text-xs text-gray-400 uppercase">
+            {contentType === "tv" ? "TV" : "Movie"}
+          </span>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">{meta}</p>
+        {children}
+      </div>
+    </div>
   );
 }
