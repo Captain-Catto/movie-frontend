@@ -101,7 +101,7 @@ interface WatchTimeSummaryResponse {
   totalPages: number;
 }
 
-type DetailModalType = "searches" | "favorites" | "comments";
+type DetailModalType = "searches" | "favorites" | "comments" | "logins";
 
 interface UserSearchHistoryItem {
   id: number;
@@ -123,28 +123,47 @@ interface UserFavoriteDetailItem {
   createdAt: string;
 }
 
-interface UserCommentDetailItem {
+interface UserCommentEntry {
   id: number;
   content: string;
-  contentId: number | null;
-  contentType: "movie" | "tv";
-  contentTitle: string;
   parentId: number | null;
   isHidden: boolean;
   isDeleted: boolean;
   likeCount: number;
   dislikeCount: number;
   replyCount: number;
-  posterUrl: string | null;
-  href: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+interface UserCommentGroupItem {
+  id: string;
+  contentId: number | null;
+  contentType: "movie" | "tv";
+  contentTitle: string;
+  commentCount: number;
+  latestCommentAt: string;
+  posterUrl: string | null;
+  href: string | null;
+  comments: UserCommentEntry[];
+}
+
+interface UserLoginHistoryItem {
+  id: string;
+  source: "user_activity" | "user_logs";
+  description: string;
+  ipAddress: string | null;
+  deviceType: string | null;
+  country: string | null;
+  userAgent: string | null;
+  createdAt: string;
 }
 
 type DetailItem =
   | UserSearchHistoryItem
   | UserFavoriteDetailItem
-  | UserCommentDetailItem;
+  | UserCommentGroupItem
+  | UserLoginHistoryItem;
 
 interface DetailResponse<T> {
   data: T[];
@@ -152,6 +171,7 @@ interface DetailResponse<T> {
   page: number;
   limit: number;
   totalPages: number;
+  meta?: Record<string, unknown>;
 }
 
 interface AdminUserDetailsResponse {
@@ -467,6 +487,7 @@ export default function AdminUserDetailPage() {
         searches: "search-history",
         favorites: "favorites",
         comments: "comments",
+        logins: "login-history",
       };
 
       setDetailLoading(true);
@@ -783,11 +804,6 @@ export default function AdminUserDetailPage() {
             onClick={() => handleOpenDetailModal("comments")}
           />
           <StatCard
-            icon={<Play className="w-5 h-5 text-red-400" />}
-            label="Bấm play"
-            value={displayStats.plays || 0}
-          />
-          <StatCard
             icon={<Clock className="w-5 h-5 text-green-400" />}
             label="Thời gian xem"
             value={formatWatchTime(displayWatchTimeSeconds)}
@@ -797,6 +813,7 @@ export default function AdminUserDetailPage() {
             icon={<LogIn className="w-5 h-5 text-emerald-400" />}
             label="Đăng nhập"
             value={displayStats.logins}
+            onClick={() => handleOpenDetailModal("logins")}
           />
         </div>
       )}
@@ -1108,11 +1125,19 @@ function DetailModal({
     searches: "Lịch sử tìm kiếm",
     favorites: "Danh sách yêu thích",
     comments: "Bình luận của user",
+    logins: "Lịch sử đăng nhập",
   };
   const emptyByType: Record<DetailModalType, string> = {
     searches: "User chưa có lịch sử tìm kiếm",
     favorites: "User chưa có nội dung yêu thích",
     comments: "User chưa có bình luận",
+    logins: "User chưa có lịch sử đăng nhập",
+  };
+  const totalLabelByType: Record<DetailModalType, string> = {
+    searches: `${total} lượt tìm kiếm`,
+    favorites: `${total} nội dung yêu thích`,
+    comments: `${total} phim/series có bình luận`,
+    logins: `${total} lần đăng nhập`,
   };
 
   return (
@@ -1123,7 +1148,7 @@ function DetailModal({
             <h2 className="text-lg font-semibold text-white">
               {titleByType[type]}
             </h2>
-            <p className="text-sm text-gray-400 mt-1">{total} mục</p>
+            <p className="text-sm text-gray-400 mt-1">{totalLabelByType[type]}</p>
           </div>
           <button
             onClick={onClose}
@@ -1202,7 +1227,47 @@ function DetailModalItem({
     );
   }
 
-  if (type === "favorites" && "contentTitle" in item && !("content" in item)) {
+  if (type === "logins" && "source" in item) {
+    return (
+      <div className="flex items-start gap-3 p-4 hover:bg-gray-800/60 transition-colors">
+        <div className="w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-400 inline-flex items-center justify-center flex-shrink-0">
+          <LogIn className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-medium text-white">{item.description}</span>
+            <span className="px-2 py-0.5 rounded bg-gray-800 text-xs text-gray-400">
+              {item.source === "user_logs" ? "Log" : "Activity"}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            {new Date(item.createdAt).toLocaleString("vi-VN")}
+          </p>
+          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
+            {item.deviceType && (
+              <span className="flex items-center gap-1">
+                {getDeviceIcon(item.deviceType)}
+                {item.deviceType}
+              </span>
+            )}
+            {item.country && (
+              <span>
+                {countryCodeToFlag(item.country)} {item.country}
+              </span>
+            )}
+            {item.ipAddress && <span>IP: {item.ipAddress}</span>}
+          </div>
+          {item.userAgent && (
+            <p className="mt-2 text-xs text-gray-600 line-clamp-2">
+              {item.userAgent}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (type === "favorites" && "posterUrl" in item && "createdAt" in item) {
     return (
       <ContentDetailRow
         posterUrl={item.posterUrl}
@@ -1217,24 +1282,48 @@ function DetailModalItem({
     );
   }
 
-  if (type === "comments" && "content" in item) {
+  if (type === "comments" && "comments" in item) {
     return (
       <ContentDetailRow
         posterUrl={item.posterUrl}
         title={item.contentTitle}
         href={item.href}
         contentType={item.contentType}
-        meta={`Bình luận lúc ${new Date(item.createdAt).toLocaleString("vi-VN")}`}
+        meta={`${item.commentCount} bình luận - gần nhất ${new Date(
+          item.latestCommentAt
+        ).toLocaleString("vi-VN")}`}
         icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
       >
-        <p className="mt-2 text-sm text-gray-300 line-clamp-3">{item.content}</p>
-        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
-          <span>{item.likeCount} like</span>
-          <span>{item.dislikeCount} dislike</span>
-          <span>{item.replyCount} replies</span>
-          {item.parentId && <span>Reply #{item.parentId}</span>}
-          {item.isHidden && <span className="text-yellow-400">Hidden</span>}
-          {item.isDeleted && <span className="text-red-400">Deleted</span>}
+        <div className="mt-3 space-y-3">
+          {item.comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="rounded-lg bg-gray-950/50 border border-gray-800 p-3"
+            >
+              <p className="text-sm text-gray-300 line-clamp-3">
+                {comment.content}
+              </p>
+              <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
+                <span>{new Date(comment.createdAt).toLocaleString("vi-VN")}</span>
+                <span>{comment.likeCount} like</span>
+                <span>{comment.dislikeCount} dislike</span>
+                <span>{comment.replyCount} replies</span>
+                {comment.parentId && <span>Reply #{comment.parentId}</span>}
+                {comment.isHidden && (
+                  <span className="text-yellow-400">Hidden</span>
+                )}
+                {comment.isDeleted && (
+                  <span className="text-red-400">Deleted</span>
+                )}
+              </div>
+            </div>
+          ))}
+          {item.commentCount > item.comments.length && (
+            <p className="text-xs text-gray-500">
+              Còn {item.commentCount - item.comments.length} bình luận khác trong
+              phim/series này.
+            </p>
+          )}
         </div>
       </ContentDetailRow>
     );
