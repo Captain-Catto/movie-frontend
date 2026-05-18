@@ -305,11 +305,19 @@ export default function AdminUserDetailPage() {
   }, [api, userId]);
 
   const fetchStats = useCallback(async () => {
-    const res = await api.get<ActivityStats>(
-      `/admin/users/${userId}/activity-stats`
-    );
+    const [res, watchTimeRes] = await Promise.all([
+      api.get<ActivityStats>(`/admin/users/${userId}/activity-stats`),
+      api.get<WatchTimeSummaryResponse>(
+        `/admin/users/${userId}/watch-time-summary?page=1&limit=1`
+      ),
+    ]);
+
     if (res.success && res.data) {
       setStats(res.data);
+    }
+
+    if (watchTimeRes.success && watchTimeRes.data) {
+      setWatchTimeSummary(watchTimeRes.data.summary);
     }
   }, [api, userId]);
 
@@ -459,6 +467,10 @@ export default function AdminUserDetailPage() {
       : timelineStats.total > 0
         ? timelineStats
         : stats;
+  const displayWatchTimeSeconds =
+    watchTimeSummary?.totalWatchTimeSeconds && watchTimeSummary.totalWatchTimeSeconds > 0
+      ? watchTimeSummary.totalWatchTimeSeconds
+      : displayStats?.watchTimeSeconds || 0;
 
   return (
     <div className="space-y-6">
@@ -673,7 +685,7 @@ export default function AdminUserDetailPage() {
           <StatCard
             icon={<Clock className="w-5 h-5 text-green-400" />}
             label="Thời gian xem"
-            value={formatWatchTime(displayStats.watchTimeSeconds)}
+            value={formatWatchTime(displayWatchTimeSeconds)}
             onClick={handleOpenWatchTime}
           />
           <StatCard
