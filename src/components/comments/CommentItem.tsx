@@ -55,13 +55,20 @@ export function CommentItem(props: CommentItemProps) {
     return (
       <div className="d-item flex gap-3 py-4" id={`cm-${currentComment.id}`}>
         <div className="user-avatar flex-shrink-0">
-          <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700" />
+          <Image
+            src={avatarSrc}
+            alt={currentComment.user?.name || labels.defaultUser}
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
+            onError={handleAvatarError}
+          />
         </div>
 
         <div className="info flex-1 min-w-0">
           <div className="comment-header flex items-center justify-between mb-2">
-            <span className="text-gray-500 text-sm font-medium">
-              {labels.anonymous}
+            <span className="text-white text-sm font-medium">
+              {currentComment.user?.name || labels.anonymous}
             </span>
             <div className="c-time text-gray-500 text-xs">
               <RelativeTime
@@ -71,12 +78,53 @@ export function CommentItem(props: CommentItemProps) {
               />
             </div>
           </div>
-          <p className="text-gray-300 text-sm leading-relaxed">
+          <p className="text-gray-500 text-sm leading-relaxed italic">
             Bình luận này bị ẩn bởi admin
             {currentComment.hiddenReason
               ? `: ${currentComment.hiddenReason}`
               : ""}
           </p>
+
+          {localReplyCount > 0 && (
+            <div className="replies-wrap mt-3">
+              <button
+                type="button"
+                className="text-primary text-red-500 cursor-pointer text-sm flex items-center gap-1 hover:text-red-400"
+                onClick={() => void handleToggleReplies()}
+              >
+                {showReplies ? (
+                  <ChevronUp className="text-xs w-3 h-3" />
+                ) : (
+                  <ChevronDown className="text-xs w-3 h-3" />
+                )}
+                {loadingReplies
+                  ? labels.loading
+                  : showReplies
+                  ? labels.hideReplies
+                  : labels.viewAllReplies(localReplyCount)}
+              </button>
+            </div>
+          )}
+
+          {showReplies && replies.length > 0 && (
+            <div className="replies-list mt-4 pl-4 border-l-2 border-gray-700">
+              {replies.map((reply) => (
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  depth={(props.depth ?? 0) + 1}
+                  maxDepth={props.maxDepth}
+                  onReply={props.onReply}
+                  onEdit={props.onEdit}
+                  onDelete={handleNestedDelete}
+                  onLike={handleNestedLike}
+                  onDislike={handleNestedDislike}
+                  onReport={props.onReport}
+                  onAddComment={props.onAddComment}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
