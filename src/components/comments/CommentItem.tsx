@@ -52,7 +52,33 @@ export function CommentItem(props: CommentItemProps) {
   } = useCommentItem(props);
 
   if (currentComment.isHidden && !canModerate) {
-    return null;
+    return (
+      <div className="d-item flex gap-3 py-4" id={`cm-${currentComment.id}`}>
+        <div className="user-avatar flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700" />
+        </div>
+
+        <div className="info flex-1 min-w-0">
+          <div className="comment-header flex items-center justify-between mb-2">
+            <span className="text-gray-500 text-sm font-medium">
+              {labels.anonymous}
+            </span>
+            <div className="c-time text-gray-500 text-xs">
+              <RelativeTime
+                date={currentComment.createdAt}
+                className="inline"
+                language={language}
+              />
+            </div>
+          </div>
+          <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 px-3 py-2">
+            <p className="text-sm text-yellow-200">
+              Bình luận này bị ẩn bởi admin
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

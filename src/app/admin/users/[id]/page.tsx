@@ -393,6 +393,17 @@ export default function AdminUserDetailPage() {
   const [commentGroupPages, setCommentGroupPages] = useState<
     Record<string, CommentGroupPageState>
   >({});
+  const [hideCommentModal, setHideCommentModal] = useState<{
+    group: UserCommentGroupItem | null;
+    commentId: number | null;
+    reason: string;
+    saving: boolean;
+  }>({
+    group: null,
+    commentId: null,
+    reason: "",
+    saving: false,
+  });
 
   const fetchUser = useCallback(async () => {
     const res = await api.get<AdminUserDetailsResponse | UserDetails>(
@@ -630,19 +641,10 @@ export default function AdminUserDetailPage() {
     fetchCommentGroupPage(group, pageNum);
   };
 
-  const handleSoftDeleteComment = async (
+  const markCommentHidden = (
     group: UserCommentGroupItem,
     commentId: number
   ) => {
-    if (!confirm("Xoá mềm bình luận này?")) return;
-
-    const res = await api.put(`/admin/comments/${commentId}/delete-soft`, {});
-    if (!res.success) {
-      showError("Delete failed", res.error || "Không thể xoá bình luận");
-      return;
-    }
-
-    showSuccess("Deleted", "Đã xoá mềm bình luận");
     setCommentGroupPages((prev) => ({
       ...prev,
       [group.id]: {
@@ -654,7 +656,7 @@ export default function AdminUserDetailPage() {
           loading: false,
         }),
         data: (prev[group.id]?.data || group.comments).map((comment) =>
-          comment.id === commentId ? { ...comment, isDeleted: true } : comment
+          comment.id === commentId ? { ...comment, isHidden: true } : comment
         ),
       },
     }));
@@ -664,11 +666,48 @@ export default function AdminUserDetailPage() {
         return {
           ...item,
           comments: item.comments.map((comment) =>
-            comment.id === commentId ? { ...comment, isDeleted: true } : comment
+            comment.id === commentId ? { ...comment, isHidden: true } : comment
           ),
         };
       })
     );
+  };
+
+  const handleOpenHideCommentModal = (
+    group: UserCommentGroupItem,
+    commentId: number
+  ) => {
+    setHideCommentModal({
+      group,
+      commentId,
+      reason: "",
+      saving: false,
+    });
+  };
+
+  const handleHideComment = async () => {
+    const { group, commentId, reason } = hideCommentModal;
+    if (!group || !commentId) return;
+
+    setHideCommentModal((prev) => ({ ...prev, saving: true }));
+    const res = await api.put(`/admin/comments/${commentId}/hide`, {
+      reason: reason.trim() || "Ẩn bởi admin",
+    });
+
+    if (!res.success) {
+      setHideCommentModal((prev) => ({ ...prev, saving: false }));
+      showError("Hide failed", res.error || "Không thể ẩn bình luận");
+      return;
+    }
+
+    markCommentHidden(group, commentId);
+    setHideCommentModal({
+      group: null,
+      commentId: null,
+      reason: "",
+      saving: false,
+    });
+    showSuccess("Đã ẩn", "Bình luận đã được ẩn khỏi nội dung công khai");
   };
 
   const handleSaveProfile = async () => {
@@ -1108,10 +1147,87 @@ export default function AdminUserDetailPage() {
             totalPages={detailTotalPages}
             onToggleCommentGroup={handleToggleCommentGroup}
             onCommentGroupPageChange={handleCommentGroupPageChange}
-            onSoftDeleteComment={handleSoftDeleteComment}
+            onOpenHideCommentModal={handleOpenHideCommentModal}
             onClose={() => setDetailModalType(null)}
             onPageChange={handleDetailPageChange}
           />
+      )}
+
+      {hideCommentModal.group && hideCommentModal.commentId && (
+        <div className="fixed inset-0 z-[220] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between gap-4 p-5 border-b border-gray-700">
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Ẩn bình luận
+                </h2>
+                <p className="text-sm text-gray-400 mt-1">
+                  Người dùng bên ngoài sẽ thấy thông báo bình luận này bị ẩn bởi admin.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setHideCommentModal({
+                    group: null,
+                    commentId: null,
+                    reason: "",
+                    saving: false,
+                  })
+                }
+                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-3">
+              <label className="block text-sm font-medium text-gray-300">
+                Lý do ẩn
+              </label>
+              <textarea
+                value={hideCommentModal.reason}
+                onChange={(event) =>
+                  setHideCommentModal((prev) => ({
+                    ...prev,
+                    reason: event.target.value,
+                  }))
+                }
+                rows={4}
+                placeholder="Ví dụ: Nội dung không phù hợp"
+                className="w-full rounded-lg bg-gray-950 border border-gray-700 text-white placeholder:text-gray-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-700">
+              <button
+                type="button"
+                onClick={() =>
+                  setHideCommentModal({
+                    group: null,
+                    commentId: null,
+                    reason: "",
+                    saving: false,
+                  })
+                }
+                className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 cursor-pointer"
+              >
+                Huỷ
+              </button>
+              <button
+                type="button"
+                onClick={handleHideComment}
+                disabled={hideCommentModal.saving}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer inline-flex items-center gap-2"
+              >
+                {hideCommentModal.saving && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                Ẩn bình luận
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {watchTimeOpen && (
@@ -1260,7 +1376,7 @@ function DetailModal({
   totalPages,
   onToggleCommentGroup,
   onCommentGroupPageChange,
-  onSoftDeleteComment,
+  onOpenHideCommentModal,
   onClose,
   onPageChange,
 }: {
@@ -1274,7 +1390,7 @@ function DetailModal({
   totalPages: number;
   onToggleCommentGroup: (group: UserCommentGroupItem) => void;
   onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
-  onSoftDeleteComment: (group: UserCommentGroupItem, commentId: number) => void;
+  onOpenHideCommentModal: (group: UserCommentGroupItem, commentId: number) => void;
   onClose: () => void;
   onPageChange: (page: number) => void;
 }) {
@@ -1337,7 +1453,7 @@ function DetailModal({
                 commentGroupPages={commentGroupPages}
                 onToggleCommentGroup={onToggleCommentGroup}
                 onCommentGroupPageChange={onCommentGroupPageChange}
-                onSoftDeleteComment={onSoftDeleteComment}
+                onOpenHideCommentModal={onOpenHideCommentModal}
               />
             ))
           )}
@@ -1365,7 +1481,7 @@ function DetailModalItem({
   commentGroupPages,
   onToggleCommentGroup,
   onCommentGroupPageChange,
-  onSoftDeleteComment,
+  onOpenHideCommentModal,
 }: {
   type: DetailModalType;
   item: DetailItem;
@@ -1373,7 +1489,7 @@ function DetailModalItem({
   commentGroupPages: Record<string, CommentGroupPageState>;
   onToggleCommentGroup: (group: UserCommentGroupItem) => void;
   onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
-  onSoftDeleteComment: (group: UserCommentGroupItem, commentId: number) => void;
+  onOpenHideCommentModal: (group: UserCommentGroupItem, commentId: number) => void;
 }) {
   if (type === "views" && "actionType" in item) {
     return (
@@ -1531,13 +1647,13 @@ function DetailModalItem({
                     <span className="text-red-400">Deleted</span>
                   )}
                 </div>
-                {!comment.isDeleted && (
+                {!comment.isHidden && !comment.isDeleted && (
                   <button
                     type="button"
-                    onClick={() => onSoftDeleteComment(item, comment.id)}
+                    onClick={() => onOpenHideCommentModal(item, comment.id)}
                     className="text-xs text-red-400 hover:text-red-300 whitespace-nowrap cursor-pointer"
                   >
-                    Xoá mềm
+                    Ẩn bình luận
                   </button>
                 )}
               </div>
