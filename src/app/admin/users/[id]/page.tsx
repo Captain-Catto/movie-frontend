@@ -191,6 +191,14 @@ interface DetailResponse<T> {
   meta?: Record<string, unknown>;
 }
 
+interface CommentGroupPageState {
+  data: UserCommentEntry[];
+  page: number;
+  totalPages: number;
+  total: number;
+  loading: boolean;
+}
+
 interface AdminUserDetailsResponse {
   user: UserDetails;
   activities?: ActivityItem[];
@@ -382,6 +390,9 @@ export default function AdminUserDetailPage() {
   const [expandedCommentGroups, setExpandedCommentGroups] = useState<Set<string>>(
     () => new Set()
   );
+  const [commentGroupPages, setCommentGroupPages] = useState<
+    Record<string, CommentGroupPageState>
+  >({});
 
   const fetchUser = useCallback(async () => {
     const res = await api.get<AdminUserDetailsResponse | UserDetails>(
@@ -522,6 +533,7 @@ export default function AdminUserDetailPage() {
         setDetailTotalPages(res.data.totalPages);
         setDetailTotal(res.data.total);
         setExpandedCommentGroups(new Set());
+        setCommentGroupPages({});
       } else {
         showError(
           "Load failed",
@@ -541,6 +553,7 @@ export default function AdminUserDetailPage() {
     setDetailTotalPages(0);
     setDetailTotal(0);
     setExpandedCommentGroups(new Set());
+    setCommentGroupPages({});
     fetchDetailItems(type, 1);
   };
 
@@ -548,6 +561,114 @@ export default function AdminUserDetailPage() {
     if (detailModalType) {
       fetchDetailItems(detailModalType, nextPage);
     }
+  };
+
+  const fetchCommentGroupPage = useCallback(
+    async (group: UserCommentGroupItem, pageNum = 1) => {
+      if (!group.contentId) return;
+
+      setCommentGroupPages((prev) => ({
+        ...prev,
+        [group.id]: {
+          data: prev[group.id]?.data || group.comments,
+          page: prev[group.id]?.page || 1,
+          totalPages: prev[group.id]?.totalPages || 1,
+          total: prev[group.id]?.total || group.commentCount,
+          loading: true,
+        },
+      }));
+
+      const res = await api.get<DetailResponse<UserCommentEntry>>(
+        `/admin/users/${userId}/comments/${group.contentType}/${group.contentId}?page=${pageNum}&limit=5`
+      );
+
+      if (res.success && res.data) {
+        setCommentGroupPages((prev) => ({
+          ...prev,
+          [group.id]: {
+            data: res.data!.data,
+            page: res.data!.page,
+            totalPages: res.data!.totalPages,
+            total: res.data!.total,
+            loading: false,
+          },
+        }));
+      } else {
+        setCommentGroupPages((prev) => ({
+          ...prev,
+          [group.id]: {
+            data: prev[group.id]?.data || group.comments,
+            page: prev[group.id]?.page || 1,
+            totalPages: prev[group.id]?.totalPages || 1,
+            total: prev[group.id]?.total || group.commentCount,
+            loading: false,
+          },
+        }));
+        showError("Load failed", res.error || "Không thể tải bình luận");
+      }
+    },
+    [api, showError, userId]
+  );
+
+  const handleToggleCommentGroup = (group: UserCommentGroupItem) => {
+    setExpandedCommentGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group.id)) {
+        next.delete(group.id);
+      } else {
+        next.add(group.id);
+        fetchCommentGroupPage(group, 1);
+      }
+      return next;
+    });
+  };
+
+  const handleCommentGroupPageChange = (
+    group: UserCommentGroupItem,
+    pageNum: number
+  ) => {
+    fetchCommentGroupPage(group, pageNum);
+  };
+
+  const handleSoftDeleteComment = async (
+    group: UserCommentGroupItem,
+    commentId: number
+  ) => {
+    if (!confirm("Xoá mềm bình luận này?")) return;
+
+    const res = await api.put(`/admin/comments/${commentId}/delete-soft`, {});
+    if (!res.success) {
+      showError("Delete failed", res.error || "Không thể xoá bình luận");
+      return;
+    }
+
+    showSuccess("Deleted", "Đã xoá mềm bình luận");
+    setCommentGroupPages((prev) => ({
+      ...prev,
+      [group.id]: {
+        ...(prev[group.id] || {
+          data: group.comments,
+          page: 1,
+          totalPages: 1,
+          total: group.commentCount,
+          loading: false,
+        }),
+        data: (prev[group.id]?.data || group.comments).map((comment) =>
+          comment.id === commentId ? { ...comment, isDeleted: true } : comment
+        ),
+      },
+    }));
+    setDetailItems((prev) =>
+      prev.map((item) => {
+        if (!("comments" in item) || item.id !== group.id) return item;
+        return {
+          ...item,
+          comments: item.comments.map((comment) =>
+            comment.id === commentId ? { ...comment, isDeleted: true } : comment
+          ),
+        };
+      })
+    );
   };
 
   const handleSaveProfile = async () => {
@@ -981,23 +1102,16 @@ export default function AdminUserDetailPage() {
             total={detailTotal}
             items={detailItems}
             expandedCommentGroups={expandedCommentGroups}
+            commentGroupPages={commentGroupPages}
             loading={detailLoading}
             page={detailPage}
             totalPages={detailTotalPages}
-            onToggleCommentGroup={(groupId) =>
-              setExpandedCommentGroups((prev) => {
-                const next = new Set(prev);
-                if (next.has(groupId)) {
-                  next.delete(groupId);
-                } else {
-                  next.add(groupId);
-                }
-                return next;
-              })
-            }
+            onToggleCommentGroup={handleToggleCommentGroup}
+            onCommentGroupPageChange={handleCommentGroupPageChange}
+            onSoftDeleteComment={handleSoftDeleteComment}
             onClose={() => setDetailModalType(null)}
-          onPageChange={handleDetailPageChange}
-        />
+            onPageChange={handleDetailPageChange}
+          />
       )}
 
       {watchTimeOpen && (
@@ -1140,10 +1254,13 @@ function DetailModal({
   total,
   items,
   expandedCommentGroups,
+  commentGroupPages,
   loading,
   page,
   totalPages,
   onToggleCommentGroup,
+  onCommentGroupPageChange,
+  onSoftDeleteComment,
   onClose,
   onPageChange,
 }: {
@@ -1151,10 +1268,13 @@ function DetailModal({
   total: number;
   items: DetailItem[];
   expandedCommentGroups: Set<string>;
+  commentGroupPages: Record<string, CommentGroupPageState>;
   loading: boolean;
   page: number;
   totalPages: number;
-  onToggleCommentGroup: (groupId: string) => void;
+  onToggleCommentGroup: (group: UserCommentGroupItem) => void;
+  onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
+  onSoftDeleteComment: (group: UserCommentGroupItem, commentId: number) => void;
   onClose: () => void;
   onPageChange: (page: number) => void;
 }) {
@@ -1214,7 +1334,10 @@ function DetailModal({
                 type={type}
                 item={item}
                 expandedCommentGroups={expandedCommentGroups}
+                commentGroupPages={commentGroupPages}
                 onToggleCommentGroup={onToggleCommentGroup}
+                onCommentGroupPageChange={onCommentGroupPageChange}
+                onSoftDeleteComment={onSoftDeleteComment}
               />
             ))
           )}
@@ -1239,12 +1362,18 @@ function DetailModalItem({
   type,
   item,
   expandedCommentGroups,
+  commentGroupPages,
   onToggleCommentGroup,
+  onCommentGroupPageChange,
+  onSoftDeleteComment,
 }: {
   type: DetailModalType;
   item: DetailItem;
   expandedCommentGroups: Set<string>;
-  onToggleCommentGroup: (groupId: string) => void;
+  commentGroupPages: Record<string, CommentGroupPageState>;
+  onToggleCommentGroup: (group: UserCommentGroupItem) => void;
+  onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
+  onSoftDeleteComment: (group: UserCommentGroupItem, commentId: number) => void;
 }) {
   if (type === "views" && "actionType" in item) {
     return (
@@ -1357,7 +1486,10 @@ function DetailModalItem({
 
   if (type === "comments" && "comments" in item) {
     const isExpanded = expandedCommentGroups.has(item.id);
-    const visibleComments = isExpanded ? item.comments : item.comments.slice(0, 1);
+    const pageState = commentGroupPages[item.id];
+    const visibleComments = isExpanded
+      ? pageState?.data || item.comments
+      : item.comments.slice(0, 1);
 
     return (
       <ContentDetailRow
@@ -1371,25 +1503,42 @@ function DetailModalItem({
         icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
       >
         <div className="mt-3 space-y-3">
+          {isExpanded && pageState?.loading && (
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Đang tải bình luận...
+            </div>
+          )}
           {visibleComments.map((comment) => (
             <div
               key={comment.id}
               className="rounded-lg bg-gray-950/50 border border-gray-800 p-3"
             >
-              <p className="text-sm text-gray-300 line-clamp-3">
+              <p className={`text-sm text-gray-300 ${isExpanded ? "" : "line-clamp-3"}`}>
                 {comment.content}
               </p>
-              <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
-                <span>{new Date(comment.createdAt).toLocaleString("vi-VN")}</span>
-                <span>{comment.likeCount} like</span>
-                <span>{comment.dislikeCount} dislike</span>
-                <span>{comment.replyCount} replies</span>
-                {comment.parentId && <span>Reply #{comment.parentId}</span>}
-                {comment.isHidden && (
-                  <span className="text-yellow-400">Hidden</span>
-                )}
-                {comment.isDeleted && (
-                  <span className="text-red-400">Deleted</span>
+              <div className="flex items-start justify-between gap-3 mt-2">
+                <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                  <span>{new Date(comment.createdAt).toLocaleString("vi-VN")}</span>
+                  <span>{comment.likeCount} like</span>
+                  <span>{comment.dislikeCount} dislike</span>
+                  <span>{comment.replyCount} replies</span>
+                  {comment.parentId && <span>Reply #{comment.parentId}</span>}
+                  {comment.isHidden && (
+                    <span className="text-yellow-400">Hidden</span>
+                  )}
+                  {comment.isDeleted && (
+                    <span className="text-red-400">Deleted</span>
+                  )}
+                </div>
+                {!comment.isDeleted && (
+                  <button
+                    type="button"
+                    onClick={() => onSoftDeleteComment(item, comment.id)}
+                    className="text-xs text-red-400 hover:text-red-300 whitespace-nowrap cursor-pointer"
+                  >
+                    Xoá mềm
+                  </button>
                 )}
               </div>
             </div>
@@ -1397,13 +1546,22 @@ function DetailModalItem({
           {item.commentCount > 1 && (
             <button
               type="button"
-              onClick={() => onToggleCommentGroup(item.id)}
+              onClick={() => onToggleCommentGroup(item)}
               className="text-sm text-blue-400 hover:text-blue-300 cursor-pointer"
             >
               {isExpanded
                 ? "Thu gọn bình luận"
-                : `Xem tất cả ${item.commentCount} bình luận trong phim/series này`}
+                : `Xem bình luận trong phim/series này`}
             </button>
+          )}
+          {isExpanded && pageState && pageState.totalPages > 1 && (
+            <Pagination
+              currentPage={pageState.page}
+              totalPages={pageState.totalPages}
+              onPageChange={(nextPage) => onCommentGroupPageChange(item, nextPage)}
+              showPages={3}
+              className="pt-2"
+            />
           )}
         </div>
       </ContentDetailRow>
