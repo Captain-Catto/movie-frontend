@@ -51,7 +51,7 @@ export function CommentItem(props: CommentItemProps) {
     handleSelfDelete,
   } = useCommentItem(props);
 
-  if (currentComment.isHidden && !canModerate) {
+  if (currentComment.isHidden) {
     return (
       <div className="d-item flex gap-3 py-4" id={`cm-${currentComment.id}`}>
         <div className="user-avatar flex-shrink-0">

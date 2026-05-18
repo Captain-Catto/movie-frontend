@@ -643,7 +643,8 @@ export default function AdminUserDetailPage() {
 
   const markCommentHidden = (
     group: UserCommentGroupItem,
-    commentId: number
+    commentId: number,
+    isHidden: boolean
   ) => {
     setCommentGroupPages((prev) => ({
       ...prev,
@@ -656,7 +657,7 @@ export default function AdminUserDetailPage() {
           loading: false,
         }),
         data: (prev[group.id]?.data || group.comments).map((comment) =>
-          comment.id === commentId ? { ...comment, isHidden: true } : comment
+          comment.id === commentId ? { ...comment, isHidden } : comment
         ),
       },
     }));
@@ -666,7 +667,7 @@ export default function AdminUserDetailPage() {
         return {
           ...item,
           comments: item.comments.map((comment) =>
-            comment.id === commentId ? { ...comment, isHidden: true } : comment
+            comment.id === commentId ? { ...comment, isHidden } : comment
           ),
         };
       })
@@ -700,7 +701,7 @@ export default function AdminUserDetailPage() {
       return;
     }
 
-    markCommentHidden(group, commentId);
+    markCommentHidden(group, commentId, true);
     setHideCommentModal({
       group: null,
       commentId: null,
@@ -708,6 +709,20 @@ export default function AdminUserDetailPage() {
       saving: false,
     });
     showSuccess("Đã ẩn", "Bình luận đã được ẩn khỏi nội dung công khai");
+  };
+
+  const handleUnhideComment = async (
+    group: UserCommentGroupItem,
+    commentId: number
+  ) => {
+    const res = await api.put(`/admin/comments/${commentId}/unhide`, {});
+    if (!res.success) {
+      showError("Unhide failed", res.error || "Không thể mở lại bình luận");
+      return;
+    }
+
+    markCommentHidden(group, commentId, false);
+    showSuccess("Đã mở lại", "Bình luận đã hiển thị lại ở trang công khai");
   };
 
   const handleSaveProfile = async () => {
@@ -1148,6 +1163,7 @@ export default function AdminUserDetailPage() {
             onToggleCommentGroup={handleToggleCommentGroup}
             onCommentGroupPageChange={handleCommentGroupPageChange}
             onOpenHideCommentModal={handleOpenHideCommentModal}
+            onUnhideComment={handleUnhideComment}
             onClose={() => setDetailModalType(null)}
             onPageChange={handleDetailPageChange}
           />
@@ -1377,6 +1393,7 @@ function DetailModal({
   onToggleCommentGroup,
   onCommentGroupPageChange,
   onOpenHideCommentModal,
+  onUnhideComment,
   onClose,
   onPageChange,
 }: {
@@ -1391,6 +1408,7 @@ function DetailModal({
   onToggleCommentGroup: (group: UserCommentGroupItem) => void;
   onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
   onOpenHideCommentModal: (group: UserCommentGroupItem, commentId: number) => void;
+  onUnhideComment: (group: UserCommentGroupItem, commentId: number) => void;
   onClose: () => void;
   onPageChange: (page: number) => void;
 }) {
@@ -1454,6 +1472,7 @@ function DetailModal({
                 onToggleCommentGroup={onToggleCommentGroup}
                 onCommentGroupPageChange={onCommentGroupPageChange}
                 onOpenHideCommentModal={onOpenHideCommentModal}
+                onUnhideComment={onUnhideComment}
               />
             ))
           )}
@@ -1482,6 +1501,7 @@ function DetailModalItem({
   onToggleCommentGroup,
   onCommentGroupPageChange,
   onOpenHideCommentModal,
+  onUnhideComment,
 }: {
   type: DetailModalType;
   item: DetailItem;
@@ -1490,6 +1510,7 @@ function DetailModalItem({
   onToggleCommentGroup: (group: UserCommentGroupItem) => void;
   onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
   onOpenHideCommentModal: (group: UserCommentGroupItem, commentId: number) => void;
+  onUnhideComment: (group: UserCommentGroupItem, commentId: number) => void;
 }) {
   if (type === "views" && "actionType" in item) {
     return (
@@ -1641,20 +1662,30 @@ function DetailModalItem({
                   <span>{comment.replyCount} replies</span>
                   {comment.parentId && <span>Reply #{comment.parentId}</span>}
                   {comment.isHidden && (
-                    <span className="text-yellow-400">Hidden</span>
+                    <span className="text-yellow-400">Đã ẩn</span>
                   )}
                   {comment.isDeleted && (
-                    <span className="text-red-400">Deleted</span>
+                    <span className="text-red-400">Đã xoá</span>
                   )}
                 </div>
-                {!comment.isHidden && !comment.isDeleted && (
-                  <button
-                    type="button"
-                    onClick={() => onOpenHideCommentModal(item, comment.id)}
-                    className="text-xs text-red-400 hover:text-red-300 whitespace-nowrap cursor-pointer"
-                  >
-                    Ẩn bình luận
-                  </button>
+                {!comment.isDeleted && (
+                  comment.isHidden ? (
+                    <button
+                      type="button"
+                      onClick={() => onUnhideComment(item, comment.id)}
+                      className="text-xs text-emerald-400 hover:text-emerald-300 whitespace-nowrap cursor-pointer"
+                    >
+                      Mở lại
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onOpenHideCommentModal(item, comment.id)}
+                      className="text-xs text-red-400 hover:text-red-300 whitespace-nowrap cursor-pointer"
+                    >
+                      Ẩn bình luận
+                    </button>
+                  )
                 )}
               </div>
             </div>
