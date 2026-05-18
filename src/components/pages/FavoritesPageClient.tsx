@@ -21,7 +21,7 @@ const FavoritesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [, setTotal] = useState(0);
+  const [total, setTotal] = useState(0);
   const [, setHasMore] = useState(true);
   const { isAuthenticated } = useAuth();
   const { language } = useLanguage();
@@ -130,7 +130,7 @@ const FavoritesPage = () => {
               {labels.pageTitle}
             </h1>
             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
-              {labels.favoritesCount(favorites.length)}
+              {labels.favoritesCount(total)}
             </span>
           </div>
 

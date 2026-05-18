@@ -568,12 +568,7 @@ export default function AdminUserDetailPage() {
   const selectedFilter = FILTER_OPTIONS.find((f) => f.value === filter);
   const isEditingSelf = Number(currentUser?.id) === user.id;
   const timelineStats = buildStatsFromTimeline(timeline);
-  const displayStats =
-    stats && stats.total > 0
-      ? stats
-      : timelineStats.total > 0
-        ? timelineStats
-        : stats;
+  const displayStats = stats || (timelineStats.total > 0 ? timelineStats : null);
   const displayWatchTimeSeconds =
     watchTimeSummary?.totalWatchTimeSeconds && watchTimeSummary.totalWatchTimeSeconds > 0
       ? watchTimeSummary.totalWatchTimeSeconds
