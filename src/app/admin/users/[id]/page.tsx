@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
 import { useAuth } from "@/hooks/useAuth";
+import { Pagination } from "@/components/ui/Pagination";
 import {
   ArrowLeft,
   User as UserIcon,
@@ -101,7 +102,7 @@ interface WatchTimeSummaryResponse {
   totalPages: number;
 }
 
-type DetailModalType = "searches" | "favorites" | "comments" | "logins";
+type DetailModalType = "views" | "searches" | "favorites" | "comments" | "logins";
 
 interface UserSearchHistoryItem {
   id: number;
@@ -121,6 +122,21 @@ interface UserFavoriteDetailItem {
   posterUrl: string | null;
   href: string | null;
   createdAt: string;
+}
+
+interface UserViewHistoryItem {
+  id: number;
+  contentId: string;
+  tmdbId: number | null;
+  contentType: "movie" | "tv_series";
+  actionType: "view" | "play" | "complete" | "click" | "search";
+  contentTitle: string;
+  duration: number;
+  deviceType: string | null;
+  country: string | null;
+  createdAt: string;
+  posterUrl: string | null;
+  href: string | null;
 }
 
 interface UserCommentEntry {
@@ -160,6 +176,7 @@ interface UserLoginHistoryItem {
 }
 
 type DetailItem =
+  | UserViewHistoryItem
   | UserSearchHistoryItem
   | UserFavoriteDetailItem
   | UserCommentGroupItem
@@ -362,6 +379,9 @@ export default function AdminUserDetailPage() {
   const [detailPage, setDetailPage] = useState(1);
   const [detailTotalPages, setDetailTotalPages] = useState(0);
   const [detailTotal, setDetailTotal] = useState(0);
+  const [expandedCommentGroups, setExpandedCommentGroups] = useState<Set<string>>(
+    () => new Set()
+  );
 
   const fetchUser = useCallback(async () => {
     const res = await api.get<AdminUserDetailsResponse | UserDetails>(
@@ -475,15 +495,14 @@ export default function AdminUserDetailPage() {
     fetchWatchTimeSummary(1);
   };
 
-  const handleLoadMoreWatchTime = () => {
-    if (watchTimePage < watchTimeTotalPages) {
-      fetchWatchTimeSummary(watchTimePage + 1, true);
-    }
+  const handleWatchTimePageChange = (nextPage: number) => {
+    fetchWatchTimeSummary(nextPage, false);
   };
 
   const fetchDetailItems = useCallback(
-    async (type: DetailModalType, pageNum = 1, append = false) => {
+    async (type: DetailModalType, pageNum = 1) => {
       const endpointByType: Record<DetailModalType, string> = {
+        views: "watch-history?actionType=view",
         searches: "search-history",
         favorites: "favorites",
         comments: "comments",
@@ -492,16 +511,17 @@ export default function AdminUserDetailPage() {
 
       setDetailLoading(true);
       const res = await api.get<DetailResponse<DetailItem>>(
-        `/admin/users/${userId}/${endpointByType[type]}?page=${pageNum}&limit=20`
+        `/admin/users/${userId}/${endpointByType[type]}${
+          endpointByType[type].includes("?") ? "&" : "?"
+        }page=${pageNum}&limit=20`
       );
 
       if (res.success && res.data) {
-        setDetailItems((prev) =>
-          append ? [...prev, ...res.data!.data] : res.data!.data
-        );
+        setDetailItems(res.data.data);
         setDetailPage(pageNum);
         setDetailTotalPages(res.data.totalPages);
         setDetailTotal(res.data.total);
+        setExpandedCommentGroups(new Set());
       } else {
         showError(
           "Load failed",
@@ -520,12 +540,13 @@ export default function AdminUserDetailPage() {
     setDetailPage(1);
     setDetailTotalPages(0);
     setDetailTotal(0);
+    setExpandedCommentGroups(new Set());
     fetchDetailItems(type, 1);
   };
 
-  const handleLoadMoreDetails = () => {
-    if (detailModalType && detailPage < detailTotalPages) {
-      fetchDetailItems(detailModalType, detailPage + 1, true);
+  const handleDetailPageChange = (nextPage: number) => {
+    if (detailModalType) {
+      fetchDetailItems(detailModalType, nextPage);
     }
   };
 
@@ -784,6 +805,7 @@ export default function AdminUserDetailPage() {
             icon={<Eye className="w-5 h-5 text-blue-400" />}
             label="Lượt xem"
             value={displayStats.views}
+            onClick={() => handleOpenDetailModal("views")}
           />
           <StatCard
             icon={<Search className="w-5 h-5 text-yellow-400" />}
@@ -954,15 +976,27 @@ export default function AdminUserDetailPage() {
       </div>
 
       {detailModalType && (
-        <DetailModal
-          type={detailModalType}
-          total={detailTotal}
-          items={detailItems}
-          loading={detailLoading}
-          page={detailPage}
-          totalPages={detailTotalPages}
-          onClose={() => setDetailModalType(null)}
-          onLoadMore={handleLoadMoreDetails}
+          <DetailModal
+            type={detailModalType}
+            total={detailTotal}
+            items={detailItems}
+            expandedCommentGroups={expandedCommentGroups}
+            loading={detailLoading}
+            page={detailPage}
+            totalPages={detailTotalPages}
+            onToggleCommentGroup={(groupId) =>
+              setExpandedCommentGroups((prev) => {
+                const next = new Set(prev);
+                if (next.has(groupId)) {
+                  next.delete(groupId);
+                } else {
+                  next.add(groupId);
+                }
+                return next;
+              })
+            }
+            onClose={() => setDetailModalType(null)}
+          onPageChange={handleDetailPageChange}
         />
       )}
 
@@ -1056,15 +1090,14 @@ export default function AdminUserDetailPage() {
               )}
             </div>
 
-            {watchTimePage < watchTimeTotalPages && (
+            {watchTimeTotalPages > 1 && (
               <div className="p-4 border-t border-gray-700 text-center">
-                <button
-                  onClick={handleLoadMoreWatchTime}
-                  disabled={watchTimeLoading}
-                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  {watchTimeLoading ? "Đang tải..." : "Tải thêm"}
-                </button>
+                <Pagination
+                  currentPage={watchTimePage}
+                  totalPages={watchTimeTotalPages}
+                  onPageChange={handleWatchTimePageChange}
+                  showPages={5}
+                />
               </div>
             )}
           </div>
@@ -1106,34 +1139,41 @@ function DetailModal({
   type,
   total,
   items,
+  expandedCommentGroups,
   loading,
   page,
   totalPages,
+  onToggleCommentGroup,
   onClose,
-  onLoadMore,
+  onPageChange,
 }: {
   type: DetailModalType;
   total: number;
   items: DetailItem[];
+  expandedCommentGroups: Set<string>;
   loading: boolean;
   page: number;
   totalPages: number;
+  onToggleCommentGroup: (groupId: string) => void;
   onClose: () => void;
-  onLoadMore: () => void;
+  onPageChange: (page: number) => void;
 }) {
   const titleByType: Record<DetailModalType, string> = {
+    views: "Lịch sử lượt xem",
     searches: "Lịch sử tìm kiếm",
     favorites: "Danh sách yêu thích",
     comments: "Bình luận của user",
     logins: "Lịch sử đăng nhập",
   };
   const emptyByType: Record<DetailModalType, string> = {
+    views: "User chưa có lượt xem nội dung nào",
     searches: "User chưa có lịch sử tìm kiếm",
     favorites: "User chưa có nội dung yêu thích",
     comments: "User chưa có bình luận",
     logins: "User chưa có lịch sử đăng nhập",
   };
   const totalLabelByType: Record<DetailModalType, string> = {
+    views: `${total} lượt mở trang phim/series`,
     searches: `${total} lượt tìm kiếm`,
     favorites: `${total} nội dung yêu thích`,
     comments: `${total} phim/series có bình luận`,
@@ -1173,20 +1213,21 @@ function DetailModal({
                 key={`${type}-${item.id}`}
                 type={type}
                 item={item}
+                expandedCommentGroups={expandedCommentGroups}
+                onToggleCommentGroup={onToggleCommentGroup}
               />
             ))
           )}
         </div>
 
-        {page < totalPages && (
+        {totalPages > 1 && (
           <div className="p-4 border-t border-gray-700 text-center">
-            <button
-              onClick={onLoadMore}
-              disabled={loading}
-              className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
-            >
-              {loading ? "Đang tải..." : "Tải thêm"}
-            </button>
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={onPageChange}
+              showPages={5}
+            />
           </div>
         )}
       </div>
@@ -1197,10 +1238,42 @@ function DetailModal({
 function DetailModalItem({
   type,
   item,
+  expandedCommentGroups,
+  onToggleCommentGroup,
 }: {
   type: DetailModalType;
   item: DetailItem;
+  expandedCommentGroups: Set<string>;
+  onToggleCommentGroup: (groupId: string) => void;
 }) {
+  if (type === "views" && "actionType" in item) {
+    return (
+      <ContentDetailRow
+        posterUrl={item.posterUrl}
+        title={item.contentTitle}
+        href={item.href}
+        contentType={item.contentType === "tv_series" ? "tv" : "movie"}
+        meta={`Mở trang lúc ${new Date(item.createdAt).toLocaleString("vi-VN")}`}
+        icon={<Eye className="w-5 h-5 text-blue-400" />}
+      >
+        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
+          <span>ID: {item.contentId}</span>
+          {item.deviceType && (
+            <span className="flex items-center gap-1">
+              {getDeviceIcon(item.deviceType)}
+              {item.deviceType}
+            </span>
+          )}
+          {item.country && (
+            <span>
+              {countryCodeToFlag(item.country)} {item.country}
+            </span>
+          )}
+        </div>
+      </ContentDetailRow>
+    );
+  }
+
   if (type === "searches" && "query" in item) {
     return (
       <div className="flex items-start gap-3 p-4 hover:bg-gray-800/60 transition-colors">
@@ -1273,7 +1346,7 @@ function DetailModalItem({
         posterUrl={item.posterUrl}
         title={item.contentTitle}
         href={item.href}
-        contentType={item.contentType}
+        contentType={item.contentType === "tv" ? "tv" : "movie"}
         meta={`Đã thêm yêu thích lúc ${new Date(item.createdAt).toLocaleString(
           "vi-VN"
         )}`}
@@ -1283,6 +1356,9 @@ function DetailModalItem({
   }
 
   if (type === "comments" && "comments" in item) {
+    const isExpanded = expandedCommentGroups.has(item.id);
+    const visibleComments = isExpanded ? item.comments : item.comments.slice(0, 1);
+
     return (
       <ContentDetailRow
         posterUrl={item.posterUrl}
@@ -1295,7 +1371,7 @@ function DetailModalItem({
         icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
       >
         <div className="mt-3 space-y-3">
-          {item.comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <div
               key={comment.id}
               className="rounded-lg bg-gray-950/50 border border-gray-800 p-3"
@@ -1318,11 +1394,16 @@ function DetailModalItem({
               </div>
             </div>
           ))}
-          {item.commentCount > item.comments.length && (
-            <p className="text-xs text-gray-500">
-              Còn {item.commentCount - item.comments.length} bình luận khác trong
-              phim/series này.
-            </p>
+          {item.commentCount > 1 && (
+            <button
+              type="button"
+              onClick={() => onToggleCommentGroup(item.id)}
+              className="text-sm text-blue-400 hover:text-blue-300 cursor-pointer"
+            >
+              {isExpanded
+                ? "Thu gọn bình luận"
+                : `Xem tất cả ${item.commentCount} bình luận trong phim/series này`}
+            </button>
           )}
         </div>
       </ContentDetailRow>
