@@ -35,7 +35,7 @@ export default async function WatchPartyPage({ params }: Props) {
   } | null = null;
 
   try {
-    const res = await fetch(`${API_BASE_URL}/watch-party/${inviteCode}`, {
+    const res = await fetch(`${API_BASE_URL}/api/watch-party/${inviteCode}`, {
       cache: "no-store",
     });
 

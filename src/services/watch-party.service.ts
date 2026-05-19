@@ -29,8 +29,12 @@ class WatchPartyService {
     };
   }
 
+  private getApiUrl(path: string): string {
+    return `${API_BASE_URL}/api${path}`;
+  }
+
   async createParty(dto: CreateWatchPartyDto): Promise<WatchPartyCreatedDto> {
-    const res = await fetch(`${API_BASE_URL}/watch-party`, {
+    const res = await fetch(this.getApiUrl("/watch-party"), {
       method: "POST",
       headers: this.getAuthHeaders(),
       body: JSON.stringify(dto),

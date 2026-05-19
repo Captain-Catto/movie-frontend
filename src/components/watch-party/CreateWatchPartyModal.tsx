@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X, Users, Link as LinkIcon } from "lucide-react";
 import { watchPartyService } from "@/services/watch-party.service";
+import { apiService } from "@/services/api";
 
 interface Props {
   contentTitle: string;
@@ -26,8 +27,36 @@ export default function CreateWatchPartyModal({
 }: Props) {
   const router = useRouter();
   const [streamUrl, setStreamUrl] = useState("");
+  const [streamLoading, setStreamLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const tmdbId = movieId ?? tvId;
+    const contentType = movieId ? "movie" : tvId ? "tv" : null;
+
+    if (!tmdbId || !contentType) return;
+
+    let cancelled = false;
+    setStreamLoading(true);
+
+    apiService
+      .getStreamUrlByTmdbId(tmdbId, contentType, { season, episode })
+      .then((response) => {
+        if (cancelled || !response.success || !response.data?.url) return;
+        setStreamUrl((current) => current || response.data?.url || "");
+      })
+      .catch(() => {
+        // Manual input remains available if stream lookup fails.
+      })
+      .finally(() => {
+        if (!cancelled) setStreamLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [movieId, tvId, season, episode]);
 
   const handleCreate = async () => {
     if (!streamUrl.trim()) {
@@ -111,7 +140,9 @@ export default function CreateWatchPartyModal({
             className="w-full bg-gray-800 border border-gray-700 focus:border-red-500 text-white text-sm rounded-xl px-4 py-3 outline-none transition-colors placeholder-gray-500"
           />
           <p className="text-gray-500 text-xs mt-1.5">
-            Nhập link stream trực tiếp (không phải link trang web)
+            {streamLoading
+              ? "Đang lấy link stream từ hệ thống..."
+              : "Có thể dùng link hệ thống hoặc nhập link stream trực tiếp"}
           </p>
           {error && (
             <p className="text-red-400 text-xs mt-1.5">{error}</p>
