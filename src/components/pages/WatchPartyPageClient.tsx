@@ -5,7 +5,7 @@ import { WatchPartyProvider, useWatchParty } from "@/contexts/WatchPartyContext"
 import VideoPlayer from "@/components/ui/VideoPlayer";
 import WatchPartyChat from "@/components/watch-party/WatchPartyChat";
 import WatchPartyParticipants from "@/components/watch-party/WatchPartyParticipants";
-import { useToast } from "@/contexts/ToastContext";
+import { useToast } from "@/hooks/useToast";
 
 interface PartyInfo {
   id: number;
