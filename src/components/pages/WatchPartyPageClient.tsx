@@ -39,6 +39,8 @@ function WatchPartyInner({ inviteCode }: { inviteCode: string }) {
   } = useWatchParty();
 
   const { showToast } = useToast();
+  const isDirectVideoSource = (url: string) =>
+    /\.(mp4|webm|ogg|m3u8)($|\?)/i.test(url);
 
   const copyInviteLink = () => {
     const url = `${window.location.origin}/watch-party/${inviteCode}`;
@@ -94,7 +96,7 @@ function WatchPartyInner({ inviteCode }: { inviteCode: string }) {
             </div>
           )}
 
-          {room ? (
+          {room && isDirectVideoSource(room.streamUrl) ? (
             <VideoPlayer
               ref={playerRef}
               src={room.streamUrl}
@@ -105,6 +107,19 @@ function WatchPartyInner({ inviteCode }: { inviteCode: string }) {
               onPause={isHost ? emitPause : undefined}
               onSeek={isHost ? emitSeek : undefined}
             />
+          ) : room ? (
+            <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+              <iframe
+                src={room.streamUrl}
+                title={room.contentTitle}
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full border-0"
+              />
+              <p className="mt-2 text-xs text-gray-400 text-center">
+                Nguồn embed được phát trong iframe nên đồng bộ play/pause theo host có thể không khả dụng.
+              </p>
+            </div>
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gray-900 rounded-lg aspect-video">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500" />

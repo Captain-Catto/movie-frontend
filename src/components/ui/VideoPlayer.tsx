@@ -11,6 +11,7 @@ import {
   SkipBack,
   SkipForward,
 } from "lucide-react";
+import type Hls from "hls.js";
 
 export interface VideoPlayerRef {
   play(): void;
@@ -60,6 +61,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
   const [isMuted, setIsMuted] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [playbackError, setPlaybackError] = useState("");
   const [showSettings, setShowSettings] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
 
@@ -70,9 +72,14 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
     play() {
       if (videoRef.current) {
         isExternalSync.current = true;
-        void videoRef.current.play().finally(() => {
-          isExternalSync.current = false;
-        });
+        void videoRef.current
+          .play()
+          .catch(() => {
+            setPlaybackError("Không thể phát nguồn video này.");
+          })
+          .finally(() => {
+            isExternalSync.current = false;
+          });
       }
     },
     pause() {
@@ -111,7 +118,9 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
       if (isPlaying) {
         videoRef.current.pause();
       } else {
-        void videoRef.current.play();
+        void videoRef.current.play().catch(() => {
+          setPlaybackError("Không thể phát nguồn video này.");
+        });
       }
     }
   };
@@ -167,6 +176,7 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
       setIsLoading(false);
+      setPlaybackError("");
     }
   };
 
@@ -228,6 +238,46 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showSettings]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !src) return;
+
+    let hls: Hls | null = null;
+    setIsLoading(true);
+    setPlaybackError("");
+
+    const isHlsSource = /\.m3u8($|\?)/i.test(src);
+
+    if (isHlsSource && video.canPlayType("application/vnd.apple.mpegurl")) {
+      video.src = src;
+    } else if (isHlsSource) {
+      void import("hls.js")
+        .then(({ default: Hls }) => {
+          if (!Hls.isSupported()) {
+            setPlaybackError("Trình duyệt không hỗ trợ nguồn HLS này.");
+            setIsLoading(false);
+            return;
+          }
+
+          hls = new Hls();
+          hls.loadSource(src);
+          hls.attachMedia(video);
+        })
+        .catch(() => {
+          setPlaybackError("Không thể tải trình phát HLS.");
+          setIsLoading(false);
+        });
+    } else {
+      video.src = src;
+    }
+
+    return () => {
+      hls?.destroy();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [src]);
+
   return (
     <div className="relative bg-black rounded-lg overflow-hidden group">
       <video
@@ -239,10 +289,12 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
         onPlay={handlePlay}
         onPause={handlePause}
         onEnded={handleEnded}
+        onError={() => {
+          setIsLoading(false);
+          setPlaybackError("Nguồn video không được hỗ trợ hoặc không thể tải.");
+        }}
         onClick={togglePlay}
-        src={src}
       >
-        <source src={src} type="video/mp4" />
         {subtitles.map((subtitle, index) => (
           <track
             key={index}
@@ -259,6 +311,17 @@ const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(function VideoP
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+      )}
+
+      {playbackError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 px-6 text-center">
+          <div>
+            <p className="text-white font-medium">{playbackError}</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Hãy dùng link MP4/WebM/HLS trực tiếp, hoặc nguồn embed sẽ được mở bằng iframe.
+            </p>
+          </div>
         </div>
       )}
 

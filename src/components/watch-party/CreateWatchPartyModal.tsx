@@ -126,7 +126,7 @@ export default function CreateWatchPartyModal({
           <label className="block text-gray-300 text-sm mb-2">
             <span className="flex items-center gap-1.5">
               <LinkIcon size={14} />
-              Stream URL (HLS / MP4)
+              Stream URL hoặc embed URL
             </span>
           </label>
           <input
@@ -136,13 +136,13 @@ export default function CreateWatchPartyModal({
               setStreamUrl(e.target.value);
               setError("");
             }}
-            placeholder="https://example.com/stream.m3u8"
+            placeholder="https://example.com/embed/movie?tmdb=..."
             className="w-full bg-gray-800 border border-gray-700 focus:border-red-500 text-white text-sm rounded-xl px-4 py-3 outline-none transition-colors placeholder-gray-500"
           />
           <p className="text-gray-500 text-xs mt-1.5">
             {streamLoading
               ? "Đang lấy link stream từ hệ thống..."
-              : "Có thể dùng link hệ thống hoặc nhập link stream trực tiếp"}
+              : "Link MP4/WebM/HLS sẽ đồng bộ player; link embed sẽ mở bằng iframe"}
           </p>
           {error && (
             <p className="text-red-400 text-xs mt-1.5">{error}</p>
