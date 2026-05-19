@@ -37,6 +37,14 @@ type CacheEntry<T> = {
 const responseCache = new Map<string, CacheEntry<unknown>>();
 const DEFAULT_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 const TRENDING_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+const MAX_RESPONSE_CACHE_ENTRIES = 200;
+
+type NextFetchOptions = RequestInit & {
+  next?: {
+    revalidate?: number | false;
+    tags?: string[];
+  };
+};
 
 class ApiService {
   /**
@@ -72,14 +80,18 @@ class ApiService {
 
   private async fetchWithErrorHandling<T>(
     url: string,
-    options?: RequestInit
+    options?: NextFetchOptions
   ): Promise<T> {
     try {
+      const shouldDisableNextDiskCache =
+        isServer && !options?.cache && !options?.next;
+
       const response = await fetch(url, {
         headers: {
           "Content-Type": "application/json",
           ...options?.headers,
         },
+        ...(shouldDisableNextDiskCache ? { cache: "no-store" as const } : {}),
         ...options,
       });
 
@@ -103,11 +115,11 @@ class ApiService {
    */
   private async fetchWithCache<T>(
     url: string,
-    options?: RequestInit,
+    options?: NextFetchOptions,
     cacheTtlMs: number = DEFAULT_CACHE_TTL
   ): Promise<T> {
     const method = (options?.method || "GET").toUpperCase();
-    const isCacheable = method === "GET" && cacheTtlMs > 0;
+    const isCacheable = !isServer && method === "GET" && cacheTtlMs > 0;
 
     if (isCacheable) {
       const cached = responseCache.get(url) as CacheEntry<T> | undefined;
@@ -120,6 +132,10 @@ class ApiService {
 
     if (isCacheable) {
       responseCache.set(url, { timestamp: Date.now(), data });
+      if (responseCache.size > MAX_RESPONSE_CACHE_ENTRIES) {
+        const oldestKey = responseCache.keys().next().value;
+        if (oldestKey) responseCache.delete(oldestKey);
+      }
     }
 
     return data;
