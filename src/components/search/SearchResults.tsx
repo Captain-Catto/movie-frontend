@@ -31,8 +31,10 @@ const LoadingSkeleton = () => (
   </div>
 );
 
+const EMPTY_RESULTS: SearchResult[] = [];
+
 const SearchResults: React.FC<SearchResultsProps> = ({
-  results = [], // Default to empty array
+  results = EMPTY_RESULTS,
   isLoading,
   hasMore,
   onLoadMore,

@@ -123,7 +123,7 @@ export function ToastNotificationProvider({
                     <p className="text-sm text-gray-300 mt-1">
                       {language.startsWith("vi") ? (toast.messageVi || toast.message) : (toast.messageEn || toast.message)}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 mt-1" suppressHydrationWarning>
                       {new Date(toast.createdAt).toLocaleTimeString()}
                     </p>
                   </div>
