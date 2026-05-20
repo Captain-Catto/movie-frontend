@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
+import HomePosterRail from "@/components/movie/HomePosterRail";
 import HomeTopicRows from "@/components/movie/HomeTopicRows";
-import MovieGrid from "@/components/movie/MovieGrid";
-import SectionHeader from "@/components/ui/SectionHeader";
 import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getHomePageData } from "@/lib/home-page-data";
@@ -73,19 +72,12 @@ export default async function Home() {
 
       {/* Upcoming Section */}
       <div className="py-8 deferred-content">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
+        <HomePosterRail
             title={labels.upcoming}
             href="/movies/upcoming"
             viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
             movies={upcomingMovies}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
           />
-        </div>
       </div>
 
       {/* TV Series Sections */}

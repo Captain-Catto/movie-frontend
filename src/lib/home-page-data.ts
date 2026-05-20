@@ -7,6 +7,7 @@ import type { HomePageData } from "@/lib/page-data.types";
 
 const HOME_SECTION_LIMIT = 10;
 const HOME_HERO_LIMIT = 6;
+const HOME_UPCOMING_SECTION_LIMIT = 24;
 const HOME_TV_SECTION_LIMIT = 6;
 
 const toMovieCards = (items: unknown, language: string): MovieCardData[] => {
@@ -60,7 +61,7 @@ export async function getHomePageData(
     }),
     apiService.getUpcomingMovies({
       page: 1,
-      limit: HOME_SECTION_LIMIT,
+      limit: HOME_UPCOMING_SECTION_LIMIT,
       language,
     }),
     apiService.getOnTheAirTVSeries({
