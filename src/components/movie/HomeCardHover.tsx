@@ -25,7 +25,7 @@ export default function HomeCardHover({
   const detailHref = movie.href || `/${contentType}/${movie.tmdbId}`;
   const watchHref = `/watch/${contentType}-${movie.tmdbId}`;
 
-  const handleHoverPosition = (pointerX: number, target: HTMLElement) => {
+  const handleHoverPosition = (target: HTMLElement) => {
     if (typeof window === "undefined") return;
 
     const viewportWidth = window.innerWidth;
@@ -33,9 +33,10 @@ export default function HomeCardHover({
     const hoverCardWidth = 384;
     const hoverCardHeight = 430;
     const margin = 20;
-    const hoverCardLeft = pointerX - hoverCardWidth / 2;
-    const hoverCardRight = pointerX + hoverCardWidth / 2;
     const rect = target.getBoundingClientRect();
+    const cardCenterX = rect.left + rect.width / 2;
+    const hoverCardLeft = cardCenterX - hoverCardWidth / 2;
+    const hoverCardRight = cardCenterX + hoverCardWidth / 2;
     const top = Math.min(
       Math.max(rect.top + rect.height / 2 - hoverCardHeight / 2, margin),
       Math.max(viewportHeight - hoverCardHeight - margin, margin)
@@ -56,7 +57,7 @@ export default function HomeCardHover({
   return (
     <article
       className={`${className} group relative`}
-      onMouseEnter={(event) => handleHoverPosition(event.clientX, event.currentTarget)}
+      onMouseEnter={(event) => handleHoverPosition(event.currentTarget)}
     >
       {children}
       <HoverPreviewCard
