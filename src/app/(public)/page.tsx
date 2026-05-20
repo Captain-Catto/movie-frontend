@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
+import HomeTopicRows from "@/components/movie/HomeTopicRows";
 import MovieGrid from "@/components/movie/MovieGrid";
 import SectionHeader from "@/components/ui/SectionHeader";
 import TVSeriesSections from "@/components/tv/TVSeriesSections";
@@ -42,55 +43,32 @@ export default async function Home() {
     <Layout>
       <HeroSection movies={heroMovies} isLoading={false} />
 
-      {/* Now Playing Section */}
-      <div className="py-8 deferred-content">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title={labels.nowPlaying}
-            href="/movies/now-playing"
-            viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
-            movies={nowPlayingMovies}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
-      </div>
-
-      {/* Popular Section */}
-      <div className="py-8 deferred-content">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title={labels.popular}
-            href="/movies/popular"
-            viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
-            movies={popularMovies}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
-      </div>
-
-      {/* Top Rated Section */}
-      <div className="py-8 deferred-content">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title={labels.topRated}
-            href="/movies/top-rated"
-            viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
-            movies={topRatedMovies}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
+      <div className="deferred-content">
+        <HomeTopicRows
+          rows={[
+            {
+              title: labels.nowPlaying,
+              href: "/movies/now-playing",
+              viewMoreLabel: labels.viewMore,
+              movies: nowPlayingMovies,
+              accentClassName: "home-topic-title--pink",
+            },
+            {
+              title: labels.topRated,
+              href: "/movies/top-rated",
+              viewMoreLabel: labels.viewMore,
+              movies: topRatedMovies,
+              accentClassName: "home-topic-title--gold",
+            },
+            {
+              title: labels.popular,
+              href: "/movies/popular",
+              viewMoreLabel: labels.viewMore,
+              movies: popularMovies,
+              accentClassName: "home-topic-title--magenta",
+            },
+          ]}
+        />
       </div>
 
       {/* Upcoming Section */}
