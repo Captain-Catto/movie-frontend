@@ -7,6 +7,7 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
+import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
 interface HomeFeatureSliderProps {
   title: string;
@@ -50,7 +51,10 @@ export default function HomeFeatureSlider({
     return null;
   }
 
-  const background = visible.backgroundImage || visible.posterImage || visible.poster || FALLBACK_POSTER;
+  const background = normalizeTmdbImageUrl(
+    visible.backgroundImage || visible.posterImage || visible.poster,
+    "w1280"
+  ) || FALLBACK_POSTER;
   const score =
     typeof visible.rating === "number" && visible.rating > 0 ? visible.rating.toFixed(1) : null;
   const duration = visible.duration && visible.duration !== "N/A" ? visible.duration : null;
@@ -205,7 +209,10 @@ export default function HomeFeatureSlider({
 
         <div className="home-feature-slider__thumbs" aria-label={`${title} thumbnails`}>
           {items.map((movie, index) => {
-            const thumb = movie.posterImage || movie.poster || movie.backgroundImage || FALLBACK_POSTER;
+            const thumb =
+              normalizeTmdbImageUrl(movie.posterImage || movie.poster, "w154") ||
+              normalizeTmdbImageUrl(movie.backgroundImage, "w300") ||
+              FALLBACK_POSTER;
 
             return (
               <button

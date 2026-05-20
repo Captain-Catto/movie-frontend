@@ -15,6 +15,7 @@ import { useWindowWidth } from "@/hooks/useWindowWidth";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getHeroSectionUiMessages } from "@/lib/ui-messages";
+import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 
 // Import Swiper styles
 import "swiper/css";
@@ -28,16 +29,20 @@ interface HeroSectionProps {
 }
 
 const HERO_TMDB_BACKDROP_SIZE = "w1280";
+const HERO_TMDB_MOBILE_BACKDROP_SIZE = "w780";
+const HERO_TMDB_THUMB_SIZE = "w300";
 
-const toHeroBackdrop = (url: string): string => {
-  if (!url.includes("image.tmdb.org/t/p/")) {
-    return url;
-  }
-
-  return url.replace(
-    /\/t\/p\/(?:w\d+|original)\//,
-    `/t/p/${HERO_TMDB_BACKDROP_SIZE}/`
+const toHeroBackdrop = (url: string, isMobile: boolean): string => {
+  return (
+    normalizeTmdbImageUrl(
+      url,
+      isMobile ? HERO_TMDB_MOBILE_BACKDROP_SIZE : HERO_TMDB_BACKDROP_SIZE
+    ) || url
   );
+};
+
+const toHeroThumb = (url: string): string => {
+  return normalizeTmdbImageUrl(url, HERO_TMDB_THUMB_SIZE) || url;
 };
 
 interface FlipAnim {
@@ -167,7 +172,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
         {movies.map((movie, index) => {
           const backgroundImage =
             movie.backgroundImage || movie.poster || FALLBACK_POSTER;
-          const heroBackgroundImage = toHeroBackdrop(backgroundImage);
+          const heroBackgroundImage = toHeroBackdrop(backgroundImage, isMobile);
           const posterImage =
             movie.posterImage || movie.poster || backgroundImage || FALLBACK_POSTER;
           const rawRatingCandidates: Array<number | string | null | undefined> = [
@@ -451,7 +456,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                   `}
                 >
                   <Image
-                    src={backgroundImage || posterImage}
+                    src={toHeroThumb(backgroundImage || posterImage)}
                     alt={movie.title}
                     width={104}
                     height={62}
