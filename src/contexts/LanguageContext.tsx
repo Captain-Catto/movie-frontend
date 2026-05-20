@@ -8,6 +8,7 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import {
   DEFAULT_LANGUAGE,
   SUPPORTED_LANGUAGES,
@@ -30,40 +31,43 @@ interface LanguageContextValue {
   isVietnamese: boolean;
 }
 
+interface LanguageProviderProps {
+  children: ReactNode;
+  initialLanguage: SupportedLanguageCode;
+}
+
 const LanguageContext = createContext<LanguageContextValue | undefined>(
   undefined
 );
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<SupportedLanguageCode>(
-    DEFAULT_LANGUAGE as SupportedLanguageCode
-  );
+export function LanguageProvider({ children, initialLanguage }: LanguageProviderProps) {
+  const router = useRouter();
+  const [language, setLanguageState] = useState<SupportedLanguageCode>(initialLanguage);
 
-  // Load from localStorage on mount
+  // Fallback: only fires when the server had no cookie (initialLanguage === default).
+  // Recovers the stored preference from localStorage (e.g. after cookie was cleared).
   useEffect(() => {
+    if (initialLanguage !== DEFAULT_LANGUAGE) return;
+
     const stored = localStorage.getItem(STORAGE_KEY);
-    const normalizedStored =
-      stored === "vi" ? "vi-VN" : stored;
-    if (
-      normalizedStored &&
-      SUPPORTED_LANGUAGES.some((l) => l.code === normalizedStored)
-    ) {
-      setLanguageState(normalizedStored as SupportedLanguageCode);
-      setLanguageCookie(normalizedStored as SupportedLanguageCode);
-      if (stored === "vi") {
-        localStorage.setItem(STORAGE_KEY, "vi-VN");
-      }
-      return;
+    const normalized = stored === "vi" ? "vi-VN" : stored;
+    if (normalized && SUPPORTED_LANGUAGES.some((l) => l.code === normalized)) {
+      if (stored === "vi") localStorage.setItem(STORAGE_KEY, "vi-VN");
+      setLanguageState(normalized as SupportedLanguageCode);
+      setLanguageCookie(normalized as SupportedLanguageCode);
     }
+  }, [initialLanguage]);
 
-    setLanguageCookie(DEFAULT_LANGUAGE as SupportedLanguageCode);
-  }, []);
-
-  const setLanguage = useCallback((lang: SupportedLanguageCode) => {
-    setLanguageState(lang);
-    localStorage.setItem(STORAGE_KEY, lang);
-    setLanguageCookie(lang);
-  }, []);
+  const setLanguage = useCallback(
+    (lang: SupportedLanguageCode) => {
+      setLanguageState(lang);
+      localStorage.setItem(STORAGE_KEY, lang);
+      setLanguageCookie(lang);
+      // Re-run server components so they fetch data in the new language.
+      router.refresh();
+    },
+    [router]
+  );
 
   return (
     <LanguageContext.Provider

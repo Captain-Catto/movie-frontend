@@ -79,7 +79,7 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${roboto.variable} antialiased overflow-x-hidden`}
       >
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider initialLanguage={language}>{children}</LanguageProvider>
       </body>
     </html>
   );
