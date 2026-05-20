@@ -130,7 +130,11 @@ export default function HomeFeatureSlider({
                 className="home-feature-slider__favorite"
                 activeClassName="home-feature-slider__favorite--active"
               />
-              <Link href={visible.href} aria-label={`Details for ${visible.title}`}>
+              <Link
+                href={visible.href}
+                className="home-feature-slider__info-button"
+                aria-label={`Details for ${visible.title}`}
+              >
                 <Info size={20} fill="currentColor" />
               </Link>
             </div>
