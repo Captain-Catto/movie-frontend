@@ -1387,8 +1387,8 @@ body {
 
 .home-wide-cover-card__badges {
   position: absolute;
-  left: 7.5rem;
-  bottom: 0;
+  left: 7.45rem;
+  bottom: 0.75rem;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -1400,7 +1400,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.25rem 0.25rem 0 0;
+  border-radius: 0.25rem;
   background: rgba(40, 48, 66, 0.94);
   color: #ffffff;
   padding: 0.2rem 0.45rem;
@@ -1419,7 +1419,7 @@ body {
   gap: 1.25rem;
   align-items: end;
   min-height: 6.2rem;
-  margin-top: -2.75rem;
+  margin-top: -1.55rem;
   padding: 0 1.2rem;
   position: relative;
   z-index: 2;
@@ -1556,13 +1556,14 @@ body {
   }
 
   .home-wide-cover-card__badges {
-    left: 6.8rem;
+    left: 6.6rem;
+    bottom: 0.65rem;
   }
 
   .home-wide-cover-card__body {
     grid-template-columns: 4.4rem minmax(0, 1fr);
     gap: 1rem;
-    margin-top: -2.35rem;
+    margin-top: -1.4rem;
     padding: 0 0.95rem;
   }
 
