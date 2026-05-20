@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ArrowUp,
   Bot,
   Clock3,
   Loader2,
@@ -252,7 +253,7 @@ export default function ChatWidget() {
     }
     // Keep button inside viewport; 68px top margin keeps it below the fixed header (h-16 = 64px)
     const newX = Math.max(0, Math.min(window.innerWidth - 48, dragStartRef.current.px + dx));
-    const newY = Math.max(68, Math.min(window.innerHeight - 48, dragStartRef.current.py + dy));
+    const newY = Math.max(68, Math.min(window.innerHeight - 104, dragStartRef.current.py + dy));
     setPos({ x: newX, y: newY });
   };
 
@@ -266,6 +267,10 @@ export default function ChatWidget() {
       return;
     }
     setOpen((v) => !v);
+  };
+
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const panelPos = {
@@ -509,6 +514,16 @@ export default function ChatWidget() {
           aria-label="Open movie assistant"
         >
           {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleScrollToTop}
+          className="absolute right-0 top-14 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-red-600 text-white shadow-xl transition hover:bg-red-700"
+          aria-label="Back to top"
+          title="Back to top"
+        >
+          <ArrowUp className="h-5 w-5" />
         </button>
       </div>
     </>
