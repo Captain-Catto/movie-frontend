@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { Play, Info } from "lucide-react";
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -39,6 +40,7 @@ interface HoverPreviewCardProps {
   };
   className?: string;
   placement?: "center" | "left" | "right";
+  floatingStyle?: CSSProperties;
 }
 
 /**
@@ -59,6 +61,7 @@ export function HoverPreviewCard({
   favoriteButton,
   className,
   placement = "center",
+  floatingStyle,
 }: HoverPreviewCardProps) {
   const { language } = useLanguage();
   const labels = getHoverPreviewCardUiMessages(language);
@@ -76,6 +79,7 @@ export function HoverPreviewCard({
       ? Number(year)
       : null;
 
+  const isFloating = Boolean(floatingStyle);
   const placementClasses =
     placement === "left"
       ? "left-0 translate-x-0"
@@ -102,12 +106,15 @@ export function HoverPreviewCard({
 
   return (
     <div
+      style={floatingStyle}
       className={cn(
         "w-96 bg-gray-900 rounded-xl shadow-2xl overflow-hidden",
         "transition-all duration-300 transform scale-95 group-hover:scale-100",
         "opacity-0 invisible pointer-events-none group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto",
-        "absolute top-1/2 -translate-y-1/2 z-30",
-        placementClasses,
+        isFloating
+          ? "fixed z-50 translate-x-0 translate-y-0"
+          : "absolute top-1/2 -translate-y-1/2 z-30",
+        !isFloating && placementClasses,
         className
       )}
     >
