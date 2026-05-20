@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Heart, Info, Play } from "lucide-react";
+import { ChevronRight, Info, Play } from "lucide-react";
 import { useEffect, useId, useMemo, useState } from "react";
+import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 
@@ -112,9 +113,23 @@ export default function HomeFeatureSlider({
               <Play size={26} fill="currentColor" />
             </Link>
             <div className="home-feature-slider__action-group">
-              <button type="button" aria-label="Favorite">
-                <Heart size={20} fill="currentColor" />
-              </button>
+              <FavoriteButton
+                movie={{
+                  id: visible.tmdbId,
+                  tmdbId: visible.tmdbId,
+                  title: visible.title,
+                  poster_path: visible.posterImage || visible.poster,
+                  vote_average: visible.rating,
+                  media_type: watchType,
+                  overview: visible.description,
+                  genres: visible.genres?.map((genre) => ({ id: 0, name: genre })) || [],
+                }}
+                iconOnly
+                stopPropagation
+                preventDefault
+                className="home-feature-slider__favorite"
+                activeClassName="home-feature-slider__favorite--active"
+              />
               <Link href={visible.href} aria-label={`Details for ${visible.title}`}>
                 <Info size={20} fill="currentColor" />
               </Link>
