@@ -75,15 +75,13 @@ export default function HomeFeatureSlider({
             {duration && <span>{duration}</span>}
           </div>
 
-          {active.genre && (
-            <div className="home-feature-slider__genres">
-              <span>{active.genre}</span>
-            </div>
-          )}
+          <div className="home-feature-slider__genres" aria-hidden={!active.genre}>
+            {active.genre && <span>{active.genre}</span>}
+          </div>
 
-          {active.description && (
-            <p className="home-feature-slider__description">{active.description}</p>
-          )}
+          <p className="home-feature-slider__description">
+            {active.description || ""}
+          </p>
 
           <div className="home-feature-slider__actions">
             <Link href={watchHref} className="home-feature-slider__play" aria-label={`Watch ${active.title}`}>
