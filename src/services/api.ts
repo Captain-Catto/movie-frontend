@@ -120,6 +120,11 @@ class ApiService {
   ): Promise<T> {
     const method = (options?.method || "GET").toUpperCase();
     const isCacheable = !isServer && method === "GET" && cacheTtlMs > 0;
+    const serverRevalidateSeconds = Math.max(1, Math.ceil(cacheTtlMs / 1000));
+    const requestOptions: NextFetchOptions | undefined =
+      isServer && method === "GET" && cacheTtlMs > 0 && !options?.cache && !options?.next
+        ? { ...options, next: { revalidate: serverRevalidateSeconds } }
+        : options;
 
     if (isCacheable) {
       const cached = responseCache.get(url) as CacheEntry<T> | undefined;
@@ -128,7 +133,7 @@ class ApiService {
       }
     }
 
-    const data = await this.fetchWithErrorHandling<T>(url, options);
+    const data = await this.fetchWithErrorHandling<T>(url, requestOptions);
 
     if (isCacheable) {
       responseCache.set(url, { timestamp: Date.now(), data });

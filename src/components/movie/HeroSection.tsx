@@ -462,6 +462,9 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     height={62}
                     sizes={isMobile ? "48px" : "104px"}
                     quality={45}
+                    priority={index === 0}
+                    loading={index === 0 ? undefined : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
                     className={isMobile ? "h-8 w-12 object-cover" : "h-[62px] w-[104px] object-cover"}
                   />
                 </div>
