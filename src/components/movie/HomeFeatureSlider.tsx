@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Heart, Info, Play } from "lucide-react";
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 
@@ -23,18 +23,35 @@ export default function HomeFeatureSlider({
   const titleId = useId();
   const items = useMemo(() => movies.slice(0, 15), [movies]);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [visibleIndex, setVisibleIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const active = items[activeIndex] ?? items[0];
+  const visible = items[visibleIndex] ?? active;
 
-  if (!active) {
+  useEffect(() => {
+    if (activeIndex === visibleIndex) {
+      return;
+    }
+
+    setIsTransitioning(true);
+    const timeout = window.setTimeout(() => {
+      setVisibleIndex(activeIndex);
+      window.setTimeout(() => setIsTransitioning(false), 40);
+    }, 180);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeIndex, visibleIndex]);
+
+  if (!visible) {
     return null;
   }
 
-  const background = active.backgroundImage || active.posterImage || active.poster || FALLBACK_POSTER;
+  const background = visible.backgroundImage || visible.posterImage || visible.poster || FALLBACK_POSTER;
   const score =
-    typeof active.rating === "number" && active.rating > 0 ? active.rating.toFixed(1) : null;
-  const duration = active.duration && active.duration !== "N/A" ? active.duration : null;
-  const watchType = active.href?.includes("/tv/") ? "tv" : "movie";
-  const watchHref = `/watch/${watchType}-${active.tmdbId}`;
+    typeof visible.rating === "number" && visible.rating > 0 ? visible.rating.toFixed(1) : null;
+  const duration = visible.duration && visible.duration !== "N/A" ? visible.duration : null;
+  const watchType = visible.href?.includes("/tv/") ? "tv" : "movie";
+  const watchHref = `/watch/${watchType}-${visible.tmdbId}`;
 
   return (
     <section className="home-feature-slider" aria-labelledby={titleId}>
@@ -48,50 +65,57 @@ export default function HomeFeatureSlider({
       </div>
 
       <div className="home-feature-slider__stage">
-        <Link href={active.href} className="home-feature-slider__stage-link" aria-label={active.title} />
+        <Link href={visible.href} className="home-feature-slider__stage-link" aria-label={visible.title} />
         <Image
-          key={active.id}
+          key={visible.id}
           src={background}
-          alt={active.title}
+          alt={visible.title}
           fill
           sizes="100vw"
-          priority={activeIndex === 0}
-          className="object-cover"
+          priority={visibleIndex === 0}
+          className={`object-cover home-feature-slider__image${
+            isTransitioning ? " is-fading" : ""
+          }`}
         />
         <div className="home-feature-slider__fade" />
 
-        <div className="home-feature-slider__content">
-          <h3 title={active.title}>
-            <Link href={active.href}>{active.title}</Link>
+        <div
+          key={`content-${visible.id}`}
+          className={`home-feature-slider__content${
+            isTransitioning ? " is-fading" : ""
+          }`}
+        >
+          <h3 title={visible.title}>
+            <Link href={visible.href}>{visible.title}</Link>
           </h3>
-          <p className="home-feature-slider__alias" title={active.aliasTitle}>
-            {active.aliasTitle}
+          <p className="home-feature-slider__alias" title={visible.aliasTitle}>
+            {visible.aliasTitle}
           </p>
 
           <div className="home-feature-slider__tags">
             {score && <span className="home-feature-slider__tag-imdb">IMDb {score}</span>}
             <span>T16</span>
-            {active.year && <span>{active.year}</span>}
+            {visible.year && <span>{visible.year}</span>}
             {duration && <span>{duration}</span>}
           </div>
 
-          <div className="home-feature-slider__genres" aria-hidden={!active.genre}>
-            {active.genre && <span>{active.genre}</span>}
+          <div className="home-feature-slider__genres" aria-hidden={!visible.genre}>
+            {visible.genre && <span>{visible.genre}</span>}
           </div>
 
           <p className="home-feature-slider__description">
-            {active.description || ""}
+            {visible.description || ""}
           </p>
 
           <div className="home-feature-slider__actions">
-            <Link href={watchHref} className="home-feature-slider__play" aria-label={`Watch ${active.title}`}>
+            <Link href={watchHref} className="home-feature-slider__play" aria-label={`Watch ${visible.title}`}>
               <Play size={26} fill="currentColor" />
             </Link>
             <div className="home-feature-slider__action-group">
               <button type="button" aria-label="Favorite">
                 <Heart size={20} fill="currentColor" />
               </button>
-              <Link href={active.href} aria-label={`Details for ${active.title}`}>
+              <Link href={visible.href} aria-label={`Details for ${visible.title}`}>
                 <Info size={20} fill="currentColor" />
               </Link>
             </div>

@@ -3,56 +3,76 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 import HomeCardHover from "@/components/movie/HomeCardHover";
 
-interface HomePosterRailProps {
+interface HomeWideCoverRailProps {
   title: string;
   href: string;
   viewMoreLabel: string;
   movies: MovieCardData[];
 }
 
-function PosterRailCard({ movie, priority }: { movie: MovieCardData; priority: boolean }) {
-  const image = movie.posterImage || movie.poster || movie.backgroundImage || FALLBACK_POSTER;
+function WideCoverCard({ movie, priority }: { movie: MovieCardData; priority: boolean }) {
+  const cover = movie.backgroundImage || movie.posterImage || movie.poster || FALLBACK_POSTER;
+  const poster = movie.posterImage || movie.poster || movie.backgroundImage || FALLBACK_POSTER;
   const score = typeof movie.rating === "number" && movie.rating > 0 ? movie.rating.toFixed(1) : null;
+  const duration = movie.duration && movie.duration !== "N/A" ? movie.duration : null;
 
   return (
-    <HomeCardHover movie={movie} className="home-poster-rail-card">
-      <Link href={movie.href} className="home-poster-rail-card__thumb group" aria-label={movie.title}>
+    <HomeCardHover movie={movie} className="home-wide-cover-card">
+      <Link href={movie.href} className="home-wide-cover-card__cover group" aria-label={movie.title}>
         <Image
-          src={image}
+          src={cover}
           alt={movie.title}
           fill
-          sizes="(max-width: 768px) 42vw, (max-width: 1280px) 15vw, 11vw"
+          sizes="(max-width: 768px) 82vw, (max-width: 1280px) 32vw, 24vw"
           priority={priority}
           loading={priority ? undefined : "lazy"}
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        <div className="home-poster-rail-card__shade" />
-        <div className="home-poster-rail-card__badges">
+        <div className="home-wide-cover-card__cover-shade" />
+        <div className="home-wide-cover-card__badges">
           {score && <span>{score}</span>}
           {movie.year && <span>{movie.year}</span>}
         </div>
       </Link>
-      <div className="home-poster-rail-card__info">
-        <h3 title={movie.title}>
-          <Link href={movie.href}>{movie.title}</Link>
-        </h3>
-        <p title={movie.aliasTitle}>{movie.aliasTitle}</p>
+
+      <div className="home-wide-cover-card__body">
+        <Link href={movie.href} className="home-wide-cover-card__poster" aria-label={movie.title}>
+          <Image
+            src={poster}
+            alt={movie.title}
+            fill
+            sizes="80px"
+            className="object-cover"
+          />
+        </Link>
+        <div className="home-wide-cover-card__info">
+          <h3 title={movie.title}>
+            <Link href={movie.href}>{movie.title}</Link>
+          </h3>
+          <p title={movie.aliasTitle}>{movie.aliasTitle}</p>
+          <div className="home-wide-cover-card__meta">
+            {score && <span>{score}</span>}
+            {movie.year && <span>{movie.year}</span>}
+            {duration && <span>{duration}</span>}
+          </div>
+        </div>
       </div>
     </HomeCardHover>
   );
 }
 
-export default function HomePosterRail({
+export default function HomeWideCoverRail({
   title,
   href,
   viewMoreLabel,
   movies,
-}: HomePosterRailProps) {
+}: HomeWideCoverRailProps) {
+  const titleId = useId();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollBack, setCanScrollBack] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
@@ -91,47 +111,48 @@ export default function HomePosterRail({
   }
 
   return (
-    <section className="home-poster-rail" aria-labelledby="home-upcoming-title">
-      <div className="home-poster-rail__header">
-        <Link href={href} className="home-poster-rail__title-link" aria-label={viewMoreLabel}>
-          <h2 id="home-upcoming-title">{title}</h2>
+    <section className="home-wide-cover-rail" aria-labelledby={titleId}>
+      <div className="home-wide-cover-rail__header">
+        <Link href={href} className="home-wide-cover-rail__title-link" aria-label={viewMoreLabel}>
+          <h2 id={titleId}>{title}</h2>
           <span>
             <ChevronRight aria-hidden="true" size={18} strokeWidth={2.2} />
           </span>
         </Link>
       </div>
 
-      <div className="home-poster-rail__content">
-        <div className="home-poster-rail__nav" aria-hidden="true">
+      <div className="home-wide-cover-rail__content">
+        <div className="home-wide-cover-rail__nav" aria-hidden="true">
           <button
             type="button"
-            className="home-poster-rail__nav-button"
+            className="home-wide-cover-rail__nav-button"
             onClick={() => scrollByPage("prev")}
             disabled={!canScrollBack}
             tabIndex={-1}
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={24} />
           </button>
           <button
             type="button"
-            className="home-poster-rail__nav-button"
+            className="home-wide-cover-rail__nav-button"
             onClick={() => scrollByPage("next")}
             disabled={!canScrollNext}
             tabIndex={-1}
           >
-            <ChevronRight size={22} />
+            <ChevronRight size={24} />
           </button>
         </div>
+
         <div
           ref={scrollerRef}
-          className="home-poster-rail__scroller"
+          className="home-wide-cover-rail__scroller"
           onScroll={updateScrollState}
         >
           {movies.map((movie, index) => (
-            <PosterRailCard
-              key={`upcoming-${movie.id}-${index}`}
+            <WideCoverCard
+              key={`wide-cover-${movie.id}-${index}`}
               movie={movie}
-              priority={index < 4}
+              priority={index < 3}
             />
           ))}
         </div>

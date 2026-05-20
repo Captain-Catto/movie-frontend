@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
+import HomeCardHover from "@/components/movie/HomeCardHover";
 
 interface HomeTopicRow {
   title: string;
@@ -24,7 +25,7 @@ function HomeTopicCard({ movie, priority }: { movie: MovieCardData; priority: bo
   const score = typeof movie.rating === "number" && movie.rating > 0 ? movie.rating.toFixed(1) : null;
 
   return (
-    <article className="home-topic-card group">
+    <HomeCardHover movie={movie} className="home-topic-card">
       <Link href={movie.href} className="home-topic-card__thumb" aria-label={movie.title}>
         <Image
           src={image}
@@ -47,7 +48,7 @@ function HomeTopicCard({ movie, priority }: { movie: MovieCardData; priority: bo
         </h3>
         <p title={movie.aliasTitle}>{movie.aliasTitle}</p>
       </div>
-    </article>
+    </HomeCardHover>
   );
 }
 

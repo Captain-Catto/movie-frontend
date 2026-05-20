@@ -1,7 +1,6 @@
-import MovieGrid from "@/components/movie/MovieGrid";
 import HomeFeatureSlider from "@/components/movie/HomeFeatureSlider";
 import HomeTopTenRail from "@/components/movie/HomeTopTenRail";
-import SectionHeader from "@/components/ui/SectionHeader";
+import HomeWideCoverRail from "@/components/movie/HomeWideCoverRail";
 import type { MovieCardData } from "@/types/content.types";
 import { getHomePageUiMessages } from "@/lib/ui-messages";
 
@@ -24,19 +23,12 @@ export default function TVSeriesSections({
     <div className="space-y-8">
       {/* On The Air Section */}
       <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title={labels.onTheAir}
-            href="/tv/on-the-air"
-            viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
-            movies={onTheAirTVSeries}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
+        <HomeWideCoverRail
+          title={labels.onTheAir}
+          href="/tv/on-the-air"
+          viewMoreLabel={labels.viewMore}
+          movies={onTheAirTVSeries}
+        />
       </div>
 
       {/* Popular TV Series Section */}

@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
+import HomeCardHover from "@/components/movie/HomeCardHover";
 
 interface HomeTopTenRailProps {
   title: string;
@@ -26,7 +27,7 @@ function TopTenCard({
   const duration = movie.duration && movie.duration !== "N/A" ? movie.duration : null;
 
   return (
-    <article className="home-top-ten-card">
+    <HomeCardHover movie={movie} className="home-top-ten-card">
       <Link href={movie.href} className="home-top-ten-card__thumb group" aria-label={movie.title}>
         <Image
           src={image}
@@ -57,7 +58,7 @@ function TopTenCard({
           </div>
         </div>
       </div>
-    </article>
+    </HomeCardHover>
   );
 }
 
