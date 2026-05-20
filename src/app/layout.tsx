@@ -4,7 +4,6 @@ import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { getServerPreferredLanguage } from "@/lib/server-language";
 import { getRootSeoUiMessages, resolveUiLocale } from "@/lib/ui-messages";
-import Script from "next/script";
 
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getServerPreferredLanguage();
@@ -80,9 +79,7 @@ export default async function RootLayout({
       <body
         className={`${inter.variable} ${roboto.variable} antialiased overflow-x-hidden`}
       >
-        {/* TODO: remove after profiling */}
-        <Script src="https://unpkg.com/react-scan/dist/auto.global.js" strategy="beforeInteractive" />
-        <LanguageProvider initialLanguage={language}>{children}</LanguageProvider>
+<LanguageProvider initialLanguage={language}>{children}</LanguageProvider>
       </body>
     </html>
   );

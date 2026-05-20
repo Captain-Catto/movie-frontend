@@ -12,6 +12,8 @@ const remoteImageHosts = [
 ];
 
 const nextConfig: NextConfig = {
+  // Enables React DevTools Profiler on production builds. Remove when done profiling.
+  reactProductionProfiling: true,
   images: {
     formats: ["image/avif", "image/webp"],
     // Mobile-first widths to reduce overfetch on 360/390/414 devices.
