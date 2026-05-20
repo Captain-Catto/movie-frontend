@@ -19,9 +19,10 @@ export default function ForceLogoutPage() {
     });
 
     // Redirect to home after 1 second
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       router.push("/");
     }, 1000);
+    return () => clearTimeout(timer);
   }, [router]);
 
   return (

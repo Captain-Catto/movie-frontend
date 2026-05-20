@@ -16,6 +16,21 @@ interface SearchResultsProps {
   onResultClick?: () => void;
 }
 
+const LoadingSkeleton = () => (
+  <div className="space-y-3">
+    {[...Array(3)].map((_, i) => (
+      <div key={i} className="flex items-center space-x-3 p-3 animate-pulse">
+        <div className="w-16 h-20 bg-gray-700 rounded"></div>
+        <div className="flex-1 space-y-2">
+          <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+          <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+          <div className="h-3 bg-gray-700 rounded w-1/4"></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
 const SearchResults: React.FC<SearchResultsProps> = ({
   results = [], // Default to empty array
   isLoading,
@@ -29,22 +44,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({
 
   // Ensure results is always an array
   const safeResults = Array.isArray(results) ? results : [];
-
-  // Loading skeleton
-  const LoadingSkeleton = () => (
-    <div className="space-y-3">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="flex items-center space-x-3 p-3 animate-pulse">
-          <div className="w-16 h-20 bg-gray-700 rounded"></div>
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
-            <div className="h-3 bg-gray-700 rounded w-1/2"></div>
-            <div className="h-3 bg-gray-700 rounded w-1/4"></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
 
   // Initial loading state (no results yet)
   if (isLoading && safeResults.length === 0) {

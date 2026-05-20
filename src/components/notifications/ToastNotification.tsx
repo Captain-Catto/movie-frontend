@@ -61,26 +61,26 @@ export function ToastNotificationProvider({
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   useEffect(() => {
-    if (latestNotification) {
-      const newToast: ToastNotification = {
-        id: latestNotification.id,
-        title: latestNotification.title,
-        message: latestNotification.message,
-        titleVi: latestNotification.titleVi,
-        messageVi: latestNotification.messageVi,
-        titleEn: latestNotification.titleEn,
-        messageEn: latestNotification.messageEn,
-        type: latestNotification.type,
-        createdAt: latestNotification.createdAt,
-      };
+    if (!latestNotification) return;
 
-      setToasts((prev) => [newToast, ...prev.slice(0, 4)]); // Keep only 5 toasts max
+    const newToast: ToastNotification = {
+      id: latestNotification.id,
+      title: latestNotification.title,
+      message: latestNotification.message,
+      titleVi: latestNotification.titleVi,
+      messageVi: latestNotification.messageVi,
+      titleEn: latestNotification.titleEn,
+      messageEn: latestNotification.messageEn,
+      type: latestNotification.type,
+      createdAt: latestNotification.createdAt,
+    };
 
-      // Auto-remove after 5 seconds
-      setTimeout(() => {
-        setToasts((prev) => prev.filter((toast) => toast.id !== newToast.id));
-      }, 5000);
-    }
+    setToasts((prev) => [newToast, ...prev.slice(0, 4)]);
+
+    const timer = setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== newToast.id));
+    }, 5000);
+    return () => clearTimeout(timer);
   }, [latestNotification]);
 
   const removeToast = (id: number) => {
