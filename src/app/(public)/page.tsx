@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
 import HomePosterRail from "@/components/movie/HomePosterRail";
+import HomeTopTenRail from "@/components/movie/HomeTopTenRail";
 import HomeTopicRows from "@/components/movie/HomeTopicRows";
 import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import { getServerPreferredLanguage } from "@/lib/server-language";
@@ -53,13 +54,6 @@ export default async function Home() {
               accentClassName: "home-topic-title--pink",
             },
             {
-              title: labels.topRated,
-              href: "/movies/top-rated",
-              viewMoreLabel: labels.viewMore,
-              movies: topRatedMovies,
-              accentClassName: "home-topic-title--gold",
-            },
-            {
               title: labels.popular,
               href: "/movies/popular",
               viewMoreLabel: labels.viewMore,
@@ -70,14 +64,21 @@ export default async function Home() {
         />
       </div>
 
+      <div className="deferred-content">
+        <HomeTopTenRail
+          title={`Top 10 ${labels.topRated}`}
+          movies={topRatedMovies}
+        />
+      </div>
+
       {/* Upcoming Section */}
       <div className="py-8 deferred-content">
         <HomePosterRail
-            title={labels.upcoming}
-            href="/movies/upcoming"
-            viewMoreLabel={labels.viewMore}
-            movies={upcomingMovies}
-          />
+          title={labels.upcoming}
+          href="/movies/upcoming"
+          viewMoreLabel={labels.viewMore}
+          movies={upcomingMovies}
+        />
       </div>
 
       {/* TV Series Sections */}
