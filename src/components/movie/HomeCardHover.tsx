@@ -28,15 +28,21 @@ export default function HomeCardHover({
     if (typeof window === "undefined") return;
 
     const rect = target.getBoundingClientRect();
+    const boundary = target.closest(
+      ".home-topic-row__scroller, .home-poster-rail__scroller, .home-top-ten__scroller, .home-wide-cover-rail__scroller"
+    );
+    const boundaryRect = boundary?.getBoundingClientRect();
     const hoverCardWidth = 384;
     const margin = 20;
+    const boundaryLeft = boundaryRect?.left ?? 0;
+    const boundaryRight = boundaryRect?.right ?? window.innerWidth;
     const cardCenterX = rect.left + rect.width / 2;
     const left = cardCenterX - hoverCardWidth / 2;
     const right = cardCenterX + hoverCardWidth / 2;
 
-    if (left < margin) {
+    if (left < boundaryLeft + margin) {
       setPlacement("left");
-    } else if (right > window.innerWidth - margin) {
+    } else if (right > boundaryRight - margin) {
       setPlacement("right");
     } else {
       setPlacement("center");
