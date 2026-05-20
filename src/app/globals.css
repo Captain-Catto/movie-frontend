@@ -727,12 +727,13 @@ body {
 }
 
 .home-top-ten-card__rank {
-  color: #ffe08a;
+  color: #ff3045;
   font-size: 3.6rem;
   font-style: italic;
   font-weight: 900;
   line-height: 0.9;
   text-align: center;
+  text-shadow: 0 1px 0 #ffffff, 0 0.45rem 1.25rem rgba(255, 48, 69, 0.28);
 }
 
 .home-top-ten-card__text {
