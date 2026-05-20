@@ -64,8 +64,6 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
   const heroRef = useRef<HTMLDivElement | null>(null);
   const swiperRef = useRef<SwiperType | null>(null);
   const { breakpoint } = useWindowWidth();
-  const thumbCount =
-    breakpoint === "desktop" ? 10 : breakpoint === "tablet" ? 8 : 5;
   const isMobile = breakpoint === "mobile";
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
@@ -421,36 +419,26 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       {/* Thumbnail Navigation */}
       {movies.length > 1 && (
         <div
-          className={`absolute bottom-6 z-30 ${
-            isMobile
-              ? "left-1/2 -translate-x-1/2 w-full px-4"
-              : "right-6"
-          }`}
+          className="absolute bottom-6 left-1/2 z-30 w-full -translate-x-1/2 px-4 lg:left-auto lg:right-6 lg:w-auto lg:translate-x-0 lg:px-0"
         >
-          <div
-            className={`flex ${
-              isMobile
-                ? "flex-nowrap justify-center gap-2"
-                : "flex-wrap justify-end gap-5"
-            }`}
-          >
-            {movies.slice(0, thumbCount).map((movie, index) => {
+          <div className="flex flex-nowrap justify-center gap-2 sm:gap-3 lg:flex-wrap lg:justify-end lg:gap-5">
+            {movies.slice(0, 10).map((movie, index) => {
               const backgroundImage =
                 movie.backgroundImage || movie.poster || FALLBACK_POSTER;
               const posterImage =
                 movie.posterImage || movie.poster || backgroundImage;
+              const responsiveVisibility =
+                index >= 8 ? "hidden lg:block" : index >= 5 ? "hidden sm:block" : "";
 
               return (
                 <div
                   key={movie.id}
                   onClick={(event) => handleThumbnailClick(index, event)}
                   className={`
-                    cursor-pointer transition-all duration-300 rounded-md overflow-hidden
+                    ${responsiveVisibility} cursor-pointer overflow-hidden rounded-md transition-all duration-300
                     ${
                       activeIndex === index
-                        ? `ring-2 ring-white ${
-                            isMobile ? "scale-105" : "scale-105"
-                          } opacity-100`
+                        ? "scale-105 opacity-100 ring-2 ring-white"
                         : "opacity-70 hover:opacity-90 hover:scale-105"
                     }
                   `}
@@ -460,12 +448,12 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     alt={movie.title}
                     width={104}
                     height={62}
-                    sizes={isMobile ? "48px" : "104px"}
+                    sizes="(max-width: 1023px) 48px, 104px"
                     quality={45}
                     priority={index === 0}
                     loading={index === 0 ? undefined : "lazy"}
                     fetchPriority={index === 0 ? "high" : "auto"}
-                    className={isMobile ? "h-8 w-12 object-cover" : "h-[62px] w-[104px] object-cover"}
+                    className="h-8 w-12 object-cover lg:h-[62px] lg:w-[104px]"
                   />
                 </div>
               );
