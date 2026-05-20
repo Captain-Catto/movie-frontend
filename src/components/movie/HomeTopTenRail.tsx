@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 
@@ -63,6 +63,7 @@ function TopTenCard({
 
 export default function HomeTopTenRail({ title, movies }: HomeTopTenRailProps) {
   const topMovies = movies.slice(0, 10);
+  const titleId = useId();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [canScrollBack, setCanScrollBack] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
@@ -101,8 +102,8 @@ export default function HomeTopTenRail({ title, movies }: HomeTopTenRailProps) {
   }
 
   return (
-    <section className="home-top-ten" aria-labelledby="home-top-ten-title">
-      <h2 id="home-top-ten-title">{title}</h2>
+    <section className="home-top-ten" aria-labelledby={titleId}>
+      <h2 id={titleId}>{title}</h2>
 
       <div className="home-top-ten__content">
         <div className="home-top-ten__nav" aria-hidden="true">

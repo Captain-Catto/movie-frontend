@@ -1,4 +1,6 @@
 import MovieGrid from "@/components/movie/MovieGrid";
+import HomeFeatureSlider from "@/components/movie/HomeFeatureSlider";
+import HomeTopTenRail from "@/components/movie/HomeTopTenRail";
 import SectionHeader from "@/components/ui/SectionHeader";
 import type { MovieCardData } from "@/types/content.types";
 import { getHomePageUiMessages } from "@/lib/ui-messages";
@@ -39,36 +41,20 @@ export default function TVSeriesSections({
 
       {/* Popular TV Series Section */}
       <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title={labels.popularTVSeries}
-            href="/tv/popular"
-            viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
-            movies={popularTVSeries}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
+        <HomeFeatureSlider
+          title={labels.popularTVSeries}
+          href="/tv/popular"
+          viewMoreLabel={labels.viewMore}
+          movies={popularTVSeries}
+        />
       </div>
 
       {/* Top Rated TV Series Section */}
       <div className="py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title={labels.topRatedTVSeries}
-            href="/tv/top-rated"
-            viewMoreLabel={labels.viewMore}
-          />
-          <MovieGrid
-            movies={topRatedTVSeries}
-            showFilters={false}
-            maxRows={1}
-            containerPadding={false}
-          />
-        </div>
+        <HomeTopTenRail
+          title={`Top 10 ${labels.topRatedTVSeries}`}
+          movies={topRatedTVSeries}
+        />
       </div>
     </div>
   );
