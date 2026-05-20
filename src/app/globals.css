@@ -921,6 +921,12 @@ body {
   border-radius: 1.125rem;
   background: #151923;
   isolation: isolate;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.home-feature-slider__stage:active {
+  cursor: grabbing;
 }
 
 .home-feature-slider__stage-link {
@@ -1123,12 +1129,12 @@ body {
 
 .home-feature-slider__action-group .home-feature-slider__favorite[data-state="on"],
 .home-feature-slider__action-group .home-feature-slider__favorite.home-feature-slider__favorite--active {
-  background: rgba(255, 255, 255, 0.95) !important;
+  background: transparent !important;
   color: #ef4444 !important;
 }
 
 .home-feature-slider__action-group .home-feature-slider__favorite[data-state="on"]:hover {
-  background: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
   color: #dc2626 !important;
 }
 
@@ -1155,7 +1161,7 @@ body {
 }
 
 .home-feature-slider__action-group .home-feature-slider__info-button:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.08);
   color: #ef4444;
 }
 

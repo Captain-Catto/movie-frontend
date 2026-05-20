@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Info, Play } from "lucide-react";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
@@ -26,6 +26,9 @@ export default function HomeFeatureSlider({
   const [activeIndex, setActiveIndex] = useState(0);
   const [visibleIndex, setVisibleIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const swipeStartXRef = useRef<number | null>(null);
+  const swipeStartYRef = useRef<number | null>(null);
+  const swipeHandledRef = useRef(false);
   const active = items[activeIndex] ?? items[0];
   const visible = items[visibleIndex] ?? active;
 
@@ -54,6 +57,46 @@ export default function HomeFeatureSlider({
   const watchType = visible.href?.includes("/tv/") ? "tv" : "movie";
   const watchHref = `/watch/${watchType}-${visible.tmdbId}`;
 
+  const goToRelativeSlide = (direction: "prev" | "next") => {
+    if (items.length <= 1 || isTransitioning) return;
+
+    setActiveIndex((current) => {
+      if (direction === "next") {
+        return (current + 1) % items.length;
+      }
+
+      return (current - 1 + items.length) % items.length;
+    });
+  };
+
+  const handleSwipeStart = (clientX: number, clientY: number) => {
+    swipeStartXRef.current = clientX;
+    swipeStartYRef.current = clientY;
+    swipeHandledRef.current = false;
+  };
+
+  const handleSwipeMove = (clientX: number, clientY: number) => {
+    const startX = swipeStartXRef.current;
+    const startY = swipeStartYRef.current;
+
+    if (startX === null || startY === null || swipeHandledRef.current) return;
+
+    const deltaX = clientX - startX;
+    const deltaY = clientY - startY;
+    const isHorizontalSwipe = Math.abs(deltaX) > 54 && Math.abs(deltaX) > Math.abs(deltaY) * 1.35;
+
+    if (!isHorizontalSwipe) return;
+
+    swipeHandledRef.current = true;
+    goToRelativeSlide(deltaX < 0 ? "next" : "prev");
+  };
+
+  const handleSwipeEnd = () => {
+    swipeStartXRef.current = null;
+    swipeStartYRef.current = null;
+    swipeHandledRef.current = false;
+  };
+
   return (
     <section className="home-feature-slider" aria-labelledby={titleId}>
       <div className="home-feature-slider__header">
@@ -65,7 +108,26 @@ export default function HomeFeatureSlider({
         </Link>
       </div>
 
-      <div className="home-feature-slider__stage">
+      <div
+        className="home-feature-slider__stage"
+        onPointerDown={(event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+          handleSwipeStart(event.clientX, event.clientY);
+        }}
+        onPointerMove={(event) => handleSwipeMove(event.clientX, event.clientY)}
+        onPointerUp={handleSwipeEnd}
+        onPointerCancel={handleSwipeEnd}
+        onMouseLeave={handleSwipeEnd}
+        onTouchStart={(event) => {
+          const touch = event.touches[0];
+          if (touch) handleSwipeStart(touch.clientX, touch.clientY);
+        }}
+        onTouchMove={(event) => {
+          const touch = event.touches[0];
+          if (touch) handleSwipeMove(touch.clientX, touch.clientY);
+        }}
+        onTouchEnd={handleSwipeEnd}
+      >
         <Link href={visible.href} className="home-feature-slider__stage-link" aria-label={visible.title} />
         <Image
           key={visible.id}
