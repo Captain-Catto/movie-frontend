@@ -191,21 +191,21 @@ body {
 }
 
 .home-topic-title--pink {
-  background: linear-gradient(235deg, #fff 28%, #ff8dd8 120%);
+  background: linear-gradient(235deg, #fff 28%, #ef4444 120%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
 }
 
 .home-topic-title--gold {
-  background: linear-gradient(235deg, #fff 28%, #ffc764 120%);
+  background: linear-gradient(235deg, #fff 28%, #ef4444 120%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
 }
 
 .home-topic-title--magenta {
-  background: linear-gradient(235deg, #fff 28%, #ff4fbd 120%);
+  background: linear-gradient(235deg, #fff 28%, #ef4444 120%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
@@ -995,7 +995,7 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
   min-height: 1.5rem;
-  color: #f5cf72;
+  color: #ff6b6b;
   font-size: 1rem;
   font-weight: 600;
 }
@@ -1029,9 +1029,9 @@ body {
 }
 
 .home-feature-slider__tags .home-feature-slider__tag-imdb {
-  border: 1px solid rgba(250, 204, 21, 0.9);
-  background: rgba(250, 204, 21, 0.08);
-  color: #fde68a;
+  border: 1px solid rgba(239, 68, 68, 0.95);
+  background: rgba(239, 68, 68, 0.16);
+  color: #ffffff;
 }
 
 .home-feature-slider__genres {
@@ -1072,15 +1072,15 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  background: #f5d47f;
-  color: #111827;
+  background: #ef4444;
+  color: #ffffff;
   text-decoration: none;
   transition: transform 160ms ease, background-color 160ms ease;
 }
 
 .home-feature-slider__play:hover {
   transform: scale(1.04);
-  background: #ffe08f;
+  background: #dc2626;
 }
 
 .home-feature-slider__action-group {
@@ -1151,7 +1151,7 @@ body {
 
 .home-feature-slider__thumbs button:hover,
 .home-feature-slider__thumbs button.is-active {
-  border-color: #f8d66d;
+  border-color: #ef4444;
   opacity: 1;
   transform: translateY(-0.2rem);
 }
