@@ -9,8 +9,7 @@ const LANGUAGE_COOKIE_KEY = "preferred-language";
 const LANGUAGE_HEADER_KEY = "x-preferred-language";
 
 export async function getServerPreferredLanguage(): Promise<SupportedLanguageCode> {
-  const headerStore = await headers();
-  const cookieStore = await cookies();
+  const [headerStore, cookieStore] = await Promise.all([headers(), cookies()]);
   const rawLanguage =
     headerStore.get(LANGUAGE_HEADER_KEY) ||
     cookieStore.get(LANGUAGE_COOKIE_KEY)?.value;
