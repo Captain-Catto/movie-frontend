@@ -18,7 +18,7 @@ interface MovieCardProps {
 }
 
 const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
-  const router = useRouter();
+  const { push } = useRouter();
   const { language } = useLanguage();
   const labels = getMovieCardUiMessages(language);
   const [isHovered, setIsHovered] = useState(false);
@@ -103,7 +103,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
 
     // Create proper watch URL - tmdbId is guaranteed to exist since all data comes from TMDB
     const watchUrl = `/watch/${contentType}-${movie.tmdbId}`;
-    router.push(watchUrl);
+    push(watchUrl);
   };
 
   return (

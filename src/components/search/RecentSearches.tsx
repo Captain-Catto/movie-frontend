@@ -113,7 +113,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                       </span>
                     }
                   >
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-gray-400" suppressHydrationWarning>
                       {formatDistanceToNow(new Date(search.timestamp), {
                         addSuffix: true,
                         locale: dateFnsLocale,

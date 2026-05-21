@@ -95,15 +95,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
       style={{
-        zIndex: 99999,
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backdropFilter: "blur(12px)", // Add inline backup
+        backdropFilter: "blur(12px)",
       }}
       onClick={handleBackdropClick}
       onKeyDown={(event) => {

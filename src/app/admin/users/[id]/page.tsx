@@ -367,7 +367,7 @@ function countryCodeToFlag(code?: string | null) {
 
 export default function AdminUserDetailPage() {
   const params = useParams();
-  const router = useRouter();
+  const { push } = useRouter();
   const userId = params.id as string;
   const api = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
@@ -836,7 +836,7 @@ export default function AdminUserDetailPage() {
     <div className="space-y-6">
       {/* Back button */}
       <button
-        onClick={() => router.push("/admin/users")}
+        onClick={() => push("/admin/users")}
         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
       >
         <ArrowLeft className="size-4" />
@@ -882,13 +882,13 @@ export default function AdminUserDetailPage() {
             </div>
             <p className="text-gray-400 text-sm mt-1">{user.email}</p>
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 flex-wrap">
-              <span>
+              <span suppressHydrationWarning>
                 Joined:{" "}
                 {new Date(user.createdAt).toLocaleDateString("vi-VN")}
               </span>
               {user.provider && <span>Provider: {user.provider}</span>}
               {user.lastLoginAt && (
-                <span>
+                <span suppressHydrationWarning>
                   Last login:{" "}
                   {new Date(user.lastLoginAt).toLocaleString("vi-VN")}
                 </span>
@@ -1138,7 +1138,7 @@ export default function AdminUserDetailPage() {
                         </span>
                       ) : null}
                   </div>
-                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                  <span className="text-xs text-gray-500 whitespace-nowrap" suppressHydrationWarning>
                     {new Date(item.createdAt).toLocaleString("vi-VN")}
                   </span>
                 </div>
@@ -1383,7 +1383,7 @@ export default function AdminUserDetailPage() {
                         <span>{item.totalPlays} lượt play</span>
                         <span>{item.durationEvents} lần ghi thời lượng</span>
                         {item.lastWatchedAt && (
-                          <span>
+                          <span suppressHydrationWarning>
                             Gần nhất:{" "}
                             {new Date(item.lastWatchedAt).toLocaleString("vi-VN")}
                           </span>
@@ -1624,7 +1624,7 @@ function DetailModalItem({
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-2" suppressHydrationWarning>
             Tìm lúc {new Date(item.createdAt).toLocaleString("vi-VN")}
           </p>
         </div>
@@ -1645,7 +1645,7 @@ function DetailModalItem({
               {item.source === "user_logs" ? "Log" : "Activity"}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500 mt-2" suppressHydrationWarning>
             {new Date(item.createdAt).toLocaleString("vi-VN")}
           </p>
           <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
@@ -1738,7 +1738,7 @@ function DetailModalItem({
               )}
               <div className="flex items-start justify-between gap-3 mt-2">
                 <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
-                  <span>{new Date(comment.createdAt).toLocaleString("vi-VN")}</span>
+                  <span suppressHydrationWarning>{new Date(comment.createdAt).toLocaleString("vi-VN")}</span>
                   <span>{comment.likeCount} like</span>
                   <span>{comment.dislikeCount} dislike</span>
                   <span>{comment.replyCount} replies</span>
@@ -1851,7 +1851,7 @@ function ContentDetailRow({
             {contentType === "tv" ? "TV" : "Movie"}
           </span>
         </div>
-        <p className="text-xs text-gray-500 mt-1">{meta}</p>
+        <p className="text-xs text-gray-500 mt-1" suppressHydrationWarning>{meta}</p>
         {children}
       </div>
     </div>

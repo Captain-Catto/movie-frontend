@@ -2,7 +2,7 @@
 
 import {
   createContext,
-  useContext,
+  use,
   useState,
   useEffect,
   useCallback,
@@ -41,7 +41,7 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 );
 
 export function LanguageProvider({ children, initialLanguage }: LanguageProviderProps) {
-  const router = useRouter();
+  const { refresh } = useRouter();
   const [language, setLanguageState] = useState<SupportedLanguageCode>(initialLanguage);
 
   // Fallback: only fires when the server had no cookie (initialLanguage === default).
@@ -64,9 +64,9 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
       localStorage.setItem(STORAGE_KEY, lang);
       setLanguageCookie(lang);
       // Re-run server components so they fetch data in the new language.
-      router.refresh();
+      refresh();
     },
-    [router]
+    [refresh]
   );
 
   return (
@@ -83,7 +83,7 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
 }
 
 export function useLanguage(): LanguageContextValue {
-  const context = useContext(LanguageContext);
+  const context = use(LanguageContext);
   if (!context) {
     throw new Error("useLanguage must be used within LanguageProvider");
   }

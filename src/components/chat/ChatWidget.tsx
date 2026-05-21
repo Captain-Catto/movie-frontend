@@ -361,7 +361,7 @@ export default function ChatWidget() {
                         <div className="line-clamp-1 font-medium">
                           {item.title || text.title}
                         </div>
-                        <div className="mt-0.5 text-xs opacity-70">
+                        <div className="mt-0.5 text-xs opacity-70" suppressHydrationWarning>
                           {new Date(item.updatedAt).toLocaleString(locale === "vi" ? "vi-VN" : "en-US")}
                         </div>
                       </button>

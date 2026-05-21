@@ -74,7 +74,7 @@ interface WatchHistoryResponse {
 const regionDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
 
 export default function AdminUsersPage() {
-  const router = useRouter();
+  const { push } = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "active" | "banned">("all");
@@ -576,7 +576,7 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => router.push(`/admin/users/${user.id}`)}
+                            onClick={() => push(`/admin/users/${user.id}`)}
                             className="cursor-pointer px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
                           >
                             Chi tiết

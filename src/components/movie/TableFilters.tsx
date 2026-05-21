@@ -18,7 +18,7 @@ const TableFilters = ({
   showToggle = true,
   initialFilters,
 }: TableFiltersProps) => {
-  const router = useRouter();
+  const { push } = useRouter();
   const { language } = useLanguage();
   const labels = getTableFiltersUiMessages(language);
   const [filters, setFilters] = useState<TableFilterOptions>({
@@ -177,7 +177,7 @@ const TableFilters = ({
 
     // Navigate to browse page with params
     const queryString = params.length > 0 ? `?${params.join("&")}` : "";
-    router.push(`/browse${queryString}`);
+    push(`/browse${queryString}`);
 
     // Call the optional onFilterChange callback if provided
     if (onFilterChange) {

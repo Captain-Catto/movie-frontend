@@ -574,7 +574,7 @@ const WatchPageClientContent = ({
                           <h4 className="text-white text-sm font-medium truncate group-hover:text-red-400">
                             {item.title || item.name}
                           </h4>
-                          <p className="text-gray-400 text-xs mb-1">
+                          <p className="text-gray-400 text-xs mb-1" suppressHydrationWarning>
                             {item.release_date || item.first_air_date
                               ? new Date(
                                   item.release_date || item.first_air_date || ""

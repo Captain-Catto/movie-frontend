@@ -7,10 +7,11 @@ import { useAnalyticsData } from "@/hooks/useAnalyticsData";
 import AnalyticsHeader from "@/components/analytics/AnalyticsHeader";
 import AnalyticsStatsCards from "@/components/analytics/AnalyticsStatsCards";
 import AnalyticsPlaySourceBreakdown from "@/components/analytics/AnalyticsPlaySourceBreakdown";
-import AnalyticsViewChart from "@/components/analytics/AnalyticsViewChart";
-import AnalyticsFavoritesChart from "@/components/analytics/AnalyticsFavoritesChart";
+import dynamic from "next/dynamic";
+const AnalyticsViewChart = dynamic(() => import("@/components/analytics/AnalyticsViewChart"), { ssr: false });
+const AnalyticsFavoritesChart = dynamic(() => import("@/components/analytics/AnalyticsFavoritesChart"), { ssr: false });
+const AnalyticsDeviceStats = dynamic(() => import("@/components/analytics/AnalyticsDeviceStats"), { ssr: false });
 import AnalyticsContentList from "@/components/analytics/AnalyticsContentList";
-import AnalyticsDeviceStats from "@/components/analytics/AnalyticsDeviceStats";
 import AnalyticsCountryStats from "@/components/analytics/AnalyticsCountryStats";
 
 export default function AdminAnalyticsPage() {

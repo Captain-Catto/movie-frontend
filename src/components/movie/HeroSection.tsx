@@ -317,7 +317,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
                       {/* Year */}
                       <div className="tag-year">
-                        <span className="bg-gray-700 text-white px-3 py-1 rounded text-sm">
+                        <span className="bg-gray-700 text-white px-3 py-1 rounded text-sm" suppressHydrationWarning>
                           {year}
                         </span>
                       </div>

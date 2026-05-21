@@ -376,7 +376,7 @@ export default function AdminSettingsPage() {
           >
             {swaggerSaving ? "Saving..." : "Save Access"}
           </button>
-          <p className="md:col-span-3 text-xs text-gray-400">
+          <p className="md:col-span-3 text-xs text-gray-400" suppressHydrationWarning>
             Status: {swaggerAuth.configured ? "Configured" : "Not configured"}
             {swaggerAuth.updatedAt ? ` · Updated ${new Date(swaggerAuth.updatedAt).toLocaleString()}` : ""}
             {swaggerAuth.updatedBy?.email

@@ -295,6 +295,7 @@ export default function AdminSyncDataPage() {
                 value={customDate}
                 onChange={(event) => setCustomDate(event.target.value)}
                 max={new Date().toISOString().split("T")[0]}
+                suppressHydrationWarning
                 className="mt-1 rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
             </label>

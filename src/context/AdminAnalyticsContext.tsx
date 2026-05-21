@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, use, ReactNode } from "react";
 import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
 
 type AdminAnalyticsContextValue = Pick<
@@ -27,7 +27,7 @@ export function AdminAnalyticsProvider({
 }
 
 export function useAdminAnalyticsContext(): AdminAnalyticsContextValue {
-  const ctx = useContext(AdminAnalyticsContext);
+  const ctx = use(AdminAnalyticsContext);
   if (!ctx) {
     throw new Error(
       "useAdminAnalyticsContext must be used within AdminAnalyticsProvider"

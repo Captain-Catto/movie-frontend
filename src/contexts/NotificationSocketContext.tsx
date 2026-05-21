@@ -3,7 +3,7 @@
 import {
   createContext,
   useCallback,
-  useContext,
+  use,
   useEffect,
   useRef,
   useState,
@@ -173,7 +173,7 @@ export function NotificationSocketProvider({
 }
 
 export function useNotificationSocketContext(): NotificationSocketContextValue {
-  const context = useContext(NotificationSocketContext);
+  const context = use(NotificationSocketContext);
   if (!context) {
     throw new Error(
       "useNotificationSocket must be used within NotificationSocketProvider"

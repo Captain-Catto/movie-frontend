@@ -47,7 +47,7 @@ function getLocalizedNotif(
 }
 
 export default function NotificationsPage() {
-  const router = useRouter();
+  const { push } = useRouter();
   const { isLoading } = useAuth();
   const { language } = useLanguage();
   const labels = getNotificationsPageUiMessages(language);
@@ -168,7 +168,7 @@ export default function NotificationsPage() {
     markNotificationAsRead(notif);
     const url = resolveTargetUrl(notif);
     if (url) {
-      router.push(url);
+      push(url);
     } else {
       setSelectedNotification(notif);
     }
@@ -300,7 +300,7 @@ export default function NotificationsPage() {
 
                 return (
                   <div key={dateKey} className="space-y-3">
-                    <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide px-1">
+                    <div className="text-sm font-semibold text-gray-400 uppercase tracking-wide px-1" suppressHydrationWarning>
                       {dayLabel}
                     </div>
                     {groupedByDate[dateKey].map((notif) => {
@@ -343,7 +343,7 @@ export default function NotificationsPage() {
                                       {title}
                                     </h3>
                                     <div className="flex items-center gap-2">
-                                      <div className="text-xs text-gray-500 whitespace-nowrap">
+                                      <div className="text-xs text-gray-500 whitespace-nowrap" suppressHydrationWarning>
                                         {formatRelativeTimeByLanguage(
                                           new Date(notif.createdAt),
                                           language

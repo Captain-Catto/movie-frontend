@@ -20,7 +20,7 @@ export default function AccountPage() {
   const { user, isAuthenticated, isLoading, checkAuth } = useAuth();
   const { language } = useLanguage();
   const labels = getAccountUiMessages(language);
-  const router = useRouter();
+  const { push } = useRouter();
   const [form, setForm] = useState({
     name: "",
     password: "",
@@ -346,7 +346,7 @@ export default function AccountPage() {
             <div className="gap-y-4 mt-8">
               <button
                 className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
-                onClick={() => router.push("/account/change-password")}
+                onClick={() => push("/account/change-password")}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -361,7 +361,7 @@ export default function AccountPage() {
 
               <button
                 className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
-                onClick={() => router.push("/notifications")}
+                onClick={() => push("/notifications")}
               >
                 <div className="flex items-center justify-between">
                   <div>

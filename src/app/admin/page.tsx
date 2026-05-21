@@ -119,7 +119,7 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-400 text-sm">Last Sync</p>
-                  <p className="text-white font-semibold">
+                  <p className="text-white font-semibold" suppressHydrationWarning>
                     {new Date(stats.lastSyncDate).toLocaleString()}
                   </p>
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef } from "react";
+import React from "react";
 import { Search, Loader2, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getSearchUiMessages } from "@/lib/ui-messages";
@@ -10,73 +10,67 @@ interface SearchInputProps {
   onQueryChange: (query: string) => void;
   onSearch: (query: string) => void;
   isLoading: boolean;
+  ref?: React.Ref<HTMLInputElement>;
 }
 
-const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ query, onQueryChange, onSearch, isLoading }, ref) => {
-    const { language } = useLanguage();
-    const labels = getSearchUiMessages(language);
+function SearchInput({ query, onQueryChange, onSearch, isLoading, ref }: SearchInputProps) {
+  const { language } = useLanguage();
+  const labels = getSearchUiMessages(language);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newQuery = e.target.value;
-      onQueryChange(newQuery);
-      // ❌ REMOVED: Don't save to recent searches while typing
-      // Debouncing now happens in useSearch hook for API calls only
-    };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onQueryChange(e.target.value);
+  };
 
-    const handleClear = () => {
-      onQueryChange("");
-    };
+  const handleClear = () => {
+    onQueryChange("");
+  };
 
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      // ✅ Save to recent searches ONLY when user presses Enter
-      if (query.trim().length >= 2) {
-        onSearch(query);
-      }
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim().length >= 2) {
+      onSearch(query);
+    }
+  };
 
-    return (
-      <form onSubmit={handleSubmit} className="relative">
-        <div className="relative flex items-center">
-          <Search className="absolute left-3 size-5 text-gray-400" />
+  return (
+    <form onSubmit={handleSubmit} className="relative">
+      <div className="relative flex items-center">
+        <Search className="absolute left-3 size-5 text-gray-400" />
 
-          <input
-            ref={ref}
-            type="text"
-            placeholder={labels.placeholder}
-            value={query}
-            onChange={handleInputChange}
-            className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
-          />
+        <input
+          ref={ref}
+          type="text"
+          placeholder={labels.placeholder}
+          value={query}
+          onChange={handleInputChange}
+          className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+        />
 
-          {/* Loading or Clear button */}
-          <div className="absolute right-3">
-            {isLoading ? (
-              <Loader2 className="size-5 text-gray-400 animate-spin" />
-            ) : (
-              query && (
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  className="text-gray-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  <X className="size-5" />
-                </button>
-              )
-            )}
-          </div>
+        <div className="absolute right-3">
+          {isLoading ? (
+            <Loader2 className="size-5 text-gray-400 animate-spin" />
+          ) : (
+            query && (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="text-gray-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            )
+          )}
         </div>
+      </div>
 
-        {query.length > 0 && query.length < 2 && (
-          <p className="text-xs text-gray-400 mt-2">
-            {labels.minCharsHint}
-          </p>
-        )}
-      </form>
-    );
-  }
-);
+      {query.length > 0 && query.length < 2 && (
+        <p className="text-xs text-gray-400 mt-2">
+          {labels.minCharsHint}
+        </p>
+      )}
+    </form>
+  );
+}
 
 SearchInput.displayName = "SearchInput";
 
