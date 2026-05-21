@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import type { SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
@@ -94,12 +94,14 @@ export default function NotificationDetailModal({ notification, onClose }: Props
   const config = TYPE_CONFIG[notification.type] ?? TYPE_CONFIG.info;
   const imageUrl = notification.metadata?.imageUrl as string | undefined;
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onCloseRef.current(); };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";

@@ -7,6 +7,17 @@ import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER, TMDB_IMAGE_BASE_URL, TMDB_POSTER_SIZE } from "@/constants/app.constants";
+
+async function fetchFallbackPoster(tmdbId: number, type: string): Promise<string | null> {
+  try {
+    const r = await fetch(`/api/poster/${tmdbId}?type=${type}`);
+    const res = await r.json();
+    if (res.data?.posterPath) return `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${res.data.posterPath}`;
+    return null;
+  } catch {
+    return null;
+  }
+}
 import type { MovieCardData } from "@/types/content.types";
 import { analyticsService } from "@/services/analytics.service";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -42,14 +53,9 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
   useEffect(() => {
     if (initialPoster !== FALLBACK_POSTER || !movie.tmdbId) return;
     const type = isTVSeries ? "tv" : "movie";
-    fetch(`/api/poster/${movie.tmdbId}?type=${type}`)
-      .then((r) => r.json())
-      .then((res) => {
-        if (res.data?.posterPath) {
-          setPosterSafe(`${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${res.data.posterPath}`);
-        }
-      })
-      .catch(() => {});
+    fetchFallbackPoster(movie.tmdbId, type).then((url) => {
+      if (url) setPosterSafe(url);
+    });
   }, [movie.tmdbId, initialPoster, isTVSeries]);
 
   const handleHoverPosition = (pointerX: number) => {

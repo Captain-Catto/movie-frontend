@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useReducer, useCallback } from "react";
 import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,64 +29,58 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
   const { checking, result } = checkerState;
   const { token } = useAuth();
 
-  useEffect(() => {
-    if (!checking) return;
-    if (!token) {
+  const runCheck = useCallback(async () => {
+    if (!token) return;
+    dispatch({ checking: true });
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/seo`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      const entries: SeoMetadata[] = Array.isArray(data.data)
+        ? data.data
+        : Array.isArray(data)
+        ? data
+        : [];
+
+      const check: CheckerResult = {
+        total: entries.length,
+        active: entries.filter((entry) => entry.isActive).length,
+        missingTitle: entries.filter((entry) => !entry.title?.trim()).length,
+        missingDescription: entries.filter((entry) => !entry.description?.trim()).length,
+        longTitle: entries.filter((entry) => entry.title?.length > 60).length,
+        longDescription: entries.filter((entry) => entry.description?.length > 160).length,
+        keywordsMissing: entries.filter(
+          (entry) => !entry.keywords || entry.keywords.length === 0
+        ).length,
+        ogMissing: entries.filter(
+          (entry) => !entry.ogTitle || !entry.ogDescription || !entry.ogImage
+        ).length,
+        twitterMissing: entries.filter(
+          (entry) =>
+            !entry.twitterTitle || !entry.twitterDescription || !entry.twitterImage
+        ).length,
+        duplicates: [],
+      };
+
+      const titleMap = new Map<string, string[]>();
+      entries.forEach((entry) => {
+        if (!entry.title) return;
+        const key = entry.title.trim().toLowerCase();
+        if (!titleMap.has(key)) titleMap.set(key, []);
+        titleMap.get(key)?.push(entry.path);
+      });
+
+      check.duplicates = Array.from(titleMap.entries()).flatMap(([title, paths]) =>
+        paths.length > 1 ? [{ title, paths }] : []
+      );
+
+      dispatch({ result: check, checking: false });
+      onComplete?.(check);
+    } catch {
       dispatch({ checking: false });
-      return;
     }
-
-    fetch(`${API_BASE_URL}/admin/seo`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const entries: SeoMetadata[] = Array.isArray(data.data)
-          ? data.data
-          : Array.isArray(data)
-          ? data
-          : [];
-
-        const check: CheckerResult = {
-          total: entries.length,
-          active: entries.filter((entry) => entry.isActive).length,
-          missingTitle: entries.filter((entry) => !entry.title?.trim()).length,
-          missingDescription: entries.filter((entry) => !entry.description?.trim()).length,
-          longTitle: entries.filter((entry) => entry.title?.length > 60).length,
-          longDescription: entries.filter((entry) => entry.description?.length > 160).length,
-          keywordsMissing: entries.filter((entry) => !entry.keywords || entry.keywords.length === 0)
-            .length,
-          ogMissing: entries.filter(
-            (entry) => !entry.ogTitle || !entry.ogDescription || !entry.ogImage
-          ).length,
-          twitterMissing: entries.filter(
-            (entry) =>
-              !entry.twitterTitle || !entry.twitterDescription || !entry.twitterImage
-          ).length,
-          duplicates: [],
-        };
-
-        const titleMap = new Map<string, string[]>();
-        entries.forEach((entry) => {
-          if (!entry.title) return;
-          const key = entry.title.trim().toLowerCase();
-          if (!titleMap.has(key)) {
-            titleMap.set(key, []);
-          }
-          titleMap.get(key)?.push(entry.path);
-        });
-
-        check.duplicates = Array.from(titleMap.entries()).flatMap(([title, paths]) =>
-          paths.length > 1 ? [{ title, paths }] : []
-        );
-
-        dispatch({ result: check, checking: false });
-        onComplete?.(check);
-      })
-      .catch(() => dispatch({ checking: false }));
-  }, [checking, onComplete, token]);
+  }, [token, onComplete]);
 
   return (
     <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg space-y-4">
@@ -98,7 +92,7 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
           </p>
         </div>
         <button
-          onClick={() => dispatch({ checking: true })}
+          onClick={runCheck}
           disabled={checking}
           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
         >

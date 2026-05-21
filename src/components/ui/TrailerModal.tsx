@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useRef,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
 } from "react";
@@ -27,6 +28,8 @@ export default function TrailerModal({
   const { language } = useLanguage();
   const labels = getTrailerModalUiMessages(language);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   // Find the best trailer - prefer official trailers
   useEffect(() => {
@@ -53,7 +56,7 @@ export default function TrailerModal({
   useEffect(() => {
     const handleEscape = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -69,7 +72,7 @@ export default function TrailerModal({
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

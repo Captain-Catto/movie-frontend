@@ -50,7 +50,6 @@ export function GET(request: Request) {
           height: "100%",
           display: "flex",
           position: "relative",
-          overflow: "hidden",
           background: "linear-gradient(135deg, #070b16 0%, #111827 55%, #020617 100%)",
           color: "white",
           fontFamily: "Arial, Helvetica, sans-serif",
@@ -63,7 +62,6 @@ export function GET(request: Request) {
             height: 560,
             right: -150,
             top: -170,
-            borderRadius: 999,
             background: style.glow,
             filter: "blur(8px)",
           }}
@@ -75,7 +73,6 @@ export function GET(request: Request) {
             height: 440,
             left: -170,
             bottom: -180,
-            borderRadius: 999,
             background: "rgba(59, 130, 246, 0.18)",
             filter: "blur(8px)",
           }}

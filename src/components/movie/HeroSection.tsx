@@ -128,19 +128,14 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
       {/* Hero-local FLIP overlay. It zooms only inside the hero container. */}
       {flipAnim && (
         <div
-          className="absolute inset-0 z-[60] pointer-events-none"
+          className="absolute inset-0 z-[60] pointer-events-none bg-cover bg-center origin-top-left [transition:transform_0.55s_cubic-bezier(0.4,0,0.2,1),opacity_0.37s_ease,border-radius_0.55s_ease]"
           style={{
             backgroundImage: `url(${flipAnim.src})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            transformOrigin: "top left",
             transform: flipAnim.active
               ? "translate(0px, 0px) scale(1, 1)"
               : `translate(${flipAnim.tx}px, ${flipAnim.ty}px) scale(${flipAnim.sx}, ${flipAnim.sy})`,
             opacity: flipAnim.fadingOut ? 0 : flipAnim.active ? 1 : 0.85,
             borderRadius: flipAnim.active ? "0px" : "8px",
-            transition:
-              "transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.37s ease, border-radius 0.55s ease",
           }}
         />
       )}

@@ -21,6 +21,8 @@ interface SearchModalProps {
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
   const { user } = useAuth();
   const { language } = useLanguage();
   const labels = getSearchUiMessages(language);
@@ -47,7 +49,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onCloseRef.current();
       }
     };
 
@@ -64,7 +66,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         document.removeEventListener("keydown", handleEscape);
       };
     }
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Close modal on backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
