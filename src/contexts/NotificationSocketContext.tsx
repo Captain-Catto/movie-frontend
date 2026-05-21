@@ -50,7 +50,6 @@ export function NotificationSocketProvider({
   children: React.ReactNode;
 }) {
   const { token, isAuthenticated } = useAuth();
-  const [isReady, setIsReady] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -59,12 +58,7 @@ export function NotificationSocketProvider({
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!isReady || !isAuthenticated || !token) {
+    if (!isAuthenticated || !token) {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
@@ -73,43 +67,23 @@ export function NotificationSocketProvider({
         setUnreadCount(0);
         setLatestNotification(null);
       }
-      return () => {};
+      return;
     }
 
-    const API_BASE_URL =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-
-    const newSocket = io(`${API_BASE_URL}/notifications`, {
-      auth: { token },
-      transports: ["polling", "websocket"],
-      autoConnect: true,
-      forceNew: false,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
-    });
-
-    socketRef.current = newSocket;
+    let newSocket: Socket | null = null;
 
     const handleConnect = () => {
-      setIsConnected(true);
-      setSocket(newSocket);
+      if (newSocket) { setIsConnected(true); setSocket(newSocket); }
     };
-
-    const handleDisconnect = () => {
-      setIsConnected(false);
-    };
-
+    const handleDisconnect = () => { setIsConnected(false); };
     const handleConnectError = (error: Error) => {
       console.error("WebSocket connection error:", error);
       setIsConnected(false);
     };
-
     const handleAuthError = (error: Error) => {
       console.error("Socket authentication failed:", error);
       setIsConnected(false);
     };
-
     const handleNewNotification = (notification: NotificationData) => {
       const createdAt =
         notification?.createdAt instanceof Date
@@ -117,31 +91,47 @@ export function NotificationSocketProvider({
           : new Date(notification?.createdAt || Date.now());
       setLatestNotification({ ...notification, createdAt });
     };
-
     const handleUnreadCount = (data: { count: number }) => {
       setUnreadCount(data.count);
     };
 
-    newSocket.on("connect", handleConnect);
-    newSocket.on("disconnect", handleDisconnect);
-    newSocket.on("connect_error", handleConnectError);
-    newSocket.on("auth:error", handleAuthError);
-    newSocket.on("notification:new", handleNewNotification);
-    newSocket.on("notification:unread-count", handleUnreadCount);
+    const timer = setTimeout(() => {
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+      newSocket = io(`${API_BASE_URL}/notifications`, {
+        auth: { token },
+        transports: ["polling", "websocket"],
+        autoConnect: true,
+        forceNew: false,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+      });
+      socketRef.current = newSocket;
+      newSocket.on("connect", handleConnect);
+      newSocket.on("disconnect", handleDisconnect);
+      newSocket.on("connect_error", handleConnectError);
+      newSocket.on("auth:error", handleAuthError);
+      newSocket.on("notification:new", handleNewNotification);
+      newSocket.on("notification:unread-count", handleUnreadCount);
+    }, 100);
 
     return () => {
-      newSocket.off("connect", handleConnect);
-      newSocket.off("disconnect", handleDisconnect);
-      newSocket.off("connect_error", handleConnectError);
-      newSocket.off("auth:error", handleAuthError);
-      newSocket.off("notification:new", handleNewNotification);
-      newSocket.off("notification:unread-count", handleUnreadCount);
-      newSocket.disconnect();
-      socketRef.current = null;
-      setSocket(null);
-      setIsConnected(false);
+      clearTimeout(timer);
+      if (newSocket) {
+        newSocket.off("connect", handleConnect);
+        newSocket.off("disconnect", handleDisconnect);
+        newSocket.off("connect_error", handleConnectError);
+        newSocket.off("auth:error", handleAuthError);
+        newSocket.off("notification:new", handleNewNotification);
+        newSocket.off("notification:unread-count", handleUnreadCount);
+        newSocket.disconnect();
+        socketRef.current = null;
+        setSocket(null);
+        setIsConnected(false);
+      }
     };
-  }, [isReady, isAuthenticated, token]);
+  }, [isAuthenticated, token]);
 
   const markAsRead = useCallback((notificationId: number) => {
     if (!socketRef.current?.connected) return false;

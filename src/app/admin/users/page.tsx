@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Image from "next/image";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
@@ -133,7 +133,7 @@ export default function AdminUsersPage() {
   const [logFilter, setLogFilter] = useState<string>("all");
   const [watchHistory, setWatchHistory] = useState<WatchHistoryResponse | null>(null);
   const [watchLoading, setWatchLoading] = useState(false);
-  const [watchPage, setWatchPage] = useState(1);
+  const watchPageRef = useRef(1);
   const [watchAction, setWatchAction] = useState<WatchActionType>("all");
   const [watchContentType, setWatchContentType] = useState<WatchContentType>("all");
   const [watchStartDate, setWatchStartDate] = useState("");
@@ -261,7 +261,7 @@ export default function AdminUsersPage() {
   }, [adminApi]);
 
   const fetchWatchHistory = useCallback(
-    async (userId: number, page = watchPage) => {
+    async (userId: number, page = watchPageRef.current) => {
       setWatchLoading(true);
       try {
         const params = new URLSearchParams({
@@ -280,7 +280,7 @@ export default function AdminUsersPage() {
 
         if (response.success && response.data) {
           setWatchHistory(response.data);
-          setWatchPage(response.data.page || page);
+          watchPageRef.current = response.data.page || page;
         } else {
           setWatchHistory(null);
         }
@@ -296,7 +296,6 @@ export default function AdminUsersPage() {
       watchAction,
       watchContentType,
       watchEndDate,
-      watchPage,
       watchStartDate,
     ]
   );
@@ -312,7 +311,7 @@ export default function AdminUsersPage() {
     setActiveTab("info");
     setUserLogs([]);
     setWatchHistory(null);
-    setWatchPage(1);
+    watchPageRef.current = 1;
     setWatchAction("all");
     setWatchContentType("all");
     setWatchStartDate("");
@@ -641,7 +640,7 @@ export default function AdminUsersPage() {
                 <button
                   onClick={() => {
                     setActiveTab("watch");
-                    setWatchPage(1);
+                    watchPageRef.current = 1;
                   }}
                   className={`px-4 py-2 font-medium transition-colors cursor-pointer ${
                     activeTab === "watch"
@@ -850,7 +849,7 @@ export default function AdminUsersPage() {
                       value={watchAction}
                       onChange={(e) => {
                         setWatchAction(e.target.value as WatchActionType);
-                        setWatchPage(1);
+                        watchPageRef.current = 1;
                       }}
                       className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
                     >
@@ -863,7 +862,7 @@ export default function AdminUsersPage() {
                       value={watchContentType}
                       onChange={(e) => {
                         setWatchContentType(e.target.value as WatchContentType);
-                        setWatchPage(1);
+                        watchPageRef.current = 1;
                       }}
                       className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
                     >
@@ -876,7 +875,7 @@ export default function AdminUsersPage() {
                       value={watchStartDate}
                       onChange={(e) => {
                         setWatchStartDate(e.target.value);
-                        setWatchPage(1);
+                        watchPageRef.current = 1;
                       }}
                       className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
                     />
@@ -885,7 +884,7 @@ export default function AdminUsersPage() {
                       value={watchEndDate}
                       onChange={(e) => {
                         setWatchEndDate(e.target.value);
-                        setWatchPage(1);
+                        watchPageRef.current = 1;
                       }}
                       className="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
                     />

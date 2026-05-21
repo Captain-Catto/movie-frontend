@@ -40,7 +40,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isVisible, setIsVisible] = useState(true); // Start visible
-  const [hasScrolled, setHasScrolled] = useState(false);
+  const hasScrolledRef = useRef(false);
   const scrollRafRef = useRef<number | null>(null);
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => {
@@ -53,13 +53,6 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const isHydrated = useIsHydrated();
   const labels = getHeaderUiMessages(language);
 
-  // Handle play state - hide header when playing (unless user has scrolled)
-  useEffect(() => {
-    if (hideOnPlay && isPlaying && !hasScrolled) {
-      setIsVisible(false);
-    }
-  }, [hideOnPlay, isPlaying, hasScrolled]);
-
   // Handle scroll to update play state visibility and header styling
   useEffect(() => {
     const updateScrollState = () => {
@@ -70,10 +63,10 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
       });
 
       if (hideOnPlay && scrollTop > 50) {
-        setHasScrolled((prev) => (prev ? prev : true));
+        if (!hasScrolledRef.current) hasScrolledRef.current = true;
         setIsVisible((prev) => (prev ? prev : true));
       } else if (hideOnPlay && isPlayingRef.current && scrollTop <= 50) {
-        setHasScrolled(false);
+        hasScrolledRef.current = false;
         setIsVisible(false);
       }
 
@@ -96,10 +89,11 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
     };
   }, [hideOnPlay]);
 
-  // Reset scroll state when play state changes (to allow hiding again on next play)
+  // Reset scroll + visibility state when play starts (allows hiding again on next play)
   useEffect(() => {
     if (hideOnPlay && isPlaying) {
-      setHasScrolled(false);
+      hasScrolledRef.current = false;
+      setIsVisible(false);
     }
   }, [hideOnPlay, isPlaying]);
 

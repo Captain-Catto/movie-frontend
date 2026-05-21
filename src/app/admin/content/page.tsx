@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Eye } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useAdminApi } from "@/hooks/useAdminApi";
@@ -88,7 +88,7 @@ export default function AdminContentPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ContentStatusFilter>("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [appliedSearchTerm, setAppliedSearchTerm] = useState("");
+  const appliedSearchTermRef = useRef("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -161,8 +161,8 @@ export default function AdminContentPage() {
           contentType: CONTENT_TYPE_PARAM.movies,
         });
 
-        if (appliedSearchTerm) {
-          params.append("search", appliedSearchTerm);
+        if (appliedSearchTermRef.current) {
+          params.append("search", appliedSearchTermRef.current);
         }
 
         const response = await adminApi.get<{ items: RawContentItem[]; total: number; totalPages: number; page: number }>(
@@ -191,7 +191,7 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, adminApi]
+    [PAGE_SIZE, filter, normalizeContent, adminApi]
   );
 
   const fetchTVSeries = useCallback(
@@ -209,8 +209,8 @@ export default function AdminContentPage() {
           contentType: CONTENT_TYPE_PARAM.tv,
         });
 
-        if (appliedSearchTerm) {
-          params.append("search", appliedSearchTerm);
+        if (appliedSearchTermRef.current) {
+          params.append("search", appliedSearchTermRef.current);
         }
 
         const response = await adminApi.get<{ items: RawContentItem[]; total: number; totalPages: number; page: number }>(
@@ -239,7 +239,7 @@ export default function AdminContentPage() {
         setLoading(false);
       }
     },
-    [PAGE_SIZE, appliedSearchTerm, filter, normalizeContent, adminApi]
+    [PAGE_SIZE, filter, normalizeContent, adminApi]
   );
 
   const fetchTrending = useCallback(
@@ -313,7 +313,7 @@ export default function AdminContentPage() {
       return;
     }
     setPage(1);
-    setAppliedSearchTerm(searchTerm.trim());
+    appliedSearchTermRef.current = searchTerm.trim();
   };
 
   const handleFilterChange = (status: ContentStatusFilter) => {
@@ -333,7 +333,7 @@ export default function AdminContentPage() {
     if (tab === "trending") {
       setFilter("all");
       setSearchTerm("");
-      setAppliedSearchTerm("");
+      appliedSearchTermRef.current = "";
     }
   };
 

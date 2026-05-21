@@ -11,6 +11,9 @@ interface HLSPlayerProps {
 export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<unknown>(null);
+  const onReadyRef = useRef(onReady);
+  const onErrorRef = useRef(onError);
+  useEffect(() => { onReadyRef.current = onReady; onErrorRef.current = onError; }, [onReady, onError]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -21,10 +24,10 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
 
     const onManifestParsed = () => {
       videoEl.play().catch(() => {});
-      onReady?.();
+      onReadyRef.current?.();
     };
     const onHlsError = (_: unknown, data: { fatal: boolean }) => {
-      if (data.fatal) onError?.();
+      if (data.fatal) onErrorRef.current?.();
     };
 
     async function init() {
@@ -47,9 +50,9 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
         // Native HLS (Safari)
         videoEl.src = src;
         videoEl.addEventListener("loadedmetadata", onManifestParsed);
-        videoEl.addEventListener("error", () => onError?.());
+        videoEl.addEventListener("error", () => onErrorRef.current?.());
       } else {
-        onError?.();
+        onErrorRef.current?.();
       }
     }
 
@@ -68,7 +71,7 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
       }
       hlsRef.current = null;
     };
-  }, [src, onReady, onError]);
+  }, [src]);
 
   return (
     <video

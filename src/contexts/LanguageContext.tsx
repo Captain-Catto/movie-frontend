@@ -42,7 +42,7 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 
 export function LanguageProvider({ children, initialLanguage }: LanguageProviderProps) {
   const { refresh } = useRouter();
-  const [language, setLanguageState] = useState<SupportedLanguageCode>(initialLanguage);
+  const [language, setLanguageState] = useState<SupportedLanguageCode>(() => initialLanguage);
 
   // Fallback: only fires when the server had no cookie (initialLanguage === default).
   // Recovers the stored preference from localStorage (e.g. after cookie was cleared).

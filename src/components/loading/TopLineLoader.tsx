@@ -53,7 +53,7 @@ function TopLineLoaderImpl() {
   const pathWithSearch = `${pathname}${searchKey ? `?${searchKey}` : ""}`;
 
   const [isVisible, setIsVisible] = useState(false);
-  const [isActive, setIsActive] = useState(false);
+  const isActiveRef = useRef(false);
   const [progress, setProgress] = useState(0);
 
   const isFirstRenderRef = useRef(true);
@@ -76,13 +76,13 @@ function TopLineLoaderImpl() {
   const start = useCallback(() => {
     hasPendingLoadRef.current = true;
     clearTimers();
+    isActiveRef.current = true;
     setIsVisible(true);
-    setIsActive(true);
     setProgress((prev) => (prev > 0 ? prev : MIN_START_PROGRESS));
 
     stallTimerRef.current = window.setTimeout(() => {
       hasPendingLoadRef.current = false;
-      setIsActive(false);
+      isActiveRef.current = false;
       setProgress(100);
       hideTimerRef.current = window.setTimeout(() => {
         setIsVisible(false);
@@ -97,7 +97,7 @@ function TopLineLoaderImpl() {
     }
     hasPendingLoadRef.current = false;
     clearTimers();
-    setIsActive(false);
+    isActiveRef.current = false;
     setProgress(100);
     hideTimerRef.current = window.setTimeout(() => {
       setIsVisible(false);
@@ -106,9 +106,10 @@ function TopLineLoaderImpl() {
   }, [clearTimers]);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isVisible) return;
 
     const interval = window.setInterval(() => {
+      if (!isActiveRef.current) return;
       setProgress((prev) => {
         if (prev >= MAX_AUTO_PROGRESS) return prev;
         const next = prev + Math.max((MAX_AUTO_PROGRESS - prev) * 0.12, 0.8);
@@ -117,7 +118,7 @@ function TopLineLoaderImpl() {
     }, 140);
 
     return () => window.clearInterval(interval);
-  }, [isActive]);
+  }, [isVisible]);
 
   useEffect(() => {
     const onDocumentClick = (event: MouseEvent) => {
