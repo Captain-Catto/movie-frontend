@@ -137,7 +137,12 @@ export const useSearch = (): UseSearchReturn => {
                 );
               }
             } else {
-              dispatch({ results: [...results, ...processedResults], hasMore: pagination.page < pagination.totalPages, page: pagination.page, isLoading: false });
+              dispatch((state) => ({
+                results: [...state.results, ...processedResults],
+                hasMore: pagination.page < pagination.totalPages,
+                page: pagination.page,
+                isLoading: false,
+              }));
             }
           };
 
@@ -159,11 +164,11 @@ export const useSearch = (): UseSearchReturn => {
           if (loadingTimerRef.current) {
             clearTimeout(loadingTimerRef.current);
           }
-          setIsLoading(false);
-          if (pageNum === 1) {
-            setResults([]);
-          }
-          setHasMore(false);
+          dispatch((state) => ({
+            results: pageNum === 1 ? [] : state.results,
+            hasMore: false,
+            isLoading: false,
+          }));
         }
       } catch (error) {
         if (requestId !== activeRequestIdRef.current) {
@@ -178,12 +183,12 @@ export const useSearch = (): UseSearchReturn => {
         if (loadingTimerRef.current) {
           clearTimeout(loadingTimerRef.current);
         }
-        setIsLoading(false);
-        if (pageNum === 1) {
-          setResults([]);
-        }
-        setHasMore(false);
-        setPage(1);
+        dispatch((state) => ({
+          results: pageNum === 1 ? [] : state.results,
+          hasMore: false,
+          page: 1,
+          isLoading: false,
+        }));
       }
     },
     []
@@ -235,9 +240,7 @@ export const useSearch = (): UseSearchReturn => {
   }, [hasMore, isLoading, query, selectedType, page, searchAPI]);
 
   const clearResults = useCallback(() => {
-    setResults([]);
-    setHasMore(false);
-    setPage(1);
+    dispatch({ results: [], hasMore: false, page: 1 });
   }, []);
 
   return {
