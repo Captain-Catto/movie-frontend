@@ -113,7 +113,7 @@ export function CommentSection({
         <div className="discuss-list space-y-4">
           {loading && (!comments || comments.length === 0) ? (
             <div className="text-center py-8">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+              <div className="inline-block animate-spin rounded-full size-8 border-b-2 border-red-500"></div>
               <p className="text-gray-400 mt-3">
                 {labels.loadingComments}
               </p>

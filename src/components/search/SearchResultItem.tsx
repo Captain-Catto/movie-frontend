@@ -83,14 +83,14 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           alt={result.title}
           width={48}
           height={64}
-          className="w-full h-full object-cover rounded"
+          className="size-full object-cover rounded"
         />
 
         {/* Media type badge */}
         <div
           className={`absolute -top-1 -right-1 p-1 bg-gray-900 rounded-full ${mediaInfo.color}`}
         >
-          <MediaIcon className="w-3 h-3" />
+          <MediaIcon className="size-3" />
         </div>
       </div>
 
@@ -115,7 +115,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           {/* Year */}
           {year && (
             <div className="flex items-center space-x-1 text-gray-400">
-              <Calendar className="w-3 h-3" />
+              <Calendar className="size-3" />
               <span className="text-xs">{year}</span>
             </div>
           )}
@@ -123,7 +123,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           {/* Rating */}
           {result.voteAverage && Number(result.voteAverage) > 0 && (
             <div className="flex items-center space-x-1 text-yellow-400">
-              <Star className="w-3 h-3 fill-current" />
+              <Star className="size-3 fill-current" />
               <span className="text-xs">
                 {Number(result.voteAverage).toFixed(1)}
               </span>

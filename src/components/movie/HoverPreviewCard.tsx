@@ -145,7 +145,7 @@ export function HoverPreviewCard({
             className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
             onClick={handleWatchClick}
           >
-            <Play className="w-4 h-4 fill-white" />
+            <Play className="size-4 fill-white" />
             {labels.watch}
           </Link>
 
@@ -178,7 +178,7 @@ export function HoverPreviewCard({
             className="bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded font-semibold text-xs transition-colors flex items-center gap-2 cursor-pointer"
             onClick={handleDetailsClick}
           >
-            <Info className="w-4 h-4" />
+            <Info className="size-4" />
             {labels.details}
           </Link>
         </div>

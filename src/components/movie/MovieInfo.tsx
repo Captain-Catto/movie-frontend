@@ -19,7 +19,7 @@ const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: M
           <RatingBadge rating={rating} variant="inline" showZero={true} />
           <span className="text-white">{year}</span>
           <div className="flex items-center text-gray-400">
-            <div className="w-4 h-4 border-2 border-current rounded-full relative mr-1">
+            <div className="size-4 border-2 border-current rounded-full relative mr-1">
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0.5 h-2 bg-current origin-bottom"></div>
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-0.5 bg-current"></div>
             </div>

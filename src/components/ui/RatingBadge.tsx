@@ -34,7 +34,7 @@ export default function RatingBadge({
       <div
         className={`flex items-center bg-yellow-500 text-black px-3 py-1 rounded-full ${className}`}
       >
-        <Star className="w-4 h-4 mr-1 fill-current" />
+        <Star className="size-4 mr-1 fill-current" />
         <span className="font-bold">{formattedRating}</span>
       </div>
     );
@@ -44,7 +44,7 @@ export default function RatingBadge({
   if (variant === "inline") {
     return (
       <div className={`flex items-center ${className}`}>
-        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+        <Star className="size-4 text-yellow-500 fill-yellow-500" />
         <span className="ml-1 text-white">{formattedRating}</span>
       </div>
     );
@@ -55,7 +55,7 @@ export default function RatingBadge({
     <span
       className={`bg-yellow-500 text-black px-2 py-1 rounded flex items-center space-x-1 font-bold text-xs ${className}`}
     >
-      <Star className="w-3 h-3 fill-current" />
+      <Star className="size-3 fill-current" />
       <span>{formattedRating}</span>
     </span>
   );

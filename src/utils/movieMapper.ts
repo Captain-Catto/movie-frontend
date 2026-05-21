@@ -76,14 +76,16 @@ export function mapMovieToFrontend(movie: MovieInput, language?: string): Fronte
 
   // Map genres from IDs to English names (convert strings to numbers)
   const normalizedGenreIds = genreIds
-    ? genreIds
-        .map((id: string | number) => Number(id))
-        .filter((id) => !Number.isNaN(id))
+    ? genreIds.flatMap((id: string | number) => {
+        const n = Number(id);
+        return Number.isNaN(n) ? [] : [n];
+      })
     : [];
 
-  const genres = normalizedGenreIds
-    .map((id: number) => TMDB_ENGLISH_GENRE_MAP[id])
-    .filter(Boolean);
+  const genres = normalizedGenreIds.flatMap((id: number) => {
+    const g = TMDB_ENGLISH_GENRE_MAP[id];
+    return g ? [g] : [];
+  });
 
   // Get primary genre for the genre field
   const primaryGenre = genres[0] || "Uncategorized";

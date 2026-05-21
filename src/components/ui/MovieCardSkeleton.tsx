@@ -13,7 +13,7 @@ const MovieCardSkeleton = () => {
           
           {/* Favorite Button Skeleton */}
           <div className="absolute top-2 right-2">
-            <Skeleton className="w-8 h-8 rounded-full" />
+            <Skeleton className="size-8 rounded-full" />
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@ const MovieCardSkeleton = () => {
       {/* Movie Info Skeleton */}
       <div className="info mt-3 space-y-2">
         <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-3 w-3/4" />
+        <Skeleton className="size-3/4" />
       </div>
     </div>
   );

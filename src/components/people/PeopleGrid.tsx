@@ -47,7 +47,7 @@ const PeopleGrid = ({
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <svg
-              className="mx-auto w-16 h-16 mb-4"
+              className="mx-auto size-16 mb-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

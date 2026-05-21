@@ -51,7 +51,7 @@ export function CommentForm(props: CommentFormProps) {
             alt={user?.name || labels.defaultUser}
             width={40}
             height={40}
-            className="w-10 h-10 rounded-full object-cover"
+            className="size-10 rounded-full object-cover"
             onError={handleAvatarError}
           />
         </div>
@@ -88,7 +88,7 @@ export function CommentForm(props: CommentFormProps) {
             <div className="mention-dropdown absolute left-0 right-0 bg-gray-800 border border-gray-600 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto z-50">
               {loadingMentions ? (
                 <div className="p-3 text-center text-gray-400 text-sm">
-                  <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" />
+                  <Loader2 className="size-4 animate-spin inline-block mr-2" />
                   {labels.searching}
                 </div>
               ) : mentionUsers.length > 0 ? (
@@ -105,7 +105,7 @@ export function CommentForm(props: CommentFormProps) {
                           alt={mentionUser.name}
                           width={24}
                           height={24}
-                          className="w-6 h-6 rounded-full object-cover"
+                          className="size-6 rounded-full object-cover"
                           onError={handleAvatarError}
                         />
                         <span className="text-white text-sm">{mentionUser.name}</span>
@@ -149,7 +149,7 @@ export function CommentForm(props: CommentFormProps) {
             }
           >
             {isSubmitting || checking ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
                 <span>
@@ -164,7 +164,7 @@ export function CommentForm(props: CommentFormProps) {
                     viewBox="0 0 24 24"
                     width="512"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
+                    className="size-4"
                   >
                     <path
                       d="m22.1012 10.5616-19.34831-9.43824c-.1664-.08117-.34912-.12336-.53427-.12336-.67302 0-1.21862.5456-1.21862 1.21862v.03517c0 .16352.02005.32643.05971.48507l1.85597 7.42384c.05069.2028.22214.3526.42986.3757l8.15756.9064c.2829.0314.4969.2705.4969.5552s-.214.5238-.4969.5552l-8.15756.9064c-.20772.0231-.37917.1729-.42986.3757l-1.85597 7.4238c-.03966.1587-.05971.3216-.05971.4851v.0352c0 .673.5456 1.2186 1.21862 1.2186.18515 0 .36787-.0422.53427-.1234l19.34831-9.4382c.5499-.2682.8988-.8265.8988-1.4384s-.3489-1.1702-.8988-1.4384z"

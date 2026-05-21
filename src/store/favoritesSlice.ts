@@ -22,13 +22,10 @@ export const fetchFavorites = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const ids = await favoritesService.getUserFavoriteIds();
-      const favoriteKeys = ids
-        .map((item) => ({
-          id: item.contentId,
-          type: item.contentType,
-        }))
-        .filter(({ id, type }) => !!id && !!type)
-        .map(({ id, type }) => makeFavoriteKey(id, type));
+      const favoriteKeys = ids.flatMap((item) => {
+        const { contentId: id, contentType: type } = item;
+        return id && type ? [makeFavoriteKey(id, type)] : [];
+      });
       return favoriteKeys;
     } catch (error) {
       return rejectWithValue(

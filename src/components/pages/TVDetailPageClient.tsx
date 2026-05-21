@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense, lazy } from "react";
+import { useState, useMemo, Suspense, lazy } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
@@ -50,6 +50,13 @@ const TVDetailPageClient = ({
   const [showFullDescription, setShowFullDescription] = useState(false);
   const labels = getTVDetailUiMessages(language);
 
+  const regionFormatter = useMemo(() => {
+    try { return new Intl.DisplayNames([locale], { type: "region" }); } catch { return null; }
+  }, [locale]);
+  const languageFormatter = useMemo(() => {
+    try { return new Intl.DisplayNames([locale], { type: "language" }); } catch { return null; }
+  }, [locale]);
+
   // Helper functions
   const isLocalFallback = (path: string | null) =>
     !path || path === FALLBACK_POSTER || path.startsWith("/images/");
@@ -86,12 +93,7 @@ const TVDetailPageClient = ({
     if (!trimmed) return labels.unknown;
 
     if (/^[A-Za-z]{2}$/.test(trimmed)) {
-      try {
-        const regionNames = new Intl.DisplayNames([locale], { type: "region" });
-        return regionNames.of(trimmed.toUpperCase()) || trimmed.toUpperCase();
-      } catch {
-        return trimmed.toUpperCase();
-      }
+      return regionFormatter?.of(trimmed.toUpperCase()) || trimmed.toUpperCase();
     }
 
     return trimmed;
@@ -100,15 +102,10 @@ const TVDetailPageClient = ({
   const getLocalizedLanguageName = (languageCode: string | undefined) => {
     if (!languageCode) return labels.notAvailable;
 
-    try {
-      const languageNames = new Intl.DisplayNames([locale], { type: "language" });
-      const localized = languageNames.of(languageCode.toLowerCase());
-      return localized
-        ? localized.charAt(0).toUpperCase() + localized.slice(1)
-        : languageCode.toUpperCase();
-    } catch {
-      return languageCode.toUpperCase();
-    }
+    const localized = languageFormatter?.of(languageCode.toLowerCase());
+    return localized
+      ? localized.charAt(0).toUpperCase() + localized.slice(1)
+      : languageCode.toUpperCase();
   };
 
   const getLocalizedStatus = (status: string | undefined) => {
@@ -151,6 +148,7 @@ const TVDetailPageClient = ({
               src={getBackdropUrl(tvData.backdropPath)}
               alt={tvData.title}
               fill
+              sizes="100vw"
               className="object-cover"
               priority
               placeholder="blur"

@@ -19,26 +19,26 @@ interface NotificationsHeaderProps {
 
 // SVG Icon Components
 const MailIcon = () => (
-  <svg className="w-6 h-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+  <svg className="size-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
     <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
     <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
   </svg>
 );
 
 const UsersIcon = () => (
-  <svg className="w-6 h-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+  <svg className="size-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
   </svg>
 );
 
 const UserIcon = () => (
-  <svg className="w-6 h-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+  <svg className="size-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
     <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
   </svg>
 );
 
 const WarningIcon = () => (
-  <svg className="w-6 h-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+  <svg className="size-6 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
     <path
       fillRule="evenodd"
       d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"

@@ -34,8 +34,7 @@ const splitParam = (value: string | string[] | undefined): string[] => {
 
   return raw
     .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
+    .flatMap((item) => { const t = item.trim(); return t ? [t] : []; });
 };
 
 const normalizeFetchType = (value: string): BrowseFetchType => {

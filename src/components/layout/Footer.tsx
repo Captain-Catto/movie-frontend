@@ -15,8 +15,8 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center mr-2">
-                <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+              <div className="size-8 bg-red-500 rounded flex items-center justify-center mr-2">
+                <div className="size-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
               </div>
               <span className="ml-2 text-xl font-bold text-white">
                 MovieStream
@@ -28,7 +28,7 @@ const Footer = () => {
             <div className="flex space-x-4">
               <Link
                 href="https://facebook.com"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex size-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Facebook"
                 title="Facebook"
                 target="_blank"
@@ -45,14 +45,14 @@ const Footer = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5"
+                  className="size-5"
                 >
                   <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                 </svg>
               </Link>
               <Link
                 href="https://x.com"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex size-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Twitter"
                 title="Twitter"
                 target="_blank"
@@ -69,14 +69,14 @@ const Footer = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5"
+                  className="size-5"
                 >
                   <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
                 </svg>
               </Link>
               <Link
                 href="https://instagram.com"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex size-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="Instagram"
                 title="Instagram"
                 target="_blank"
@@ -93,7 +93,7 @@ const Footer = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5"
+                  className="size-5"
                 >
                   <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
                   <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
@@ -102,7 +102,7 @@ const Footer = () => {
               </Link>
               <Link
                 href="https://youtube.com"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
+                className="inline-flex size-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
                 aria-label="YouTube"
                 title="YouTube"
                 target="_blank"
@@ -119,7 +119,7 @@ const Footer = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5"
+                  className="size-5"
                 >
                   <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path>
                   <path d="m10 15 5-3-5-3z"></path>
@@ -243,7 +243,7 @@ const Footer = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5 mr-2"
+                  className="size-5 mr-2"
                 >
                   <rect width="20" height="16" x="2" y="4" rx="2"></rect>
                   <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
@@ -261,7 +261,7 @@ const Footer = () => {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5 mr-2"
+                  className="size-5 mr-2"
                 >
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                 </svg>

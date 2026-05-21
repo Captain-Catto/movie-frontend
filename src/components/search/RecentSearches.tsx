@@ -30,7 +30,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
   if (searches.length === 0) {
     return (
       <div className="p-6 text-center">
-        <Clock className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+        <Clock className="size-12 text-gray-600 mx-auto mb-3" />
         <h3 className="text-gray-400 font-medium mb-1">
           {labels.noRecentSearches}
         </h3>
@@ -68,7 +68,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-white font-medium flex items-center space-x-2">
-            <Clock className="w-4 h-4" />
+            <Clock className="size-4" />
             <span>{labels.recentSearchesTitle}</span>
           </h3>
 
@@ -77,7 +77,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
               onClick={onClearAll}
               className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center space-x-1 cursor-pointer"
             >
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="size-3" />
               <span>{labels.clearAll}</span>
             </button>
           )}
@@ -136,7 +136,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                 }}
                 className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="size-4" />
               </button>
             </button>
           ))}

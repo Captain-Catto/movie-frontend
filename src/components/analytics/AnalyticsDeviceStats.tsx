@@ -46,7 +46,7 @@ export default function AnalyticsDeviceStats({
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-4 h-4 rounded"
+                    className="size-4 rounded"
                     style={{
                       backgroundColor: DEVICE_COLORS[index % DEVICE_COLORS.length],
                     }}

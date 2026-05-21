@@ -248,9 +248,9 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                 <div className="background-fade absolute inset-0" />
                 {/* Cover Fade */}
                 <div className="cover-fade absolute inset-0">
-                  <div className="cover-image relative w-full h-full">
+                  <div className="cover-image relative size-full">
                     <Image
-                      className="fade-in visible w-full h-full object-cover"
+                      className="fade-in visible size-full object-cover"
                       title={movie.title}
                       src={heroBackgroundImage}
                       alt={movie.title}
@@ -304,7 +304,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                         <div className="tag-rating">
                           <span className="bg-yellow-500 text-black px-3 py-1 rounded text-sm font-bold flex items-center gap-1">
                             <svg
-                              className="w-4 h-4"
+                              className="size-4"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -359,9 +359,9 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                             : `Watch ${movie.title}`
                         }
                       >
-                        <div className="text-white rounded-full w-12 h-12 flex items-center justify-center transition-colors cursor-pointer">
+                        <div className="text-white rounded-full size-12 flex items-center justify-center transition-colors cursor-pointer">
                           <svg
-                            className="w-5 h-5"
+                            className="size-5"
                             fill="currentColor"
                             viewBox="0 0 20 20"
                           >
@@ -400,7 +400,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                               : `View information about ${movie.title}`
                           }
                         >
-                          <Info className="w-6 h-6 text-gray-400" />
+                          <Info className="size-6 text-gray-400" />
                         </Link>
                       </div>
                     </div>

@@ -49,7 +49,7 @@ export default function LinkPagination({
       Object.entries(queryParams).forEach(([key, value]) => {
         if (value === undefined || value === "") return;
         if (Array.isArray(value)) {
-          value.filter(Boolean).forEach((item) => params.append(key, item));
+          for (const item of value) { if (item) params.append(key, item); }
         } else {
           params.set(key, value);
         }

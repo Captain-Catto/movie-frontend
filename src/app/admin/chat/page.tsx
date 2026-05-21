@@ -103,7 +103,7 @@ export default function AdminChatPage() {
           </div>
           <div className="max-h-[720px] overflow-y-auto p-3">
             {loading ? (
-              <div className="p-4 text-sm text-gray-400">Loading...</div>
+              <div className="p-4 text-sm text-gray-400">Loading…</div>
             ) : flags.length === 0 ? (
               <div className="p-4 text-sm text-gray-400">No open flags.</div>
             ) : (
@@ -177,24 +177,26 @@ export default function AdminChatPage() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-2">
-                {selectedSession.flags
-                  .filter((flag) => flag.status === "open")
-                  .map((flag) => (
-                    <div key={flag.id} className="flex gap-2">
-                      <button
-                        onClick={() => resolveFlag(flag.id, "resolved")}
-                        className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
-                      >
-                        Resolve flag #{flag.id}
-                      </button>
-                      <button
-                        onClick={() => resolveFlag(flag.id, "ignored")}
-                        className="rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700"
-                      >
-                        Ignore
-                      </button>
-                    </div>
-                  ))}
+                {selectedSession.flags.flatMap((flag) =>
+                  flag.status === "open"
+                    ? [
+                        <div key={flag.id} className="flex gap-2">
+                          <button
+                            onClick={() => resolveFlag(flag.id, "resolved")}
+                            className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                          >
+                            Resolve flag #{flag.id}
+                          </button>
+                          <button
+                            onClick={() => resolveFlag(flag.id, "ignored")}
+                            className="rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700"
+                          >
+                            Ignore
+                          </button>
+                        </div>,
+                      ]
+                    : []
+                )}
               </div>
             </div>
           )}

@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export default function ForceLogoutPage() {
-  const router = useRouter();
-
   useEffect(() => {
     // Clear all auth data
     localStorage.removeItem("token");
@@ -20,10 +17,10 @@ export default function ForceLogoutPage() {
 
     // Redirect to home after 1 second
     const timer = setTimeout(() => {
-      router.push("/");
+      window.location.replace("/");
     }, 1000);
     return () => clearTimeout(timer);
-  }, [router]);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -35,10 +32,10 @@ export default function ForceLogoutPage() {
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 flex items-center gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600" />
+        <div className="animate-spin rounded-full size-12 border-b-2 border-red-600" />
         <div>
           <h2 className="text-xl font-semibold text-white mb-1">
-            Logging out...
+            Logging out…
           </h2>
           <p className="text-gray-400 text-sm">
             Please wait, we are clearing your login session.

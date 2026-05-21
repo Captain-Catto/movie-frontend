@@ -84,7 +84,7 @@ export function ContentHoverPreview({
               <div className="flex items-center gap-2">
                 {voteAverage != null && voteAverage > 0 && (
                   <span className="flex items-center gap-0.5 text-yellow-400 text-xs font-semibold">
-                    <Star className="w-3 h-3" />
+                    <Star className="size-3" />
                     {voteAverage.toFixed(1)}
                   </span>
                 )}

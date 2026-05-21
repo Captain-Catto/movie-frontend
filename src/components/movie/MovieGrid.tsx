@@ -50,7 +50,7 @@ const MovieGrid = ({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5"
+                  className="size-5"
                 >
                   <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
                   <polyline points="16 7 22 7 22 13"></polyline>
@@ -68,7 +68,7 @@ const MovieGrid = ({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5"
+                  className="size-5"
                 >
                   <circle cx="12" cy="12" r="10"></circle>
                   <polyline points="12 6 12 12 16 14"></polyline>

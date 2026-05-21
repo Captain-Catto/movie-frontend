@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import type { SyntheticEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -45,6 +45,13 @@ const MovieDetailPageClient = ({
 }: MovieDetailPageClientProps) => {
   const { language } = useLanguage();
   const locale = getLocaleFromLanguage(language);
+
+  const regionFormatter = useMemo(() => {
+    try { return new Intl.DisplayNames([locale], { type: "region" }); } catch { return null; }
+  }, [locale]);
+  const languageFormatter = useMemo(() => {
+    try { return new Intl.DisplayNames([locale], { type: "language" }); } catch { return null; }
+  }, [locale]);
   const {
     movieData,
     loading,
@@ -66,12 +73,7 @@ const MovieDetailPageClient = ({
     if (!trimmed) return labels.unknown;
 
     if (/^[A-Za-z]{2}$/.test(trimmed)) {
-      try {
-        const regionNames = new Intl.DisplayNames([locale], { type: "region" });
-        return regionNames.of(trimmed.toUpperCase()) || trimmed.toUpperCase();
-      } catch {
-        return trimmed.toUpperCase();
-      }
+      return regionFormatter?.of(trimmed.toUpperCase()) || trimmed.toUpperCase();
     }
 
     return trimmed;
@@ -84,15 +86,10 @@ const MovieDetailPageClient = ({
     if (!raw) return labels.notAvailable;
 
     if (/^[A-Za-z]{2,3}$/.test(raw)) {
-      try {
-        const languageNames = new Intl.DisplayNames([locale], { type: "language" });
-        const localized = languageNames.of(raw.toLowerCase());
-        return localized
-          ? localized.charAt(0).toUpperCase() + localized.slice(1)
-          : raw.toUpperCase();
-      } catch {
-        return raw.toUpperCase();
-      }
+      const localized = languageFormatter?.of(raw.toLowerCase());
+      return localized
+        ? localized.charAt(0).toUpperCase() + localized.slice(1)
+        : raw.toUpperCase();
     }
 
     if (raw.toLowerCase() === "vietsub") {
@@ -226,7 +223,7 @@ const MovieDetailPageClient = ({
                         <>
                           <div className="flex items-center">
                             <svg
-                              className="w-5 h-5 text-yellow-500 mr-1"
+                              className="size-5 text-yellow-500 mr-1"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -292,7 +289,7 @@ const MovieDetailPageClient = ({
                     className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="size-5"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >

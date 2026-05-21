@@ -220,11 +220,12 @@ export function useWatchPage({
 
       if (streamResponse.success && streamResponse.data?.url) {
         const candidates = [
-          streamResponse.data.url,
-          ...(streamResponse.data.fallbackUrls || []),
-        ]
-          .filter((url) => !!url)
-          .filter((url, index, all) => all.indexOf(url) === index);
+          ...new Set(
+            [streamResponse.data.url, ...(streamResponse.data.fallbackUrls || [])].filter(
+              (url): url is string => !!url
+            )
+          ),
+        ];
 
         setStreamCandidates(candidates);
         setStreamError(null);

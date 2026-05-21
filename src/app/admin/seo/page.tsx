@@ -58,8 +58,7 @@ const mapSeoRecord = (item: unknown): SeoMetadata => {
     ? rawKeywords
         .replace(/[{}]/g, "")
         .split(/[;,]/)
-        .map((k) => k.trim())
-        .filter(Boolean)
+        .flatMap((k) => { const t = k.trim(); return t ? [t] : []; })
     : [];
 
   return {
@@ -227,8 +226,7 @@ export default function AdminSeoPage() {
 
       const normalizedKeywords = formData.keywords
         .split(",")
-        .map((k) => k.trim())
-        .filter(Boolean)
+        .flatMap((k) => { const t = k.trim(); return t ? [t] : []; })
         .join(", ");
 
       const payload = {
@@ -585,7 +583,7 @@ export default function AdminSeoPage() {
         />
         {lastCheckedAt && lastCheckSummary && (
           <p className="text-sm text-gray-500">
-            Last checker run: {lastCheckedAt} — {lastCheckSummary}
+            Last checker run: {lastCheckedAt}, {lastCheckSummary}
           </p>
         )}
       </div>
@@ -752,7 +750,7 @@ export default function AdminSeoPage() {
               type="checkbox"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="h-4 w-4 accent-red-500"
+              className="size-4 accent-red-500"
             />
             <label htmlFor="auto-refresh" className="text-sm text-gray-300">
               Auto refresh (30s)
@@ -823,7 +821,7 @@ export default function AdminSeoPage() {
             disabled={resolveLoading}
             className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
           >
-            {resolveLoading ? "Resolving..." : "Resolve"}
+            {resolveLoading ? "Resolving…" : "Resolve"}
           </button>
         </div>
         {resolveResult && (
@@ -875,7 +873,7 @@ export default function AdminSeoPage() {
               {loading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-4 text-center">
-                    Loading...
+                    Loading…
                   </td>
                 </tr>
               ) : filteredSeoData.length === 0 ? (
@@ -941,11 +939,11 @@ export default function AdminSeoPage() {
                         >
                           {seo.isActive ? (
                             <>
-                              <EyeOff className="w-4 h-4" />
+                              <EyeOff className="size-4" />
                             </>
                           ) : (
                             <>
-                              <Eye className="w-4 h-4" />
+                              <Eye className="size-4" />
                             </>
                           )}
                         </button>

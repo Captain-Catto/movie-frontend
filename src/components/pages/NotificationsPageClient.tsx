@@ -354,7 +354,7 @@ export default function NotificationsPage() {
                                           event.stopPropagation();
                                           handleDeleteNotification(notif);
                                         }}
-                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer"
+                                        className="inline-flex size-8 items-center justify-center rounded-md text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer"
                                         title={labels.deleteNotification}
                                         aria-label={labels.deleteNotification}
                                       >
@@ -372,7 +372,7 @@ export default function NotificationsPage() {
                             {/* Unread indicator */}
                             {!notif.isRead && (
                               <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 bg-blue-500/10 border border-blue-500/30 rounded-md">
-                                <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                                <span className="size-2 bg-blue-400 rounded-full animate-pulse"></span>
                                 <span className="text-xs text-blue-300 font-medium">
                                   {labels.new}
                                 </span>

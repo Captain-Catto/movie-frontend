@@ -545,7 +545,7 @@ export default function AdminContentPage() {
                       colSpan={7}
                       className="px-6 py-8 text-center text-gray-400"
                     >
-                      Loading...
+                      Loading…
                     </td>
                   </tr>
                 ) : contents.length === 0 ? (
@@ -632,7 +632,7 @@ export default function AdminContentPage() {
                             className="cursor-pointer px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded transition-colors"
                             title="View details"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Eye className="size-4" />
                           </button>
                           {content.isBlocked ? (
                             <button

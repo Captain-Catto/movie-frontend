@@ -26,18 +26,16 @@ const createCrewGroupKey = (crew: CrewMember): string => {
 const mergeCrewJobs = (existingJob?: string, nextJob?: string): string | undefined => {
   const jobSet = new Set<string>();
   if (existingJob) {
-    existingJob
-      .split(",")
-      .map((job) => job.trim())
-      .filter(Boolean)
-      .forEach((job) => jobSet.add(job));
+    for (const raw of existingJob.split(",")) {
+      const job = raw.trim();
+      if (job) jobSet.add(job);
+    }
   }
   if (nextJob) {
-    nextJob
-      .split(",")
-      .map((job) => job.trim())
-      .filter(Boolean)
-      .forEach((job) => jobSet.add(job));
+    for (const raw of nextJob.split(",")) {
+      const job = raw.trim();
+      if (job) jobSet.add(job);
+    }
   }
   const combined = Array.from(jobSet);
   return combined.length > 0 ? combined.join(", ") : undefined;

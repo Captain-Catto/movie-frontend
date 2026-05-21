@@ -44,7 +44,7 @@ export default function NotificationModal({
             className="text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
             <svg
-              className="w-6 h-6"
+              className="size-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -118,7 +118,7 @@ export default function NotificationModal({
             <div className="p-2.5 bg-orange-900 bg-opacity-50 border border-orange-700 rounded-lg">
               <div className="flex items-center gap-2">
                 <svg
-                  className="w-4 h-4 text-orange-400 flex-shrink-0"
+                  className="size-4 text-orange-400 flex-shrink-0"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >

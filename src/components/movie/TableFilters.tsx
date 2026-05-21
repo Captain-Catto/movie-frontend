@@ -238,7 +238,7 @@ const TableFilters = ({
           <div className="flex items-center space-x-2">
             {/* Filter Icon */}
             <svg
-              className="w-4 h-4 text-gray-300"
+              className="size-4 text-gray-300"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -369,7 +369,7 @@ const TableFilters = ({
                 />
                 <div className="search-icon absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400">
                   <svg
-                    className="w-4 h-4"
+                    className="size-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -446,7 +446,7 @@ const TableFilters = ({
             >
               <span>{labels.applyFilters}</span>
               <svg
-                className="w-4 h-4"
+                className="size-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

@@ -32,7 +32,7 @@ export function NotificationBell({
 
       {/* Unread count badge */}
       {unreadCount > 0 && (
-        <div className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600 text-white rounded-full font-semibold">
+        <div className="absolute -top-2 -right-2 size-5 flex items-center justify-center p-0 text-xs bg-red-600 text-white rounded-full font-semibold">
           {unreadCount > 99 ? "99+" : unreadCount}
         </div>
       )}
@@ -40,7 +40,7 @@ export function NotificationBell({
       {/* Connection status indicator */}
       <div
         className={cn(
-          "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-gray-800",
+          "absolute -bottom-1 -right-1 size-3 rounded-full border-2 border-gray-800",
           isConnected ? "bg-green-500" : "bg-red-500"
         )}
         title={isConnected ? labels.connected : labels.disconnected}

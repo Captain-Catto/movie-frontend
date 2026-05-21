@@ -246,7 +246,7 @@ export function Pagination({
                         setDesktopInputMode(true);
                         setDesktopInputValue("");
                       }}
-                      className="relative inline-flex items-center px-2 py-2 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
+                      className="relative inline-flex items-center p-2 text-sm font-medium text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
                       title={labels.jumpToPageTitle}
                     >
                       ...

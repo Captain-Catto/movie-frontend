@@ -247,15 +247,15 @@ const ROLE_OPTIONS = [
 
 function getActivityIcon(type: string) {
   const t = type.toUpperCase();
-  if (t === "VIEW" || t === "VIEW_CONTENT") return <Eye className="w-4 h-4" />;
+  if (t === "VIEW" || t === "VIEW_CONTENT") return <Eye className="size-4" />;
   if (t === "CLICK" || t === "CLICK_CONTENT")
-    return <MousePointerClick className="w-4 h-4" />;
-  if (t === "PLAY") return <Play className="w-4 h-4" />;
-  if (t === "SEARCH") return <Search className="w-4 h-4" />;
-  if (t.includes("FAVORITE")) return <Heart className="w-4 h-4" />;
-  if (t.includes("COMMENT")) return <MessageSquare className="w-4 h-4" />;
-  if (t === "LOGIN") return <LogIn className="w-4 h-4" />;
-  return <Eye className="w-4 h-4" />;
+    return <MousePointerClick className="size-4" />;
+  if (t === "PLAY") return <Play className="size-4" />;
+  if (t === "SEARCH") return <Search className="size-4" />;
+  if (t.includes("FAVORITE")) return <Heart className="size-4" />;
+  if (t.includes("COMMENT")) return <MessageSquare className="size-4" />;
+  if (t === "LOGIN") return <LogIn className="size-4" />;
+  return <Eye className="size-4" />;
 }
 
 function getActivityColor(type: string) {
@@ -271,9 +271,9 @@ function getActivityColor(type: string) {
 }
 
 function getDeviceIcon(device?: string) {
-  if (device === "mobile") return <Smartphone className="w-3 h-3" />;
-  if (device === "tablet") return <Tablet className="w-3 h-3" />;
-  return <Monitor className="w-3 h-3" />;
+  if (device === "mobile") return <Smartphone className="size-3" />;
+  if (device === "tablet") return <Tablet className="size-3" />;
+  return <Monitor className="size-3" />;
 }
 
 function formatDuration(seconds: number): string {
@@ -810,7 +810,7 @@ export default function AdminUserDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="size-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -839,7 +839,7 @@ export default function AdminUserDetailPage() {
         onClick={() => router.push("/admin/users")}
         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="size-4" />
         <span>Quay lại danh sách</span>
       </button>
 
@@ -847,7 +847,7 @@ export default function AdminUserDetailPage() {
       <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
         <div className="flex items-start gap-4">
           {/* Avatar */}
-          <div className="relative w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className="relative size-16 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
             {user.image ? (
               <Image
                 src={user.image}
@@ -857,7 +857,7 @@ export default function AdminUserDetailPage() {
                 className="object-cover"
               />
             ) : (
-              <UserIcon className="w-8 h-8 text-gray-400" />
+              <UserIcon className="size-8 text-gray-400" />
             )}
           </div>
 
@@ -916,7 +916,7 @@ export default function AdminUserDetailPage() {
         <div className="flex items-center justify-between gap-4 mb-5">
           <div>
             <div className="flex items-center gap-2 text-white">
-              <ShieldCheck className="w-5 h-5 text-blue-400" />
+              <ShieldCheck className="size-5 text-blue-400" />
               <h2 className="text-lg font-semibold">Thông tin & quyền user</h2>
             </div>
             <p className="text-sm text-gray-400 mt-1">
@@ -932,9 +932,9 @@ export default function AdminUserDetailPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-sm font-medium text-white transition-colors cursor-pointer"
           >
             {savingProfile ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="size-4 animate-spin" />
             ) : (
-              <Save className="w-4 h-4" />
+              <Save className="size-4" />
             )}
             Lưu
           </button>
@@ -1022,37 +1022,37 @@ export default function AdminUserDetailPage() {
       {displayStats && (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           <StatCard
-            icon={<Eye className="w-5 h-5 text-blue-400" />}
+            icon={<Eye className="size-5 text-blue-400" />}
             label="Lượt xem"
             value={displayStats.views}
             onClick={() => handleOpenDetailModal("views")}
           />
           <StatCard
-            icon={<Search className="w-5 h-5 text-yellow-400" />}
+            icon={<Search className="size-5 text-yellow-400" />}
             label="Tìm kiếm"
             value={displayStats.searches}
             onClick={() => handleOpenDetailModal("searches")}
           />
           <StatCard
-            icon={<Heart className="w-5 h-5 text-pink-400" />}
+            icon={<Heart className="size-5 text-pink-400" />}
             label="Yêu thích"
             value={displayStats.favorites}
             onClick={() => handleOpenDetailModal("favorites")}
           />
           <StatCard
-            icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
+            icon={<MessageSquare className="size-5 text-purple-400" />}
             label="Bình luận"
             value={displayStats.comments}
             onClick={() => handleOpenDetailModal("comments")}
           />
           <StatCard
-            icon={<Clock className="w-5 h-5 text-green-400" />}
+            icon={<Clock className="size-5 text-green-400" />}
             label="Thời gian xem"
             value={formatWatchTime(displayWatchTimeSeconds)}
             onClick={handleOpenWatchTime}
           />
           <StatCard
-            icon={<LogIn className="w-5 h-5 text-emerald-400" />}
+            icon={<LogIn className="size-5 text-emerald-400" />}
             label="Đăng nhập"
             value={displayStats.logins}
             onClick={() => handleOpenDetailModal("logins")}
@@ -1077,9 +1077,9 @@ export default function AdminUserDetailPage() {
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-gray-300 transition-colors cursor-pointer"
             >
-              <Filter className="w-4 h-4" />
+              <Filter className="size-4" />
               {selectedFilter?.label}
-              <ChevronDown className="w-3 h-3" />
+              <ChevronDown className="size-3" />
             </button>
             {showFilterMenu && (
               <div className="absolute right-0 top-full mt-1 bg-gray-700 rounded-lg border border-gray-600 shadow-xl z-10 min-w-[150px]">
@@ -1116,7 +1116,7 @@ export default function AdminUserDetailPage() {
             >
               {/* Icon */}
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${getActivityColor(
+                className={`size-8 rounded-full flex items-center justify-center flex-shrink-0 ${getActivityColor(
                   item.type
                 )}`}
               >
@@ -1178,8 +1178,8 @@ export default function AdminUserDetailPage() {
             >
               {timelineLoading ? (
                 <span className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Đang tải...
+                  <Loader2 className="size-4 animate-spin" />
+                  Đang tải…
                 </span>
               ) : (
                 "Tải thêm"
@@ -1190,7 +1190,7 @@ export default function AdminUserDetailPage() {
 
         {timelineLoading && timeline.length === 0 && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+            <Loader2 className="size-6 animate-spin text-blue-500" />
           </div>
         )}
       </div>
@@ -1237,9 +1237,9 @@ export default function AdminUserDetailPage() {
                     saving: false,
                   })
                 }
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
+                className="size-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="size-5" />
               </button>
             </div>
 
@@ -1303,7 +1303,7 @@ export default function AdminUserDetailPage() {
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer inline-flex items-center gap-2"
               >
                 {hideCommentModal.saving && (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="size-4 animate-spin" />
                 )}
                 Ẩn bình luận
               </button>
@@ -1330,16 +1330,16 @@ export default function AdminUserDetailPage() {
               </div>
               <button
                 onClick={() => setWatchTimeOpen(false)}
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
+                className="size-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="size-5" />
               </button>
             </div>
 
             <div className="max-h-[65vh] overflow-y-auto divide-y divide-gray-800">
               {watchTimeLoading && watchTimeItems.length === 0 ? (
                 <div className="flex items-center justify-center py-16">
-                  <Loader2 className="w-7 h-7 animate-spin text-blue-500" />
+                  <Loader2 className="size-7 animate-spin text-blue-500" />
                 </div>
               ) : watchTimeItems.length === 0 ? (
                 <div className="text-center py-16 text-gray-500">
@@ -1361,8 +1361,8 @@ export default function AdminUserDetailPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Play className="w-5 h-5 text-gray-500" />
+                        <div className="size-full flex items-center justify-center">
+                          <Play className="size-5 text-gray-500" />
                         </div>
                       )}
                     </div>
@@ -1512,16 +1512,16 @@ function DetailModal({
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
+            className="size-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="size-5" />
           </button>
         </div>
 
         <div className="max-h-[65vh] overflow-y-auto divide-y divide-gray-800">
           {loading && items.length === 0 ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="w-7 h-7 animate-spin text-blue-500" />
+              <Loader2 className="size-7 animate-spin text-blue-500" />
             </div>
           ) : items.length === 0 ? (
             <div className="text-center py-16 text-gray-500">
@@ -1586,7 +1586,7 @@ function DetailModalItem({
         href={item.href}
         contentType={item.contentType === "tv_series" ? "tv" : "movie"}
         meta={`Mở trang lúc ${new Date(item.createdAt).toLocaleString("vi-VN")}`}
-        icon={<Eye className="w-5 h-5 text-blue-400" />}
+        icon={<Eye className="size-5 text-blue-400" />}
       >
         <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 flex-wrap">
           <span>ID: {item.contentId}</span>
@@ -1609,8 +1609,8 @@ function DetailModalItem({
   if (type === "searches" && "query" in item) {
     return (
       <div className="flex items-start gap-3 p-4 hover:bg-gray-800/60 transition-colors">
-        <div className="w-10 h-10 rounded-lg bg-yellow-500/15 text-yellow-400 inline-flex items-center justify-center flex-shrink-0">
-          <Search className="w-5 h-5" />
+        <div className="size-10 rounded-lg bg-yellow-500/15 text-yellow-400 inline-flex items-center justify-center flex-shrink-0">
+          <Search className="size-5" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1635,8 +1635,8 @@ function DetailModalItem({
   if (type === "logins" && "source" in item) {
     return (
       <div className="flex items-start gap-3 p-4 hover:bg-gray-800/60 transition-colors">
-        <div className="w-10 h-10 rounded-lg bg-emerald-500/15 text-emerald-400 inline-flex items-center justify-center flex-shrink-0">
-          <LogIn className="w-5 h-5" />
+        <div className="size-10 rounded-lg bg-emerald-500/15 text-emerald-400 inline-flex items-center justify-center flex-shrink-0">
+          <LogIn className="size-5" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1682,7 +1682,7 @@ function DetailModalItem({
         meta={`Đã thêm yêu thích lúc ${new Date(item.createdAt).toLocaleString(
           "vi-VN"
         )}`}
-        icon={<Heart className="w-5 h-5 text-pink-400" />}
+        icon={<Heart className="size-5 text-pink-400" />}
       />
     );
   }
@@ -1703,13 +1703,13 @@ function DetailModalItem({
         meta={`${item.commentCount} bình luận - gần nhất ${new Date(
           item.latestCommentAt
         ).toLocaleString("vi-VN")}`}
-        icon={<MessageSquare className="w-5 h-5 text-purple-400" />}
+        icon={<MessageSquare className="size-5 text-purple-400" />}
       >
         <div className="mt-3 space-y-3">
           {isExpanded && pageState?.loading && (
             <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Đang tải bình luận...
+              <Loader2 className="size-4 animate-spin" />
+              Đang tải bình luận…
             </div>
           )}
           {visibleComments.map((comment) => (
@@ -1829,7 +1829,7 @@ function ContentDetailRow({
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
+          <div className="size-full flex items-center justify-center">
             {icon}
           </div>
         )}

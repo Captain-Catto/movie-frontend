@@ -164,7 +164,7 @@ export function ContentDetailModal({
                 <div className="flex flex-wrap gap-2">
                   {voteAverage > 0 && (
                     <span className="flex items-center gap-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-xs font-semibold">
-                      <Star className="w-3 h-3" />
+                      <Star className="size-3" />
                       {voteAverage.toFixed(1)}
                     </span>
                   )}
@@ -175,7 +175,7 @@ export function ContentDetailModal({
                   )}
                   {runtime > 0 && (
                     <span className="flex items-center gap-1 bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">
-                      <Clock className="w-3 h-3" />
+                      <Clock className="size-3" />
                       {runtime} min
                     </span>
                   )}
@@ -208,7 +208,7 @@ export function ContentDetailModal({
                 {/* Country */}
                 {originCountry && originCountry.length > 0 && (
                   <div className="flex items-center gap-1 text-xs text-gray-400">
-                    <Globe className="w-3 h-3" />
+                    <Globe className="size-3" />
                     {originCountry.join(", ")}
                   </div>
                 )}
@@ -225,7 +225,7 @@ export function ContentDetailModal({
 
                 {/* TMDB ID */}
                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Film className="w-3 h-3" />
+                  <Film className="size-3" />
                   TMDB ID: {tmdbId}
                 </div>
               </div>
@@ -262,7 +262,7 @@ export function ContentDetailModal({
                             alt={member.name}
                             width={24}
                             height={24}
-                            className="rounded-full object-cover w-6 h-6"
+                            className="rounded-full object-cover size-6"
                           />
                         )}
                         <div className="text-xs">
@@ -289,7 +289,7 @@ export function ContentDetailModal({
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="size-4" />
                 View on Site
               </a>
               <button

@@ -199,7 +199,7 @@ export default function AdminSyncDataPage() {
             color="bg-blue-600"
             icon={
               <svg
-                className="w-7 h-7"
+                className="size-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -219,7 +219,7 @@ export default function AdminSyncDataPage() {
             color="bg-purple-600"
             icon={
               <svg
-                className="w-7 h-7"
+                className="size-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -239,7 +239,7 @@ export default function AdminSyncDataPage() {
             color="bg-amber-600"
             icon={
               <svg
-                className="w-7 h-7"
+                className="size-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -259,7 +259,7 @@ export default function AdminSyncDataPage() {
             color="bg-slate-600"
             icon={
               <svg
-                className="w-7 h-7"
+                className="size-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

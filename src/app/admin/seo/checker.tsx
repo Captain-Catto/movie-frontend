@@ -74,9 +74,9 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
           titleMap.get(key)?.push(entry.path);
         });
 
-        check.duplicates = Array.from(titleMap.entries())
-          .filter(([, paths]) => paths.length > 1)
-          .map(([title, paths]) => ({ title, paths }));
+        check.duplicates = Array.from(titleMap.entries()).flatMap(([title, paths]) =>
+          paths.length > 1 ? [{ title, paths }] : []
+        );
 
         setResult(check);
         onComplete?.(check);

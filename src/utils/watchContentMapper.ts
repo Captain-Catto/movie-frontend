@@ -207,9 +207,10 @@ export function mapContentToWatchContent(
 
 function normalizeGenreIds(genreIds: (string | number)[]): number[] {
   if (!Array.isArray(genreIds)) return [];
-  return genreIds
-    .map((id: string | number) => Number(id))
-    .filter((id) => Number.isInteger(id) && id > 0);
+  return genreIds.flatMap((id: string | number) => {
+    const n = Number(id);
+    return Number.isInteger(n) && n > 0 ? [n] : [];
+  });
 }
 
 /**

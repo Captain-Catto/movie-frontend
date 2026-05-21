@@ -43,7 +43,7 @@ export default function AdminDashboard() {
               value={stats.totalMovies}
               icon={
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
               value={stats.totalTVSeries}
               icon={
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
               value={stats.totalUsers}
               icon={
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
               value={stats.totalContent}
               icon={
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold text-white">Popular Refresh</h3>
                 {syncingTarget === "popular" && (
                   <svg
-                    className="animate-spin h-5 w-5 text-white"
+                    className="animate-spin size-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold text-white">Full Daily Export</h3>
                 {syncingTarget === "all" && (
                   <svg
-                    className="animate-spin h-5 w-5 text-white"
+                    className="animate-spin size-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
             <div className="flex items-center mb-3">
               <div className="bg-blue-500 p-2 rounded-lg mr-3">
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -250,7 +250,7 @@ export default function AdminDashboard() {
             <div className="flex items-center mb-3">
               <div className="bg-green-500 p-2 rounded-lg mr-3">
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -271,7 +271,7 @@ export default function AdminDashboard() {
             <div className="flex items-center mb-3">
               <div className="bg-purple-500 p-2 rounded-lg mr-3">
                 <svg
-                  className="w-6 h-6"
+                  className="size-6"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >

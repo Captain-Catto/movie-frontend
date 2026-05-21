@@ -61,7 +61,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -80,7 +80,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/settings",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -100,7 +100,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/content",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -119,7 +119,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/users",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -138,7 +138,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/analytics",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -157,7 +157,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/notifications",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -176,7 +176,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/chat",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -195,7 +195,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/seo",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -214,7 +214,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       href: "/admin/sync-data",
       icon: (
         <svg
-          className="w-5 h-5"
+          className="size-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -240,7 +240,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
           onClick={() => setMenuOpen((prev) => !prev)}
           className="flex w-full items-center gap-3 text-left cursor-pointer"
         >
-          <div className="w-12 h-12 rounded-full bg-red-600 text-white font-bold flex items-center justify-center cursor-pointer">
+          <div className="size-12 rounded-full bg-red-600 text-white font-bold flex items-center justify-center cursor-pointer">
             {(user?.name || "A").charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1  cursor-pointer">
@@ -255,7 +255,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             )}
           </div>
           <ChevronDown
-            className={`w-4 h-4 text-gray-400 transition-transform  cursor-pointer ${
+            className={`size-4 text-gray-400 transition-transform  cursor-pointer ${
               menuOpen ? "rotate-180" : ""
             }`}
           />
@@ -273,7 +273,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               }}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors cursor-pointer"
             >
-              <User className="w-4 h-4" />
+              <User className="size-4" />
               <span>Profile</span>
             </button>
             <button
@@ -283,7 +283,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               }}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-200 hover:bg-red-600/20 transition-colors cursor-pointer"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="size-4" />
               <span>Logout</span>
             </button>
           </div>
@@ -317,7 +317,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
           className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
         >
           <svg
-            className="w-5 h-5"
+            className="size-5"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

@@ -21,7 +21,7 @@ export default function AdminTopBar({ onMenuClick, user }: AdminTopBarProps) {
             aria-label="Toggle sidebar"
           >
             <svg
-              className="w-5 h-5"
+              className="size-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -42,7 +42,7 @@ export default function AdminTopBar({ onMenuClick, user }: AdminTopBarProps) {
         </div>
 
         <div className="flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 shrink-0">
-          <div className="w-7 h-7 rounded-md bg-red-600 flex items-center justify-center text-white text-xs font-semibold">
+          <div className="size-7 rounded-md bg-red-600 flex items-center justify-center text-white text-xs font-semibold">
             {user?.name?.charAt(0)?.toUpperCase() || "A"}
           </div>
           <div className="text-xs leading-tight">

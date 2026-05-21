@@ -28,16 +28,14 @@ export function mapTVSeriesToFrontend(
 
   const ensureNumberArray = (value: unknown): number[] =>
     Array.isArray(value)
-      ? value
-          .map((item) => {
-            if (typeof item === "number") return item;
-            if (typeof item === "string") {
-              const parsed = Number(item);
-              return Number.isNaN(parsed) ? null : parsed;
-            }
-            return null;
-          })
-          .filter((item): item is number => item !== null)
+      ? value.flatMap((item) => {
+          if (typeof item === "number") return [item];
+          if (typeof item === "string") {
+            const parsed = Number(item);
+            return Number.isNaN(parsed) ? [] : [parsed];
+          }
+          return [];
+        })
       : [];
 
   const tmdbId =
@@ -98,9 +96,10 @@ export function mapTVSeriesToFrontend(
   const rating = Math.round(ratingValue * 10) / 10;
 
   const genreIds = ensureNumberArray(series.genreIds ?? series.genre_ids);
-  const genres = genreIds
-    .map((id) => TMDB_TV_ENGLISH_GENRE_MAP[id])
-    .filter((genre): genre is string => Boolean(genre));
+  const genres = genreIds.flatMap((id) => {
+    const genre = TMDB_TV_ENGLISH_GENRE_MAP[id];
+    return genre ? [genre] : [];
+  });
   const primaryGenre = genres[0] || "TV Series";
 
   const mediaType = ensureString(series.media_type) ?? "tv";

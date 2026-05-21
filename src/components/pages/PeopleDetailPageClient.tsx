@@ -88,6 +88,7 @@ const PeopleDetailPageClient = ({
                   src={profileImage}
                   alt={personData.name}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 25vw"
                   className="object-cover"
                   priority
                 />

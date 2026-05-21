@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState, useEffect, useRef } from "react";
@@ -145,8 +146,8 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
           <div className="flex items-center justify-between h-16 gap-2">
             <div className="flex items-center flex-shrink-0 min-w-0">
               <Link href="/" className="flex items-center min-w-0">
-                <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center flex-shrink-0">
-                  <div className="w-0 h-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
+                <div className="size-8 bg-red-500 rounded flex items-center justify-center flex-shrink-0">
+                  <div className="size-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
                 </div>
                 <span className="ml-2 text-base sm:text-xl font-bold text-white whitespace-nowrap truncate">
                   MovieStream
@@ -196,7 +197,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="w-5 h-5"
+                    className="size-5"
                   >
                     <circle cx="11" cy="11" r="8"></circle>
                     <path d="m21 21-4.3-4.3"></path>
@@ -258,7 +259,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
       </nav>
       {/* Mobile Menu Dropdown (outside nav to avoid stacking issues) */}
       {isMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-[200] w-screen h-screen bg-gray-900 opacity-100 transition-all duration-300 ease-out">
+        <div className="lg:hidden fixed inset-0 z-[200] size-screen bg-gray-900 opacity-100 transition-all duration-300 ease-out">
           <div className="min-h-screen h-screen overflow-y-auto px-4 pt-16 pb-6 relative z-[210] pointer-events-auto flex flex-col gap-3">
             <button
               onClick={() => setIsMenuOpen(false)}
@@ -284,20 +285,22 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
             <div className="flex flex-col gap-3">
               {/* Mobile profile & actions */}
-              <div className="flex flex-col items-end gap-3 bg-gray-900/80 rounded-lg px-4 py-4 w-full">
+              <div className="flex flex-col items-end gap-3 bg-gray-900/80 rounded-lg p-4 w-full">
                 <Link
                   href={isAuthenticated ? "/account" : "#"}
                   onClick={() => isAuthenticated && setIsMenuOpen(false)}
                   className="flex flex-row-reverse items-center gap-3 w-full"
                   aria-label={labels.accountAria}
                 >
-                  <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+                  <div className="size-12 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
                     {isHydrated && isAuthenticated && user?.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={user.image}
                         alt={user.name || labels.profileAlt}
-                        className="w-full h-full object-cover"
+                        width={48}
+                        height={48}
+                        className="size-full object-cover"
+                        unoptimized
                       />
                     ) : (
                       <span className="text-white text-base font-semibold">

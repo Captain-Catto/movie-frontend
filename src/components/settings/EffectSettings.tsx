@@ -147,7 +147,7 @@ function SnowAdvanced({
           onClick={onReset}
           className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors cursor-pointer"
         >
-          <RotateCcw className="w-3 h-3" /> Reset
+          <RotateCcw className="size-3" /> Reset
         </button>
       </div>
       <Slider label="Fall Speed" value={snowSettings.speed} min={0.1} max={3} step={0.1}
@@ -186,7 +186,7 @@ function RedEnvelopeAdvanced({
           onClick={onReset}
           className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors cursor-pointer"
         >
-          <RotateCcw className="w-3 h-3" /> Reset
+          <RotateCcw className="size-3" /> Reset
         </button>
       </div>
       <Slider label="Quantity" value={redEnvelopeSettings.quantity || 25} min={1} max={100} step={1}
@@ -279,7 +279,7 @@ export default function EffectSettings() {
       <div className="flex items-center justify-between py-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-gray-200">Enable Visual Effects</span>
-          {isLoading && <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
+          {isLoading && <Loader2 className="size-3.5 text-gray-400 animate-spin" />}
         </div>
         <Toggle checked={enabled} onChange={() => dispatch(toggleEffects())} disabled={isLoading} />
       </div>
@@ -309,11 +309,11 @@ export default function EffectSettings() {
               {/* Card header */}
               <div className="flex items-center gap-4 px-4 py-3.5">
                 <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  className={`size-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                     isActive && enabled ? 'bg-gray-700/60' : 'bg-gray-800'
                   }`}
                 >
-                  <effect.icon className={`w-5 h-5 ${effect.iconColor}`} />
+                  <effect.icon className={`size-5 ${effect.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-semibold ${isActive && enabled ? 'text-white' : 'text-gray-400'}`}>
@@ -329,7 +329,7 @@ export default function EffectSettings() {
                     >
                       Advanced
                       <ChevronDown
-                        className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`size-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
                       />
                     </button>
                   )}
@@ -393,7 +393,7 @@ export default function EffectSettings() {
               disabled={!newExcludedPath.trim()}
               className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="size-4" />
             </button>
           </div>
 
@@ -409,13 +409,13 @@ export default function EffectSettings() {
                     onClick={() => handleRemoveExcludedPath(path)}
                     className="text-gray-500 hover:text-red-400 transition-colors cursor-pointer ml-2"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="size-3.5" />
                   </button>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-gray-600 italic pt-1">No exclusions — effects show on all pages.</p>
+            <p className="text-xs text-gray-600 italic pt-1">No exclusions; effects show on all pages.</p>
           )}
         </div>
       </div>

@@ -23,7 +23,7 @@ export default function SectionHeader({
         >
           <span className="text-sm font-medium leading-none">{viewMoreLabel}</span>
           <svg
-            className="h-4 w-4 transition-transform group-hover:translate-x-1"
+            className="size-4 transition-transform group-hover:translate-x-1"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

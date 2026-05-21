@@ -138,8 +138,7 @@ export default function AdminSettingsPage() {
   const handleSaveStreamDomains = async () => {
     const domains = streamDomainText
       .split(/[\n,]+/)
-      .map((domain) => domain.trim())
-      .filter(Boolean);
+      .flatMap((domain) => { const t = domain.trim(); return t ? [t] : []; });
 
     if (domains.length === 0) {
       showError("Save failed", "Please provide at least one stream domain");
@@ -237,7 +236,7 @@ export default function AdminSettingsPage() {
             </h2>
             {loading && (
               <span className="text-sm text-gray-400 animate-pulse">
-                Loading...
+                Loading…
               </span>
             )}
           </div>

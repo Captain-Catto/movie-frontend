@@ -44,7 +44,7 @@ const HeroSkeleton = () => {
           {/* Buttons Skeleton */}
           <div className="flex items-center space-x-4">
             <Skeleton className="h-12 w-32 rounded-xl" />
-            <Skeleton className="h-12 w-12 rounded-xl" />
+            <Skeleton className="size-12 rounded-xl" />
             <Skeleton className="h-12 w-24 rounded-xl" />
           </div>
         </div>

@@ -129,7 +129,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
       {/* Preview */}
       {preview ? (
         <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* eslint-disable-next-line @next/next/no-img-element, react-doctor/nextjs-no-img-element */}
           <img
             src={preview}
             alt="preview"
@@ -142,7 +142,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
           />
           {uploading && (
             <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2">
-              <Loader2 className="w-7 h-7 text-white animate-spin" />
+              <Loader2 className="size-7 text-white animate-spin" />
               <span className="text-xs text-gray-300">Uploading…</span>
             </div>
           )}
@@ -150,7 +150,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
             <button
               type="button"
               onClick={handleRemove}
-              className="absolute top-2 right-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer"
+              className="absolute top-2 right-2 size-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer"
             >
               <X size={14} />
             </button>
@@ -181,11 +181,11 @@ export default function ImageUploadField({ value, onChange }: Props) {
                 : "border-gray-600 hover:border-gray-500 bg-gray-800/30 cursor-pointer"
             }`}
           >
-            <ImageIcon className="w-8 h-8 text-gray-500" />
+            <ImageIcon className="size-8 text-gray-500" />
             <p className="text-sm text-gray-300 text-center">
               {isDragging ? "Drop image here" : "Drag & drop or click to select"}
             </p>
-            <p className="text-xs text-gray-600">JPEG · PNG · GIF · WebP — max 5 MB</p>
+            <p className="text-xs text-gray-600">JPEG · PNG · GIF · WebP (max 5 MB)</p>
           </div>
 
           {/* URL input (inline, below drop zone) */}

@@ -25,7 +25,7 @@ export default function PageSkeleton({
         <span className="sr-only">{title}</span>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 bg-gray-700/50 animate-pulse rounded-lg" />
+            <div className="size-8 bg-gray-700/50 animate-pulse rounded-lg" />
             <div className="h-8 w-48 bg-gray-700/60 animate-pulse rounded" />
           </div>
           <div className="h-4 w-64 bg-gray-700/40 animate-pulse rounded" />

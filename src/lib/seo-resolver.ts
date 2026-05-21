@@ -96,15 +96,14 @@ const normalizePath = (path: string): string => {
 
 const parseKeywords = (value: string[] | string | undefined): string[] | undefined => {
   if (Array.isArray(value)) {
-    const filtered = value.map((k) => k.trim()).filter(Boolean);
+    const filtered = value.flatMap((k) => { const t = k.trim(); return t ? [t] : []; });
     return filtered.length > 0 ? filtered : undefined;
   }
 
   if (typeof value === "string") {
     const parsed = value
       .split(",")
-      .map((k) => k.trim())
-      .filter(Boolean);
+      .flatMap((k) => { const t = k.trim(); return t ? [t] : []; });
     return parsed.length > 0 ? parsed : undefined;
   }
 

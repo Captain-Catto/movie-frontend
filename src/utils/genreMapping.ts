@@ -167,11 +167,10 @@ export function mapGenreIdsToNames(
 ): string[] {
   if (!genreIds || !Array.isArray(genreIds)) return [];
 
-  return genreIds
-    .map((id) =>
-      getLocalizedGenreNameById(Number(id), language, contentType)
-    )
-    .filter((name): name is string => Boolean(name));
+  return genreIds.flatMap((id) => {
+    const name = getLocalizedGenreNameById(Number(id), language, contentType);
+    return name ? [name] : [];
+  });
 }
 
 /**

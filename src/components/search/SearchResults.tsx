@@ -63,7 +63,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
     return (
       <div className="h-full flex items-center justify-center p-6">
         <div className="text-center">
-          <Search className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+          <Search className="size-12 text-gray-600 mx-auto mb-3" />
           <h3 className="text-gray-400 font-medium mb-1">
             {labels.noResultsTitle}
           </h3>
@@ -83,7 +83,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         <div className="absolute top-0 left-0 right-0 z-10 bg-gray-900/50 backdrop-blur-sm p-2">
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-2 text-sm text-gray-300">
-              <div className="w-4 h-4 border-2 border-gray-400 border-t-red-500 rounded-full animate-spin"></div>
+              <div className="size-4 border-2 border-gray-400 border-t-red-500 rounded-full animate-spin"></div>
               <span>{labels.updating}</span>
             </div>
           </div>

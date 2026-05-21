@@ -97,7 +97,7 @@ export default function GoogleOAuthCallbackPage() {
           {/* Icon */}
           <div className="mb-4">
             {status === "loading" && (
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-500 border-t-transparent"></div>
+              <div className="inline-block animate-spin rounded-full size-12 border-4 border-red-500 border-t-transparent"></div>
             )}
             {status === "success" && (
               <div className="inline-block text-6xl text-green-500">✓</div>

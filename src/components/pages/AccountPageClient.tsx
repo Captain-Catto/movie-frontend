@@ -196,7 +196,7 @@ export default function AccountPage() {
             <div className="flex items-start space-x-6">
               <button
                 type="button"
-                className="group relative h-24 w-24 cursor-pointer overflow-hidden rounded-full border-4 border-gray-600"
+                className="group relative size-24 cursor-pointer overflow-hidden rounded-full border-4 border-gray-600"
                 onClick={handleAvatarClick}
                 title={labels.changeAvatar}
               >

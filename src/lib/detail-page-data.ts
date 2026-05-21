@@ -49,9 +49,10 @@ async function lookupContentByTmdbId(
 
 function mapMovieToDetail(content: Movie, language: string): MovieDetail {
   const genreNames =
-    content.genreIds
-      ?.map((id) => getLocalizedGenreNameById(id, language, "movie"))
-      .filter((name): name is string => Boolean(name)) || [];
+    content.genreIds?.flatMap((id) => {
+      const name = getLocalizedGenreNameById(id, language, "movie");
+      return name ? [name] : [];
+    }) || [];
 
   const runtime = (content as { runtime?: number }).runtime;
   const runtimeText =
@@ -99,9 +100,10 @@ function mapMovieToDetail(content: Movie, language: string): MovieDetail {
 
 function mapTVToMovieDetail(content: TVSeries, language: string): MovieDetail {
   const genreNames =
-    content.genreIds
-      ?.map((id) => getLocalizedGenreNameById(id, language, "tv"))
-      .filter((name): name is string => Boolean(name)) || [];
+    content.genreIds?.flatMap((id) => {
+      const name = getLocalizedGenreNameById(id, language, "tv");
+      return name ? [name] : [];
+    }) || [];
 
   return {
     id: content.id,
@@ -254,16 +256,14 @@ export async function getTVDetailPageDataByTmdbId(
 
   const ensureNumberArray = (value: unknown): number[] =>
     Array.isArray(value)
-      ? value
-          .map((item) => {
-            if (typeof item === "number") return item;
-            if (typeof item === "string") {
-              const parsed = Number(item);
-              return Number.isNaN(parsed) ? null : parsed;
-            }
-            return null;
-          })
-          .filter((item): item is number => item !== null)
+      ? value.flatMap((item) => {
+          if (typeof item === "number") return [item];
+          if (typeof item === "string") {
+            const parsed = Number(item);
+            return Number.isNaN(parsed) ? [] : [parsed];
+          }
+          return [];
+        })
       : [];
 
   try {
@@ -295,48 +295,43 @@ export async function getTVDetailPageDataByTmdbId(
     );
 
     const createdBy = Array.isArray(tv.created_by)
-      ? tv.created_by
-          .map((creator) => {
-            if (
-              creator &&
-              typeof creator === "object" &&
-              "id" in creator &&
-              "name" in creator
-            ) {
-              const record = creator as Record<string, unknown>;
-              return {
+      ? tv.created_by.flatMap((creator) => {
+          if (
+            creator &&
+            typeof creator === "object" &&
+            "id" in creator &&
+            "name" in creator
+          ) {
+            const record = creator as Record<string, unknown>;
+            return [
+              {
                 id: ensureNumber(record.id, 0),
                 name: ensureString(record.name, "Unknown") || "Unknown",
-              };
-            }
-            return null;
-          })
-          .filter(
-            (creator): creator is { id: number; name: string } => creator !== null
-          )
+              },
+            ];
+          }
+          return [];
+        })
       : [];
 
     const productionCountries = Array.isArray(tv.production_countries)
-      ? tv.production_countries
-          .map((country) => {
-            if (
-              country &&
-              typeof country === "object" &&
-              "name" in country &&
-              "iso_3166_1" in country
-            ) {
-              const record = country as Record<string, unknown>;
-              return {
+      ? tv.production_countries.flatMap((country) => {
+          if (
+            country &&
+            typeof country === "object" &&
+            "name" in country &&
+            "iso_3166_1" in country
+          ) {
+            const record = country as Record<string, unknown>;
+            return [
+              {
                 name: ensureString(record.name, "Unknown"),
                 iso_3166_1: ensureString(record.iso_3166_1, ""),
-              };
-            }
-            return null;
-          })
-          .filter(
-            (country): country is { name: string; iso_3166_1: string } =>
-              country !== null
-          )
+              },
+            ];
+          }
+          return [];
+        })
       : [];
 
     let tvData: TVDetail = {
@@ -358,9 +353,10 @@ export async function getTVDetailPageDataByTmdbId(
         tv.backdropUrl ?? tv.backdropPath ?? tv.backdrop_path,
         FALLBACK_POSTER
       ),
-      genres: rawGenreIds
-        .map((genreId) => getLocalizedGenreNameById(genreId, language, "tv"))
-        .filter((genre): genre is string => Boolean(genre)),
+      genres: rawGenreIds.flatMap((genreId) => {
+        const genre = getLocalizedGenreNameById(genreId, language, "tv");
+        return genre ? [genre] : [];
+      }),
       genreIds: rawGenreIds,
       numberOfEpisodes: ensureNumber(
         tv.numberOfEpisodes ?? tv.number_of_episodes,
@@ -553,11 +549,12 @@ export async function getWatchPageDataByRouteId(
 
     if (streamResponse.success && streamResponse.data?.url) {
       streamCandidates = [
-        streamResponse.data.url,
-        ...(streamResponse.data.fallbackUrls || []),
-      ]
-        .filter((url) => !!url)
-        .filter((url, index, all) => all.indexOf(url) === index);
+        ...new Set(
+          [streamResponse.data.url, ...(streamResponse.data.fallbackUrls || [])].filter(
+            (url): url is string => !!url
+          )
+        ),
+      ];
     } else {
       streamError = "No stream source available right now.";
     }

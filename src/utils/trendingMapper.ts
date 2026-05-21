@@ -49,12 +49,16 @@ export function mapTrendingToFrontend(trending: TrendingItem): FrontendMovie {
   const genreSource = Array.isArray(trending.genreIds)
     ? trending.genreIds
     : [];
-  const genreIds = genreSource
-    .map((id: string | number) => Number(id))
-    .filter((id) => !Number.isNaN(id));
+  const genreIds = genreSource.flatMap((id: string | number) => {
+    const n = Number(id);
+    return Number.isNaN(n) ? [] : [n];
+  });
 
   // Map genres from IDs to English names
-  const genres = genreIds.map((id: number) => TMDB_ENGLISH_GENRE_MAP[id]).filter(Boolean);
+  const genres = genreIds.flatMap((id: number) => {
+    const g = TMDB_ENGLISH_GENRE_MAP[id];
+    return g ? [g] : [];
+  });
 
   // Get primary genre for the genre field
   const primaryGenre = genres[0] || "Uncategorized";

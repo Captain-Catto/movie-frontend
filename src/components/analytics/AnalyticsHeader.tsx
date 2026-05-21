@@ -55,7 +55,7 @@ export default function AnalyticsHeader({
             }
           >
             <span
-              className={`h-2.5 w-2.5 rounded-full ${
+              className={`size-2.5 rounded-full ${
                 isLiveConnected ? "bg-green-200 animate-pulse" : "bg-gray-500"
               }`}
             />
@@ -64,7 +64,7 @@ export default function AnalyticsHeader({
           <button
             onClick={onRefresh}
             aria-label="Refresh analytics data"
-            className="h-10 w-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center cursor-pointer"
+            className="size-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center cursor-pointer"
             title={
               lastRefreshed
                 ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}`
@@ -72,7 +72,7 @@ export default function AnalyticsHeader({
             }
           >
             <svg
-              className={`w-5 h-5 ${isRefreshing ? "animate-spin" : ""}`}
+              className={`size-5 ${isRefreshing ? "animate-spin" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -91,7 +91,7 @@ export default function AnalyticsHeader({
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer"
           >
             <svg
-              className="w-5 h-5"
+              className="size-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -112,7 +112,7 @@ export default function AnalyticsHeader({
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer"
           >
             <svg
-              className="w-5 h-5"
+              className="size-5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

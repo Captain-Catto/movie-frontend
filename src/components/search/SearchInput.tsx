@@ -39,7 +39,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative flex items-center">
-          <Search className="absolute left-3 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 size-5 text-gray-400" />
 
           <input
             ref={ref}
@@ -53,7 +53,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
           {/* Loading or Clear button */}
           <div className="absolute right-3">
             {isLoading ? (
-              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+              <Loader2 className="size-5 text-gray-400 animate-spin" />
             ) : (
               query && (
                 <button
@@ -61,7 +61,7 @@ const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
                   onClick={handleClear}
                   className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="size-5" />
                 </button>
               )
             )}

@@ -193,7 +193,7 @@ export default function AuthModal({
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
             >
-              <Chrome className="w-5 h-5 mr-2 text-[#4285f4]" />
+              <Chrome className="size-5 mr-2 text-[#4285f4]" />
               {isGoogleLoading ? labels.processing : labels.loginWithGoogle}
             </Button>
           </TabsContent>
@@ -222,7 +222,7 @@ export default function AuthModal({
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
             >
-              <Chrome className="w-5 h-5 mr-2 text-[#4285f4]" />
+              <Chrome className="size-5 mr-2 text-[#4285f4]" />
               {isGoogleLoading ? labels.processing : labels.registerWithGoogle}
             </Button>
           </TabsContent>

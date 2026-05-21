@@ -116,8 +116,9 @@ export async function GET(request: NextRequest) {
     const { text: embedHtml, status } = await fetchText(embedUrl);
     if (status !== 200) throw new Error(`vidsrc embed HTTP ${status}`);
 
-    const hashes = [...embedHtml.matchAll(/data-hash=["']([A-Za-z0-9+/=_\-]{10,})["']/g)]
-      .map((m) => m[1]).filter((v, i, a) => a.indexOf(v) === i);
+    const hashes = [...new Set(
+      [...embedHtml.matchAll(/data-hash=["']([A-Za-z0-9+/=_\-]{10,})["']/g)].map((m) => m[1])
+    )];
 
     if (hashes.length === 0) {
       return NextResponse.json({ error: "no data-hash found" }, { status: 404 });

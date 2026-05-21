@@ -46,7 +46,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
             {/* Buttons Skeleton */}
             <div className="flex items-center space-x-4">
               <Skeleton className="h-12 w-32 rounded-xl" />
-              <Skeleton className="h-12 w-12 rounded-xl" />
+              <Skeleton className="size-12 rounded-xl" />
               <Skeleton className="h-12 w-24 rounded-xl" />
             </div>
           </div>
@@ -89,7 +89,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
                   </div>
                   <div className="info mt-3 space-y-2">
                     <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-3/4" />
+                    <Skeleton className="size-3/4" />
                   </div>
                 </div>
               ))}

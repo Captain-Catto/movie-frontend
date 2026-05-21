@@ -25,7 +25,7 @@ export default function StatsCard({
             <div className="flex items-center mt-2">
               {trend >= 0 ? (
                 <svg
-                  className="w-4 h-4 text-green-500 mr-1"
+                  className="size-4 text-green-500 mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -39,7 +39,7 @@ export default function StatsCard({
                 </svg>
               ) : (
                 <svg
-                  className="w-4 h-4 text-red-500 mr-1"
+                  className="size-4 text-red-500 mr-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

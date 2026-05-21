@@ -23,12 +23,12 @@ const iconBgColors = [
 ];
 
 const metricIcons = [
-  <Eye key="views" className="w-5 h-5" strokeWidth={2} />,
-  <MousePointerClick key="clicks" className="w-5 h-5" strokeWidth={2} />,
-  <Play key="plays" className="w-5 h-5" fill="currentColor" />,
-  <TrendingUp key="ctr" className="w-5 h-5" strokeWidth={2} />,
-  <Heart key="favorites" className="w-5 h-5" fill="currentColor" stroke="none" />,
-  <Star key="fav-rate" className="w-5 h-5" fill="currentColor" stroke="none" />,
+  <Eye key="views" className="size-5" strokeWidth={2} />,
+  <MousePointerClick key="clicks" className="size-5" strokeWidth={2} />,
+  <Play key="plays" className="size-5" fill="currentColor" />,
+  <TrendingUp key="ctr" className="size-5" strokeWidth={2} />,
+  <Heart key="favorites" className="size-5" fill="currentColor" stroke="none" />,
+  <Star key="fav-rate" className="size-5" fill="currentColor" stroke="none" />,
 ];
 
 export default function AdminMetricsBar({ metrics }: AdminMetricsBarProps) {
@@ -45,7 +45,7 @@ export default function AdminMetricsBar({ metrics }: AdminMetricsBarProps) {
               className="flex items-start gap-3 bg-gray-800 text-gray-50 rounded-lg px-3 py-2 shadow-sm border border-gray-700 min-w-[185px] hover:-translate-y-[1px] hover:shadow-lg hover:border-gray-600 transition cursor-pointer"
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center text-white ${
+                className={`size-9 rounded-lg flex items-center justify-center text-white ${
                   iconBgColors[idx % iconBgColors.length]
                 }`}
               >

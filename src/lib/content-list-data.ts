@@ -48,9 +48,10 @@ const filterTrendingByGenres = (
     return items;
   }
 
-  const genreFilterIds = genres
-    .map((genre) => Number(genre))
-    .filter((id) => Number.isFinite(id));
+  const genreFilterIds = genres.flatMap((genre) => {
+    const id = Number(genre);
+    return Number.isFinite(id) ? [id] : [];
+  });
 
   if (genreFilterIds.length === 0) {
     return items;

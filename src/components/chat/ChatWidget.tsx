@@ -285,8 +285,8 @@ export default function ChatWidget() {
     >
       <div className="flex items-center justify-between border-b border-gray-800 px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-red-600">
-            <Bot className="h-5 w-5 text-white" />
+          <div className="flex size-9 items-center justify-center rounded-md bg-red-600">
+            <Bot className="size-5 text-white" />
           </div>
           <div>
             <div className="text-sm font-semibold text-white">{text.title}</div>
@@ -303,7 +303,7 @@ export default function ChatWidget() {
                 aria-label="Chat history"
                 title={text.history}
               >
-                <Clock3 className="h-4 w-4" />
+                <Clock3 className="size-4" />
               </button>
               <button
                 type="button"
@@ -312,7 +312,7 @@ export default function ChatWidget() {
                 aria-label="New chat"
                 title={text.newChat}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="size-4" />
               </button>
             </>
           )}
@@ -322,7 +322,7 @@ export default function ChatWidget() {
             className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
             aria-label="Close chat"
           >
-            <X className="h-4 w-4" />
+            <X className="size-4" />
           </button>
         </div>
       </div>
@@ -334,7 +334,7 @@ export default function ChatWidget() {
       ) : (
         <>
           {showHistory && (
-            <div className="border-b border-gray-800 bg-gray-950/40 px-3 py-3">
+            <div className="border-b border-gray-800 bg-gray-950/40 p-3">
               <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
                 {text.history}
               </div>
@@ -379,7 +379,7 @@ export default function ChatWidget() {
                         aria-label={text.deleteChat}
                         title={text.deleteChat}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="size-3.5" />
                       </button>
                     </div>
                   ))
@@ -388,7 +388,7 @@ export default function ChatWidget() {
             </div>
           )}
 
-          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-4">
             {messages.length === 0 && !initializing && !sending && (
               <div className="rounded-lg border border-gray-800 bg-gray-800/60 p-3 text-sm text-gray-300">
                 {text.empty}
@@ -416,7 +416,7 @@ export default function ChatWidget() {
 
             {sending && (
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="size-4 animate-spin" />
                 {text.title}
               </div>
             )}
@@ -448,10 +448,10 @@ export default function ChatWidget() {
             <button
               type="submit"
               disabled={!input.trim() || sending || !session}
-              className="flex h-10 w-10 items-center justify-center rounded-md bg-red-600 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex size-10 items-center justify-center rounded-md bg-red-600 text-white disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Send message"
             >
-              <Send className="h-4 w-4" />
+              <Send className="size-4" />
             </button>
           </form>
         </>
@@ -518,20 +518,20 @@ export default function ChatWidget() {
           onPointerCancel={handlePointerUp}
           onClick={handleToggle}
           style={{ touchAction: "none" }}
-          className="flex h-12 w-12 cursor-grab items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition hover:bg-red-700 active:cursor-grabbing"
+          className="flex size-12 cursor-grab items-center justify-center rounded-full bg-red-600 text-white shadow-xl transition hover:bg-red-700 active:cursor-grabbing"
           aria-label="Open movie assistant"
         >
-          {open ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+          {open ? <X className="size-5" /> : <MessageCircle className="size-5" />}
         </button>
 
         <button
           type="button"
           onClick={handleScrollToTop}
-          className="absolute right-0 top-14 flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-red-600 text-white shadow-xl transition hover:bg-red-700"
+          className="absolute right-0 top-14 flex size-11 items-center justify-center rounded-full border border-white/10 bg-red-600 text-white shadow-xl transition hover:bg-red-700"
           aria-label="Back to top"
           title="Back to top"
         >
-          <ArrowUp className="h-5 w-5" />
+          <ArrowUp className="size-5" />
         </button>
       </div>
     </>

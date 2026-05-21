@@ -93,9 +93,9 @@ export function CommentItem(props: CommentItemProps) {
                 onClick={() => void handleToggleReplies()}
               >
                 {showReplies ? (
-                  <ChevronUp className="text-xs w-3 h-3" />
+                  <ChevronUp className="text-xs size-3" />
                 ) : (
-                  <ChevronDown className="text-xs w-3 h-3" />
+                  <ChevronDown className="text-xs size-3" />
                 )}
                 {loadingReplies
                   ? labels.loading
@@ -149,7 +149,7 @@ export function CommentItem(props: CommentItemProps) {
             <span className="text-white text-sm font-medium">
               {currentComment.user?.name || labels.anonymous}
               {isAdmin && (
-                <Infinity className="text-primary ms-2 text-red-500 inline-block w-4 h-4" />
+                <Infinity className="text-primary ms-2 text-red-500 inline-block size-4" />
               )}
             </span>
           </div>
@@ -192,7 +192,7 @@ export function CommentItem(props: CommentItemProps) {
                     key={mention.id}
                     className="mention-badge inline-flex items-center gap-1 px-2 py-1 bg-blue-600/20 text-blue-400 rounded text-xs"
                   >
-                    <AtSign className="text-xs w-3 h-3" />
+                    <AtSign className="text-xs size-3" />
                     {mention.name}
                   </span>
                 ))}
@@ -213,7 +213,7 @@ export function CommentItem(props: CommentItemProps) {
               onClick={() => void handleSelfLike()}
             >
               <ThumbsUp
-                className={`w-4 h-4 ${
+                className={`size-4 ${
                   currentComment.userLike === true ? "fill-current" : ""
                 }`}
               />
@@ -231,7 +231,7 @@ export function CommentItem(props: CommentItemProps) {
               onClick={() => void handleSelfDislike()}
             >
               <ThumbsDown
-                className={`w-4 h-4 ${
+                className={`size-4 ${
                   currentComment.userLike === false ? "fill-current" : ""
                 }`}
               />
@@ -247,7 +247,7 @@ export function CommentItem(props: CommentItemProps) {
               className="btn btn-xs btn-basic btn-comment px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
               onClick={() => setShowReplyForm((prev) => !prev)}
             >
-              <Reply className="text-xs w-3 h-3" />
+              <Reply className="text-xs size-3" />
               <span className="text-xs">{labels.reply}</span>
             </button>
           )}
@@ -261,7 +261,7 @@ export function CommentItem(props: CommentItemProps) {
                   onClick={() => setIsEditing(true)}
                   disabled={isEditing}
                 >
-                  <Pencil className="text-xs w-3 h-3" />
+                  <Pencil className="text-xs size-3" />
                   <span className="text-xs">{labels.edit}</span>
                 </button>
               )}
@@ -270,7 +270,7 @@ export function CommentItem(props: CommentItemProps) {
                 className="btn btn-xs btn-basic btn-menu px-3 py-1 bg-gray-700 text-gray-300 rounded hover:bg-gray-600 transition-colors flex items-center gap-1"
                 onClick={() => void handleSelfDelete()}
               >
-                <Trash2 className="text-xs w-3 h-3" />
+                <Trash2 className="text-xs size-3" />
                 <span className="text-xs">{labels.delete}</span>
               </button>
             </div>
@@ -298,9 +298,9 @@ export function CommentItem(props: CommentItemProps) {
               onClick={() => void handleToggleReplies()}
             >
               {showReplies ? (
-                <ChevronUp className="text-xs w-3 h-3" />
+                <ChevronUp className="text-xs size-3" />
               ) : (
-                <ChevronDown className="text-xs w-3 h-3" />
+                <ChevronDown className="text-xs size-3" />
               )}
               {loadingReplies
                 ? labels.loading

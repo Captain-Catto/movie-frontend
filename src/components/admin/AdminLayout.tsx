@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode, useEffect, useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
 import AdminSidebar from "./AdminSidebar";
 import AdminMetricsBar from "./AdminMetricsBar";
@@ -65,25 +65,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const sidebarOpen = true;
   const { user, isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-
-  // Redirect non-admin users
-  useEffect(() => {
-    const isAdminRole =
-      user?.role === "admin" ||
-      user?.role === "super_admin" ||
-      user?.role === "viewer";
-
-    if (!isLoading && (!isAuthenticated || !isAdminRole)) {
-      router.push("/");
-    }
-  }, [isAuthenticated, isLoading, user?.role, router]);
 
   // Show loading while checking auth
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+        <div className="text-white">Loading…</div>
       </div>
     );
   }
@@ -95,7 +82,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     user?.role === "viewer";
 
   if (!isAuthenticated || !isAdminRole) {
-    return null;
+    redirect("/");
   }
 
   return (
@@ -120,7 +107,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <div className="p-3 bg-yellow-900/30 border border-yellow-600 rounded-lg">
                   <div className="flex items-center gap-2">
                     <svg
-                      className="w-5 h-5 text-yellow-500"
+                      className="size-5 text-yellow-500"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >
