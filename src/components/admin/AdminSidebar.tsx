@@ -376,10 +376,11 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
+                <label htmlFor="admin-profile-name" className="block text-sm text-gray-300 mb-1">
                   Display name
                 </label>
                 <input
+                  id="admin-profile-name"
                   value={profileForm.name}
                   onChange={(e) =>
                     setProfileForm((prev) => ({
@@ -393,19 +394,25 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
+                <label htmlFor="admin-profile-email" className="block text-sm text-gray-300 mb-1">
                   Email
                 </label>
-                <div className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400">
+                <div
+                  id="admin-profile-email"
+                  role="textbox"
+                  aria-readonly="true"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400"
+                >
                   {user?.email || "No email"}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm text-gray-300 mb-1">
+                <label htmlFor="admin-profile-password" className="block text-sm text-gray-300 mb-1">
                   Password (leave blank to keep current)
                 </label>
                 <input
+                  id="admin-profile-password"
                   type="password"
                   value={profileForm.password}
                   onChange={(e) =>

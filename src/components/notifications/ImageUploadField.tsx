@@ -13,6 +13,8 @@ const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 const ACCEPT = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 
 export default function ImageUploadField({ value, onChange }: Props) {
+  const fileInputId = "notification-image-upload";
+  const urlInputId = "notification-image-url";
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string>(value || "");
@@ -109,7 +111,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-300">
+        <label htmlFor={showUrlInput ? urlInputId : fileInputId} className="text-sm font-medium text-gray-300">
           Image <span className="text-gray-500 font-normal">(optional)</span>
         </label>
         {!preview && (
@@ -190,12 +192,12 @@ export default function ImageUploadField({ value, onChange }: Props) {
           {showUrlInput && (
             <div className="flex gap-2">
               <input
+                id={urlInputId}
                 type="text"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleUrlApply(); } }}
                 placeholder="https://example.com/image.jpg"
-                autoFocus
                 className="flex-1 bg-gray-700 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -214,6 +216,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
       {error && <p className="text-xs text-red-400">{error}</p>}
 
       <input
+        id={fileInputId}
         ref={inputRef}
         type="file"
         accept={ACCEPT.join(",")}

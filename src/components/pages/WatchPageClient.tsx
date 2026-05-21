@@ -125,6 +125,7 @@ const WatchPageClient = ({
                   <iframe
                     key={activeStreamUrl}
                     src={activeStreamUrl}
+                    title={`Watch ${movieData.title}`}
                     className="w-full h-full"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
