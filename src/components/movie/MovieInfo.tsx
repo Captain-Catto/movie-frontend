@@ -14,7 +14,7 @@ const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: M
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-5xl font-bold mb-4 text-white">{title}</h1>
+        <h1 className="text-5xl font-semibold mb-4 text-white">{title}</h1>
         <div className="flex items-center space-x-4 text-sm">
           <RatingBadge rating={rating} variant="inline" showZero={true} />
           <span className="text-white">{year}</span>

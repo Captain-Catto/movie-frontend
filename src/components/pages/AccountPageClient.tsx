@@ -51,7 +51,7 @@ export default function AccountPage() {
         <Header />
         <main>
           <Container size="narrow" withHeaderOffset className="text-center pb-12">
-            <h1 className="text-4xl font-bold text-white mb-6">
+            <h1 className="text-4xl font-semibold text-white mb-6">
               {labels.pleaseLogin}
             </h1>
             <p className="text-gray-400">
@@ -187,7 +187,7 @@ export default function AccountPage() {
 
       <main>
         <Container size="narrow" withHeaderOffset className="pb-12">
-          <h1 className="text-4xl font-bold text-white mb-8">
+          <h1 className="text-4xl font-semibold text-white mb-8">
             {labels.accountTitle}
           </h1>
 
@@ -229,7 +229,7 @@ export default function AccountPage() {
               />
 
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-white mb-2">
+                <h2 className="text-2xl font-semibold text-white mb-2">
                   {displayName}
                 </h2>
                 <p className="text-gray-400 mb-4">{user?.email}</p>
@@ -255,7 +255,7 @@ export default function AccountPage() {
 
           {/* Account Settings */}
           <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700">
-            <h3 className="text-xl font-bold text-white mb-6">
+            <h3 className="text-xl font-semibold text-white mb-6">
               {labels.settings}
             </h3>
 
@@ -272,8 +272,9 @@ export default function AccountPage() {
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">{labels.displayName}</label>
+                  <label htmlFor="account-display-name" className="text-sm text-gray-300">{labels.displayName}</label>
                   <input
+                    id="account-display-name"
                     type="text"
                     value={form.name}
                     onChange={(e) =>
@@ -285,8 +286,9 @@ export default function AccountPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">{labels.email}</label>
+                  <label htmlFor="account-email" className="text-sm text-gray-300">{labels.email}</label>
                   <input
+                    id="account-email"
                     type="text"
                     value={user?.email || ""}
                     disabled
@@ -297,8 +299,9 @@ export default function AccountPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">{labels.newPassword}</label>
+                  <label htmlFor="account-new-password" className="text-sm text-gray-300">{labels.newPassword}</label>
                   <input
+                    id="account-new-password"
                     type="password"
                     value={form.password}
                     onChange={(e) =>
@@ -310,10 +313,11 @@ export default function AccountPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">
+                  <label htmlFor="account-confirm-password" className="text-sm text-gray-300">
                     {labels.confirmPassword}
                   </label>
                   <input
+                    id="account-confirm-password"
                     type="password"
                     value={form.confirmPassword}
                     onChange={(e) =>

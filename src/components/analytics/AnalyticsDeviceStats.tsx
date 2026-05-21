@@ -12,7 +12,7 @@ export default function AnalyticsDeviceStats({
 }: AnalyticsDeviceStatsProps) {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-bold text-white mb-4">Device Distribution</h2>
+      <h2 className="text-xl font-semibold text-white mb-4">Device Distribution</h2>
       {deviceStats.length > 0 ? (
         <div className="flex flex-col lg:flex-row items-center gap-6">
           <ResponsiveContainer width="50%" height={300}>

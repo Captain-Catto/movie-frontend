@@ -26,7 +26,7 @@ export default async function TermsPage() {
     <Layout>
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16 px-4">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-8">{content.title}</h1>
+        <h1 className="text-4xl font-semibold text-white mb-8">{content.title}</h1>
 
         <div className="space-y-6 text-gray-300">
           {content.sections.map((section) => (

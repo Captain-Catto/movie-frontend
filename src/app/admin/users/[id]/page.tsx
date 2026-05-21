@@ -864,7 +864,7 @@ export default function AdminUserDetailPage() {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-xl font-bold text-white">
+              <h1 className="text-xl font-semibold text-white">
                 {user.name || "Unnamed"}
               </h1>
               <span
@@ -941,11 +941,12 @@ export default function AdminUserDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <label className="space-y-2">
+          <label htmlFor="user-detail-display-name" className="space-y-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
               Tên hiển thị
             </span>
             <input
+              id="user-detail-display-name"
               value={profileForm.name}
               onChange={(event) =>
                 setProfileForm((prev) => ({
@@ -958,22 +959,24 @@ export default function AdminUserDetailPage() {
             />
           </label>
 
-          <label className="space-y-2">
+          <label htmlFor="user-detail-email" className="space-y-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
               Email
             </span>
             <input
+              id="user-detail-email"
               value={user.email}
               readOnly
               className="w-full px-3 py-2 bg-gray-900/70 border border-gray-700 rounded-lg text-sm text-gray-300 cursor-not-allowed"
             />
           </label>
 
-          <label className="space-y-2">
+          <label htmlFor="user-detail-role" className="space-y-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
               Quyền
             </span>
             <select
+              id="user-detail-role"
               value={profileForm.role}
               disabled={isEditingSelf}
               onChange={(event) =>
@@ -992,11 +995,12 @@ export default function AdminUserDetailPage() {
             </select>
           </label>
 
-          <label className="space-y-2">
+          <label htmlFor="user-detail-status" className="space-y-2">
             <span className="text-xs font-medium uppercase tracking-wide text-gray-400">
               Trạng thái
             </span>
             <select
+              id="user-detail-status"
               value={profileForm.isActive ? "active" : "banned"}
               disabled={isEditingSelf}
               onChange={(event) =>
@@ -1240,10 +1244,11 @@ export default function AdminUserDetailPage() {
             </div>
 
             <div className="p-5 space-y-3">
-              <label className="block text-sm font-medium text-gray-300">
+              <label htmlFor="hide-comment-reason" className="block text-sm font-medium text-gray-300">
                 Lý do ẩn
               </label>
               <select
+                id="hide-comment-reason"
                 value={hideCommentModal.reason}
                 onChange={(event) =>
                   setHideCommentModal((prev) => ({

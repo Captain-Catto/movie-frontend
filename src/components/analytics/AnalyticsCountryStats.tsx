@@ -10,7 +10,7 @@ export default function AnalyticsCountryStats({
 }: AnalyticsCountryStatsProps) {
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-bold text-white mb-4">Top Countries</h2>
+      <h2 className="text-xl font-semibold text-white mb-4">Top Countries</h2>
       {countryStats.length > 0 ? (
         <div className="space-y-2">
           {countryStats.slice(0, 10).map((country, index) => (

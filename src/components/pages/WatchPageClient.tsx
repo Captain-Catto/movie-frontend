@@ -231,7 +231,7 @@ const WatchPageClient = ({
                 {/* Movie Details */}
                 <div className="info lg:col-span-3 space-y-6">
                   <div>
-                    <h2 className="heading-sm media-name text-4xl font-bold text-white mb-2">
+                    <h2 className="heading-sm media-name text-4xl font-semibold text-white mb-2">
                       <Link
                         title={movieData.title}
                         href={`/${
@@ -438,7 +438,7 @@ const WatchPageClient = ({
             <div className="lg:col-span-1 space-y-8">
               {/* Cast & Crew */}
               <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-white mb-4">
+                <h3 className="text-xl font-semibold text-white mb-4">
                   {labels.cast}
                 </h3>
                 {creditsLoading ? (
@@ -510,7 +510,7 @@ const WatchPageClient = ({
 
               {/* Recommendations */}
               <div className="bg-gray-800 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-white mb-4">
+                <h3 className="text-xl font-semibold text-white mb-4">
                   {labels.youMayAlsoLike}
                 </h3>
                 {recommendationsLoading ? (

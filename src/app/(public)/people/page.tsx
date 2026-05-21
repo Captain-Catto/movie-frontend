@@ -44,7 +44,7 @@ const PeoplePage = async ({ searchParams }: PeoplePageProps) => {
       <div className="min-h-screen bg-gray-900">
         <Container withHeaderOffset>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-3xl font-semibold text-white mb-2">
               {labels.pageTitle}
             </h1>
             <p className="text-gray-400">

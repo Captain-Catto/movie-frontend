@@ -21,13 +21,13 @@ export default function GlobalError({
   }, []);
 
   return (
-    <html>
+    <html lang={language === "vi" ? "vi" : "en"}>
       <body>
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
           <div className="max-w-md w-full text-center">
             <div className="mb-8">
               <div className="text-6xl mb-4">💥</div>
-              <h2 className="text-3xl font-bold text-white mb-4">
+              <h2 className="text-3xl font-semibold text-white mb-4">
                 {labels.title}
               </h2>
               <p className="text-gray-400 text-lg mb-4">

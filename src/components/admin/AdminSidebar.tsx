@@ -360,7 +360,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-bold text-white">Edit Profile</h3>
+                <h3 className="text-xl font-semibold text-white">Edit Profile</h3>
                 <p className="text-sm text-gray-400">
                   Update your information
                 </p>

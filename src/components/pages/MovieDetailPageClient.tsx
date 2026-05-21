@@ -205,7 +205,7 @@ const MovieDetailPageClient = ({
 
               {/* Content */}
               <div className="flex-1 max-w-2xl">
-                <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+                <h1 className="text-4xl md:text-5xl font-semibold text-white mb-2">
                   {movieData.title}
                 </h1>
                 {movieData.aliasTitle &&
@@ -336,7 +336,7 @@ const MovieDetailPageClient = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-6">{labels.overview}</h3>
+              <h3 className="text-2xl font-semibold text-white mb-6">{labels.overview}</h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
                 <p className="text-gray-300 leading-relaxed">
                   {movieData.description}
@@ -347,7 +347,7 @@ const MovieDetailPageClient = ({
               {(movieData.cast && movieData.cast.length > 0) ||
               creditsLoading ? (
                 <>
-                  <h3 className="text-2xl font-bold text-white mb-6">{labels.cast}</h3>
+                  <h3 className="text-2xl font-semibold text-white mb-6">{labels.cast}</h3>
                   {creditsLoading ? (
                     <CastSkeleton />
                   ) : (
@@ -396,7 +396,7 @@ const MovieDetailPageClient = ({
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
-                <h3 className="text-xl font-bold text-white mb-4">{labels.contentInfo}</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">{labels.contentInfo}</h3>
                 <div className="space-y-3 text-gray-300">
                   <div>
                     <span className="text-gray-500">{labels.director}</span>
@@ -497,7 +497,7 @@ const MovieDetailPageClient = ({
             fallback={
               <section className="py-12 max-w-6xl mx-auto">
                 <div className="container mx-auto px-4 pt-16">
-                  <h2 className="text-3xl font-bold text-white mb-8">
+                  <h2 className="text-3xl font-semibold text-white mb-8">
                     {labels.youMightAlsoLike}
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">

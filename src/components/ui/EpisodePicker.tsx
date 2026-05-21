@@ -40,7 +40,7 @@ export default function EpisodePicker({
   return (
     <div className="bg-gray-800 rounded-lg p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-white">
+        <h3 className="text-lg font-semibold text-white">
           {labels.episodes}
         </h3>
         <select

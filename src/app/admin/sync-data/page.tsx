@@ -184,7 +184,7 @@ export default function AdminSyncDataPage() {
   return (
     <div className="space-y-6">
         <header>
-          <h1 className="text-3xl font-bold text-white">Data Synchronization</h1>
+          <h1 className="text-3xl font-semibold text-white">Data Synchronization</h1>
           <p className="text-gray-400 mt-2 max-w-2xl">
             Manually trigger TMDB import jobs for movies and TV series. Use this
             when you need fresh catalog data immediately, outside of scheduled
@@ -287,9 +287,10 @@ export default function AdminSyncDataPage() {
                 date.
               </p>
             </div>
-            <label className="flex flex-col text-sm text-gray-300">
+            <label htmlFor="sync-custom-date" className="flex flex-col text-sm text-gray-300">
               TMDB Export Date (optional)
               <input
+                id="sync-custom-date"
                 type="date"
                 value={customDate}
                 onChange={(event) => setCustomDate(event.target.value)}
@@ -347,10 +348,11 @@ export default function AdminSyncDataPage() {
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="sync-movie-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
                 Movie Catalog Limit
               </label>
               <input
+                id="sync-movie-catalog-limit"
                 type="number"
                 min="0"
                 step="1000"
@@ -369,10 +371,11 @@ export default function AdminSyncDataPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="sync-tv-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
                 TV Series Catalog Limit
               </label>
               <input
+                id="sync-tv-catalog-limit"
                 type="number"
                 min="0"
                 step="1000"
@@ -391,10 +394,11 @@ export default function AdminSyncDataPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="sync-trending-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
                 Trending Catalog Limit
               </label>
               <input
+                id="sync-trending-catalog-limit"
                 type="number"
                 min="0"
                 step="10"
@@ -413,10 +417,11 @@ export default function AdminSyncDataPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="sync-people-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
                 People Cache Limit
               </label>
               <input
+                id="sync-people-cache-limit"
                 type="number"
                 min="0"
                 step="1000"
@@ -435,10 +440,11 @@ export default function AdminSyncDataPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="sync-recommendation-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
                 Recommendation Cache Limit
               </label>
               <input
+                id="sync-recommendation-cache-limit"
                 type="number"
                 min="0"
                 step="1000"

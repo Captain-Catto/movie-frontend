@@ -36,7 +36,7 @@ export default function NotificationModal({
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 w-full max-w-lg my-8 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-semibold text-white">
             Send {modalTitle} Notification
           </h2>
           <button
@@ -64,8 +64,9 @@ export default function NotificationModal({
           <div className="rounded-lg border border-gray-600 p-3 space-y-3">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🇻🇳 Tiếng Việt</p>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Tiêu đề</label>
+              <label htmlFor="notification-title-vi" className="block text-sm font-medium text-gray-300 mb-1.5">Tiêu đề</label>
               <input
+                id="notification-title-vi"
                 type="text"
                 value={formData.titleVi}
                 onChange={(e) => onFormDataChange({ ...formData, titleVi: e.target.value })}
@@ -74,8 +75,9 @@ export default function NotificationModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Nội dung</label>
+              <label htmlFor="notification-message-vi" className="block text-sm font-medium text-gray-300 mb-1.5">Nội dung</label>
               <textarea
+                id="notification-message-vi"
                 value={formData.messageVi}
                 onChange={(e) => onFormDataChange({ ...formData, messageVi: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -89,8 +91,9 @@ export default function NotificationModal({
           <div className="rounded-lg border border-gray-600 p-3 space-y-3">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🇺🇸 English</p>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Title</label>
+              <label htmlFor="notification-title-en" className="block text-sm font-medium text-gray-300 mb-1.5">Title</label>
               <input
+                id="notification-title-en"
                 type="text"
                 value={formData.titleEn}
                 onChange={(e) => onFormDataChange({ ...formData, titleEn: e.target.value })}
@@ -99,8 +102,9 @@ export default function NotificationModal({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Message</label>
+              <label htmlFor="notification-message-en" className="block text-sm font-medium text-gray-300 mb-1.5">Message</label>
               <textarea
+                id="notification-message-en"
                 value={formData.messageEn}
                 onChange={(e) => onFormDataChange({ ...formData, messageEn: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -132,8 +136,9 @@ export default function NotificationModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Type</label>
+            <label htmlFor="notification-type" className="block text-sm font-medium text-gray-300 mb-2">Type</label>
             <select
+              id="notification-type"
               value={formData.notificationType}
               onChange={(e) =>
                 onFormDataChange({
@@ -166,8 +171,9 @@ export default function NotificationModal({
 
           {sendModal.type === "role" && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
+              <label htmlFor="notification-role" className="block text-sm font-medium text-gray-300 mb-2">Role</label>
               <select
+                id="notification-role"
                 value={formData.role}
                 onChange={(e) =>
                   onFormDataChange({
@@ -185,10 +191,11 @@ export default function NotificationModal({
 
           {sendModal.type === "user" && (
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="notification-user-id" className="block text-sm font-medium text-gray-300 mb-2">
                 User ID
               </label>
               <input
+                id="notification-user-id"
                 type="number"
                 value={formData.userId}
                 onChange={(e) =>
@@ -203,10 +210,11 @@ export default function NotificationModal({
           {sendModal.type === "maintenance" && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                <label htmlFor="notification-maintenance-start" className="block text-xs font-medium text-gray-300 mb-1.5">
                   Start Time (Optional)
                 </label>
                 <input
+                  id="notification-maintenance-start"
                   type="datetime-local"
                   value={formData.maintenanceStartTime}
                   onChange={(e) =>
@@ -219,10 +227,11 @@ export default function NotificationModal({
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-300 mb-1.5">
+                <label htmlFor="notification-maintenance-end" className="block text-xs font-medium text-gray-300 mb-1.5">
                   End Time (Optional)
                 </label>
                 <input
+                  id="notification-maintenance-end"
                   type="datetime-local"
                   value={formData.maintenanceEndTime}
                   onChange={(e) =>
@@ -238,10 +247,11 @@ export default function NotificationModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1.5">
+            <label htmlFor="notification-action-url" className="block text-sm font-medium text-gray-300 mb-1.5">
               Link (optional)
             </label>
             <input
+              id="notification-action-url"
               type="text"
               value={formData.actionUrl}
               onChange={(e) => onFormDataChange({ ...formData, actionUrl: e.target.value })}

@@ -28,9 +28,9 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
     };
 
     async function init() {
-      const Hls = (await import("hls.js")).default;
-
       if (destroyed) return;
+
+      const Hls = (await import("hls.js")).default;
 
       if (Hls.isSupported()) {
         const hls = new Hls({

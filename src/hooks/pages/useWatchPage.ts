@@ -210,13 +210,13 @@ export function useWatchPage({
           ? { season, episode, dsLang, autoplay: true, autoNext: true }
           : { dsLang, autoplay: true };
 
+      if (cancelled) return;
+
       const streamResponse = await apiService.getStreamUrlByTmdbId(
         streamTmdbId,
         streamContentType === "tv" ? "tv" : "movie",
         streamOptions
       );
-
-      if (cancelled) return;
 
       if (streamResponse.success && streamResponse.data?.url) {
         const candidates = [

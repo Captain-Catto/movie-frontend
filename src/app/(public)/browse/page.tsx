@@ -53,7 +53,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   return (
     <Layout>
       <Container withHeaderOffset>
-        <h1 className="text-3xl font-bold text-white mb-8">
+        <h1 className="text-3xl font-semibold text-white mb-8">
           {getBrowsePageTitleByLanguage(fetchType, language)}
         </h1>
 

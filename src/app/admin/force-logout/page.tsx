@@ -28,7 +28,7 @@ export default function ForceLogoutPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-white">Force Logout</h1>
+        <h1 className="text-3xl font-semibold text-white">Force Logout</h1>
         <p className="text-gray-400">
           Clearing authentication data and redirecting you to the home page.
         </p>

@@ -437,7 +437,7 @@ export default function AdminContentPage() {
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Content Management</h1>
+            <h1 className="text-3xl font-semibold text-white">Content Management</h1>
             <p className="text-gray-400 mt-1 max-w-2xl">{sectionDescription}</p>
           </div>
 
@@ -693,7 +693,7 @@ export default function AdminContentPage() {
         {blockModal.open && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
-              <h3 className="text-xl font-bold text-white mb-4">
+              <h3 className="text-xl font-semibold text-white mb-4">
                 {isTrendingTab ? "Hide Content" : "Block Content"}
               </h3>
               <p className="text-gray-400 mb-4">

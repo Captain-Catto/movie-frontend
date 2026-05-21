@@ -123,12 +123,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "no data-hash found" }, { status: 404 });
     }
 
-    for (const hash of hashes) {
-      const m3u8 = await fetchRcpAndExtract(hash, embedUrl);
-      if (m3u8) {
-        const proxy = buildProxy(m3u8);
-        return NextResponse.json({ m3u8: proxy, raw: m3u8 });
-      }
+    const m3u8 = await Promise.any(
+      hashes.map((hash) =>
+        fetchRcpAndExtract(hash, embedUrl).then((result) => {
+          if (!result) throw new Error("no m3u8");
+          return result;
+        })
+      )
+    ).catch(() => null);
+
+    if (m3u8) {
+      const proxy = buildProxy(m3u8);
+      return NextResponse.json({ m3u8: proxy, raw: m3u8 });
     }
 
     return NextResponse.json({ error: "m3u8 not found" }, { status: 404 });

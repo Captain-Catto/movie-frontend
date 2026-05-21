@@ -51,7 +51,7 @@ export default async function TVShowsPage({ searchParams }: TVShowsPageProps) {
     <Layout>
       <Container withHeaderOffset>
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-8">
+          <h1 className="text-3xl font-semibold text-white mb-8">
             {listing.tvSeriesTitle}
           </h1>
 

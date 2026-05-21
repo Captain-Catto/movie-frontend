@@ -393,7 +393,7 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-white">User Management</h1>
+          <h1 className="text-3xl font-semibold text-white">User Management</h1>
           <p className="text-gray-400">
             Manage users, ban or unban accounts
           </p>
@@ -612,7 +612,7 @@ export default function AdminUsersPage() {
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-4xl border border-gray-700 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-white">User Details</h3>
+                  <h3 className="text-xl font-semibold text-white">User Details</h3>
                   <p className="text-gray-400 text-sm">
                     {editModal.user.email}
                   </p>
@@ -673,10 +673,11 @@ export default function AdminUsersPage() {
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">
+                      <label htmlFor="admin-user-display-name" className="block text-sm text-gray-400 mb-1">
                         Display name
                       </label>
                       <input
+                        id="admin-user-display-name"
                         value={editForm.name}
                         onChange={(e) =>
                           setEditForm((prev) => ({ ...prev, name: e.target.value }))
@@ -686,18 +687,22 @@ export default function AdminUsersPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">
+                      <label htmlFor="admin-user-email" className="block text-sm text-gray-400 mb-1">
                         Email (read-only)
                       </label>
-                      <div className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300">
-                        {editModal.user.email}
-                      </div>
+                      <input
+                        id="admin-user-email"
+                        value={editModal.user.email}
+                        readOnly
+                        className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300"
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">
+                      <label htmlFor="admin-user-role" className="block text-sm text-gray-400 mb-1">
                         Role
                       </label>
                       <select
+                        id="admin-user-role"
                         value={editForm.role}
                         onChange={(e) =>
                           setEditForm((prev) => ({
@@ -719,9 +724,9 @@ export default function AdminUsersPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">
+                      <div className="block text-sm text-gray-400 mb-1">
                         Status
-                      </label>
+                      </div>
                       <div className="flex flex-col space-y-1">
                         {editModal.user.isActive ? (
                           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white w-fit">
@@ -743,10 +748,11 @@ export default function AdminUsersPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
-                      <label className="block text-sm text-gray-400 mb-1">
+                      <label htmlFor="admin-user-new-password" className="block text-sm text-gray-400 mb-1">
                         New password
                       </label>
                       <input
+                        id="admin-user-new-password"
                         type="password"
                         value={editForm.password}
                         onChange={(e) =>
@@ -1084,7 +1090,7 @@ export default function AdminUsersPage() {
         {banModal.open && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
-              <h3 className="text-xl font-bold text-white mb-4">Ban User</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">Ban User</h3>
               <p className="text-gray-400 mb-4">
                 Ban user &quot;{banModal.user?.name}&quot; (
                 {banModal.user?.email})

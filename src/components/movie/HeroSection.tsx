@@ -270,7 +270,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     }`}
                   >
                     {/* Main Title */}
-                    <h1 className="hero-content-fade hero-content-fade--title text-5xl font-bold text-white">
+                    <h1 className="hero-content-fade hero-content-fade--title text-5xl font-semibold text-white">
                       <Link title={movie.title} href={movie.href} onClick={handleDetailClick}>
                         {movie.title}
                       </Link>

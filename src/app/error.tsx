@@ -24,7 +24,7 @@ export default function Error({
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-semibold text-white mb-4">
             {labels.title}
           </h2>
           <p className="text-gray-400 text-lg mb-4">

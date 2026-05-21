@@ -104,7 +104,7 @@ export default function TrailerModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700 flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-white">{movieTitle}</h2>
+            <h2 className="text-xl font-semibold text-white">{movieTitle}</h2>
           </div>
           <button
             onClick={onClose}

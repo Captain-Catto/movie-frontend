@@ -561,7 +561,7 @@ export default function AdminSeoPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-white">SEO Management</h1>
+        <h1 className="text-3xl font-semibold text-white">SEO Management</h1>
         <p className="text-gray-400">
           Monitor and tune metadata so search crawlers pick up the latest
           updates.
@@ -968,17 +968,18 @@ export default function AdminSeoPage() {
         {editModal.open && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
-              <h2 className="text-lg font-bold mb-4">
+              <h2 className="text-lg font-semibold mb-4">
                 {editModal.isNew ? "Add" : "Edit"} SEO Metadata
               </h2>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-white">
+                    <label htmlFor="seo-page-type" className="block text-sm font-medium text-white">
                       Page Type
                     </label>
                     <select
+                      id="seo-page-type"
                       value={formData.pageType}
                       onChange={(e) =>
                         setFormData({ ...formData, pageType: e.target.value })
@@ -998,10 +999,11 @@ export default function AdminSeoPage() {
                     </p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white">
+                    <label htmlFor="seo-path" className="block text-sm font-medium text-white">
                       Path
                     </label>
                     <input
+                      id="seo-path"
                       type="text"
                       value={formData.path}
                       onChange={(e) =>
@@ -1012,10 +1014,11 @@ export default function AdminSeoPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white">
+                    <label htmlFor="seo-locale" className="block text-sm font-medium text-white">
                       Locale
                     </label>
                     <select
+                      id="seo-locale"
                       value={formData.locale}
                       onChange={(e) =>
                         setFormData({ ...formData, locale: e.target.value })
@@ -1032,10 +1035,11 @@ export default function AdminSeoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white">
+                  <label htmlFor="seo-title" className="block text-sm font-medium text-white">
                     Title
                   </label>
                   <input
+                    id="seo-title"
                     type="text"
                     value={formData.title}
                     onChange={(e) =>
@@ -1049,10 +1053,11 @@ export default function AdminSeoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white">
+                  <label htmlFor="seo-description" className="block text-sm font-medium text-white">
                     Description
                   </label>
                   <textarea
+                    id="seo-description"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
@@ -1066,10 +1071,11 @@ export default function AdminSeoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white">
+                  <label htmlFor="seo-keywords" className="block text-sm font-medium text-white">
                     Keywords (comma-separated)
                   </label>
                   <input
+                    id="seo-keywords"
                     type="text"
                     value={formData.keywords}
                     onChange={(e) =>

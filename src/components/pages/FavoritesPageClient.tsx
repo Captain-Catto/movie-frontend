@@ -79,7 +79,7 @@ const FavoritesPage = () => {
         <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
           <div className="text-center">
             <Heart className="mx-auto mb-4 text-red-500" size={64} />
-            <h1 className="text-2xl font-bold mb-2">
+            <h1 className="text-2xl font-semibold mb-2">
               {labels.yourFavorites}
             </h1>
             <p className="text-gray-400">
@@ -126,7 +126,7 @@ const FavoritesPage = () => {
         <Container withHeaderOffset>
           <div className="flex items-center gap-3 mb-8">
             <Heart className="text-red-500 fill-current" size={32} />
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-3xl font-semibold">
               {labels.pageTitle}
             </h1>
             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">

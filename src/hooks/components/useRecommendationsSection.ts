@@ -62,12 +62,12 @@ export function useRecommendationsSection({
         setLoading(true);
         setError(null);
 
+        if (!isMounted) return;
+
         const response =
           contentType === "movie"
             ? await apiService.getMovieRecommendations(tmdbId)
             : await apiService.getTVRecommendations(tmdbId);
-
-        if (!isMounted) return;
 
         if (response.success && Array.isArray(response.data)) {
           setRecommendations(

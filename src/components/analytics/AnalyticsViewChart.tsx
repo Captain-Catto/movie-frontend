@@ -25,7 +25,7 @@ export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProp
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-bold text-white mb-2">Views Over Time</h2>
+      <h2 className="text-xl font-semibold text-white mb-2">Views Over Time</h2>
       <p className="text-sm text-gray-400 mb-4">
         Trend is limited to the last 30 days (backend constraint)
       </p>

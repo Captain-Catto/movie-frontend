@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import {
@@ -60,11 +60,14 @@ function Toggle({
   disabled?: boolean;
   color?: 'red' | 'blue';
 }) {
+  const inputId = useId();
   const checkedColor = color === 'blue' ? 'peer-checked:bg-blue-500' : 'peer-checked:bg-red-600';
   const ringColor = color === 'blue' ? 'peer-focus:ring-blue-800' : 'peer-focus:ring-red-800';
   return (
-    <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+    <label htmlFor={inputId} className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+      <span className="sr-only">Toggle visual effect</span>
       <input
+        id={inputId}
         type="checkbox"
         className="sr-only peer"
         checked={checked}

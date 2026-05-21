@@ -29,7 +29,7 @@ export default function RecommendationsSection({
     return (
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-white mb-8">
+          <h2 className="text-3xl font-semibold text-white mb-8">
             You Might Also Like
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -52,7 +52,7 @@ export default function RecommendationsSection({
   return (
     <section className="py-12">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-white mb-8">
+        <h2 className="text-3xl font-semibold text-white mb-8">
           You Might Also Like
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">

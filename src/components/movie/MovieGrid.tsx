@@ -36,7 +36,7 @@ const MovieGrid = ({
     <div className={containerPadding ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16" : ""}>
       {(title || showFilters) && (
         <div className="flex items-center justify-between mb-8">
-          {title && <h2 className="text-2xl font-bold text-white">{title}</h2>}
+          {title && <h2 className="text-2xl font-semibold text-white">{title}</h2>}
           {showFilters && (
             <div className="flex space-x-4">
               <button className="flex items-center space-x-2 text-red-500 cursor-pointer">

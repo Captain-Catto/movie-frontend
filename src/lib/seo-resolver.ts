@@ -166,8 +166,8 @@ const fetchSeoOverride = async (
     new Set([path, ...(lookupPaths || [])].map(normalizePath))
   );
 
-  for (const candidatePath of candidatePaths) {
-    try {
+  const override = await Promise.any(
+    candidatePaths.map(async (candidatePath) => {
       const url = new URL(`${DEFAULT_API_BASE}${SEO_RESOLVE_ENDPOINT}`);
       url.searchParams.set("path", candidatePath);
       url.searchParams.set("locale", locale);
@@ -183,20 +183,19 @@ const fetchSeoOverride = async (
         },
       });
 
-      if (!response.ok) continue;
+      if (!response.ok) throw new Error("not ok");
 
       const json = (await response.json()) as unknown;
       const raw = extractRawSeoRecord(json);
-      if (!raw) continue;
+      if (!raw) throw new Error("no seo record");
 
-      const override = toSeoOverride(raw);
-      if (override) return override;
-    } catch {
-      continue;
-    }
-  }
+      const result = toSeoOverride(raw);
+      if (!result) throw new Error("no override");
+      return result;
+    })
+  ).catch(() => null);
 
-  return null;
+  return override;
 };
 
 const buildRobots = (

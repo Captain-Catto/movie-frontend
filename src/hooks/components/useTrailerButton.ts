@@ -42,8 +42,8 @@ export function useTrailerButton({
     const checkVideosAvailability = async () => {
       setLoading(true);
       try {
-        const response = await fetchVideos();
         if (!isMounted) return;
+        const response = await fetchVideos();
 
         if (response.success && response.data?.results) {
           const availableVideos = response.data.results;

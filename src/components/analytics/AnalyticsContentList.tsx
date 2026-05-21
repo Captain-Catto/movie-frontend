@@ -42,7 +42,7 @@ export default function AnalyticsContentList({
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-white">{title}</h2>
+        <h2 className="text-xl font-semibold text-white">{title}</h2>
         {data.length > 0 && (
           <button
             onClick={() => exportToCSV(data, exportFilename)}

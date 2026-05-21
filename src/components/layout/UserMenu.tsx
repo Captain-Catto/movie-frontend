@@ -108,6 +108,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
       {/* Dropdown Menu */}
       {isOpen && (
         <div
+          role="menu"
           className="absolute right-0 mt-2 w-64 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-[150] animate-in fade-in slide-in-from-top-2 duration-200"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}

@@ -214,7 +214,7 @@ export default function AdminSettingsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Site Settings</h1>
+          <h1 className="text-3xl font-semibold text-white">Site Settings</h1>
           <p className="text-gray-400 mt-1">
             Adjust registration constraints and visual effects
           </p>
@@ -331,10 +331,11 @@ export default function AdminSettingsPage() {
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="swagger-auth-username" className="block text-sm font-medium text-gray-300 mb-2">
               Username
             </label>
             <input
+              id="swagger-auth-username"
               type="text"
               value={swaggerAuthForm.username}
               onChange={(e) =>
@@ -348,10 +349,11 @@ export default function AdminSettingsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="swagger-auth-password" className="block text-sm font-medium text-gray-300 mb-2">
               Password
             </label>
             <input
+              id="swagger-auth-password"
               type="password"
               value={swaggerAuthForm.password}
               onChange={(e) =>

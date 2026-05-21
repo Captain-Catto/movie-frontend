@@ -174,7 +174,7 @@ export default function NotificationDetailModal({ notification, onClose }: Props
           </div>
 
           {/* Title */}
-          <h2 className="text-white font-bold text-lg leading-snug">{title}</h2>
+          <h2 className="text-white font-semibold text-lg leading-snug">{title}</h2>
 
           {/* Message */}
           <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{message}</p>

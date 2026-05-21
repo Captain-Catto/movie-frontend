@@ -96,7 +96,7 @@ const PeopleDetailPageClient = ({
 
             <div className="lg:col-span-3 space-y-6">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
+                <h1 className="text-4xl font-semibold text-white mb-2">
                   {personData.name}
                 </h1>
                 <p className="text-xl text-red-400 mb-4">{knownForText}</p>
@@ -161,7 +161,7 @@ const PeopleDetailPageClient = ({
 
         <Container>
           <div className="border-t border-gray-700 pt-8">
-            <h2 className="text-2xl font-bold text-white mb-6">
+            <h2 className="text-2xl font-semibold text-white mb-6">
               {labels.filmography}
             </h2>
 

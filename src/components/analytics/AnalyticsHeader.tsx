@@ -36,7 +36,7 @@ export default function AnalyticsHeader({
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
+          <h1 className="text-3xl font-semibold text-white">Analytics Dashboard</h1>
           <p className="text-gray-400 mt-1">
             Track views, clicks, favorites, and device/country distribution
           </p>
@@ -133,10 +133,10 @@ export default function AnalyticsHeader({
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
         <div className="flex flex-col lg:flex-row gap-4">
           {/* Date Presets */}
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <fieldset className="flex-1">
+            <legend className="block text-sm font-medium text-gray-300 mb-2">
               Time Period
-            </label>
+            </legend>
             <div className="flex flex-wrap gap-2">
               {DATE_PRESETS.map((preset) => (
                 <button
@@ -152,14 +152,15 @@ export default function AnalyticsHeader({
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Content Type Filter */}
           <div className="w-full lg:w-48">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="analytics-content-type" className="block text-sm font-medium text-gray-300 mb-2">
               Content Type
             </label>
             <select
+              id="analytics-content-type"
               value={contentType}
               onChange={(e) =>
                 onContentTypeChange(e.target.value as "all" | "movie" | "tv")
@@ -177,10 +178,11 @@ export default function AnalyticsHeader({
         {datePreset === "custom" && (
           <div className="flex gap-4 mt-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="analytics-start-date" className="block text-sm font-medium text-gray-300 mb-2">
                 Start Date
               </label>
               <input
+                id="analytics-start-date"
                 type="date"
                 value={customDateRange.startDate}
                 onChange={(e) =>
@@ -193,10 +195,11 @@ export default function AnalyticsHeader({
               />
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="analytics-end-date" className="block text-sm font-medium text-gray-300 mb-2">
                 End Date
               </label>
               <input
+                id="analytics-end-date"
                 type="date"
                 value={customDateRange.endDate}
                 onChange={(e) =>

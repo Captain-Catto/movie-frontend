@@ -83,7 +83,7 @@ export default function NotificationsHeader({
     <div className="space-y-6">
       {showTitle && (
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-white">{title}</h1>
+          <h1 className="text-3xl font-semibold text-white">{title}</h1>
           <p className="text-gray-400">{description}</p>
         </div>
       )}
@@ -93,8 +93,9 @@ export default function NotificationsHeader({
         <h3 className="text-lg font-semibold text-white mb-4">Filters</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Type</label>
+            <label htmlFor="notification-filter-type" className="block text-sm font-medium text-gray-300 mb-2">Type</label>
             <select
+              id="notification-filter-type"
               value={filters.type}
               onChange={(e) =>
                 onFiltersChange({
@@ -112,8 +113,9 @@ export default function NotificationsHeader({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
+            <label htmlFor="notification-filter-start-date" className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
             <input
+              id="notification-filter-start-date"
               type="date"
               value={filters.startDate}
               onChange={(e) =>
@@ -123,8 +125,9 @@ export default function NotificationsHeader({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
+            <label htmlFor="notification-filter-end-date" className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
             <input
+              id="notification-filter-end-date"
               type="date"
               value={filters.endDate}
               onChange={(e) => onFiltersChange({ ...filters, endDate: e.target.value })}

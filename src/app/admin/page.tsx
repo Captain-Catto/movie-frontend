@@ -16,7 +16,7 @@ export default function AdminDashboard() {
     <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-semibold text-white mb-2">
             Admin Dashboard
           </h1>
           <p className="text-gray-400">
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
 
         {/* Sync Status Section */}
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <h2 className="text-xl font-bold text-white mb-4">
+          <h2 className="text-xl font-semibold text-white mb-4">
             Data Synchronization
           </h2>
 

@@ -78,14 +78,14 @@ export const useSearch = (): UseSearchReturn => {
           params.append("type", searchType);
         }
 
+        if (requestId !== activeRequestIdRef.current) {
+          return;
+        }
+
         const response = await fetch(`${API_BASE_URL}/search?${params.toString()}`, {
           signal: controller.signal,
         });
         const data = await response.json();
-
-        if (requestId !== activeRequestIdRef.current) {
-          return;
-        }
 
         if (data.success && data.data) {
           // Handle nested data structure from backend

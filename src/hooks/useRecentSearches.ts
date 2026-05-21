@@ -139,12 +139,14 @@ export const useRecentSearches = (
   // Sync local searches to database
   const syncLocalToDatabase = async (localSearches: RecentSearch[]) => {
     try {
-      for (const search of localSearches) {
-        await axiosInstance.post("/search/recent", {
-          query: search.query,
-          type: search.type,
-        });
-      }
+      await Promise.all(
+        localSearches.map((search) =>
+          axiosInstance.post("/search/recent", {
+            query: search.query,
+            type: search.type,
+          })
+        )
+      );
 
       // Clear local storage after successful sync
       localStorage.removeItem(LOCAL_STORAGE_KEY);

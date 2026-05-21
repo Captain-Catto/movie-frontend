@@ -178,7 +178,7 @@ const TVDetailPageClient = ({
 
               {/* TV Info */}
               <div className="flex-1 text-center md:text-left min-w-0 w-full md:w-auto">
-                <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4 drop-shadow-lg break-words">
+                <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-semibold text-white mb-2 sm:mb-3 md:mb-4 drop-shadow-lg break-words">
                   {tvData.title}
                 </h1>
                 {tvData.originalTitle !== tvData.title && (
@@ -278,7 +278,7 @@ const TVDetailPageClient = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             {/* Main Content */}
             <div className="lg:col-span-2">
-              <h3 className="text-2xl font-bold text-white mb-6">
+              <h3 className="text-2xl font-semibold text-white mb-6">
                 {labels.overview}
               </h3>
               <div className="bg-gray-800 rounded-lg p-6 mb-8">
@@ -316,7 +316,7 @@ const TVDetailPageClient = ({
               {/* Cast Section */}
               {(tvData.cast && tvData.cast.length > 0) || creditsLoading ? (
                 <>
-                  <h3 className="text-2xl font-bold text-white mb-6">
+                  <h3 className="text-2xl font-semibold text-white mb-6">
                     {labels.cast.replace(":", "")}
                   </h3>
                   {creditsLoading ? (
@@ -360,7 +360,7 @@ const TVDetailPageClient = ({
             {/* Sidebar */}
             <div className="lg:col-span-1">
               <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
-                <h3 className="text-xl font-bold text-white mb-4">
+                <h3 className="text-xl font-semibold text-white mb-4">
                   {labels.seriesInfo}
                 </h3>
                 <div className="space-y-3 text-gray-300">
@@ -517,7 +517,7 @@ const TVDetailPageClient = ({
             fallback={
               <section className="py-12 max-w-6xl mx-auto">
                 <div className="container mx-auto px-4">
-                  <h2 className="text-3xl font-bold text-white mb-8">
+                  <h2 className="text-3xl font-semibold text-white mb-8">
                     {labels.youMayAlsoLike}
                   </h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">

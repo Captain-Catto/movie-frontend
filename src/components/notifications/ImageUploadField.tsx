@@ -160,8 +160,8 @@ export default function ImageUploadField({ value, onChange }: Props) {
         <>
           {/* Drop zone */}
           <div
-            role={showUrlInput ? undefined : "button"}
-            tabIndex={showUrlInput ? undefined : 0}
+            role="button"
+            tabIndex={0}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}

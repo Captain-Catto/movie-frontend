@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCommonUiMessages, getPaginationUiMessages } from "@/lib/ui-messages";
 
@@ -41,6 +41,17 @@ export function Pagination({
   const [desktopInputValue, setDesktopInputValue] = useState(
     currentPage.toString()
   );
+
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const desktopInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isInputMode) mobileInputRef.current?.focus();
+  }, [isInputMode]);
+
+  useEffect(() => {
+    if (desktopInputMode) desktopInputRef.current?.focus();
+  }, [desktopInputMode]);
 
   const getDesktopPages = () => {
     const pages = [];
@@ -148,8 +159,8 @@ export function Pagination({
                 onChange={(e) => setInputValue(e.target.value)}
                 onBlur={handleInputBlur}
                 onKeyDown={handleInputKeyDown}
+                ref={mobileInputRef}
                 className="w-12 px-2 py-1 text-sm text-center text-white bg-gray-700 border border-red-500 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
-                autoFocus
               />
               <span className="text-sm font-medium text-gray-300 ml-2">
                 / {totalPages}
@@ -224,8 +235,8 @@ export function Pagination({
                         onChange={(e) => setDesktopInputValue(e.target.value)}
                         onBlur={handleDesktopInputBlur}
                         onKeyDown={handleDesktopInputKeyDown}
+                        ref={desktopInputRef}
                         className="w-16 px-2 py-1 text-sm text-center text-white bg-gray-700 border border-red-500 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
-                        autoFocus
                         placeholder={`1-${totalPages}`}
                       />
                     </form>
