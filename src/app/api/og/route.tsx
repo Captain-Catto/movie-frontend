@@ -65,7 +65,7 @@ export function GET(request: Request) {
             top: -170,
             borderRadius: 999,
             background: style.glow,
-            filter: "blur(20px)",
+            filter: "blur(8px)",
           }}
         />
         <div
@@ -77,7 +77,7 @@ export function GET(request: Request) {
             bottom: -180,
             borderRadius: 999,
             background: "rgba(59, 130, 246, 0.18)",
-            filter: "blur(18px)",
+            filter: "blur(8px)",
           }}
         />
         <div

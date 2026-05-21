@@ -95,10 +95,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
-      style={{
-        backdropFilter: "blur(12px)",
-      }}
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur flex items-center justify-center p-4"
       onClick={handleBackdropClick}
       onKeyDown={(event) => {
         if (event.key === "Escape") onClose();
