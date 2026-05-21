@@ -106,7 +106,7 @@ export function ToastNotificationProvider({
                   "animate-in slide-in-from-top duration-300"
                 )}
               >
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start gap-x-3">
                   <div
                     className={cn(
                       "flex-shrink-0 p-1 rounded-full",

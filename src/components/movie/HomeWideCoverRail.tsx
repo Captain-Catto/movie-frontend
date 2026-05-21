@@ -150,7 +150,7 @@ export default function HomeWideCoverRail({
         >
           {movies.map((movie, index) => (
             <WideCoverCard
-              key={`wide-cover-${movie.id}-${index}`}
+              key={`wide-cover-${movie.id}`}
               movie={movie}
               priority={index < 3}
             />

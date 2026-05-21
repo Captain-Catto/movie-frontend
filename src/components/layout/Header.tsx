@@ -156,7 +156,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
             </div>
 
             <div className="hidden lg:block">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-x-4">
                 {navigationItems.map((item) => (
                   <Link
                     key={item.href}

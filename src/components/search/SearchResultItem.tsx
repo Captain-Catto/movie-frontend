@@ -68,7 +68,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
     <Link
       href={mediaInfo.href}
       onClick={handleClick}
-      className="flex items-center space-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors group"
+      className="flex items-center gap-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors group"
     >
       {/* Poster */}
       <div className="relative w-12 h-16 flex-shrink-0">
@@ -106,7 +106,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
           </p>
         )}
 
-        <div className="flex items-center space-x-3 mt-1">
+        <div className="flex items-center gap-x-3 mt-1">
           {/* Media type */}
           <span className={`text-xs ${mediaInfo.color}`}>
             {mediaInfo.label}
@@ -114,7 +114,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
 
           {/* Year */}
           {year && (
-            <div className="flex items-center space-x-1 text-gray-400">
+            <div className="flex items-center gap-x-1 text-gray-400">
               <Calendar className="size-3" />
               <span className="text-xs">{year}</span>
             </div>
@@ -122,7 +122,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
 
           {/* Rating */}
           {result.voteAverage && Number(result.voteAverage) > 0 && (
-            <div className="flex items-center space-x-1 text-yellow-400">
+            <div className="flex items-center gap-x-1 text-yellow-400">
               <Star className="size-3 fill-current" />
               <span className="text-xs">
                 {Number(result.voteAverage).toFixed(1)}

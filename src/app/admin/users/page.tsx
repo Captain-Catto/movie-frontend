@@ -220,8 +220,8 @@ export default function AdminUsersPage() {
 
   const renderSignupAccess = (user: User) => {
     return (
-      <div className="flex flex-col space-y-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-col gap-y-2">
+        <div className="flex items-center gap-x-2">
           <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-600 text-white">
             Register
           </span>
@@ -229,7 +229,7 @@ export default function AdminUsersPage() {
             {formatDateTime(user.createdAt)}
           </span>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-x-2">
           <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-600 text-white">
             Login
           </span>
@@ -391,7 +391,7 @@ export default function AdminUsersPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="gap-y-6">
         {/* Header */}
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold text-white">User Management</h1>
@@ -488,7 +488,7 @@ export default function AdminUsersPage() {
                             className="cursor-pointer ml-3 text-left"
                             title="Edit user"
                           >
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center gap-x-2">
                               <div className="text-sm font-medium text-white hover:text-red-300 transition-colors">
                                 {user.name || "No name"}
                               </div>
@@ -534,7 +534,7 @@ export default function AdminUsersPage() {
                         {user.lastLoginCountry ? (
                           <>
                             {countryFlagUrl(user.lastLoginCountry) ? (
-                              /* eslint-disable-next-line @next/next/no-img-element, react-doctor/nextjs-no-img-element */
+                              /* eslint-disable-next-line @next/next/no-img-element */
                               <img
                                 src={
                                   countryFlagUrl(
@@ -563,7 +563,7 @@ export default function AdminUsersPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
-                        <div className="flex flex-col space-y-1">
+                        <div className="flex flex-col gap-y-1">
                           <span className="capitalize">
                             {user.lastLoginDevice || "N/A"}
                           </span>
@@ -628,7 +628,7 @@ export default function AdminUsersPage() {
               </div>
 
               {/* Tabs */}
-              <div className="flex space-x-1 mb-6 border-b border-gray-700">
+              <div className="flex gap-x-1 mb-6 border-b border-gray-700">
                 <button
                   onClick={() => setActiveTab("info")}
                   className={`px-4 py-2 font-medium transition-colors cursor-pointer ${
@@ -728,7 +728,7 @@ export default function AdminUsersPage() {
                       <div className="block text-sm text-gray-400 mb-1">
                         Status
                       </div>
-                      <div className="flex flex-col space-y-1">
+                      <div className="flex flex-col gap-y-1">
                         {editModal.user.isActive ? (
                           <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white w-fit">
                             Active
@@ -798,7 +798,7 @@ export default function AdminUsersPage() {
                     <div className="mt-3 text-sm text-red-400">{editError}</div>
                   )}
 
-                  <div className="flex justify-end space-x-3 mt-6">
+                  <div className="flex justify-end gap-x-3 mt-6">
                     <button
                       onClick={closeEditModal}
                       className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
@@ -915,7 +915,7 @@ export default function AdminUsersPage() {
                             key={item.id}
                             className="flex gap-3 p-4 hover:bg-gray-700/50 transition-colors"
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element, react-doctor/nextjs-no-img-element */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={item.posterUrl || fallbackPoster}
                               alt={item.contentTitle}
@@ -1102,7 +1102,7 @@ export default function AdminUsersPage() {
                 placeholder="Enter reason for banning..."
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 min-h-24"
               />
-              <div className="flex justify-end space-x-3 mt-4">
+              <div className="flex justify-end gap-x-3 mt-4">
                 <button
                   onClick={() => {
                     setBanModal({ open: false, user: null });

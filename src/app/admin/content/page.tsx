@@ -433,7 +433,7 @@ export default function AdminContentPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="gap-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -462,7 +462,7 @@ export default function AdminContentPage() {
         <div className="min-h-[88px] md:min-h-[44px]">
           {!isTrendingTab ? (
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex space-x-2">
+              <div className="flex gap-x-2">
                 {(["all", "active", "blocked"] as ContentStatusFilter[]).map(
                   (status) => (
                     <button
@@ -716,7 +716,7 @@ export default function AdminContentPage() {
                 }
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 min-h-24"
               />
-              <div className="flex justify-end space-x-3 mt-4">
+              <div className="flex justify-end gap-x-3 mt-4">
                 <button
                   onClick={() => {
                     setBlockModal({ open: false, content: null });

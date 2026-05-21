@@ -42,7 +42,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
   ];
 
   return (
-    <div className="flex space-x-1 bg-gray-800 rounded-lg p-1">
+    <div className="flex gap-x-1 bg-gray-800 rounded-lg p-1">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = selectedType === tab.id;
@@ -51,7 +51,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
           <button
             key={tab.id}
             onClick={() => onTypeChange(tab.id)}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            className={`flex items-center gap-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               isActive
                 ? "bg-red-500 text-white"
                 : "text-gray-400 hover:text-white hover:bg-gray-700"

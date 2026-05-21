@@ -216,7 +216,7 @@ export default function HomeFeatureSlider({
 
             return (
               <button
-                key={`feature-thumb-${movie.id}-${index}`}
+                key={`feature-thumb-${movie.id}`}
                 type="button"
                 className={index === activeIndex ? "is-active" : ""}
                 onClick={() => setActiveIndex(index)}

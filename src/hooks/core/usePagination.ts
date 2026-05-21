@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
 
 /**
  * Options for usePagination hook
@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 export interface UsePaginationOptions {
   /** Base path for navigation (e.g., '/movies', '/browse') */
   basePath?: string;
+  /** Search params from the calling component (must be provided by the component wrapped in Suspense) */
+  searchParams?: ReadonlyURLSearchParams;
   /** Initial page number (default: 1) */
   initialPage?: number;
   /** Whether to scroll to top on page change (default: false) */
@@ -69,12 +71,14 @@ export function usePagination(
 ): UsePaginationResult {
   const {
     basePath,
+    searchParams: providedSearchParams,
     initialPage = 1,
     scrollOnChange = false,
   } = options;
 
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const currentSearchParams = useSearchParams();
+  const searchParams = providedSearchParams ?? currentSearchParams;
 
   // Get current page from URL params
   const page = useMemo(() => {

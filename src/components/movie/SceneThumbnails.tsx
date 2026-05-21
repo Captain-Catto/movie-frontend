@@ -6,8 +6,8 @@ interface SceneThumbnailsProps {
 
 const SceneThumbnails = ({ scenes }: SceneThumbnailsProps) => {
   return (
-    <div className="flex space-x-2">
-      {scenes.map((scene, index) => (
+    <div className="flex gap-x-2">
+      {scenes.map((scene) => (
         <div
           key={index}
           className="w-24 h-16 rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105"

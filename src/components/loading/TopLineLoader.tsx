@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const START_EVENT = "app-route-loading-start";
@@ -46,7 +46,7 @@ const shouldHandleAnchor = (
   return true;
 };
 
-export function TopLineLoader() {
+function TopLineLoaderImpl() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchKey = searchParams.toString();
@@ -188,5 +188,13 @@ export function TopLineLoader() {
         style={{ transform: `scaleX(${progress / 100})` }}
       />
     </div>
+  );
+}
+
+export function TopLineLoader() {
+  return (
+    <Suspense fallback={null}>
+      <TopLineLoaderImpl />
+    </Suspense>
   );
 }

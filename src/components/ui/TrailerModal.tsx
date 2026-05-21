@@ -142,7 +142,7 @@ export default function TrailerModal({
               <div className="p-4 border-b border-gray-700 flex-shrink-0">
                 <h3 className="text-white font-semibold">{labels.videoList}</h3>
               </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              <div className="flex-1 overflow-y-auto p-4 gap-y-2">
                 {youtubeVideos.map((video) => (
                   <button
                     key={video.id}
@@ -153,7 +153,7 @@ export default function TrailerModal({
                         : "border-gray-600 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white"
                     } cursor-pointer`}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center gap-x-3">
                       <Play size={16} className="text-red-500 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate text-sm">

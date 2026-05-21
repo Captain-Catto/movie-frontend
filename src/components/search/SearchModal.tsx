@@ -122,7 +122,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-x-2">
             <SearchIcon className="size-5 text-gray-400" />
             <h2 className="text-lg font-semibold text-white">
               {labels.title}

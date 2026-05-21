@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { apiService } from "@/services/api";
@@ -31,6 +31,7 @@ export interface UseWatchPageOptions {
   initialError: string | null;
   initialSeason: number;
   initialEpisode: number;
+  searchParams: ReadonlyURLSearchParams;
 }
 
 export interface UseWatchPageResult {
@@ -78,8 +79,8 @@ export function useWatchPage({
   initialError,
   initialSeason,
   initialEpisode,
+  searchParams,
 }: UseWatchPageOptions): UseWatchPageResult {
-  const searchParams = useSearchParams();
   const { language } = useLanguage();
   const labels = getPageHookUiMessages(language);
 

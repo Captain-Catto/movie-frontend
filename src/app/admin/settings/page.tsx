@@ -210,7 +210,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="gap-y-6">
       <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h1 className="text-3xl font-semibold text-white">Site Settings</h1>
@@ -259,8 +259,8 @@ export default function AdminSettingsPage() {
                       {item.label}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-x-3">
+                        <div className="flex items-center gap-x-2">
                           <span className="px-2 py-1 text-xs font-semibold rounded bg-green-700 text-white">
                             Min
                           </span>
@@ -278,7 +278,7 @@ export default function AdminSettingsPage() {
                             className="w-14 px-2 py-1 rounded border border-gray-600 bg-gray-700 text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
                           />
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-x-2">
                           <span className="px-2 py-1 text-xs font-semibold rounded bg-red-700 text-white">
                             Max
                           </span>
@@ -394,7 +394,7 @@ export default function AdminSettingsPage() {
             remaining domains are fallback sources.
           </p>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-6 gap-y-4">
           <textarea
             value={streamDomainText}
             onChange={(e) => setStreamDomainText(e.target.value)}

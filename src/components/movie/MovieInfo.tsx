@@ -12,10 +12,10 @@ interface MovieInfoProps {
 
 const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: MovieInfoProps) => {
   return (
-    <div className="space-y-4">
+    <div className="gap-y-4">
       <div>
         <h1 className="text-5xl font-semibold mb-4 text-white">{title}</h1>
-        <div className="flex items-center space-x-4 text-sm">
+        <div className="flex items-center gap-x-4 text-sm">
           <RatingBadge rating={rating} variant="inline" showZero={true} />
           <span className="text-white">{year}</span>
           <div className="flex items-center text-gray-400">
@@ -41,7 +41,7 @@ const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: M
       <div className="flex flex-wrap gap-2">
         {genres.map((genre, index) => (
           <span
-            key={index}
+            key={genre}
             className="px-3 py-1 bg-gray-800/50 backdrop-blur-sm rounded-full text-sm hover:bg-gray-700/50 transition-colors cursor-pointer text-white"
           >
             {genre}

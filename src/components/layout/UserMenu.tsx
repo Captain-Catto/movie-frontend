@@ -88,7 +88,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
           e.stopPropagation();
           setIsOpen(!isOpen);
         }}
-        className="flex items-center space-x-2 focus:outline-none group cursor-pointer"
+        className="flex items-center gap-x-2 focus:outline-none group cursor-pointer"
       >
         <div className="relative size-10 rounded-full overflow-hidden border-2 border-gray-600 group-hover:border-red-500 transition-colors cursor-pointer">
           <Image
@@ -115,7 +115,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
         >
           {/* User Info Header */}
           <div className="p-4 border-b border-gray-700">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center gap-x-3">
               <div className="relative size-12 rounded-full overflow-hidden border-2 border-gray-600">
                 <Image
                   src={avatarSrc}

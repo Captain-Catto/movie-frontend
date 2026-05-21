@@ -1,5 +1,6 @@
 import type { Notification, PaginationMeta } from "@/types/notifications.types";
 import { NOTIFICATION_TYPE_COLORS } from "@/types/notifications.types";
+import type { ReactElement } from "react";
 
 interface NotificationsTableProps {
   notifications: Notification[];
@@ -172,7 +173,7 @@ export default function NotificationsTable({
 
             <div className="flex items-center gap-1">
               {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).reduce<
-                { els: JSX.Element[]; prevPage: number | null }
+                { els: ReactElement[]; prevPage: number | null }
               >(
                 (acc, page) => {
                   // Show first page, last page, current page, and pages around current

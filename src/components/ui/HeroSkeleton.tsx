@@ -14,7 +14,7 @@ const HeroSkeleton = () => {
 
       {/* Content Skeleton */}
       <div className="relative flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 lg:pt-32 pb-12">
-        <div className="max-w-2xl space-y-8">
+        <div className="max-w-2xl gap-y-8">
           {/* Title Skeleton */}
           <div>
             <Skeleton className="h-12 w-80 sm:w-96 mb-4" />
@@ -35,14 +35,14 @@ const HeroSkeleton = () => {
           </div>
 
           {/* Description Skeleton */}
-          <div className="space-y-3 max-w-3xl">
+          <div className="gap-y-3 max-w-3xl">
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-full" />
             <Skeleton className="h-4 w-5/6" />
           </div>
 
           {/* Buttons Skeleton */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-x-4">
             <Skeleton className="h-12 w-32 rounded-xl" />
             <Skeleton className="size-12 rounded-xl" />
             <Skeleton className="h-12 w-24 rounded-xl" />

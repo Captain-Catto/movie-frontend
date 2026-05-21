@@ -130,7 +130,7 @@ function HomeTopicRowItem({ row, rowIndex }: { row: HomeTopicRow; rowIndex: numb
         >
           {row.movies.map((movie, index) => (
             <HomeTopicCard
-              key={`${row.href}-${movie.id}-${index}`}
+              key={`${row.href}-${movie.id}`}
               movie={movie}
               priority={rowIndex === 0 && index < 3}
             />

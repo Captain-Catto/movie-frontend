@@ -31,7 +31,7 @@ export default function AnalyticsDeviceStats({
               >
                 {deviceStats.map((entry: DeviceStats, index) => (
                   <Cell
-                    key={`cell-${index}`}
+                    key={`cell-${entry.device}`}
                     fill={DEVICE_COLORS[index % DEVICE_COLORS.length]}
                   />
                 ))}

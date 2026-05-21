@@ -193,7 +193,7 @@ export default function AccountPage() {
 
           {/* Profile Card */}
           <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 mb-6">
-            <div className="flex items-start space-x-6">
+            <div className="flex items-start gap-x-6">
               <button
                 type="button"
                 className="group relative size-24 cursor-pointer overflow-hidden rounded-full border-4 border-gray-600"
@@ -259,7 +259,7 @@ export default function AccountPage() {
               {labels.settings}
             </h3>
 
-            <form onSubmit={handleUpdateProfile} className="space-y-4 mb-6">
+            <form onSubmit={handleUpdateProfile} className="gap-y-4 mb-6">
               {formError && (
                 <div className="px-4 py-3 rounded-lg bg-red-900/40 border border-red-700 text-red-200">
                   {formError}
@@ -271,7 +271,7 @@ export default function AccountPage() {
                 </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="gap-y-2">
                   <label htmlFor="account-display-name" className="text-sm text-gray-300">{labels.displayName}</label>
                   <input
                     id="account-display-name"
@@ -285,7 +285,7 @@ export default function AccountPage() {
                     disabled={saving}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="gap-y-2">
                   <label htmlFor="account-email" className="text-sm text-gray-300">{labels.email}</label>
                   <input
                     id="account-email"
@@ -298,7 +298,7 @@ export default function AccountPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="gap-y-2">
                   <label htmlFor="account-new-password" className="text-sm text-gray-300">{labels.newPassword}</label>
                   <input
                     id="account-new-password"
@@ -312,7 +312,7 @@ export default function AccountPage() {
                     disabled={saving}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="gap-y-2">
                   <label htmlFor="account-confirm-password" className="text-sm text-gray-300">
                     {labels.confirmPassword}
                   </label>
@@ -342,7 +342,7 @@ export default function AccountPage() {
               </button>
             </form>
 
-            <div className="space-y-4 mt-8">
+            <div className="gap-y-4 mt-8">
               <button
                 className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
                 onClick={() => router.push("/account/change-password")}

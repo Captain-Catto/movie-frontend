@@ -128,7 +128,7 @@ export function Pagination({
       className={classNames("flex items-center justify-center", className)}
       aria-label={labels.pagination}
     >
-      <div className="flex items-center space-x-1">
+      <div className="flex items-center gap-x-1">
         {/* Previous Page */}
         <button
           onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
@@ -179,7 +179,7 @@ export function Pagination({
         </div>
 
         {/* Desktop Version - Shows on >= lg (1024px) */}
-        <div className="hidden lg:flex space-x-1">
+        <div className="hidden lg:flex gap-x-1">
           {/* First page */}
           {desktopPages[0] > 1 && (
             <>

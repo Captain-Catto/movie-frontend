@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, type ReadonlyURLSearchParams } from "next/navigation";
 import { ContentQuery } from "@/types/content.types";
 import type { MovieCardData } from "@/types/content.types";
 import { DEFAULT_MOVIE_PAGE_SIZE } from "@/constants/app.constants";
@@ -22,6 +22,7 @@ type CategoryResponse = {
 
 type UseMovieCategoryOptions<Response extends CategoryResponse> = {
   basePath?: string;
+  searchParams: ReadonlyURLSearchParams;
   fetcher: (query: ContentQuery) => Promise<Response>;
   mapper: (items: Array<Record<string, unknown>>) => MovieCardData[];
   defaultLimit?: number;
@@ -76,6 +77,7 @@ const extractPagination = (response: CategoryResponse) => {
 
 export function useMovieCategory<Response extends CategoryResponse>({
   basePath,
+  searchParams,
   fetcher,
   mapper,
   defaultLimit = DEFAULT_MOVIE_PAGE_SIZE,
@@ -84,7 +86,6 @@ export function useMovieCategory<Response extends CategoryResponse>({
 }: UseMovieCategoryOptions<Response>) {
   const { language: contextLanguage } = useLanguage();
   const resolvedLanguage = defaultLanguage || contextLanguage;
-  const searchParams = useSearchParams();
   const router = useRouter();
   const fetcherRef = useRef(fetcher);
   const mapperRef = useRef(mapper);

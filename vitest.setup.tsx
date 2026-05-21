@@ -30,7 +30,7 @@ vi.mock("next/navigation", () => ({
 // Mock Next.js Image component
 vi.mock("next/image", () => ({
   default: (props: Record<string, unknown>) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text, react-doctor/nextjs-no-img-element
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return <img {...props} />;
   },
 }));

@@ -50,7 +50,7 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
       }
       setSocket(null);
       setIsConnected(false);
-      return;
+      return () => {};
     }
 
     const API_BASE_URL =

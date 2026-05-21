@@ -56,7 +56,7 @@ export default function AnalyticsContentList({
         <div className="space-y-3 max-h-[400px] overflow-y-auto">
           {data.map((item, index) => (
             <Link
-              key={`${item.contentType}-${item.id}-${index}`}
+              key={`${item.contentType}-${item.id}`}
               href={getHref(item)}
               className="flex items-center gap-3 p-3 bg-gray-700 bg-opacity-50 rounded-lg hover:bg-opacity-70 transition-colors cursor-pointer"
             >

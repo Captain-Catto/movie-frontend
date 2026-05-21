@@ -146,7 +146,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                     }
                   }}
                 >
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start gap-x-3">
                     <div className="flex-shrink-0 mt-1">
                       {getTypeIcon(notification.type)}
                     </div>
@@ -166,7 +166,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                         language={language}
                       />
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center gap-x-1">
                       {!notification.isRead && (
                         <Button
                           variant="ghost"

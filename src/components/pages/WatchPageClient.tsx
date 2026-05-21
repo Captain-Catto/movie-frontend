@@ -1,6 +1,7 @@
 "use client";
 
 import { lazy, Suspense } from "react";
+import { useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
@@ -42,7 +43,7 @@ interface WatchPageClientProps {
   initialEpisode: number;
 }
 
-const WatchPageClient = ({
+const WatchPageClientContent = ({
   movieId,
   initialLanguage,
   initialMovieData,
@@ -53,7 +54,8 @@ const WatchPageClient = ({
   initialError,
   initialSeason,
   initialEpisode,
-}: WatchPageClientProps) => {
+  searchParams,
+}: WatchPageClientProps & { searchParams: ReadonlyURLSearchParams }) => {
   const { language } = useLanguage();
   const labels = getWatchPageUiMessages(language);
 
@@ -91,6 +93,7 @@ const WatchPageClient = ({
     initialError,
     initialSeason,
     initialEpisode,
+    searchParams,
   });
 
   if (loading) {
@@ -231,7 +234,7 @@ const WatchPageClient = ({
                 </div>
 
                 {/* Movie Details */}
-                <div className="info lg:col-span-3 space-y-6">
+                <div className="info lg:col-span-3 gap-y-6">
                   <div>
                     <h2 className="heading-sm media-name text-4xl font-semibold text-white mb-2">
                       <Link
@@ -336,7 +339,7 @@ const WatchPageClient = ({
                           }
                           return (
                             <GenreBadge
-                              key={`${genreId}-${index}`}
+                              key={genreId}
                               genre={genre}
                               genreId={genreId}
                               contentType={movieData.contentType}
@@ -411,7 +414,7 @@ const WatchPageClient = ({
                     <div className="bg-gray-800 rounded-lg p-8">
                       <div className="animate-pulse">
                         <div className="h-8 bg-gray-700 rounded w-48 mb-6"></div>
-                        <div className="space-y-4">
+                        <div className="gap-y-4">
                           <div className="h-24 bg-gray-700 rounded"></div>
                           <div className="h-24 bg-gray-700 rounded"></div>
                           <div className="h-24 bg-gray-700 rounded"></div>
@@ -437,7 +440,7 @@ const WatchPageClient = ({
             </div>
 
             {/* Sidebar - 1/3 width */}
-            <div className="lg:col-span-1 space-y-8">
+            <div className="lg:col-span-1 gap-y-8">
               {/* Cast & Crew */}
               <div className="bg-gray-800 rounded-lg p-6">
                 <h3 className="text-xl font-semibold text-white mb-4">
@@ -446,7 +449,7 @@ const WatchPageClient = ({
                 {creditsLoading ? (
                   <div className="grid grid-cols-3 gap-3">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="text-center">
+                      <div key={`cast-skeleton-${i}`} className="text-center">
                         <div className="size-16 bg-gray-700 rounded-full animate-pulse mx-auto mb-2"></div>
                         <div className="h-3 bg-gray-700 rounded animate-pulse"></div>
                       </div>
@@ -516,9 +519,9 @@ const WatchPageClient = ({
                   {labels.youMayAlsoLike}
                 </h3>
                 {recommendationsLoading ? (
-                  <div className="space-y-4">
+                  <div className="gap-y-4">
                     {[...Array(5)].map((_, i) => (
-                      <div key={i} className="flex space-x-3">
+                      <div key={`rec-skeleton-${i}`} className="flex gap-x-3">
                         <div className="w-16 h-24 bg-gray-700 rounded animate-pulse flex-shrink-0"></div>
                         <div className="flex-1">
                           <div className="h-4 bg-gray-700 rounded animate-pulse mb-2"></div>
@@ -529,14 +532,14 @@ const WatchPageClient = ({
                     ))}
                   </div>
                 ) : recommendations.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="gap-y-4">
                     {recommendations.map((item: WatchPageRecommendationItem) => (
                       <Link
                         key={item.id}
                         href={`/${
                           movieData.contentType === "tv" ? "tv" : "movie"
                         }/${item.id}`}
-                        className="flex space-x-3 hover:bg-gray-700 rounded-lg p-2 transition-colors group"
+                        className="flex gap-x-3 hover:bg-gray-700 rounded-lg p-2 transition-colors group"
                       >
                         <div className="w-16 h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
                           {item.poster_path ? (
@@ -609,5 +612,16 @@ const WatchPageClient = ({
     </Layout>
   );
 };
+
+function WatchPageClientBridge(props: WatchPageClientProps) {
+  const searchParams = useSearchParams();
+  return <WatchPageClientContent {...props} searchParams={searchParams} />;
+}
+
+const WatchPageClient = (props: WatchPageClientProps) => (
+  <Suspense fallback={<Layout><DetailPageSkeleton /></Layout>}>
+    <WatchPageClientBridge {...props} />
+  </Suspense>
+);
 
 export default WatchPageClient;

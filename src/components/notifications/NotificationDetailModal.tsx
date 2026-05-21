@@ -140,7 +140,7 @@ export default function NotificationDetailModal({ notification, onClose }: Props
         {/* Header — image or type illustration */}
         {imageUrl ? (
           <div className="relative w-full aspect-video bg-gray-800">
-            {/* eslint-disable-next-line @next/next/no-img-element, react-doctor/nextjs-no-img-element */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl}
               alt={title}

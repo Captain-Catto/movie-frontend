@@ -41,7 +41,7 @@ export default function AdminTopBar({ onMenuClick, user }: AdminTopBarProps) {
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 shrink-0">
+        <div className="flex items-center gap-x-3 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 shrink-0">
           <div className="size-7 rounded-md bg-red-600 flex items-center justify-center text-white text-xs font-semibold">
             {user?.name?.charAt(0)?.toUpperCase() || "A"}
           </div>

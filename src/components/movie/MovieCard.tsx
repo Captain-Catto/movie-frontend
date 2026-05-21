@@ -158,7 +158,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
               <div className="absolute bottom-0 left-0 right-0 p-4">
                 <button
                   onClick={handleWatchMovie}
-                  className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center space-x-2 cursor-pointer"
+                  className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center gap-x-2 cursor-pointer"
                 >
                   <div className="size-4 relative">
                     <div className="size-0 border-l-[8px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-0.5"></div>
@@ -224,7 +224,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
       ) : null}
 
       {/* Movie Info - Always visible */}
-      <div className="info mt-3 space-y-1">
+      <div className="info mt-3 gap-y-1">
         <p
           className="item-title block min-h-12 min-w-12 p-2 text-center text-sm font-semibold leading-5 text-white line-clamp-3"
           title={movie.title}

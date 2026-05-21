@@ -130,7 +130,7 @@ export default function HomeTopTenRail({ title, movies }: HomeTopTenRailProps) {
         <div ref={scrollerRef} className="home-top-ten__scroller" onScroll={updateScrollState}>
           {topMovies.map((movie, index) => (
             <TopTenCard
-              key={`top-ten-${movie.id}-${index}`}
+              key={`top-ten-${movie.id}`}
               movie={movie}
               index={index}
               priority={index < 3}

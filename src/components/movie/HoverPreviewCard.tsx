@@ -129,8 +129,8 @@ export function HoverPreviewCard({
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
       </div>
 
-      <div className="p-5 space-y-4">
-        <div className="text-center space-y-1">
+      <div className="p-5 gap-y-4">
+        <div className="text-center gap-y-1">
           <h3 className="text-white font-semibold text-lg line-clamp-2">{title}</h3>
           {overview && (
             <span className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium line-clamp-3">
@@ -139,7 +139,7 @@ export function HoverPreviewCard({
           )}
         </div>
 
-        <div className="flex space-x-2">
+        <div className="flex gap-x-2">
           <Link
             href={watchHref}
             className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
@@ -185,7 +185,7 @@ export function HoverPreviewCard({
 
         <div className="flex flex-wrap gap-2">
           {displayRating && (
-            <span className="bg-yellow-500 text-black px-2 py-1 rounded flex items-center space-x-1 font-bold text-xs">
+            <span className="bg-yellow-500 text-black px-2 py-1 rounded flex items-center gap-x-1 font-bold text-xs">
               <span>★</span>
               <span>{displayRating}</span>
             </span>
@@ -218,7 +218,7 @@ export function HoverPreviewCard({
             : genreNames &&
               genreNames.slice(0, 3).map((name, idx) => (
                 <span
-                  key={`${name}-${idx}`}
+                  key={name}
                   className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium"
                 >
                   {name}

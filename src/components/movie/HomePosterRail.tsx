@@ -129,7 +129,7 @@ export default function HomePosterRail({
         >
           {movies.map((movie, index) => (
             <PosterRailCard
-              key={`upcoming-${movie.id}-${index}`}
+              key={`upcoming-${movie.id}`}
               movie={movie}
               priority={index < 4}
             />

@@ -95,7 +95,7 @@ const PeopleDetailPageClient = ({
               </div>
             </div>
 
-            <div className="lg:col-span-3 space-y-6">
+            <div className="lg:col-span-3 gap-y-6">
               <div>
                 <h1 className="text-4xl font-semibold text-white mb-2">
                   {personData.name}
@@ -166,7 +166,7 @@ const PeopleDetailPageClient = ({
               {labels.filmography}
             </h2>
 
-            <div className="flex space-x-4 mb-6">
+            <div className="flex gap-x-4 mb-6">
               <button
                 onClick={() => handleTabChange("cast")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
@@ -192,7 +192,7 @@ const PeopleDetailPageClient = ({
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {currentItems.map((item, index) => (
                 <MovieCard
-                  key={`${activeTab}-${item.tmdbId}-${index}`}
+                  key={`${activeTab}-${item.tmdbId}`}
                   movie={item}
                 />
               ))}

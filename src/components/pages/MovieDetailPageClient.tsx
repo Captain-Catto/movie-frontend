@@ -1,6 +1,6 @@
 "use client";
 
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense } from "react";
 import type { SyntheticEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +27,18 @@ import {
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
 );
+const DISPLAY_NAMES_BY_LOCALE = {
+  "en-US": {
+    region: new Intl.DisplayNames(["en-US"], { type: "region" }),
+    language: new Intl.DisplayNames(["en-US"], { type: "language" }),
+  },
+  "vi-VN": {
+    region: new Intl.DisplayNames(["vi-VN"], { type: "region" }),
+    language: new Intl.DisplayNames(["vi-VN"], { type: "language" }),
+  },
+} as const;
+
+type SupportedDisplayLocale = keyof typeof DISPLAY_NAMES_BY_LOCALE;
 
 interface MovieDetailPageClientProps {
   movieId: string;
@@ -45,13 +57,11 @@ const MovieDetailPageClient = ({
 }: MovieDetailPageClientProps) => {
   const { language } = useLanguage();
   const locale = getLocaleFromLanguage(language);
-
-  const regionFormatter = useMemo(() => {
-    try { return new Intl.DisplayNames([locale], { type: "region" }); } catch { return null; }
-  }, [locale]);
-  const languageFormatter = useMemo(() => {
-    try { return new Intl.DisplayNames([locale], { type: "language" }); } catch { return null; }
-  }, [locale]);
+  const displayNames =
+    DISPLAY_NAMES_BY_LOCALE[locale as SupportedDisplayLocale] ||
+    DISPLAY_NAMES_BY_LOCALE["en-US"];
+  const regionFormatter = displayNames.region;
+  const languageFormatter = displayNames.language;
   const {
     movieData,
     loading,
@@ -259,7 +269,7 @@ const MovieDetailPageClient = ({
                     }
                     return (
                       <GenreBadge
-                        key={`${genreId}-${index}`}
+                        key={genreId}
                         genre={genre}
                         genreId={genreId}
                         contentType={movieData.contentType || "movie"}
@@ -350,9 +360,9 @@ const MovieDetailPageClient = ({
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                       {movieData.cast.map(
-                        (actor: CastMember, index: number) => (
+                        (actor: CastMember) => (
                           <Link
-                            key={index}
+                            key={actor.id}
                             href={`/people/${actor.id}`}
                             className="text-center group block"
                           >
@@ -429,9 +439,9 @@ const MovieDetailPageClient = ({
                         ) : (
                           movieData.cast
                             .slice(0, 6)
-                            .map((actor: CastMember, index: number) => (
+                            .map((actor: CastMember) => (
                               <Link
-                                key={index}
+                                key={actor.id}
                                 href={`/people/${actor.id}`}
                                 className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded mr-2 mb-2 transition-colors cursor-pointer"
                               >

@@ -265,7 +265,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
               <div className="safe-area relative z-20 h-full flex items-center">
                 <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                   <div
-                    className={`media-item max-w-2xl lg:max-w-4xl xl:max-w-5xl space-y-6 ${
+                    className={`media-item max-w-2xl lg:max-w-4xl xl:max-w-5xl gap-y-6 ${
                       index === visibleContentIndex ? "hero-content-ready" : ""
                     }`}
                   >
@@ -348,7 +348,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     </div>
 
                     {/* Touch/Action Buttons */}
-                    <div className="hero-content-fade hero-content-fade--buttons touch flex items-center space-x-4">
+                    <div className="hero-content-fade hero-content-fade--buttons touch flex items-center gap-x-4">
                       <Link
                         href={watchHref}
                         className="button-play"
@@ -370,7 +370,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                         </div>
                       </Link>
 
-                      <div className="touch-group flex items-center space-x-2">
+                      <div className="touch-group flex items-center gap-x-2">
                         <FavoriteButton
                           movie={{
                             id: movie.tmdbId,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense, lazy } from "react";
+import { useState, Suspense, lazy } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Layout from "@/components/layout/Layout";
@@ -24,6 +24,18 @@ import {
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
 );
+const DISPLAY_NAMES_BY_LOCALE = {
+  "en-US": {
+    region: new Intl.DisplayNames(["en-US"], { type: "region" }),
+    language: new Intl.DisplayNames(["en-US"], { type: "language" }),
+  },
+  "vi-VN": {
+    region: new Intl.DisplayNames(["vi-VN"], { type: "region" }),
+    language: new Intl.DisplayNames(["vi-VN"], { type: "language" }),
+  },
+} as const;
+
+type SupportedDisplayLocale = keyof typeof DISPLAY_NAMES_BY_LOCALE;
 
 interface TVDetailPageClientProps {
   tvIdParam: string;
@@ -49,13 +61,11 @@ const TVDetailPageClient = ({
   const locale = getLocaleFromLanguage(language);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const labels = getTVDetailUiMessages(language);
-
-  const regionFormatter = useMemo(() => {
-    try { return new Intl.DisplayNames([locale], { type: "region" }); } catch { return null; }
-  }, [locale]);
-  const languageFormatter = useMemo(() => {
-    try { return new Intl.DisplayNames([locale], { type: "language" }); } catch { return null; }
-  }, [locale]);
+  const displayNames =
+    DISPLAY_NAMES_BY_LOCALE[locale as SupportedDisplayLocale] ||
+    DISPLAY_NAMES_BY_LOCALE["en-US"];
+  const regionFormatter = displayNames.region;
+  const languageFormatter = displayNames.language;
 
   // Helper functions
   const isLocalFallback = (path: string | null) =>
@@ -215,7 +225,7 @@ const TVDetailPageClient = ({
                     }
                     return (
                       <GenreBadge
-                        key={`${genreId}-${index}`}
+                        key={genreId}
                         genre={genre}
                         genreId={genreId}
                         contentType="tv"
@@ -402,9 +412,9 @@ const TVDetailPageClient = ({
                         ) : (
                           tvData.cast
                             .slice(0, 6)
-                            .map((actor, index: number) => (
+                            .map((actor) => (
                               <Link
-                                key={index}
+                                key={actor.id}
                                 href={`/people/${actor.id}`}
                                 className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded mr-2 mb-2 transition-colors cursor-pointer"
                               >
@@ -421,9 +431,9 @@ const TVDetailPageClient = ({
                       {tvData.productionCountries &&
                       tvData.productionCountries.length > 0 ? (
                         tvData.productionCountries.map(
-                          (country, index: number) => (
+                          (country) => (
                             <span
-                              key={index}
+                              key={country.iso_3166_1 ?? country.name}
                               className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"
                             >
                               {country.name
@@ -435,9 +445,9 @@ const TVDetailPageClient = ({
                       ) : tvData.originCountry &&
                         tvData.originCountry.length > 0 ? (
                         tvData.originCountry.map(
-                          (country: string, index: number) => (
+                          (country: string) => (
                             <span
-                              key={index}
+                              key={country}
                               className="inline-block bg-gray-700 text-sm px-2 py-1 rounded mr-2 mb-1"
                             >
                               {getLocalizedCountryName(country)}

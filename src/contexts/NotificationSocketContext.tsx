@@ -73,11 +73,7 @@ export function NotificationSocketProvider({
         setUnreadCount(0);
         setLatestNotification(null);
       }
-      return;
-    }
-
-    if (socketRef.current?.connected) {
-      return;
+      return () => {};
     }
 
     const API_BASE_URL =

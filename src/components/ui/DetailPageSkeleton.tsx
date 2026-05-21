@@ -16,11 +16,11 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-          <div className="max-w-2xl space-y-8">
+          <div className="max-w-2xl gap-y-8">
             {/* Title and Metadata Skeleton */}
             <div>
               <Skeleton className="h-12 w-96 mb-4" />
-              <div className="flex items-center space-x-4 text-sm mb-4">
+              <div className="flex items-center gap-x-4 text-sm mb-4">
                 <Skeleton className="h-4 w-8" />
                 <Skeleton className="h-4 w-12" />
                 <Skeleton className="h-4 w-16" />
@@ -37,14 +37,14 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
             </div>
 
             {/* Description Skeleton */}
-            <div className="space-y-2">
+            <div className="gap-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
             </div>
 
             {/* Buttons Skeleton */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-x-4">
               <Skeleton className="h-12 w-32 rounded-xl" />
               <Skeleton className="size-12 rounded-xl" />
               <Skeleton className="h-12 w-24 rounded-xl" />
@@ -53,7 +53,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
 
           {/* Scene Thumbnails Skeleton */}
           <div className="absolute bottom-8 right-8">
-            <div className="flex space-x-2">
+            <div className="flex gap-x-2">
               {Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton key={index} className="w-24 h-16 rounded-lg" />
               ))}
@@ -63,7 +63,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
       </div>
 
       {/* Content Section Skeleton */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 gap-y-16">
         {/* Cast Section Skeleton */}
         <div>
           <Skeleton className="h-8 w-32 mb-8" />
@@ -87,7 +87,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
                       <Skeleton className="absolute inset-0" />
                     </div>
                   </div>
-                  <div className="info mt-3 space-y-2">
+                  <div className="info mt-3 gap-y-2">
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="size-3/4" />
                   </div>
@@ -101,7 +101,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
             <Skeleton className="h-6 w-32 mb-4" />
-            <div className="space-y-3">
+            <div className="gap-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
                 <div key={index} className="flex justify-between">
                   <Skeleton className="h-4 w-24" />
@@ -112,7 +112,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
           </div>
           <div>
             <Skeleton className="h-6 w-32 mb-4" />
-            <div className="space-y-3">
+            <div className="gap-y-3">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div key={index} className="flex justify-between">
                   <Skeleton className="h-4 w-28" />

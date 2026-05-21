@@ -67,7 +67,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
     <div className="h-full overflow-y-auto">
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-medium flex items-center space-x-2">
+          <h3 className="text-white font-medium flex items-center gap-x-2">
             <Clock className="size-4" />
             <span>{labels.recentSearchesTitle}</span>
           </h3>
@@ -75,7 +75,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
           {searches.length > 0 && (
             <button
               onClick={onClearAll}
-              className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center space-x-1 cursor-pointer"
+              className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center gap-x-1 cursor-pointer"
             >
               <Trash2 className="size-3" />
               <span>{labels.clearAll}</span>
@@ -83,7 +83,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="gap-y-2">
           {searches.map((search, index) => (
             <button
               type="button"
@@ -92,7 +92,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
               onClick={() => onSearchClick(search)}
             >
               <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-x-2">
                   <span className="text-white font-medium truncate">
                     {search.query}
                   </span>
@@ -105,7 +105,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-center space-x-2 mt-1">
+                <div className="flex items-center gap-x-2 mt-1">
                   <ClientOnly
                     fallback={
                       <span className="text-xs text-gray-400">

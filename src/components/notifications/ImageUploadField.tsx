@@ -129,7 +129,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
       {/* Preview */}
       {preview ? (
         <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
-          {/* eslint-disable-next-line @next/next/no-img-element, react-doctor/nextjs-no-img-element */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}
             alt="preview"

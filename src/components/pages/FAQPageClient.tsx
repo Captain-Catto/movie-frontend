@@ -48,7 +48,7 @@ export default function FAQPage() {
 
         <div className="space-y-4">
           {labels.items.map((faq, index) => (
-            <FAQItem key={index} question={faq.question} answer={faq.answer} />
+            <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
           ))}
         </div>
 

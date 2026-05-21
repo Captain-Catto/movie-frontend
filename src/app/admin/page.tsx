@@ -29,7 +29,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div
-                key={i}
+                key={`stat-card-${i}`}
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 animate-pulse"
               >
                 <div className="h-20"></div>

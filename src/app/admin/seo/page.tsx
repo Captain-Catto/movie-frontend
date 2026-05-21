@@ -557,7 +557,7 @@ export default function AdminSeoPage() {
     : [];
 
   return (
-    <div className="space-y-6">
+    <div className="gap-y-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold text-white">SEO Management</h1>
         <p className="text-gray-400">
@@ -572,7 +572,7 @@ export default function AdminSeoPage() {
         </div>
       )}
 
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 space-y-3">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 gap-y-3">
         <CheckSeoHealth
           onComplete={(res) => {
             setLastCheckedAt(new Date().toLocaleString());
@@ -589,7 +589,7 @@ export default function AdminSeoPage() {
       </div>
 
       {stats && (
-        <div className="space-y-4">
+        <div className="gap-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-white">Total Pages</h3>
@@ -724,7 +724,7 @@ export default function AdminSeoPage() {
         </div>
       )}
 
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-4">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 gap-y-4">
         <div className="flex flex-wrap gap-3 items-center">
           <button
             onClick={() => openEditModal(null, true)}
@@ -795,7 +795,7 @@ export default function AdminSeoPage() {
         </div>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 space-y-3">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 gap-y-3">
         <h3 className="text-base font-semibold text-white">SEO Resolve Test</h3>
         <div className="flex flex-wrap items-center gap-3">
           <input
@@ -926,7 +926,7 @@ export default function AdminSeoPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                      <div className="flex gap-x-2">
                         <button
                           onClick={() => openEditModal(seo, false)}
                           className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
@@ -970,7 +970,7 @@ export default function AdminSeoPage() {
                 {editModal.isNew ? "Add" : "Edit"} SEO Metadata
               </h2>
 
-              <div className="space-y-4">
+              <div className="gap-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label htmlFor="seo-page-type" className="block text-sm font-medium text-white">
@@ -1088,7 +1088,7 @@ export default function AdminSeoPage() {
                   <h3 className="text-md font-medium mb-2 text-white">
                     Open Graph
                   </h3>
-                  <div className="space-y-3">
+                  <div className="gap-y-3">
                     <input
                       type="text"
                       placeholder="OG Title"
@@ -1127,7 +1127,7 @@ export default function AdminSeoPage() {
                   <h3 className="text-md font-medium mb-2 text-white">
                     Twitter
                   </h3>
-                  <div className="space-y-3">
+                  <div className="gap-y-3">
                     <input
                       type="text"
                       placeholder="Twitter Title"
@@ -1186,7 +1186,7 @@ export default function AdminSeoPage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end space-x-3">
+              <div className="mt-6 flex justify-end gap-x-3">
                 <button
                   onClick={() =>
                     setEditModal({ open: false, seo: null, isNew: false })

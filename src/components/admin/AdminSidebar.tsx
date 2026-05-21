@@ -290,7 +290,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
         )}
       </div>
 
-      <nav className="p-4 space-y-1">
+      <nav className="p-4 gap-y-1">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
 
@@ -298,7 +298,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`flex items-center gap-x-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
                   ? "bg-red-600 text-white"
                   : "text-gray-300 hover:bg-gray-700 hover:text-white"
@@ -314,7 +314,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       <div className="p-4 mt-auto border-t border-gray-800 bg-gray-900">
         <Link
           href="/"
-          className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+          className="flex items-center gap-x-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
         >
           <svg
             className="size-5"
@@ -374,7 +374,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="gap-y-4">
               <div>
                 <label htmlFor="admin-profile-name" className="block text-sm text-gray-300 mb-1">
                   Display name

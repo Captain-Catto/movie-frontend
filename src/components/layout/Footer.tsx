@@ -13,7 +13,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
-          <div className="space-y-4">
+          <div className="gap-y-4">
             <div className="flex items-center">
               <div className="size-8 bg-red-500 rounded flex items-center justify-center mr-2">
                 <div className="size-0 border-l-[6px] border-l-white border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent ml-1"></div>
@@ -25,7 +25,7 @@ const Footer = () => {
             <p className="text-gray-400">
               {labels.tagline}
             </p>
-            <div className="flex space-x-4">
+            <div className="flex gap-x-4">
               <Link
                 href="https://facebook.com"
                 className="inline-flex size-12 items-center justify-center rounded-md text-gray-400 transition-colors hover:text-red-500"
@@ -133,7 +133,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-white">
               {labels.quickLinks}
             </h3>
-            <ul className="space-y-3">
+            <ul className="gap-y-3">
               <li>
                 <Link
                   href="/"
@@ -182,7 +182,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-white">
               {labels.categories}
             </h3>
-            <ul className="space-y-3">
+            <ul className="gap-y-3">
               <li>
                 <Link
                   href="/browse?type=movie&genres=28"
@@ -231,7 +231,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4 text-white">
               {labels.contact}
             </h3>
-            <ul className="space-y-4">
+            <ul className="gap-y-4">
               <li className="flex items-center text-gray-400">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -273,11 +273,11 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-y-4 md:gap-y-0">
             <p className="text-gray-400 text-sm">
               {labels.copyright}
             </p>
-            <div className="flex space-x-8">
+            <div className="flex gap-x-8">
               <Link
                 href="/terms"
                 className="inline-flex min-h-12 min-w-12 items-center rounded-md px-3 text-sm text-gray-400 transition-colors hover:text-red-500"
