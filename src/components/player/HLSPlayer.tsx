@@ -18,6 +18,14 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
 
     let destroyed = false;
 
+    const onManifestParsed = () => {
+      video.play().catch(() => {});
+      onReady?.();
+    };
+    const onHlsError = (_: unknown, data: { fatal: boolean }) => {
+      if (data.fatal) onError?.();
+    };
+
     async function init() {
       const Hls = (await import("hls.js")).default;
 
@@ -31,24 +39,14 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
         hlsRef.current = hls;
 
         hls.loadSource(src);
-        hls.attachMedia(video!);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          video!.play().catch(() => {});
-          onReady?.();
-        });
-
-        hls.on(Hls.Events.ERROR, (_: unknown, data: { fatal: boolean }) => {
-          if (data.fatal) onError?.();
-        });
-      } else if (video!.canPlayType("application/vnd.apple.mpegurl")) {
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, onManifestParsed);
+        hls.on(Hls.Events.ERROR, onHlsError);
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         // Native HLS (Safari)
-        video!.src = src;
-        video!.addEventListener("loadedmetadata", () => {
-          video!.play().catch(() => {});
-          onReady?.();
-        });
-        video!.addEventListener("error", () => onError?.());
+        video.src = src;
+        video.addEventListener("loadedmetadata", onManifestParsed);
+        video.addEventListener("error", () => onError?.());
       } else {
         onError?.();
       }
@@ -58,8 +56,15 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
 
     return () => {
       destroyed = true;
-      const hls = hlsRef.current as { destroy?: () => void } | null;
-      hls?.destroy?.();
+      const hls = hlsRef.current as {
+        off(event: string, handler: unknown): void;
+        destroy(): void;
+      } | null;
+      if (hls) {
+        hls.off("hlsManifestParsed", onManifestParsed);
+        hls.off("hlsError", onHlsError);
+        hls.destroy();
+      }
       hlsRef.current = null;
     };
   }, [src, onReady, onError]);

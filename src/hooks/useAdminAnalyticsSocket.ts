@@ -104,6 +104,7 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
     });
 
     return () => {
+      client.removeAllListeners();
       client.disconnect();
       socketRef.current = null;
       setSocket(null);

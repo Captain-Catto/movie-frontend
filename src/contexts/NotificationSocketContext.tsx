@@ -127,6 +127,7 @@ export function NotificationSocketProvider({
     });
 
     return () => {
+      newSocket.removeAllListeners();
       newSocket.disconnect();
       socketRef.current = null;
       setSocket(null);
