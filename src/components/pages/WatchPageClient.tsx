@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { lazy, Suspense } from "react";
 import { useSearchParams, type ReadonlyURLSearchParams } from "next/navigation";
@@ -120,7 +120,7 @@ const WatchPageClientContent = ({
     <Layout hideHeaderOnPlay={true} isPlaying={isPlaying}>
       <div className="min-h-screen bg-gray-900">
         {/* Movie Player Section */}
-        <div className="relative flex items-center justify-center bg-black">
+        <div className="relative flex items-center justify-center bg-gray-950">
           <div className="w-full aspect-video max-h-[100vh] min-h-[240px] sm:min-h-[320px] flex items-center justify-center">
             {isPlaying ? (
               activeStreamUrl ? (
@@ -137,14 +137,14 @@ const WatchPageClientContent = ({
                     onError={handleStreamLoadError}
                   />
                   {activeStreamIndex > 0 && (
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded bg-black/70 text-xs text-white">
+                    <div className="absolute top-4 left-4 px-3 py-1 rounded bg-gray-950/70 text-xs text-white">
                       {labels.fallbackSource} {activeStreamIndex + 1}/
                       {streamCandidates.length}
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="size-full flex items-center justify-center bg-black px-6">
+                <div className="size-full flex items-center justify-center bg-gray-950 px-6">
                   {streamError ? (
                     <p className="text-gray-300 text-center">{streamError}</p>
                   ) : null}
@@ -166,7 +166,7 @@ const WatchPageClientContent = ({
                   className="object-cover"
                   priority
                 />
-                <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gray-950 bg-opacity-40 flex items-center justify-center">
                   <div className="size-24 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all transform hover:scale-110 group">
                     <svg
                       className="size-10 text-white ml-1 group-hover:scale-110 transition-transform"

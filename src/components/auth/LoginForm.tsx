@@ -65,7 +65,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const updateFormField = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
@@ -91,7 +91,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           type="email"
           placeholder={labels.emailPlaceholder}
           value={formData.email}
-          onChange={handleChange}
+          onChange={updateFormField}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.email ? "border-red-500" : ""
           }`}
@@ -112,7 +112,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           type="password"
           placeholder={labels.passwordPlaceholder}
           value={formData.password}
-          onChange={handleChange}
+          onChange={updateFormField}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.password ? "border-red-500" : ""
           }`}

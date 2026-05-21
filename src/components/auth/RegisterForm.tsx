@@ -70,7 +70,7 @@ export default function RegisterForm({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const updateFormField = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
@@ -91,7 +91,7 @@ export default function RegisterForm({
           type="text"
           placeholder={labels.usernamePlaceholder}
           value={formData.name}
-          onChange={handleChange}
+          onChange={updateFormField}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.name ? "border-red-500" : ""
           }`}
@@ -110,7 +110,7 @@ export default function RegisterForm({
           type="email"
           placeholder={labels.emailPlaceholder}
           value={formData.email}
-          onChange={handleChange}
+          onChange={updateFormField}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.email ? "border-red-500" : ""
           }`}
@@ -129,7 +129,7 @@ export default function RegisterForm({
           type="password"
           placeholder={labels.passwordPlaceholder}
           value={formData.password}
-          onChange={handleChange}
+          onChange={updateFormField}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.password ? "border-red-500" : ""
           }`}
@@ -150,7 +150,7 @@ export default function RegisterForm({
           type="password"
           placeholder={labels.passwordPlaceholder}
           value={formData.confirmPassword}
-          onChange={handleChange}
+          onChange={updateFormField}
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.confirmPassword ? "border-red-500" : ""
           }`}

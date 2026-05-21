@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Eye } from "lucide-react";
@@ -691,7 +691,7 @@ export default function AdminContentPage() {
 
         {/* Block Modal */}
         {blockModal.open && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-gray-950 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
               <h3 className="text-xl font-semibold text-white mb-4">
                 {isTrendingTab ? "Hide Content" : "Block Content"}

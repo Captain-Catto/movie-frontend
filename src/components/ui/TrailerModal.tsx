@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useState,
@@ -90,7 +90,7 @@ export default function TrailerModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-gray-950 bg-opacity-75 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
       onKeyDown={handleBackdropKeyDown}
       role="presentation"
@@ -119,7 +119,7 @@ export default function TrailerModal({
           {/* Video Player - Left Side */}
           <div className="flex-1">
             {selectedVideo ? (
-              <div className="relative aspect-video bg-black">
+              <div className="relative aspect-video bg-gray-950">
                 <iframe
                   src={`https://www.youtube.com/embed/${selectedVideo.key}?autoplay=1&rel=0&modestbranding=1`}
                   title={selectedVideo.name}

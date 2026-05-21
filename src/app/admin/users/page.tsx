@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
@@ -72,6 +72,35 @@ interface WatchHistoryResponse {
 }
 
 const regionDisplayNames = new Intl.DisplayNames(["en"], { type: "region" });
+
+function formatDateTime(value?: string) {
+  if (!value) return "N/A";
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
+}
+
+function UserSignupAccess({ user }: { user: User }) {
+  return (
+    <div className="flex flex-col gap-y-2">
+      <div className="flex items-center gap-x-2">
+        <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-600 text-white">
+          Register
+        </span>
+        <span className="text-sm text-gray-200" suppressHydrationWarning>
+          {formatDateTime(user.createdAt)}
+        </span>
+      </div>
+      <div className="flex items-center gap-x-2">
+        <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-600 text-white">
+          Login
+        </span>
+        <span className="text-sm text-gray-200" suppressHydrationWarning>
+          {formatDateTime(user.lastLoginAt)}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminUsersPage() {
   const { push } = useRouter();
@@ -180,12 +209,6 @@ export default function AdminUsersPage() {
 
   const roleOptions: UserRole[] = ["user", "admin", "super_admin", "viewer"];
 
-  const formatDateTime = (value?: string) => {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    return isNaN(date.getTime()) ? "N/A" : date.toLocaleString();
-  };
-
   const formatDuration = (seconds?: number | null) => {
     const value = Number(seconds || 0);
     if (!value) return "N/A";
@@ -218,29 +241,6 @@ export default function AdminUsersPage() {
   const countryFlagUrl = (code?: string | null) => {
     if (!code || code.length !== 2) return null;
     return `https://flagcdn.com/24x18/${code.toLowerCase()}.png`;
-  };
-
-  const renderSignupAccess = (user: User) => {
-    return (
-      <div className="flex flex-col gap-y-2">
-        <div className="flex items-center gap-x-2">
-          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-blue-600 text-white">
-            Register
-          </span>
-          <span className="text-sm text-gray-200">
-            {formatDateTime(user.createdAt)}
-          </span>
-        </div>
-        <div className="flex items-center gap-x-2">
-          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-600 text-white">
-            Login
-          </span>
-          <span className="text-sm text-gray-200">
-            {formatDateTime(user.lastLoginAt)}
-          </span>
-        </div>
-      </div>
-    );
   };
 
   const fetchUserLogs = useCallback(async (userId: number) => {
@@ -530,7 +530,7 @@ export default function AdminUsersPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
-                        {renderSignupAccess(user)}
+                        <UserSignupAccess user={user} />
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-300">
                         {user.lastLoginCountry ? (
@@ -608,7 +608,7 @@ export default function AdminUsersPage() {
 
         {/* Edit Modal */}
         {editModal.open && editModal.user && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-gray-950 bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-4xl border border-gray-700 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -1090,7 +1090,7 @@ export default function AdminUsersPage() {
 
         {/* Ban Modal */}
         {banModal.open && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-gray-950 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md border border-gray-700">
               <h3 className="text-xl font-semibold text-white mb-4">Ban User</h3>
               <p className="text-gray-400 mb-4">

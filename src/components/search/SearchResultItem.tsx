@@ -29,7 +29,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
   const releaseDate = result.releaseDate || result.firstAirDate;
   const year = releaseDate ? new Date(releaseDate).getFullYear() : null;
 
-  const handleClick = () => {
+  const saveAndClose = () => {
     // ✅ Save to recent searches when clicking result
     onResultClick?.();
     onClose();
@@ -67,7 +67,7 @@ const SearchResultItem: React.FC<SearchResultItemProps> = ({
   return (
     <Link
       href={mediaInfo.href}
-      onClick={handleClick}
+      onClick={saveAndClose}
       className="flex items-center gap-x-3 p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors group"
     >
       {/* Poster */}

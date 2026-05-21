@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import type { SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
@@ -93,9 +93,7 @@ export default function NotificationDetailModal({ notification, onClose }: Props
   const { title, message } = getLocalizedNotif(notification, language);
   const config = TYPE_CONFIG[notification.type] ?? TYPE_CONFIG.info;
   const imageUrl = notification.metadata?.imageUrl as string | undefined;
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };

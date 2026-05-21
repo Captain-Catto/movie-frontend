@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef } from "react";
 
@@ -73,7 +73,7 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
   return (
     <video
       ref={videoRef}
-      className="w-full h-full bg-black"
+      className="w-full h-full bg-gray-950"
       controls
       autoPlay
       playsInline

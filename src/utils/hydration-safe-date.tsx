@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { formatRelativeTimeByLanguage as originalFormatRelativeTime } from "./dateFormatter";
 
 /**
@@ -36,12 +36,8 @@ export function useHydrationSafeRelativeTime(
   dateInput: string | Date | null | undefined,
   language: string = "en-US"
 ): string {
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = useSyncExternalStore(() => () => {}, () => true, () => false);
   const isVietnamese = language.toLowerCase().startsWith("vi");
-
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
 
   // During SSR and first render, return stable ISO timestamp
   if (!isHydrated) {
