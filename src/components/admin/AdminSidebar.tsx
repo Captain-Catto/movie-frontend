@@ -341,10 +341,22 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             setProfileForm({ name: user?.name ?? "", password: "" });
             setProfileError("");
           }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              setProfileOpen(false);
+              setProfileForm({ name: user?.name ?? "", password: "" });
+              setProfileError("");
+            }
+          }}
+          role="presentation"
+          tabIndex={-1}
         >
           <div
             className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
           >
             <div className="flex items-start justify-between mb-4">
               <div>

@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent,
+} from "react";
 import { X, Play } from "lucide-react";
 import { Video } from "@/types/content.types";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -46,7 +51,7 @@ export default function TrailerModal({
 
   // Close modal with Escape key
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
+    const handleEscape = (e: globalThis.KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
       }
@@ -71,8 +76,14 @@ export default function TrailerModal({
   const youtubeVideos = videos.filter((v) => v.site === "YouTube");
 
   // Handle click outside to close modal
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleBackdropKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
       onClose();
     }
   };
@@ -81,8 +92,15 @@ export default function TrailerModal({
     <div
       className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
+      onKeyDown={handleBackdropKeyDown}
+      role="presentation"
+      tabIndex={-1}
     >
-      <div className="bg-gray-900 rounded-lg max-w-7xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div
+        className="bg-gray-900 rounded-lg max-w-7xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+        role="dialog"
+        aria-modal="true"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700 flex-shrink-0">
           <div>

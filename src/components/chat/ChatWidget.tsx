@@ -465,10 +465,18 @@ export default function ChatWidget() {
         <div
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={() => setConfirmTarget(null)}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") setConfirmTarget(null);
+          }}
+          role="presentation"
+          tabIndex={-1}
         >
           <div
             className="mx-4 w-full max-w-sm rounded-lg border border-gray-700 bg-gray-900 p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
           >
             <h3 className="text-base font-semibold text-white">{text.confirmTitle}</h3>
             <p className="mt-2 text-sm text-gray-400">{text.confirmMessage}</p>

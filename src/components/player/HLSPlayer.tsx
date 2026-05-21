@@ -15,11 +15,12 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+    const videoEl = video;
 
     let destroyed = false;
 
     const onManifestParsed = () => {
-      video.play().catch(() => {});
+      videoEl.play().catch(() => {});
       onReady?.();
     };
     const onHlsError = (_: unknown, data: { fatal: boolean }) => {
@@ -39,14 +40,14 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
         hlsRef.current = hls;
 
         hls.loadSource(src);
-        hls.attachMedia(video);
+        hls.attachMedia(videoEl);
         hls.on(Hls.Events.MANIFEST_PARSED, onManifestParsed);
         hls.on(Hls.Events.ERROR, onHlsError);
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      } else if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
         // Native HLS (Safari)
-        video.src = src;
-        video.addEventListener("loadedmetadata", onManifestParsed);
-        video.addEventListener("error", () => onError?.());
+        videoEl.src = src;
+        videoEl.addEventListener("loadedmetadata", onManifestParsed);
+        videoEl.addEventListener("error", () => onError?.());
       } else {
         onError?.();
       }

@@ -148,9 +148,11 @@ const WatchPageClient = ({
               )
             ) : (
               // Movie Poster with Play Button
-              <div
-                className="relative w-full h-full cursor-pointer"
+              <button
+                type="button"
+                className="relative h-full w-full cursor-pointer"
                 onClick={handlePlayMovie}
+                aria-label={`Play ${movieData.title}`}
               >
                 <Image
                   src={movieData.backgroundImage}
@@ -170,7 +172,7 @@ const WatchPageClient = ({
                     </svg>
                   </div>
                 </div>
-              </div>
+              </button>
             )}
           </div>
         </div>

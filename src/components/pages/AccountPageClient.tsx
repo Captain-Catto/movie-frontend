@@ -194,8 +194,9 @@ export default function AccountPage() {
           {/* Profile Card */}
           <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700 mb-6">
             <div className="flex items-start space-x-6">
-              <div
-                className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-gray-600 cursor-pointer group"
+              <button
+                type="button"
+                className="group relative h-24 w-24 cursor-pointer overflow-hidden rounded-full border-4 border-gray-600"
                 onClick={handleAvatarClick}
                 title={labels.changeAvatar}
               >
@@ -218,7 +219,7 @@ export default function AccountPage() {
                     <span className="text-white text-xs">{labels.uploading}</span>
                   </div>
                 )}
-              </div>
+              </button>
               <input
                 ref={fileInputRef}
                 type="file"

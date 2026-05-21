@@ -227,11 +227,13 @@ const TableFilters = ({
     >
       {/* Filter Toggle Header */}
       {showToggle && (
-        <div
+        <button
+          type="button"
           className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-750 transition-colors ${
             isExpanded ? "border-b border-gray-700" : ""
           }`}
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
         >
           <div className="flex items-center space-x-2">
             {/* Filter Icon */}
@@ -250,7 +252,7 @@ const TableFilters = ({
             </svg>
             <h3 className="text-white font-small text-xs">{labels.filters}</h3>
           </div>
-        </div>
+        </button>
       )}
 
       {/* Filter Content */}
@@ -262,7 +264,8 @@ const TableFilters = ({
           </div>
           <div className="fe-results flex flex-wrap gap-2">
             {countries.map((country) => (
-              <div
+              <button
+                type="button"
                 key={country.value}
                 className={`item px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
                   country.value === ""
@@ -278,7 +281,7 @@ const TableFilters = ({
                 }
               >
                 {country.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -288,7 +291,8 @@ const TableFilters = ({
           <div className="fe-name text-white font-medium mb-2">{labels.type}:</div>
           <div className="fe-results flex flex-wrap gap-2">
             {movieTypes.map((type) => (
-              <div
+              <button
+                type="button"
                 key={type.value}
                 className={`item px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
                   filters.movieType === type.value
@@ -298,7 +302,7 @@ const TableFilters = ({
                 onClick={() => handleMultiFilterClick("movieType", type.value)}
               >
                 {type.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -308,7 +312,8 @@ const TableFilters = ({
           <div className="fe-name text-white font-medium mb-2">{labels.genre}:</div>
           <div className="fe-results flex flex-wrap gap-2 max-h-32 overflow-y-auto">
             {genres.map((genre) => (
-              <div
+              <button
+                type="button"
                 key={genre.value}
                 className={`item px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
                   genre.value === ""
@@ -322,7 +327,7 @@ const TableFilters = ({
                 onClick={() => handleMultiFilterClick("genres", genre.value)}
               >
                 {genre.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -334,7 +339,8 @@ const TableFilters = ({
           </div>
           <div className="fe-results flex flex-wrap gap-2 items-center">
             {years.map((year) => (
-              <div
+              <button
+                type="button"
                 key={year.value}
                 className={`item px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
                   year.value === ""
@@ -348,7 +354,7 @@ const TableFilters = ({
                 onClick={() => handleYearClick(year.value)}
               >
                 {year.label}
-              </div>
+              </button>
             ))}
             <div className="year-input flex items-center ml-4">
               <div className="relative">
@@ -413,7 +419,8 @@ const TableFilters = ({
           </div>
           <div className="fe-results flex flex-wrap gap-2">
             {sortOptions.map((option) => (
-              <div
+              <button
+                type="button"
                 key={option.value}
                 className={`item px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
                   filters.sortBy === option.value
@@ -423,7 +430,7 @@ const TableFilters = ({
                 onClick={() => handleMultiFilterClick("sortBy", option.value)}
               >
                 {option.label}
-              </div>
+              </button>
             ))}
           </div>
         </div>

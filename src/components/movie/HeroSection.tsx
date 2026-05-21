@@ -431,7 +431,8 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                 index >= 8 ? "hidden lg:block" : index >= 5 ? "hidden sm:block" : "";
 
               return (
-                <div
+                <button
+                  type="button"
                   key={movie.id}
                   onClick={(event) => handleThumbnailClick(index, event)}
                   className={`
@@ -442,6 +443,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                         : "opacity-70 hover:opacity-90 hover:scale-105"
                     }
                   `}
+                  aria-label={movie.title}
                 >
                   <Image
                     src={toHeroThumb(backgroundImage || posterImage)}
@@ -455,7 +457,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
                     fetchPriority={index === 0 ? "high" : "auto"}
                     className="h-8 w-12 object-cover lg:h-[62px] lg:w-[104px]"
                   />
-                </div>
+                </button>
               );
             })}
           </div>

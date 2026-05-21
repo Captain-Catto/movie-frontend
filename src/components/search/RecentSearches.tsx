@@ -85,9 +85,10 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
 
         <div className="space-y-2">
           {searches.map((search, index) => (
-            <div
+            <button
+              type="button"
               key={search.id || `${search.query}-${index}`}
-              className="flex items-center justify-between p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors group cursor-pointer"
+              className="group flex w-full cursor-pointer items-center justify-between rounded-lg bg-gray-800 p-3 text-left transition-colors hover:bg-gray-700"
               onClick={() => onSearchClick(search)}
             >
               <div className="flex-1 min-w-0">
@@ -137,7 +138,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
               >
                 <X className="w-4 h-4" />
               </button>
-            </div>
+            </button>
           ))}
         </div>
       </div>

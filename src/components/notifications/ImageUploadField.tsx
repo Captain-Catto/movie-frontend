@@ -158,10 +158,19 @@ export default function ImageUploadField({ value, onChange }: Props) {
         <>
           {/* Drop zone */}
           <div
+            role={showUrlInput ? undefined : "button"}
+            tabIndex={showUrlInput ? undefined : 0}
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => !showUrlInput && inputRef.current?.click()}
+            onKeyDown={(e) => {
+              if (showUrlInput) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                inputRef.current?.click();
+              }
+            }}
             className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center gap-2 transition-colors ${
               isDragging
                 ? "border-blue-500 bg-blue-900/20 cursor-copy"

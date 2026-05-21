@@ -94,20 +94,22 @@ export function CommentForm(props: CommentFormProps) {
               ) : mentionUsers.length > 0 ? (
                 <ul className="py-1">
                   {mentionUsers.map((mentionUser) => (
-                    <li
-                      key={mentionUser.id}
-                      className="px-3 py-2 hover:bg-gray-700 cursor-pointer flex items-center gap-2"
-                      onClick={() => insertMention(mentionUser.name)}
-                    >
-                      <Image
-                        src={mentionUser.image || "/images/no-avatar.svg"}
-                        alt={mentionUser.name}
-                        width={24}
-                        height={24}
-                        className="w-6 h-6 rounded-full object-cover"
-                        onError={handleAvatarError}
-                      />
-                      <span className="text-white text-sm">{mentionUser.name}</span>
+                    <li key={mentionUser.id}>
+                      <button
+                        type="button"
+                        className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left hover:bg-gray-700"
+                        onClick={() => insertMention(mentionUser.name)}
+                      >
+                        <Image
+                          src={mentionUser.image || "/images/no-avatar.svg"}
+                          alt={mentionUser.name}
+                          width={24}
+                          height={24}
+                          className="w-6 h-6 rounded-full object-cover"
+                          onError={handleAvatarError}
+                        />
+                        <span className="text-white text-sm">{mentionUser.name}</span>
+                      </button>
                     </li>
                   ))}
                 </ul>
