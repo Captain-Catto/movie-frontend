@@ -36,11 +36,9 @@ export function Pagination({
   };
 
   const [isInputMode, setIsInputMode] = useState(false);
-  const [inputValue, setInputValue] = useState(currentPage.toString());
+  const [inputValue, setInputValue] = useState(() => currentPage.toString());
   const [desktopInputMode, setDesktopInputMode] = useState(false);
-  const [desktopInputValue, setDesktopInputValue] = useState(
-    currentPage.toString()
-  );
+  const [desktopInputValue, setDesktopInputValue] = useState(() => currentPage.toString());
 
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);

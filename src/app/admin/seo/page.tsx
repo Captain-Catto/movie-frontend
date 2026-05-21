@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import CheckSeoHealth from "./checker";
@@ -980,7 +980,7 @@ export default function AdminSeoPage() {
                       id="seo-page-type"
                       value={formData.pageType}
                       onChange={(e) =>
-                        setFormData({ ...formData, pageType: e.target.value })
+                        setFormData((prev) => ({ ...prev, pageType: e.target.value }))
                       }
                       className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     >
@@ -1005,7 +1005,7 @@ export default function AdminSeoPage() {
                       type="text"
                       value={formData.path}
                       onChange={(e) =>
-                        setFormData({ ...formData, path: e.target.value })
+                        setFormData((prev) => ({ ...prev, path: e.target.value }))
                       }
                       className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                       placeholder="e.g., /movie/[id]"
@@ -1019,7 +1019,7 @@ export default function AdminSeoPage() {
                       id="seo-locale"
                       value={formData.locale}
                       onChange={(e) =>
-                        setFormData({ ...formData, locale: e.target.value })
+                        setFormData((prev) => ({ ...prev, locale: e.target.value }))
                       }
                       className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     >
@@ -1041,7 +1041,7 @@ export default function AdminSeoPage() {
                     type="text"
                     value={formData.title}
                     onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
+                      setFormData((prev) => ({ ...prev, title: e.target.value }))
                     }
                     className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                   />
@@ -1058,7 +1058,7 @@ export default function AdminSeoPage() {
                     id="seo-description"
                     value={formData.description}
                     onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
+                      setFormData((prev) => ({ ...prev, description: e.target.value }))
                     }
                     className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     rows={3}
@@ -1077,7 +1077,7 @@ export default function AdminSeoPage() {
                     type="text"
                     value={formData.keywords}
                     onChange={(e) =>
-                      setFormData({ ...formData, keywords: e.target.value })
+                      setFormData((prev) => ({ ...prev, keywords: e.target.value }))
                     }
                     className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                   />
@@ -1094,7 +1094,7 @@ export default function AdminSeoPage() {
                       placeholder="OG Title"
                       value={formData.ogTitle}
                       onChange={(e) =>
-                        setFormData({ ...formData, ogTitle: e.target.value })
+                        setFormData((prev) => ({ ...prev, ogTitle: e.target.value }))
                       }
                       className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
@@ -1102,10 +1102,10 @@ export default function AdminSeoPage() {
                       placeholder="OG Description"
                       value={formData.ogDescription}
                       onChange={(e) =>
-                        setFormData({
-                          ...formData,
+                        setFormData((prev) => ({
+                          ...prev,
                           ogDescription: e.target.value,
-                        })
+                        }))
                       }
                       className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                       rows={2}
@@ -1115,7 +1115,7 @@ export default function AdminSeoPage() {
                       placeholder="OG Image URL"
                       value={formData.ogImage}
                       onChange={(e) =>
-                        setFormData({ ...formData, ogImage: e.target.value })
+                        setFormData((prev) => ({ ...prev, ogImage: e.target.value }))
                       }
                       className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
@@ -1133,10 +1133,10 @@ export default function AdminSeoPage() {
                       placeholder="Twitter Title"
                       value={formData.twitterTitle}
                       onChange={(e) =>
-                        setFormData({
-                          ...formData,
+                        setFormData((prev) => ({
+                          ...prev,
                           twitterTitle: e.target.value,
-                        })
+                        }))
                       }
                       className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
@@ -1144,10 +1144,10 @@ export default function AdminSeoPage() {
                       placeholder="Twitter Description"
                       value={formData.twitterDescription}
                       onChange={(e) =>
-                        setFormData({
-                          ...formData,
+                        setFormData((prev) => ({
+                          ...prev,
                           twitterDescription: e.target.value,
-                        })
+                        }))
                       }
                       className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                       rows={2}
@@ -1157,10 +1157,10 @@ export default function AdminSeoPage() {
                       placeholder="Twitter Image URL"
                       value={formData.twitterImage}
                       onChange={(e) =>
-                        setFormData({
-                          ...formData,
+                        setFormData((prev) => ({
+                          ...prev,
                           twitterImage: e.target.value,
-                        })
+                        }))
                       }
                       className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
                     />
@@ -1173,7 +1173,7 @@ export default function AdminSeoPage() {
                     id="isActive"
                     checked={formData.isActive}
                     onChange={(e) =>
-                      setFormData({ ...formData, isActive: e.target.checked })
+                      setFormData((prev) => ({ ...prev, isActive: e.target.checked }))
                     }
                     className="mr-2"
                   />

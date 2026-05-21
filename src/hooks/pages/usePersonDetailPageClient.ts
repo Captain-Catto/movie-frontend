@@ -184,10 +184,7 @@ export function usePersonDetailPageClient({
   const castTotalItems = castCredits.length;
   const crewTotalItems = crewCredits.length;
 
-  const currentRawItems = useMemo(
-    () => (activeTab === "cast" ? castCredits : crewCredits),
-    [activeTab, castCredits, crewCredits]
-  );
+  const currentRawItems = activeTab === "cast" ? castCredits : crewCredits;
 
   const totalPages = Math.max(1, Math.ceil(currentRawItems.length / ITEMS_PER_PAGE));
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import StatsCard from "@/components/admin/StatsCard";
@@ -358,10 +358,10 @@ export default function AdminSyncDataPage() {
                 step="1000"
                 value={settingsForm.movieCatalogLimit}
                 onChange={(e) =>
-                  setSettingsForm({
-                    ...settingsForm,
+                  setSettingsForm((prev) => ({
+                    ...prev,
                     movieCatalogLimit: parseInt(e.target.value) || 0,
-                  })
+                  }))
                 }
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
@@ -381,10 +381,10 @@ export default function AdminSyncDataPage() {
                 step="1000"
                 value={settingsForm.tvCatalogLimit}
                 onChange={(e) =>
-                  setSettingsForm({
-                    ...settingsForm,
+                  setSettingsForm((prev) => ({
+                    ...prev,
                     tvCatalogLimit: parseInt(e.target.value) || 0,
-                  })
+                  }))
                 }
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
@@ -404,10 +404,10 @@ export default function AdminSyncDataPage() {
                 step="10"
                 value={settingsForm.trendingCatalogLimit}
                 onChange={(e) =>
-                  setSettingsForm({
-                    ...settingsForm,
+                  setSettingsForm((prev) => ({
+                    ...prev,
                     trendingCatalogLimit: parseInt(e.target.value) || 0,
-                  })
+                  }))
                 }
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
@@ -427,10 +427,10 @@ export default function AdminSyncDataPage() {
                 step="1000"
                 value={settingsForm.peopleCacheLimit}
                 onChange={(e) =>
-                  setSettingsForm({
-                    ...settingsForm,
+                  setSettingsForm((prev) => ({
+                    ...prev,
                     peopleCacheLimit: parseInt(e.target.value) || 0,
-                  })
+                  }))
                 }
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
@@ -450,10 +450,10 @@ export default function AdminSyncDataPage() {
                 step="1000"
                 value={settingsForm.recommendationCacheLimit}
                 onChange={(e) =>
-                  setSettingsForm({
-                    ...settingsForm,
+                  setSettingsForm((prev) => ({
+                    ...prev,
                     recommendationCacheLimit: parseInt(e.target.value) || 0,
-                  })
+                  }))
                 }
                 className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />

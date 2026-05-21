@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from 'react';
-import { useRouter, useSearchParams, type ReadonlyURLSearchParams } from 'next/navigation';
+import { useRouter, type ReadonlyURLSearchParams } from 'next/navigation';
 
 /**
  * Options for usePagination hook
@@ -77,12 +77,13 @@ export function usePagination(
   } = options;
 
   const router = useRouter();
-  const currentSearchParams = useSearchParams();
-  const searchParams = providedSearchParams ?? currentSearchParams;
+  // Callers must pass searchParams from their own useSearchParams() call
+  // (component must be wrapped in <Suspense>) — avoids bailing the entire page to CSR.
+  const searchParams = providedSearchParams ?? null;
 
   // Get current page from URL params
   const page = useMemo(() => {
-    const pageParam = searchParams.get('page');
+    const pageParam = searchParams?.get('page') ?? null;
     const parsed = pageParam ? parseInt(pageParam, 10) : initialPage;
     return Number.isFinite(parsed) && parsed > 0 ? parsed : initialPage;
   }, [searchParams, initialPage]);
@@ -92,7 +93,7 @@ export function usePagination(
     (newPage: number) => {
       if (newPage < 1) return;
 
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParams?.toString() ?? '');
 
       // Remove page param if going to first page for cleaner URLs
       if (newPage <= 1) {

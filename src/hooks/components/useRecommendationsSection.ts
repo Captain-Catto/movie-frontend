@@ -58,9 +58,8 @@ export function useRecommendationsSection({
     let isMounted = true;
 
     const fetchRecommendations = async () => {
-      dispatch({ loading: true, error: null });
-
       if (!isMounted) return;
+      dispatch({ loading: true, error: null });
 
       try {
         const response =
@@ -68,15 +67,15 @@ export function useRecommendationsSection({
             ? await apiService.getMovieRecommendations(tmdbId)
             : await apiService.getTVRecommendations(tmdbId);
 
-        if (!isMounted) return;
-
-        if (response.success && Array.isArray(response.data)) {
-          dispatch({
-            recommendations: (response.data as unknown as Record<string, unknown>[]).slice(0, 12).map(normalizeItem),
-            loading: false,
-          });
-        } else {
-          dispatch({ recommendations: [], error: response.error || "Failed to load recommendations", loading: false });
+        if (isMounted) {
+          if (response.success && Array.isArray(response.data)) {
+            dispatch({
+              recommendations: (response.data as unknown as Record<string, unknown>[]).slice(0, 12).map(normalizeItem),
+              loading: false,
+            });
+          } else {
+            dispatch({ recommendations: [], error: response.error || "Failed to load recommendations", loading: false });
+          }
         }
       } catch (err) {
         if (!isMounted) return;

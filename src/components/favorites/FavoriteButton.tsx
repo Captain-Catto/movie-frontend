@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { Heart } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
@@ -41,7 +41,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   preventDefault = true,
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [lastToggleAt, setLastToggleAt] = useState<number | null>(null);
+  const lastToggleAtRef = useRef<number | null>(null);
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { language } = useLanguage();
   const labels = getFavoriteButtonUiMessages(language);
@@ -102,10 +102,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
     // Prevent rapid double-clicks/spam
     if (isProcessing) return;
     const now = Date.now();
-    if (lastToggleAt && now - lastToggleAt < 400) {
+    if (lastToggleAtRef.current && now - lastToggleAtRef.current < 400) {
       return;
     }
-    setLastToggleAt(now);
+    lastToggleAtRef.current = now;
 
     if (!isAuthenticated) {
       showWarning(labels.loginRequiredTitle, labels.loginRequiredDescription);

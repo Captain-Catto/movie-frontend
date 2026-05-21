@@ -291,6 +291,7 @@ export default function AccountPage() {
                     id="account-email"
                     type="text"
                     value={user?.email || ""}
+                    readOnly
                     disabled
                     className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300"
                   />

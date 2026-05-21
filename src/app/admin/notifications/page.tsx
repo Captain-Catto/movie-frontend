@@ -26,7 +26,7 @@ export default function AdminNotificationsPage() {
 
   const handleClearFilters = () => {
     setFilters({ type: "all", startDate: "", endDate: "" });
-    setPagination({ ...pagination, page: 1 });
+    setPagination((prev) => ({ ...prev, page: 1 }));
   };
 
   return (

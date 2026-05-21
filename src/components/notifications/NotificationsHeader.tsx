@@ -67,8 +67,8 @@ export default function NotificationsHeader({
 }: NotificationsHeaderProps) {
   const handleMaintenanceClick = () => {
     onOpenSendModal("maintenance");
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       titleVi: "Bảo trì hệ thống định kỳ",
       messageVi:
         "Hệ thống sẽ được bảo trì định kỳ. Dịch vụ có thể tạm thời không khả dụng trong thời gian này. Chúng tôi xin lỗi vì sự bất tiện này.",
@@ -76,7 +76,7 @@ export default function NotificationsHeader({
       messageEn:
         "We will be performing scheduled maintenance. Services may be temporarily unavailable during this time. We apologize for any inconvenience.",
       notificationType: "warning",
-    });
+    }));
   };
 
   return (

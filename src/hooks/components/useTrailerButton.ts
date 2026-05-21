@@ -42,18 +42,18 @@ export function useTrailerButton({
     let isMounted = true;
 
     const checkVideosAvailability = async () => {
+      if (!isMounted) return;
       dispatch({ loading: true });
       try {
-        if (!isMounted) return;
         const response = await fetchVideos();
 
-        if (!isMounted) return;
-
-        if (response.success && response.data?.results) {
-          const availableVideos = response.data.results;
-          dispatch({ videos: availableVideos, hasVideos: availableVideos.length > 0, loading: false, initialCheckDone: true });
-        } else {
-          dispatch({ hasVideos: false, videos: [], loading: false, initialCheckDone: true });
+        if (isMounted) {
+          if (response.success && response.data?.results) {
+            const availableVideos = response.data.results;
+            dispatch({ videos: availableVideos, hasVideos: availableVideos.length > 0, loading: false, initialCheckDone: true });
+          } else {
+            dispatch({ hasVideos: false, videos: [], loading: false, initialCheckDone: true });
+          }
         }
       } catch (err) {
         if (!isMounted) return;
