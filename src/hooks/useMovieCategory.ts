@@ -1,7 +1,7 @@
 // Shared hook for category/listing pages (movies/TV)
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useRouter, type ReadonlyURLSearchParams } from "next/navigation";
 import { ContentQuery } from "@/types/content.types";
 import type { MovieCardData } from "@/types/content.types";
@@ -119,17 +119,17 @@ export function useMovieCategory<Response extends CategoryResponse>({
     [normalizedAdditionalQuery, currentPage, resolvedLanguage, defaultLimit]
   );
 
-  const [movies, setMovies] = useState<MovieCardData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
+  type FetchState = { movies: MovieCardData[]; loading: boolean; error: string | null; totalPages: number; total: number };
+  const [fetchState, dispatch] = useReducer(
+    (s: FetchState, p: Partial<FetchState>): FetchState => ({ ...s, ...p }),
+    { movies: [], loading: true, error: null, totalPages: 1, total: 0 }
+  );
+  const { movies, loading, error, totalPages, total } = fetchState;
 
   useEffect(() => {
     let isMounted = true;
     const fetchData = async () => {
-      setLoading(true);
-      setError(null);
+      dispatch({ loading: true, error: null });
       try {
         const response = await fetcherRef.current(query);
         if (!response.success) {
@@ -141,21 +141,14 @@ export function useMovieCategory<Response extends CategoryResponse>({
           items as Array<Record<string, unknown>>
         );
         if (isMounted) {
-          setMovies(mapped);
           const pagination = extractPagination(response);
-          const { totalPages, total } = normalizePagination(pagination);
-          setTotalPages(totalPages || 1);
-          setTotal(total);
+          const normalized = normalizePagination(pagination);
+          dispatch({ movies: mapped, totalPages: normalized.totalPages || 1, total: normalized.total, loading: false });
         }
       } catch (err) {
         if (!isMounted) return;
         console.error("Failed to load category data:", err);
-        setError(err instanceof Error ? err.message : "Unknown error");
-        setMovies([]);
-        setTotalPages(1);
-        setTotal(0);
-      } finally {
-        if (isMounted) setLoading(false);
+        dispatch({ error: err instanceof Error ? err.message : "Unknown error", movies: [], totalPages: 1, total: 0, loading: false });
       }
     };
 

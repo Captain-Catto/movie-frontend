@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { analyticsService } from "@/services/analytics.service";
@@ -32,10 +32,12 @@ export function useTVDetailPageClient({
   const numericTvId = Number(tvIdParam);
   const { language } = useLanguage();
   const labels = getPageHookUiMessages(language);
-  const [tvData, setTVData] = useState<TVDetail | null>(initialTVData);
-  const [loading, setLoading] = useState(() => !initialTVData && !initialError);
-  const [creditsLoading, setCreditsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(initialError);
+  type PageState = { tvData: TVDetail | null; loading: boolean; creditsLoading: boolean; error: string | null };
+  const [pageState, dispatch] = useReducer(
+    (s: PageState, p: Partial<PageState>): PageState => ({ ...s, ...p }),
+    { tvData: initialTVData, loading: !initialTVData && !initialError, creditsLoading: false, error: initialError }
+  );
+  const { tvData, loading, creditsLoading, error } = pageState;
   const skipInitialFetchRef = useRef(Boolean(initialTVData || initialError));
 
   usePageDuration({
@@ -52,18 +54,14 @@ export function useTVDetailPageClient({
     }
 
     const fetchTVData = async () => {
+      dispatch({ loading: true, creditsLoading: true, error: null });
       try {
-        setLoading(true);
-        setCreditsLoading(true);
-        setError(null);
-
         if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
           throw new Error(labels.invalidTvSeriesId);
         }
 
         const result = await getTVDetailPageDataByTmdbId(numericTvId, language);
-        setTVData(result.tvData);
-        setError(result.error);
+        dispatch({ tvData: result.tvData, error: result.error, loading: false, creditsLoading: false });
 
         if (result.tvData) {
           analyticsService.trackView(
@@ -73,13 +71,7 @@ export function useTVDetailPageClient({
           );
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : labels.unknownError
-        );
-        setTVData(null);
-      } finally {
-        setLoading(false);
-        setCreditsLoading(false);
+        dispatch({ error: err instanceof Error ? err.message : labels.unknownError, tvData: null, loading: false, creditsLoading: false });
       }
     };
 

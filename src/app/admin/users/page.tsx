@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
+import type { SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
@@ -534,19 +536,16 @@ export default function AdminUsersPage() {
                         {user.lastLoginCountry ? (
                           <>
                             {countryFlagUrl(user.lastLoginCountry) ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img
-                                src={
-                                  countryFlagUrl(
-                                    user.lastLoginCountry
-                                  ) as string
-                                }
+                              <Image
+                                src={countryFlagUrl(user.lastLoginCountry) as string}
                                 alt={countryCodeToName(user.lastLoginCountry)}
                                 title={countryCodeToName(user.lastLoginCountry)}
-                                className="w-6 h-4 rounded border border-gray-600"
-                                onError={(e) => {
-                                  // Hide broken image, fallback to emoji
-                                  e.currentTarget.style.display = "none";
+                                width={24}
+                                height={16}
+                                className="rounded border border-gray-600"
+                                unoptimized
+                                onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                                  (e.currentTarget as HTMLImageElement).style.display = "none";
                                 }}
                               />
                             ) : (
@@ -915,13 +914,15 @@ export default function AdminUsersPage() {
                             key={item.id}
                             className="flex gap-3 p-4 hover:bg-gray-700/50 transition-colors"
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <Image
                               src={item.posterUrl || fallbackPoster}
                               alt={item.contentTitle}
-                              className="h-20 w-14 rounded object-cover bg-gray-800"
-                              onError={(e) => {
-                                e.currentTarget.src = fallbackPoster;
+                              width={56}
+                              height={80}
+                              className="rounded object-cover bg-gray-800"
+                              unoptimized
+                              onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                                (e.currentTarget as HTMLImageElement).src = fallbackPoster;
                               }}
                             />
                             <div className="min-w-0 flex-1">

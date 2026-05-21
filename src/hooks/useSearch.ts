@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useReducer, useRef } from "react";
 import { SearchResult } from "@/types/search";
 import type { SearchFilterType } from "@/types/search";
 import { API_BASE_URL } from "@/services/api";
@@ -25,11 +25,14 @@ const MIN_LOADING_TIME = 300; // Keep loading visible for at least 300ms to prev
 
 export const useSearch = (): UseSearchReturn => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedType, setSelectedType] = useState<SearchFilterType>("all");
-  const [hasMore, setHasMore] = useState(false);
-  const [page, setPage] = useState(1);
+  type SearchState = { results: SearchResult[]; isLoading: boolean; hasMore: boolean; page: number };
+  type SearchAction = Partial<SearchState> | ((s: SearchState) => Partial<SearchState>);
+  const [searchState, dispatch] = useReducer(
+    (s: SearchState, a: SearchAction): SearchState => ({ ...s, ...(typeof a === 'function' ? a(s) : a) }),
+    { results: [], isLoading: false, hasMore: false, page: 1 }
+  );
+  const { results, isLoading, hasMore, page } = searchState;
 
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const minLoadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -64,7 +67,7 @@ export const useSearch = (): UseSearchReturn => {
 
       // Only show loading indicator if search takes longer than LOADING_DELAY
       loadingTimerRef.current = setTimeout(() => {
-        setIsLoading(true);
+        dispatch({ isLoading: true });
       }, LOADING_DELAY);
 
       try {
@@ -126,8 +129,7 @@ export const useSearch = (): UseSearchReturn => {
             }
 
             if (pageNum === 1) {
-              setResults(processedResults);
-              // Track search analytics on first page of results
+              dispatch({ results: processedResults, hasMore: pagination.page < pagination.totalPages, page: pagination.page, isLoading: false });
               if (processedResults.length > 0) {
                 analyticsService.trackSearch(
                   searchQuery.trim(),
@@ -135,12 +137,8 @@ export const useSearch = (): UseSearchReturn => {
                 );
               }
             } else {
-              setResults((prev) => [...prev, ...processedResults]);
+              dispatch({ results: [...results, ...processedResults], hasMore: pagination.page < pagination.totalPages, page: pagination.page, isLoading: false });
             }
-
-            setHasMore(pagination.page < pagination.totalPages);
-            setPage(pagination.page);
-            setIsLoading(false);
           };
 
           // If loading was shown and minimum time hasn't passed, wait
@@ -199,10 +197,7 @@ export const useSearch = (): UseSearchReturn => {
         abortControllerRef.current.abort();
         abortControllerRef.current = null;
       }
-      setResults([]);
-      setHasMore(false);
-      setPage(1);
-      setIsLoading(false);
+      dispatch({ results: [], hasMore: false, page: 1, isLoading: false });
       // Clear any pending timers
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current);

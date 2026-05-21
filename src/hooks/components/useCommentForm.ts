@@ -77,11 +77,6 @@ export function useCommentForm({
     }
   }, [parentId]);
 
-  useEffect(() => {
-    setContent(editingComment?.content || "");
-    setContentError(null);
-  }, [editingComment]);
-
   const searchMentions = async (query: string) => {
     if (query.length < 2) {
       setMentionUsers([]);

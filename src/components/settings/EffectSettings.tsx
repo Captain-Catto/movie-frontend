@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import {
@@ -224,9 +224,12 @@ export default function EffectSettings() {
 
   const [expandedEffect, setExpandedEffect] = useState<EffectType | null>(null);
   const [newExcludedPath, setNewExcludedPath] = useState('');
-  const [initialSettings, setInitialSettings] = useState('');
-  const [isDirty, setIsDirty] = useState(false);
-  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  type DirtyState = { initialSettings: string; isDirty: boolean; hasLoadedOnce: boolean };
+  const [dirtyState, dispatchDirty] = useReducer(
+    (s: DirtyState, p: Partial<DirtyState>): DirtyState => ({ ...s, ...p }),
+    { initialSettings: '', isDirty: false, hasLoadedOnce: false }
+  );
+  const { initialSettings, isDirty, hasLoadedOnce } = dirtyState;
 
   useEffect(() => {
     dispatch(fetchEffectSettings());
@@ -235,16 +238,14 @@ export default function EffectSettings() {
   useEffect(() => {
     if (!isLoading && !hasLoadedOnce) {
       const snapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths });
-      setInitialSettings(snapshot);
-      setHasLoadedOnce(true);
-      setIsDirty(false);
+      dispatchDirty({ initialSettings: snapshot, hasLoadedOnce: true, isDirty: false });
     }
   }, [isLoading, hasLoadedOnce, enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths]);
 
   useEffect(() => {
     if (!hasLoadedOnce) return;
     const current = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths });
-    setIsDirty(current !== initialSettings);
+    dispatchDirty({ isDirty: current !== initialSettings });
   }, [enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths, initialSettings, hasLoadedOnce]);
 
   const handleSaveSettings = async () => {
@@ -253,8 +254,7 @@ export default function EffectSettings() {
         enabled, activeEffects, intensity: 'medium', redEnvelopeSettings, snowSettings, excludedPaths,
       })).unwrap();
       const newSnapshot = JSON.stringify({ enabled, activeEffects, redEnvelopeSettings, snowSettings, excludedPaths });
-      setInitialSettings(newSnapshot);
-      setIsDirty(false);
+      dispatchDirty({ initialSettings: newSnapshot, isDirty: false });
       showSuccess('Saved', 'Effect settings have been updated');
     } catch (err) {
       showError('Error', err instanceof Error ? err.message : 'Failed to save settings');

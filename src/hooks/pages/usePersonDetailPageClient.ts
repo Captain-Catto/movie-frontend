@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getLocaleFromLanguage,
@@ -110,27 +110,43 @@ export function usePersonDetailPageClient({
   const labels = getPageHookUiMessages(language);
   const locale = getLocaleFromLanguage(language);
 
-  const [personData, setPersonData] = useState<PersonDetailData | null>(
-    initialPersonData
+  type PersonState = {
+    personData: PersonDetailData | null;
+    castCredits: CastMember[];
+    crewCredits: CrewMember[];
+    loading: boolean;
+    error: string | null;
+    activeTab: PersonDetailTab;
+    showFullBio: boolean;
+    currentPage: number;
+  };
+  const [personState, dispatch] = useReducer(
+    (s: PersonState, p: Partial<PersonState>): PersonState => ({ ...s, ...p }),
+    {
+      personData: initialPersonData,
+      castCredits: initialCastCredits,
+      crewCredits: initialCrewCredits,
+      loading: !initialPersonData && !initialError,
+      error: initialError,
+      activeTab: "cast",
+      showFullBio: false,
+      currentPage: 1,
+    }
   );
-  const [castCredits, setCastCredits] = useState<CastMember[]>(initialCastCredits);
-  const [crewCredits, setCrewCredits] = useState<CrewMember[]>(initialCrewCredits);
-  const [loading, setLoading] = useState(() => !initialPersonData && !initialError);
-  const [error, setError] = useState<string | null>(initialError);
-  const [activeTab, setActiveTab] = useState<PersonDetailTab>("cast");
-  const [showFullBio, setShowFullBio] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const { personData, castCredits, crewCredits, loading, error, activeTab, showFullBio, currentPage } = personState;
   const skipInitialFetchRef = useRef(Boolean(initialPersonData));
 
   useEffect(() => {
-    setPersonData(initialPersonData);
-    setCastCredits(initialCastCredits);
-    setCrewCredits(initialCrewCredits);
-    setError(initialError);
-    setLoading(!initialPersonData && !initialError);
-    setActiveTab("cast");
-    setShowFullBio(false);
-    setCurrentPage(1);
+    dispatch({
+      personData: initialPersonData,
+      castCredits: initialCastCredits,
+      crewCredits: initialCrewCredits,
+      error: initialError,
+      loading: !initialPersonData && !initialError,
+      activeTab: "cast",
+      showFullBio: false,
+      currentPage: 1,
+    });
     skipInitialFetchRef.current = Boolean(initialPersonData);
   }, [
     personId,
@@ -148,31 +164,17 @@ export function usePersonDetailPageClient({
 
     const parsedPersonId = Number(personId);
     if (!Number.isFinite(parsedPersonId) || parsedPersonId <= 0) {
-      setPersonData(null);
-      setCastCredits([]);
-      setCrewCredits([]);
-      setError(labels.invalidPersonId);
-      setLoading(false);
+      dispatch({ personData: null, castCredits: [], crewCredits: [], error: labels.invalidPersonId, loading: false });
       return;
     }
 
     const fetchPersonData = async () => {
+      dispatch({ loading: true });
       try {
-        setLoading(true);
         const result = await getPersonDetailPageDataById(parsedPersonId);
-        setPersonData(result.personData);
-        setCastCredits(result.castCredits);
-        setCrewCredits(result.crewCredits);
-        setError(result.error);
+        dispatch({ personData: result.personData, castCredits: result.castCredits, crewCredits: result.crewCredits, error: result.error, loading: false });
       } catch (err) {
-        setPersonData(null);
-        setCastCredits([]);
-        setCrewCredits([]);
-        setError(
-          err instanceof Error ? err.message : labels.unableToLoadActorInformation
-        );
-      } finally {
-        setLoading(false);
+        dispatch({ personData: null, castCredits: [], crewCredits: [], error: err instanceof Error ? err.message : labels.unableToLoadActorInformation, loading: false });
       }
     };
 
@@ -191,7 +193,7 @@ export function usePersonDetailPageClient({
 
   useEffect(() => {
     if (currentPage > totalPages) {
-      setCurrentPage(1);
+      dispatch({ currentPage: 1 });
     }
   }, [currentPage, totalPages]);
 
@@ -205,12 +207,11 @@ export function usePersonDetailPageClient({
   }, [currentPage, currentRawItems]);
 
   const handleTabChange = (tab: PersonDetailTab) => {
-    setActiveTab(tab);
-    setCurrentPage(1);
+    dispatch({ activeTab: tab, currentPage: 1 });
   };
 
   const toggleBiography = () => {
-    setShowFullBio((prev) => !prev);
+    dispatch({ showFullBio: !showFullBio });
   };
 
   const canToggleBiography =
@@ -244,7 +245,7 @@ export function usePersonDetailPageClient({
     totalPages,
     currentItems,
     handleTabChange,
-    setCurrentPage,
+    setCurrentPage: (page: number) => dispatch({ currentPage: page }),
     toggleBiography,
   };
 }

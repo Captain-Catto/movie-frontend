@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { apiService } from "@/services/api";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTVSeriesToFrontend } from "@/utils/tvMapper";
@@ -25,15 +25,18 @@ export function useTrendingSuggestions({
   limit = 6,
 }: UseTrendingSuggestionsOptions): UseTrendingSuggestionsResult {
   const { language } = useLanguage();
-  const [items, setItems] = useState<MovieCardData[]>([]);
-  const [loading, setLoading] = useState(true);
+  type State = { items: MovieCardData[]; loading: boolean };
+  const [state, dispatch] = useReducer(
+    (s: State, p: Partial<State>): State => ({ ...s, ...p }),
+    { items: [], loading: true }
+  );
 
   useEffect(() => {
     let isMounted = true;
+    dispatch({ loading: true });
 
     const fetchSuggestions = async () => {
       try {
-        setLoading(true);
         let data: MovieCardData[] = [];
 
         if (type === "movie") {
@@ -67,15 +70,11 @@ export function useTrendingSuggestions({
         }
 
         if (!isMounted) return;
-        setItems(data.slice(0, limit));
+        dispatch({ items: data.slice(0, limit), loading: false });
       } catch (error) {
         if (!isMounted) return;
-        setItems([]);
+        dispatch({ items: [], loading: false });
         console.error("Error fetching suggestions:", error);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
       }
     };
 
@@ -86,5 +85,5 @@ export function useTrendingSuggestions({
     };
   }, [type, language, limit]);
 
-  return { items, loading };
+  return { items: state.items, loading: state.loading };
 }

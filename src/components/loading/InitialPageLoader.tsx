@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { usePathname } from "next/navigation";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 
@@ -17,19 +17,21 @@ export function InitialPageLoader() {
     typeof window !== "undefined"
       ? window.location.pathname === "/"
       : pathname === "/";
-  const [isVisible, setIsVisible] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
+  type LoaderState = { isVisible: boolean; shouldRender: boolean };
+  const [loaderState, dispatch] = useReducer(
+    (s: LoaderState, p: Partial<LoaderState>): LoaderState => ({ ...s, ...p }),
+    { isVisible: false, shouldRender: false }
+  );
+  const { isVisible, shouldRender } = loaderState;
 
   useEffect(() => {
     if (!ENABLE_INITIAL_PAGE_LOADER) return;
 
-    // Don't run until hydrated (avoids SSR issues with sessionStorage)
     if (!isHydrated) return;
 
     if (!isHome) {
       sessionStorage.setItem("initial-loader-dismissed", "true");
-      setIsVisible(false);
-      setShouldRender(false);
+      dispatch({ isVisible: false, shouldRender: false });
       return;
     }
 
@@ -37,18 +39,17 @@ export function InitialPageLoader() {
     let removeTimer: number | undefined;
 
     if (hasSeenLoader) {
-      setShouldRender(false);
+      dispatch({ shouldRender: false });
       return;
     }
 
-    setShouldRender(true);
-    setIsVisible(true);
+    dispatch({ shouldRender: true, isVisible: true });
 
     const hideTimer = window.setTimeout(() => {
       sessionStorage.setItem("initial-loader-dismissed", "true");
-      setIsVisible(false);
+      dispatch({ isVisible: false });
 
-      removeTimer = window.setTimeout(() => setShouldRender(false), 450);
+      removeTimer = window.setTimeout(() => dispatch({ shouldRender: false }), 450);
     }, 1000);
 
     return () => {

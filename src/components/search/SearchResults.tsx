@@ -18,8 +18,8 @@ interface SearchResultsProps {
 
 const LoadingSkeleton = () => (
   <div className="gap-y-3">
-    {[...Array(3)].map((_, i) => (
-      <div key={`search-skeleton-${i}`} className="flex items-center gap-x-3 p-3 animate-pulse">
+    {["sk-1", "sk-2", "sk-3"].map((id) => (
+      <div key={id} className="flex items-center gap-x-3 p-3 animate-pulse">
         <div className="w-16 h-20 bg-gray-700 rounded"></div>
         <div className="flex-1 gap-y-2">
           <div className="h-4 bg-gray-700 rounded w-3/4"></div>

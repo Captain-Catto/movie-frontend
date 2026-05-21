@@ -50,14 +50,21 @@ export function useCommentItem({
   onDislike,
   onAddComment,
 }: CommentItemProps): UseCommentItemResult {
-  const [currentComment, setCurrentComment] = useState(comment);
+  const [editedComment, setEditedComment] = useState<Comment | null>(null);
   const [showReplies, setShowReplies] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [replies, setReplies] = useState<Comment[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [repliesLoaded, setRepliesLoaded] = useState(false);
-  const [localReplyCount, setLocalReplyCount] = useState(currentComment.replyCount);
+  const [replyCountAdjustments, setReplyCountAdjustments] = useState<Record<number, number>>({});
   const [isEditing, setIsEditing] = useState(false);
+
+  const currentComment =
+    editedComment?.id === comment.id ? { ...comment, ...editedComment } : comment;
+  const localReplyCount = Math.max(
+    0,
+    currentComment.replyCount + (replyCountAdjustments[currentComment.id] ?? 0)
+  );
 
   const { user } = useAppSelector((state) => state.auth);
   const isOwner = user?.id === currentComment.userId;
@@ -70,13 +77,8 @@ export function useCommentItem({
     e.currentTarget.src = NO_AVATAR;
   };
 
-  useEffect(() => {
-    setCurrentComment(comment);
-    setLocalReplyCount(comment.replyCount);
-  }, [comment]);
-
-  const loadReplies = useCallback(async () => {
-    if (repliesLoaded) return;
+  const loadReplies = useCallback(async (force = false) => {
+    if (repliesLoaded && !force) return;
 
     setLoadingReplies(true);
     try {
@@ -115,7 +117,7 @@ export function useCommentItem({
       }
       setShowReplyForm(false);
       setRepliesLoaded(false);
-      await loadReplies();
+      await loadReplies(true);
       setShowReplies(true);
 
       return {} as Comment;
@@ -152,7 +154,7 @@ export function useCommentItem({
         updatedAt: updated?.updatedAt || new Date().toISOString(),
       };
 
-      setCurrentComment(mergedComment);
+      setEditedComment(mergedComment);
       setIsEditing(false);
       return mergedComment;
     } catch (error) {
@@ -234,7 +236,10 @@ export function useCommentItem({
       if (isDirectChild) {
         await commentService.deleteComment(replyId);
         setReplies((prevReplies) => prevReplies.filter((reply) => reply.id !== replyId));
-        setLocalReplyCount((prev) => Math.max(0, prev - 1));
+        setReplyCountAdjustments((prev) => ({
+          ...prev,
+          [currentComment.id]: (prev[currentComment.id] ?? 0) - 1,
+        }));
 
         if (onDelete) {
           await Promise.resolve(onDelete(replyId));

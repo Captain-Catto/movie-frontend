@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Info, Play } from "lucide-react";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useReducer, useRef } from "react";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
@@ -24,9 +24,12 @@ export default function HomeFeatureSlider({
 }: HomeFeatureSliderProps) {
   const titleId = useId();
   const items = useMemo(() => movies.slice(0, 15), [movies]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [visibleIndex, setVisibleIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  type SliderState = { activeIndex: number; visibleIndex: number; isTransitioning: boolean };
+  const [sliderState, dispatch] = useReducer(
+    (s: SliderState, p: Partial<SliderState>): SliderState => ({ ...s, ...p }),
+    { activeIndex: 0, visibleIndex: 0, isTransitioning: false }
+  );
+  const { activeIndex, visibleIndex, isTransitioning } = sliderState;
   const swipeStartXRef = useRef<number | null>(null);
   const swipeStartYRef = useRef<number | null>(null);
   const swipeHandledRef = useRef(false);
@@ -38,10 +41,10 @@ export default function HomeFeatureSlider({
       return;
     }
 
-    setIsTransitioning(true);
+    dispatch({ isTransitioning: true });
     const timeout = window.setTimeout(() => {
-      setVisibleIndex(activeIndex);
-      window.setTimeout(() => setIsTransitioning(false), 40);
+      dispatch({ visibleIndex: activeIndex });
+      window.setTimeout(() => dispatch({ isTransitioning: false }), 40);
     }, 180);
 
     return () => window.clearTimeout(timeout);
@@ -64,12 +67,9 @@ export default function HomeFeatureSlider({
   const goToRelativeSlide = (direction: "prev" | "next") => {
     if (items.length <= 1 || isTransitioning) return;
 
-    setActiveIndex((current) => {
-      if (direction === "next") {
-        return (current + 1) % items.length;
-      }
-
-      return (current - 1 + items.length) % items.length;
+    dispatch({ activeIndex: direction === "next"
+      ? (activeIndex + 1) % items.length
+      : (activeIndex - 1 + items.length) % items.length
     });
   };
 
@@ -219,7 +219,7 @@ export default function HomeFeatureSlider({
                 key={`feature-thumb-${movie.id}`}
                 type="button"
                 className={index === activeIndex ? "is-active" : ""}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => dispatch({ activeIndex: index })}
                 aria-label={movie.title}
               >
                 <Image

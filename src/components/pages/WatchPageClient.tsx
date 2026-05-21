@@ -448,8 +448,8 @@ const WatchPageClientContent = ({
                 </h3>
                 {creditsLoading ? (
                   <div className="grid grid-cols-3 gap-3">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={`cast-skeleton-${i}`} className="text-center">
+                    {["cast-sk-1", "cast-sk-2", "cast-sk-3", "cast-sk-4", "cast-sk-5", "cast-sk-6"].map((id) => (
+                      <div key={id} className="text-center">
                         <div className="size-16 bg-gray-700 rounded-full animate-pulse mx-auto mb-2"></div>
                         <div className="h-3 bg-gray-700 rounded animate-pulse"></div>
                       </div>
@@ -520,8 +520,8 @@ const WatchPageClientContent = ({
                 </h3>
                 {recommendationsLoading ? (
                   <div className="gap-y-4">
-                    {[...Array(5)].map((_, i) => (
-                      <div key={`rec-skeleton-${i}`} className="flex gap-x-3">
+                    {["rec-sk-1", "rec-sk-2", "rec-sk-3", "rec-sk-4", "rec-sk-5"].map((id) => (
+                      <div key={id} className="flex gap-x-3">
                         <div className="w-16 h-24 bg-gray-700 rounded animate-pulse flex-shrink-0"></div>
                         <div className="flex-1">
                           <div className="h-4 bg-gray-700 rounded animate-pulse mb-2"></div>

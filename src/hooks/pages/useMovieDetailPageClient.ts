@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
 import { analyticsService } from "@/services/analytics.service";
@@ -33,13 +33,12 @@ export function useMovieDetailPageClient({
 }: UseMovieDetailPageClientOptions): UseMovieDetailPageClientResult {
   const { language } = useLanguage();
   const labels = getPageHookUiMessages(language);
-  const [movieData, setMovieData] = useState<MovieDetail | null>(initialMovieData);
-  const [loading, setLoading] = useState(() => !initialMovieData && !initialError);
-  const [creditsLoading, setCreditsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(initialError);
-  const [contentType, setContentType] = useState<"movie" | "tv" | null>(
-    initialContentType
+  type PageState = { movieData: MovieDetail | null; loading: boolean; creditsLoading: boolean; error: string | null; contentType: "movie" | "tv" | null };
+  const [pageState, dispatch] = useReducer(
+    (s: PageState, p: Partial<PageState>): PageState => ({ ...s, ...p }),
+    { movieData: initialMovieData, loading: !initialMovieData && !initialError, creditsLoading: false, error: initialError, contentType: initialContentType }
   );
+  const { movieData, loading, creditsLoading, error, contentType } = pageState;
   const skipInitialFetchRef = useRef(Boolean(initialMovieData || initialError));
 
   usePageDuration({
@@ -56,22 +55,16 @@ export function useMovieDetailPageClient({
     }
 
     const fetchMovieData = async () => {
+      dispatch({ loading: true, creditsLoading: true, error: null });
       try {
-        setLoading(true);
-        setCreditsLoading(true);
-        setError(null);
         const parsedTmdbId = Number(movieId);
         if (!Number.isFinite(parsedTmdbId) || parsedTmdbId <= 0) {
-          setMovieData(null);
-          setContentType(null);
-          setError(labels.invalidContentId);
+          dispatch({ movieData: null, contentType: null, error: labels.invalidContentId, loading: false, creditsLoading: false });
           return;
         }
 
         const result = await getMovieDetailPageDataByTmdbId(parsedTmdbId, language);
-        setMovieData(result.movieData);
-        setContentType(result.contentType);
-        setError(result.error);
+        dispatch({ movieData: result.movieData, contentType: result.contentType, error: result.error, loading: false, creditsLoading: false });
 
         if (result.movieData) {
           analyticsService.trackView(
@@ -81,14 +74,7 @@ export function useMovieDetailPageClient({
           );
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : labels.anErrorOccurred
-        );
-        setMovieData(null);
-        setContentType(null);
-      } finally {
-        setLoading(false);
-        setCreditsLoading(false);
+        dispatch({ error: err instanceof Error ? err.message : labels.anErrorOccurred, movieData: null, contentType: null, loading: false, creditsLoading: false });
       }
     };
 

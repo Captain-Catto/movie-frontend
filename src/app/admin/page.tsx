@@ -27,9 +27,9 @@ export default function AdminDashboard() {
         {/* Stats Cards */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
+            {["stat-1", "stat-2", "stat-3", "stat-4"].map((id) => (
               <div
-                key={`stat-card-${i}`}
+                key={id}
                 className="bg-gray-800 rounded-lg p-6 border border-gray-700 animate-pulse"
               >
                 <div className="h-20"></div>

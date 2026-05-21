@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { apiService } from "@/services/api";
 
 export interface RecommendationItem {
@@ -48,52 +48,47 @@ export function useRecommendationsSection({
   tmdbId,
   contentType,
 }: UseRecommendationsSectionOptions): UseRecommendationsSectionResult {
-  const [recommendations, setRecommendations] = useState<RecommendationItem[]>(
-    []
+  type State = { recommendations: RecommendationItem[]; loading: boolean; error: string | null };
+  const [state, dispatch] = useReducer(
+    (s: State, p: Partial<State>): State => ({ ...s, ...p }),
+    { recommendations: [], loading: true, error: null }
   );
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchRecommendations = async () => {
+      dispatch({ loading: true, error: null });
+
+      if (!isMounted) return;
+
       try {
-        setLoading(true);
-        setError(null);
-
-        if (!isMounted) return;
-
         const response =
           contentType === "movie"
             ? await apiService.getMovieRecommendations(tmdbId)
             : await apiService.getTVRecommendations(tmdbId);
 
+        if (!isMounted) return;
+
         if (response.success && Array.isArray(response.data)) {
-          setRecommendations(
-            (response.data as unknown as Record<string, unknown>[]).slice(0, 12).map(normalizeItem)
-          );
+          dispatch({
+            recommendations: (response.data as unknown as Record<string, unknown>[]).slice(0, 12).map(normalizeItem),
+            loading: false,
+          });
         } else {
-          setRecommendations([]);
-          setError(response.error || "Failed to load recommendations");
+          dispatch({ recommendations: [], error: response.error || "Failed to load recommendations", loading: false });
         }
       } catch (err) {
         if (!isMounted) return;
-        setRecommendations([]);
-        setError("Failed to load recommendations");
+        dispatch({ recommendations: [], error: "Failed to load recommendations", loading: false });
         console.error("Error fetching recommendations:", err);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
       }
     };
 
     if (tmdbId > 0) {
       fetchRecommendations();
     } else {
-      setRecommendations([]);
-      setLoading(false);
+      dispatch({ recommendations: [], loading: false });
     }
 
     return () => {
@@ -101,5 +96,5 @@ export function useRecommendationsSection({
     };
   }, [tmdbId, contentType]);
 
-  return { recommendations, loading, error };
+  return { recommendations: state.recommendations, loading: state.loading, error: state.error };
 }

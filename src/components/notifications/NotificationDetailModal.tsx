@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
+import type { SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -140,12 +142,14 @@ export default function NotificationDetailModal({ notification, onClose }: Props
         {/* Header — image or type illustration */}
         {imageUrl ? (
           <div className="relative w-full aspect-video bg-gray-800">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={imageUrl}
               alt={title}
-              className="size-full object-cover"
-              onError={(e) => {
+              fill
+              sizes="100vw"
+              className="object-cover"
+              unoptimized
+              onError={(e: SyntheticEvent<HTMLImageElement>) => {
                 (e.currentTarget as HTMLImageElement).style.display = "none";
               }}
             />

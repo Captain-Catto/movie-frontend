@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiService } from "@/services/api";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -34,14 +34,20 @@ export function useEpisodePicker({
   const router = useRouter();
   const { language } = useLanguage();
   const dsLang = getDsLanguageFromLanguage(language);
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedSeason, setSelectedSeason] = useState(currentSeason);
+  type EpisodeState = { episodes: Episode[]; loading: boolean };
+  const [episodeState, dispatch] = useReducer(
+    (s: EpisodeState, p: Partial<EpisodeState>): EpisodeState => ({ ...s, ...p }),
+    { episodes: [], loading: false }
+  );
+  const { episodes, loading } = episodeState;
+  const [pendingSelection, setPendingSelection] = useState<{
+    key: string;
+    season: number;
+  } | null>(null);
   const seasonEpisodesCacheRef = useRef<Record<number, Episode[]>>({});
-
-  useEffect(() => {
-    setSelectedSeason(currentSeason);
-  }, [currentSeason]);
+  const selectionKey = `${tmdbId}:${contentId}:${currentSeason}`;
+  const selectedSeason =
+    pendingSelection?.key === selectionKey ? pendingSelection.season : currentSeason;
 
   useEffect(() => {
     seasonEpisodesCacheRef.current = {};
@@ -51,11 +57,11 @@ export function useEpisodePicker({
     const fetchEpisodes = async () => {
       const cachedEpisodes = seasonEpisodesCacheRef.current[selectedSeason];
       if (cachedEpisodes) {
-        setEpisodes(cachedEpisodes);
+        dispatch({ episodes: cachedEpisodes });
         return;
       }
 
-      setLoading(true);
+      dispatch({ loading: true });
       try {
         const response = await apiService.getTVSeasonEpisodes(
           tmdbId,
@@ -77,15 +83,13 @@ export function useEpisodePicker({
             })
           );
 
-          setEpisodes(normalizedEpisodes);
+          dispatch({ episodes: normalizedEpisodes, loading: false });
           seasonEpisodesCacheRef.current[selectedSeason] = normalizedEpisodes;
         } else {
-          setEpisodes([]);
+          dispatch({ episodes: [], loading: false });
         }
       } catch {
-        setEpisodes([]);
-      } finally {
-        setLoading(false);
+        dispatch({ episodes: [], loading: false });
       }
     };
 
@@ -115,12 +119,12 @@ export function useEpisodePicker({
   const changeSeason = useCallback(
     (newSeason: number) => {
       if (newSeason === currentSeason && currentEpisode === 1) return;
-      setSelectedSeason(newSeason);
+      setPendingSelection({ key: selectionKey, season: newSeason });
       router.replace(`/watch/${contentId}?season=${newSeason}&episode=1`, {
         scroll: false,
       });
     },
-    [contentId, currentSeason, currentEpisode, router]
+    [contentId, currentSeason, currentEpisode, router, selectionKey]
   );
 
   const selectEpisode = useCallback(

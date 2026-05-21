@@ -91,39 +91,51 @@ export function NotificationSocketProvider({
 
     socketRef.current = newSocket;
 
-    newSocket.on("connect", () => {
+    const handleConnect = () => {
       setIsConnected(true);
       setSocket(newSocket);
-    });
+    };
 
-    newSocket.on("disconnect", () => {
+    const handleDisconnect = () => {
       setIsConnected(false);
-    });
+    };
 
-    newSocket.on("connect_error", (error) => {
+    const handleConnectError = (error: Error) => {
       console.error("WebSocket connection error:", error);
       setIsConnected(false);
-    });
+    };
 
-    newSocket.on("auth:error", (error) => {
+    const handleAuthError = (error: Error) => {
       console.error("Socket authentication failed:", error);
       setIsConnected(false);
-    });
+    };
 
-    newSocket.on("notification:new", (notification: NotificationData) => {
+    const handleNewNotification = (notification: NotificationData) => {
       const createdAt =
         notification?.createdAt instanceof Date
           ? notification.createdAt
           : new Date(notification?.createdAt || Date.now());
       setLatestNotification({ ...notification, createdAt });
-    });
+    };
 
-    newSocket.on("notification:unread-count", (data: { count: number }) => {
+    const handleUnreadCount = (data: { count: number }) => {
       setUnreadCount(data.count);
-    });
+    };
+
+    newSocket.on("connect", handleConnect);
+    newSocket.on("disconnect", handleDisconnect);
+    newSocket.on("connect_error", handleConnectError);
+    newSocket.on("auth:error", handleAuthError);
+    newSocket.on("notification:new", handleNewNotification);
+    newSocket.on("notification:unread-count", handleUnreadCount);
 
     return () => {
-      newSocket.removeAllListeners();
+      newSocket.off("connect", handleConnect);
+      newSocket.off("disconnect", handleDisconnect);
+      newSocket.off("connect_error", handleConnectError);
+      newSocket.off("auth:error", handleAuthError);
+      newSocket.off("notification:new", handleNewNotification);
+      newSocket.off("notification:unread-count", handleUnreadCount);
       newSocket.disconnect();
       socketRef.current = null;
       setSocket(null);

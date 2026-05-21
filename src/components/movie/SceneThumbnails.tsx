@@ -9,12 +9,12 @@ const SceneThumbnails = ({ scenes }: SceneThumbnailsProps) => {
     <div className="flex gap-x-2">
       {scenes.map((scene) => (
         <div
-          key={index}
+          key={scene}
           className="w-24 h-16 rounded-lg overflow-hidden cursor-pointer transition-transform hover:scale-105"
         >
           <Image
             src={scene}
-            alt={`Scene ${index + 1}`}
+            alt="Scene thumbnail"
             width={96}
             height={64}
             className="w-full h-full object-cover"

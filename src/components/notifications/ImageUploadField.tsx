@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { ImageIcon, X, Loader2, Link2 } from "lucide-react";
 import { authStorage } from "@/lib/auth-storage";
@@ -128,12 +129,14 @@ export default function ImageUploadField({ value, onChange }: Props) {
 
       {/* Preview */}
       {preview ? (
-        <div className="relative rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <div className="relative aspect-video rounded-xl overflow-hidden bg-gray-800 border border-gray-700">
+          <Image
             src={preview}
             alt="preview"
-            className="w-full aspect-video object-cover"
+            fill
+            sizes="100vw"
+            className="object-cover"
+            unoptimized
             onError={() => {
               setError("Could not load image from URL");
               setPreview("");

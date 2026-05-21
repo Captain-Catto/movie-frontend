@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { SeoMetadata } from "@/types/seo";
 import { API_BASE_URL } from "@/services/api";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,14 +21,18 @@ interface CheckerResult {
 const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }> = ({
   onComplete,
 }) => {
-  const [checking, setChecking] = useState(false);
-  const [result, setResult] = useState<CheckerResult | null>(null);
+  type CheckerState = { checking: boolean; result: CheckerResult | null };
+  const [checkerState, dispatch] = useReducer(
+    (s: CheckerState, p: Partial<CheckerState>): CheckerState => ({ ...s, ...p }),
+    { checking: false, result: null }
+  );
+  const { checking, result } = checkerState;
   const { token } = useAuth();
 
   useEffect(() => {
     if (!checking) return;
     if (!token) {
-      setChecking(false);
+      dispatch({ checking: false });
       return;
     }
 
@@ -78,10 +82,10 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
           paths.length > 1 ? [{ title, paths }] : []
         );
 
-        setResult(check);
+        dispatch({ result: check, checking: false });
         onComplete?.(check);
       })
-      .finally(() => setChecking(false));
+      .catch(() => dispatch({ checking: false }));
   }, [checking, onComplete, token]);
 
   return (
@@ -94,7 +98,7 @@ const CheckSeoHealth: React.FC<{ onComplete?: (result: CheckerResult) => void }>
           </p>
         </div>
         <button
-          onClick={() => setChecking(true)}
+          onClick={() => dispatch({ checking: true })}
           disabled={checking}
           className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 cursor-pointer"
         >

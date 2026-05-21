@@ -67,26 +67,26 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
 
     socketRef.current = client;
 
-    client.on("connect", () => {
+    const handleConnect = () => {
       setIsConnected(true);
       setSocket(client);
-    });
+    };
 
-    client.on("disconnect", () => {
+    const handleDisconnect = () => {
       setIsConnected(false);
-    });
+    };
 
-    client.on("connect_error", (error) => {
+    const handleConnectError = (error: Error) => {
       console.error("[AdminAnalyticsSocket] connect_error", error);
       setIsConnected(false);
-    });
+    };
 
-    client.on("auth:error", (error) => {
+    const handleAuthError = (error: Error) => {
       console.error("[AdminAnalyticsSocket] auth:error", error);
       setIsConnected(false);
-    });
+    };
 
-    client.on("analytics:update", (payload: AdminAnalyticsSnapshot) => {
+    const handleAnalyticsUpdate = (payload: AdminAnalyticsSnapshot) => {
       if (!payload) return;
 
       if (
@@ -101,10 +101,20 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
       setLastUpdateAt(
         payload.updatedAt ? new Date(payload.updatedAt) : new Date()
       );
-    });
+    };
+
+    client.on("connect", handleConnect);
+    client.on("disconnect", handleDisconnect);
+    client.on("connect_error", handleConnectError);
+    client.on("auth:error", handleAuthError);
+    client.on("analytics:update", handleAnalyticsUpdate);
 
     return () => {
-      client.removeAllListeners();
+      client.off("connect", handleConnect);
+      client.off("disconnect", handleDisconnect);
+      client.off("connect_error", handleConnectError);
+      client.off("auth:error", handleAuthError);
+      client.off("analytics:update", handleAnalyticsUpdate);
       client.disconnect();
       socketRef.current = null;
       setSocket(null);

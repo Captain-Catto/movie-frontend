@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useReducer, useRef, useState } from "react";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageDuration } from "@/hooks/usePageDuration";
@@ -84,29 +84,40 @@ export function useWatchPage({
   const { language } = useLanguage();
   const labels = getPageHookUiMessages(language);
 
-  const [movieData, setMovieData] = useState<WatchContentData | null>(
-    initialMovieData
-  );
-  const [loading, setLoading] = useState(() => !initialMovieData && !initialError);
-  const [error, setError] = useState<string | null>(initialError);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [credits, setCredits] = useState<WatchPageCredits | null>(initialCredits);
-  const [recommendations, setRecommendations] = useState<
-    WatchPageRecommendationItem[]
-  >(initialRecommendations);
-  const [creditsLoading, setCreditsLoading] = useState(
-    () => !initialCredits && !initialError
+
+  type WatchState = {
+    movieData: WatchContentData | null;
+    loading: boolean;
+    error: string | null;
+    credits: WatchPageCredits | null;
+    recommendations: WatchPageRecommendationItem[];
+    creditsLoading: boolean;
+    recommendationsLoading: boolean;
+    streamCandidates: string[];
+    activeStreamIndex: number;
+    streamError: string | null;
+    hasTrackedPlay: boolean;
+    hasTrackedView: boolean;
+  };
+  const [watchState, dispatch] = useReducer(
+    (s: WatchState, p: Partial<WatchState>): WatchState => ({ ...s, ...p }),
+    {
+      movieData: initialMovieData,
+      loading: !initialMovieData && !initialError,
+      error: initialError,
+      credits: initialCredits,
+      recommendations: initialRecommendations,
+      creditsLoading: !initialCredits && !initialError,
+      recommendationsLoading: initialRecommendations.length === 0 && !initialError,
+      streamCandidates: initialStreamCandidates,
+      activeStreamIndex: 0,
+      streamError: initialStreamError,
+      hasTrackedPlay: false,
+      hasTrackedView: false,
+    }
   );
-  const [recommendationsLoading, setRecommendationsLoading] = useState(
-    () => initialRecommendations.length === 0 && !initialError
-  );
-  const [hasTrackedPlay, setHasTrackedPlay] = useState(false);
-  const [hasTrackedView, setHasTrackedView] = useState(false);
-  const [streamCandidates, setStreamCandidates] = useState<string[]>(
-    initialStreamCandidates
-  );
-  const [activeStreamIndex, setActiveStreamIndex] = useState(0);
-  const [streamError, setStreamError] = useState<string | null>(initialStreamError);
+  const { movieData, loading, error, credits, recommendations, creditsLoading, recommendationsLoading, streamCandidates, activeStreamIndex, streamError, hasTrackedPlay, hasTrackedView } = watchState;
   const streamLoadingRef = useRef(false);
   const streamTimeoutRef = useRef<number | null>(null);
   const skipInitialFetchRef = useRef(Boolean(initialMovieData || initialError));
@@ -144,16 +155,10 @@ export function useWatchPage({
     }
 
     const fetchMovieData = async () => {
-      try {
-        lastDataFetchKeyRef.current = dataFetchKey;
-        setLoading(true);
-        setCreditsLoading(true);
-        setRecommendationsLoading(true);
-        setStreamCandidates([]);
-        setStreamError(null);
-        setActiveStreamIndex(0);
-        setError(null);
+      lastDataFetchKeyRef.current = dataFetchKey;
+      dispatch({ loading: true, creditsLoading: true, recommendationsLoading: true, streamCandidates: [], streamError: null, activeStreamIndex: 0, error: null });
 
+      try {
         const result = await getWatchPageDataByRouteId(
           movieId,
           language,
@@ -161,33 +166,35 @@ export function useWatchPage({
           episode
         );
 
-        setMovieData(result.movieData);
-        setCredits(result.credits);
-        setRecommendations(result.recommendations);
-        setStreamCandidates(result.streamCandidates);
-        setStreamError(result.streamError);
-        setError(result.error);
+        dispatch({
+          movieData: result.movieData,
+          credits: result.credits,
+          recommendations: result.recommendations,
+          streamCandidates: result.streamCandidates,
+          streamError: result.streamError,
+          error: result.error,
+          creditsLoading: false,
+          recommendationsLoading: false,
+          loading: false,
+        });
       } catch {
-        setError(labels.loadContentFailed);
-        setMovieData(null);
-        setCredits(null);
-        setRecommendations([]);
-        setStreamCandidates([]);
-        setStreamError(labels.fetchStreamFailed);
-      } finally {
-        setCreditsLoading(false);
-        setRecommendationsLoading(false);
-        setLoading(false);
+        dispatch({
+          error: labels.loadContentFailed,
+          movieData: null,
+          credits: null,
+          recommendations: [],
+          streamCandidates: [],
+          streamError: labels.fetchStreamFailed,
+          creditsLoading: false,
+          recommendationsLoading: false,
+          loading: false,
+        });
       }
     };
 
     if (movieId) {
       fetchMovieData();
-      setHasTrackedPlay(false);
-      setHasTrackedView(false);
-      setStreamCandidates([]);
-      setStreamError(null);
-      setActiveStreamIndex(0);
+      dispatch({ hasTrackedPlay: false, hasTrackedView: false });
     }
   }, [movieId, language, initialLanguage, season, episode, labels.fetchStreamFailed, labels.loadContentFailed]);
 
@@ -228,19 +235,15 @@ export function useWatchPage({
           ),
         ];
 
-        setStreamCandidates(candidates);
-        setStreamError(null);
-        setActiveStreamIndex(0);
+        dispatch({ streamCandidates: candidates, streamError: null, activeStreamIndex: 0 });
       } else {
-        setStreamCandidates([]);
-        setStreamError(labels.noStreamAvailable);
+        dispatch({ streamCandidates: [], streamError: labels.noStreamAvailable });
       }
     };
 
     fetchStreamUrl().catch(() => {
       if (cancelled) return;
-      setStreamCandidates([]);
-      setStreamError(labels.fetchStreamFailed);
+      dispatch({ streamCandidates: [], streamError: labels.fetchStreamFailed });
     });
 
     return () => {
@@ -268,7 +271,7 @@ export function useWatchPage({
       movieData.contentType === "tv" ? "tv_series" : "movie",
       movieData.title
     );
-    setHasTrackedView(true);
+    dispatch({ hasTrackedView: true });
   }, [movieData, hasTrackedView]);
 
   const clearStreamTimeout = useCallback(() => {
@@ -281,15 +284,12 @@ export function useWatchPage({
   const handleStreamLoadError = useCallback(() => {
     clearStreamTimeout();
     streamLoadingRef.current = false;
-    setActiveStreamIndex((prev) => {
-      if (prev < streamCandidates.length - 1) {
-        setStreamError(null);
-        return prev + 1;
-      }
-      setStreamError(labels.loadStreamFailed);
-      return prev;
-    });
-  }, [clearStreamTimeout, streamCandidates.length, labels.loadStreamFailed]);
+    if (activeStreamIndex < streamCandidates.length - 1) {
+      dispatch({ activeStreamIndex: activeStreamIndex + 1, streamError: null });
+    } else {
+      dispatch({ streamError: labels.loadStreamFailed });
+    }
+  }, [clearStreamTimeout, activeStreamIndex, streamCandidates.length, labels.loadStreamFailed]);
 
   const handleStreamLoadSuccess = useCallback(() => {
     clearStreamTimeout();
@@ -331,7 +331,7 @@ export function useWatchPage({
         movieData.title,
         { source: "watch_page_play_button", context: "watch_page" }
       );
-      setHasTrackedPlay(true);
+      dispatch({ hasTrackedPlay: true });
     }
     setIsPlaying(true);
   }, [hasTrackedPlay, movieData]);

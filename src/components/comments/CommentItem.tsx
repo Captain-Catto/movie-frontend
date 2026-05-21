@@ -172,6 +172,7 @@ export function CommentItem(props: CommentItemProps) {
         {isEditing ? (
           <div className="text">
             <CommentForm
+              key={`edit-${currentComment.id}-${currentComment.updatedAt}`}
               movieId={currentComment.movieId}
               tvSeriesId={currentComment.tvSeriesId || currentComment.tvId}
               editingComment={currentComment}
