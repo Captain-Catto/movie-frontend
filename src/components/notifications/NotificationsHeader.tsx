@@ -116,6 +116,7 @@ export default function NotificationsHeader({
             <input
               id="notification-filter-start-date"
               type="date"
+              aria-label="Notification filter start date"
               value={filters.startDate}
               onChange={(e) =>
                 onFiltersChange({ ...filters, startDate: e.target.value })
@@ -128,6 +129,7 @@ export default function NotificationsHeader({
             <input
               id="notification-filter-end-date"
               type="date"
+              aria-label="Notification filter end date"
               value={filters.endDate}
               onChange={(e) => onFiltersChange({ ...filters, endDate: e.target.value })}
               className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"

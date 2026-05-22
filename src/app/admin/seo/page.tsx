@@ -665,6 +665,7 @@ export default function AdminSeoPage() {
             <input
               id="auto-refresh"
               type="checkbox"
+              aria-label="Auto refresh SEO data"
               checked={autoRefresh}
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="size-4 accent-red-500"
@@ -906,6 +907,7 @@ export default function AdminSeoPage() {
                     </label>
                     <select
                       id="seo-page-type"
+                      aria-label="SEO page type"
                       value={formData.pageType}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, pageType: e.target.value }))
@@ -931,6 +933,7 @@ export default function AdminSeoPage() {
                     <input
                       id="seo-path"
                       type="text"
+                      aria-label="SEO path"
                       value={formData.path}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, path: e.target.value }))
@@ -945,6 +948,7 @@ export default function AdminSeoPage() {
                     </label>
                     <select
                       id="seo-locale"
+                      aria-label="SEO locale"
                       value={formData.locale}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, locale: e.target.value }))
@@ -967,6 +971,7 @@ export default function AdminSeoPage() {
                   <input
                     id="seo-title"
                     type="text"
+                    aria-label="SEO title"
                     value={formData.title}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, title: e.target.value }))
@@ -984,6 +989,7 @@ export default function AdminSeoPage() {
                   </label>
                   <textarea
                     id="seo-description"
+                    aria-label="SEO description"
                     value={formData.description}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, description: e.target.value }))
@@ -1003,6 +1009,7 @@ export default function AdminSeoPage() {
                   <input
                     id="seo-keywords"
                     type="text"
+                    aria-label="SEO keywords"
                     value={formData.keywords}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, keywords: e.target.value }))
@@ -1105,6 +1112,7 @@ export default function AdminSeoPage() {
                   <input
                     type="checkbox"
                     id="isActive"
+                    aria-label="SEO entry active"
                     checked={formData.isActive}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, isActive: e.target.checked }))

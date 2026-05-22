@@ -949,6 +949,7 @@ export default function AdminUserDetailPage() {
             </span>
             <input
               id="user-detail-display-name"
+              aria-label="User detail display name"
               value={profileForm.name}
               onChange={(event) =>
                 setProfileForm((prev) => ({
@@ -967,6 +968,7 @@ export default function AdminUserDetailPage() {
             </span>
             <input
               id="user-detail-email"
+              aria-label="User detail email"
               value={user.email}
               readOnly
               className="w-full px-3 py-2 bg-gray-900/70 border border-gray-700 rounded-lg text-sm text-gray-300 cursor-not-allowed"
@@ -979,6 +981,7 @@ export default function AdminUserDetailPage() {
             </span>
             <select
               id="user-detail-role"
+              aria-label="User detail role"
               value={profileForm.role}
               disabled={isEditingSelf}
               onChange={(event) =>

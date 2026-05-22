@@ -261,7 +261,7 @@ export default function AdminUsersPage() {
   }, [adminApi]);
 
   const fetchWatchHistory = useCallback(
-    async (userId: number, page = watchPageRef.current) => {
+    async (userId: number, page: number) => {
       setWatchLoading(true);
       try {
         const params = new URLSearchParams({
@@ -684,6 +684,7 @@ export default function AdminUsersPage() {
                       </label>
                       <input
                         id="admin-user-display-name"
+                        aria-label="Admin user display name"
                         value={editForm.name}
                         onChange={(e) =>
                           setEditForm((prev) => ({ ...prev, name: e.target.value }))
@@ -698,6 +699,7 @@ export default function AdminUsersPage() {
                       </label>
                       <input
                         id="admin-user-email"
+                        aria-label="Admin user email"
                         value={editModal.user.email}
                         readOnly
                         className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-gray-300"
@@ -709,6 +711,7 @@ export default function AdminUsersPage() {
                       </label>
                       <select
                         id="admin-user-role"
+                        aria-label="Admin user role"
                         value={editForm.role}
                         onChange={(e) =>
                           setEditForm((prev) => ({
@@ -760,6 +763,7 @@ export default function AdminUsersPage() {
                       <input
                         id="admin-user-new-password"
                         type="password"
+                        aria-label="Admin user new password"
                         value={editForm.password}
                         onChange={(e) =>
                           setEditForm((prev) => ({

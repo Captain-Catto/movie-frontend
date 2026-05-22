@@ -15,6 +15,7 @@ export function useCountUp(
   { duration = 500, decimals = 0 }: UseCountUpOptions = {}
 ) {
   const [display, setDisplay] = useState<number>(value);
+  const displayRef = useRef<number>(value);
   const startValueRef = useRef<number>(value);
   const startTimeRef = useRef<number | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -25,8 +26,10 @@ export function useCountUp(
       cancelAnimationFrame(animationRef.current);
     }
 
-    startValueRef.current = display;
+    startValueRef.current = displayRef.current;
     startTimeRef.current = null;
+
+    let animationFrameId: number | null = null;
 
     const animate = (timestamp: number) => {
       if (startTimeRef.current === null) {
@@ -40,23 +43,24 @@ export function useCountUp(
         (value - startValueRef.current) * progress;
 
       const factor = Math.pow(10, decimals);
-      setDisplay(Math.round(next * factor) / factor);
+      const rounded = Math.round(next * factor) / factor;
+      displayRef.current = rounded;
+      setDisplay(rounded);
 
       if (progress < 1) {
-        animationRef.current = requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
+        animationRef.current = animationFrameId;
       }
     };
 
-    animationRef.current = requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
+    animationRef.current = animationFrameId;
 
     return () => {
-      const frame = animationRef.current;
-      if (frame) {
-        cancelAnimationFrame(frame);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
-    // value change triggers animation
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, duration, decimals]);
 
   return display;

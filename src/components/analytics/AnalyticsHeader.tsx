@@ -188,6 +188,7 @@ export default function AnalyticsHeader({
               <input
                 id="analytics-start-date"
                 type="date"
+                aria-label="Analytics start date"
                 value={customDateRange.startDate}
                 onChange={(e) =>
                   onCustomDateRangeChange({
@@ -205,6 +206,7 @@ export default function AnalyticsHeader({
               <input
                 id="analytics-end-date"
                 type="date"
+                aria-label="Analytics end date"
                 value={customDateRange.endDate}
                 onChange={(e) =>
                   onCustomDateRangeChange({

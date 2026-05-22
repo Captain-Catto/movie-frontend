@@ -1,19 +1,19 @@
 "use client";
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { ViewStats } from "@/types/analytics.types";
 import { CHART_COLORS } from "@/types/analytics.types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
+
+const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
+const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
+const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then((mod) => mod.YAxis), { ssr: false });
+const CartesianGrid = dynamic(() => import("recharts").then((mod) => mod.CartesianGrid), { ssr: false });
+const Tooltip = dynamic(() => import("recharts").then((mod) => mod.Tooltip), { ssr: false });
+const Legend = dynamic(() => import("recharts").then((mod) => mod.Legend), { ssr: false });
 
 interface AnalyticsViewChartProps {
   viewStats: ViewStats[];
@@ -51,7 +51,9 @@ export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProp
                 borderRadius: "0.5rem",
                 color: "#F3F4F6",
               }}
-              labelFormatter={(value) => new Date(value).toLocaleDateString(locale)}
+              labelFormatter={(value: string | number) =>
+                new Date(value).toLocaleDateString(locale)
+              }
             />
             <Legend />
             <Line

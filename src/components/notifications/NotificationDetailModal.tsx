@@ -113,7 +113,9 @@ export default function NotificationDetailModal({ notification, onClose }: Props
   return createPortal(
     <div
       className="fixed inset-0 z-[500] flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
       onKeyDown={(event) => {
         if (event.key === "Escape") onClose();
       }}
@@ -124,12 +126,9 @@ export default function NotificationDetailModal({ notification, onClose }: Props
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
       {/* Modal */}
-      <div
+      <dialog
+        open
         className="relative w-full max-w-md bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
       >
         {/* Close button */}
         <button
@@ -185,7 +184,7 @@ export default function NotificationDetailModal({ notification, onClose }: Props
           {/* Message */}
           <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">{message}</p>
         </div>
-      </div>
+      </dialog>
     </div>,
     document.body
   );

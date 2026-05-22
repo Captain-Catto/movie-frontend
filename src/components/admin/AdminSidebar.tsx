@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { ChevronDown, LogOut, User } from "lucide-react";
@@ -22,20 +22,48 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
   const { logout } = useAuth();
   const adminApi = useAdminApi();
 
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [profileSaving, setProfileSaving] = useState(false);
-  const [profileError, setProfileError] = useState("");
-  const [profileForm, setProfileForm] = useState({
-    name: user?.name ?? "",
-    password: "",
-  });
+  type SidebarState = {
+    menuOpen: boolean;
+    profileOpen: boolean;
+    profileSaving: boolean;
+    profileError: string;
+    profileForm: {
+      name: string;
+      password: string;
+    };
+  };
+  const [sidebarState, dispatchSidebar] = useReducer(
+    (state: SidebarState, patch: Partial<SidebarState>): SidebarState => ({
+      ...state,
+      ...patch,
+    }),
+    {
+      menuOpen: false,
+      profileOpen: false,
+      profileSaving: false,
+      profileError: "",
+      profileForm: {
+        name: user?.name ?? "",
+        password: "",
+      },
+    }
+  );
+  const { menuOpen, profileOpen, profileSaving, profileError, profileForm } =
+    sidebarState;
   const menuRef = useRef<HTMLDivElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  useEffect(() => {
-    setProfileForm({ name: user?.name ?? "", password: "" });
-  }, [user?.name]);
+  const resetProfileForm = () => {
+    dispatchSidebar({
+      profileForm: { name: user?.name ?? "", password: "" },
+      profileError: "",
+    });
+  };
+
+  const closeProfileDialog = () => {
+    dispatchSidebar({ profileOpen: false });
+    resetProfileForm();
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -47,7 +75,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
         menuButtonRef.current &&
         !menuButtonRef.current.contains(target)
       ) {
-        setMenuOpen(false);
+        dispatchSidebar({ menuOpen: false });
       }
     };
 
@@ -238,8 +266,9 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
         <button
           ref={menuButtonRef}
           type="button"
-          onClick={() => setMenuOpen((prev) => !prev)}
+          onClick={() => dispatchSidebar({ menuOpen: !menuOpen })}
           className="flex w-full items-center gap-3 text-left cursor-pointer"
+          aria-label="Open admin account menu"
         >
           <div className="size-12 rounded-full bg-red-600 text-white font-bold flex items-center justify-center cursor-pointer">
             {(user?.name || "A").charAt(0).toUpperCase()}
@@ -270,8 +299,12 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             <button
               type="button"
               onClick={() => {
-                setProfileOpen(true);
-                setMenuOpen(false);
+                dispatchSidebar({
+                  profileOpen: true,
+                  menuOpen: false,
+                  profileForm: { name: user?.name ?? "", password: "" },
+                  profileError: "",
+                });
               }}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors cursor-pointer"
             >
@@ -282,7 +315,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               type="button"
               onClick={() => {
                 logout();
-                setMenuOpen(false);
+                dispatchSidebar({ menuOpen: false });
               }}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-200 hover:bg-red-600/20 transition-colors cursor-pointer"
             >
@@ -337,40 +370,27 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       </div>
 
       {profileOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
-          onClick={() => {
-            setProfileOpen(false);
-            setProfileForm({ name: user?.name ?? "", password: "" });
-            setProfileError("");
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              setProfileOpen(false);
-              setProfileForm({ name: user?.name ?? "", password: "" });
-              setProfileError("");
-            }
-          }}
-          role="presentation"
-          tabIndex={-1}
+        <dialog
+          open
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 size-full max-w-none max-h-none m-0 p-0 border-0"
+          onCancel={closeProfileDialog}
         >
           <div
             className="bg-gray-900 border border-gray-800 rounded-lg p-6 w-full max-w-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
             onKeyDown={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
+            aria-labelledby="admin-profile-title"
           >
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-xl font-semibold text-white">Edit Profile</h3>
+                <h3 id="admin-profile-title" className="text-xl font-semibold text-white">Edit Profile</h3>
                 <p className="text-sm text-gray-400">
                   Update your information
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setProfileOpen(false)}
+                onClick={closeProfileDialog}
                 className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                 aria-label="Close profile modal"
               >
@@ -385,12 +405,16 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 </label>
                 <input
                   id="admin-profile-name"
+                  type="text"
+                  aria-label="Display name"
                   value={profileForm.name}
                   onChange={(e) =>
-                    setProfileForm((prev) => ({
-                      ...prev,
-                      name: e.target.value,
-                    }))
+                    dispatchSidebar({
+                      profileForm: {
+                        ...profileForm,
+                        name: e.target.value,
+                      },
+                    })
                   }
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"
                   placeholder="Your name"
@@ -417,12 +441,15 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 <input
                   id="admin-profile-password"
                   type="password"
+                  aria-label="Password"
                   value={profileForm.password}
                   onChange={(e) =>
-                    setProfileForm((prev) => ({
-                      ...prev,
-                      password: e.target.value,
-                    }))
+                    dispatchSidebar({
+                      profileForm: {
+                        ...profileForm,
+                        password: e.target.value,
+                      },
+                    })
                   }
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"
                   placeholder="••••••••"
@@ -437,11 +464,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 type="button"
-                onClick={() => {
-                  setProfileOpen(false);
-                  setProfileForm({ name: user?.name ?? "", password: "" });
-                  setProfileError("");
-                }}
+                onClick={closeProfileDialog}
                 className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 Cancel
@@ -450,12 +473,11 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 type="button"
                 onClick={async () => {
                   if (!user?.id) {
-                    setProfileError("User information not found");
+                    dispatchSidebar({ profileError: "User information not found" });
                     return;
                   }
 
-                  setProfileSaving(true);
-                  setProfileError("");
+                  dispatchSidebar({ profileSaving: true, profileError: "" });
                   try {
                     const payload: { name?: string; password?: string } = {};
                     if (profileForm.name.trim()) {
@@ -470,19 +492,21 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                       payload
                     );
                     if (!res.success) {
-                      setProfileError(res.error || "Update failed");
+                      dispatchSidebar({ profileError: res.error || "Update failed" });
                       return;
                     }
-                    setProfileOpen(false);
-                    setProfileForm({
-                      name: payload.name ?? user.name ?? "",
-                      password: "",
+                    dispatchSidebar({
+                      profileOpen: false,
+                      profileForm: {
+                        name: payload.name ?? user.name ?? "",
+                        password: "",
+                      },
                     });
                   } catch (err) {
                     console.error("Update profile error:", err);
-                    setProfileError("Unable to update");
+                    dispatchSidebar({ profileError: "Unable to update" });
                   } finally {
-                    setProfileSaving(false);
+                    dispatchSidebar({ profileSaving: false });
                   }
                 }}
                 disabled={profileSaving}
@@ -492,7 +516,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </aside>
   );

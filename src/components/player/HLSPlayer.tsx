@@ -80,6 +80,9 @@ export default function HLSPlayer({ src, onReady, onError }: HLSPlayerProps) {
       controls
       autoPlay
       playsInline
-    />
+      aria-label="Video player"
+    >
+      <track kind="captions" />
+    </video>
   );
 }

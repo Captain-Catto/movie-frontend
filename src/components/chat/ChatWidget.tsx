@@ -417,6 +417,7 @@ export default function ChatWidget() {
 
           <form onSubmit={handleSubmit} className="flex gap-2 border-t border-gray-800 p-3">
             <input
+              aria-label="Message movie assistant"
               value={input}
               onChange={(event) => setInput(event.target.value)}
               maxLength={2000}
@@ -441,23 +442,16 @@ export default function ChatWidget() {
   return (
     <>
       {confirmTarget && (
-        <div
+        <dialog
+          open
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={() => setConfirmTarget(null)}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") setConfirmTarget(null);
-          }}
-          role="presentation"
-          tabIndex={-1}
+          onCancel={() => setConfirmTarget(null)}
         >
           <div
             className="mx-4 w-full max-w-sm rounded-lg border border-gray-700 bg-gray-900 p-5 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
+            aria-labelledby="chat-confirm-title"
           >
-            <h3 className="text-base font-semibold text-white">{text.confirmTitle}</h3>
+            <h3 id="chat-confirm-title" className="text-base font-semibold text-white">{text.confirmTitle}</h3>
             <p className="mt-2 text-sm text-gray-400">{text.confirmMessage}</p>
             <div className="mt-4 flex justify-end gap-2">
               <button
@@ -479,7 +473,7 @@ export default function ChatWidget() {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
 
       <div

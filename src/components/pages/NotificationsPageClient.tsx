@@ -308,7 +308,7 @@ export default function NotificationsPage() {
                       return (
                         <div
                           key={notif.id}
-                          className={`bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl cursor-pointer ${
+                          className={`w-full text-left bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl cursor-pointer ${
                             notif.isRead
                               ? "border-gray-750/50"
                               : "border-blue-700/40 bg-gray-850/80"

@@ -292,6 +292,7 @@ export default function AdminSyncDataPage() {
               <input
                 id="sync-custom-date"
                 type="date"
+                aria-label="TMDB export date"
                 value={customDate}
                 onChange={(event) => setCustomDate(event.target.value)}
                 max={new Date().toISOString().split("T")[0]}
@@ -319,6 +320,7 @@ export default function AdminSyncDataPage() {
                   </div>
                   <button
                     type="button"
+                    aria-label={`Run ${option.label}`}
                     onClick={() => handleSync(option.key)}
                     disabled={busy}
                     className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
@@ -356,6 +358,7 @@ export default function AdminSyncDataPage() {
               <input
                 id="sync-movie-catalog-limit"
                 type="number"
+                aria-label="Movie catalog limit"
                 min="0"
                 step="1000"
                 value={settingsForm.movieCatalogLimit}
@@ -379,6 +382,7 @@ export default function AdminSyncDataPage() {
               <input
                 id="sync-tv-catalog-limit"
                 type="number"
+                aria-label="TV series catalog limit"
                 min="0"
                 step="1000"
                 value={settingsForm.tvCatalogLimit}
@@ -402,6 +406,7 @@ export default function AdminSyncDataPage() {
               <input
                 id="sync-trending-catalog-limit"
                 type="number"
+                aria-label="Trending catalog limit"
                 min="0"
                 step="10"
                 value={settingsForm.trendingCatalogLimit}
@@ -425,6 +430,7 @@ export default function AdminSyncDataPage() {
               <input
                 id="sync-people-cache-limit"
                 type="number"
+                aria-label="People cache limit"
                 min="0"
                 step="1000"
                 value={settingsForm.peopleCacheLimit}
@@ -448,6 +454,7 @@ export default function AdminSyncDataPage() {
               <input
                 id="sync-recommendation-cache-limit"
                 type="number"
+                aria-label="Recommendation cache limit"
                 min="0"
                 step="1000"
                 value={settingsForm.recommendationCacheLimit}

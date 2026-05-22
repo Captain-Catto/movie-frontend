@@ -70,6 +70,7 @@ export default function NotificationModal({
               <input
                 id="notification-title-vi"
                 type="text"
+                aria-label="Vietnamese notification title"
                 value={formData.titleVi}
                 onChange={(e) => onFormDataChange({ ...formData, titleVi: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -80,6 +81,7 @@ export default function NotificationModal({
               <label htmlFor="notification-message-vi" className="block text-sm font-medium text-gray-300 mb-1.5">Nội dung</label>
               <textarea
                 id="notification-message-vi"
+                aria-label="Vietnamese notification message"
                 value={formData.messageVi}
                 onChange={(e) => onFormDataChange({ ...formData, messageVi: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -97,6 +99,7 @@ export default function NotificationModal({
               <input
                 id="notification-title-en"
                 type="text"
+                aria-label="English notification title"
                 value={formData.titleEn}
                 onChange={(e) => onFormDataChange({ ...formData, titleEn: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -107,6 +110,7 @@ export default function NotificationModal({
               <label htmlFor="notification-message-en" className="block text-sm font-medium text-gray-300 mb-1.5">Message</label>
               <textarea
                 id="notification-message-en"
+                aria-label="English notification message"
                 value={formData.messageEn}
                 onChange={(e) => onFormDataChange({ ...formData, messageEn: e.target.value })}
                 className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -199,6 +203,7 @@ export default function NotificationModal({
               <input
                 id="notification-user-id"
                 type="number"
+                aria-label="Notification target user ID"
                 value={formData.userId}
                 onChange={(e) =>
                   onFormDataChange({ ...formData, userId: e.target.value })
@@ -218,6 +223,7 @@ export default function NotificationModal({
                 <input
                   id="notification-maintenance-start"
                   type="datetime-local"
+                  aria-label="Maintenance start time"
                   value={formData.maintenanceStartTime}
                   onChange={(e) =>
                     onFormDataChange({
@@ -235,6 +241,7 @@ export default function NotificationModal({
                 <input
                   id="notification-maintenance-end"
                   type="datetime-local"
+                  aria-label="Maintenance end time"
                   value={formData.maintenanceEndTime}
                   onChange={(e) =>
                     onFormDataChange({
@@ -252,10 +259,11 @@ export default function NotificationModal({
             <label htmlFor="notification-action-url" className="block text-sm font-medium text-gray-300 mb-1.5">
               Link (optional)
             </label>
-            <input
-              id="notification-action-url"
-              type="text"
-              value={formData.actionUrl}
+              <input
+                id="notification-action-url"
+                type="text"
+                aria-label="Notification action URL"
+                value={formData.actionUrl}
               onChange={(e) => onFormDataChange({ ...formData, actionUrl: e.target.value })}
               className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="/movie/12345 hoặc /tv/67890"

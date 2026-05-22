@@ -186,6 +186,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                   className="p-1 hover:text-red-500 transition-colors text-white flex-shrink-0 cursor-pointer"
                   onClick={handleSearchClick}
                   title={labels.search}
+                  aria-label={labels.search}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

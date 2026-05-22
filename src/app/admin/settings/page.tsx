@@ -339,6 +339,7 @@ export default function AdminSettingsPage() {
             <input
               id="swagger-auth-username"
               type="text"
+              aria-label="Swagger username"
               value={swaggerAuthForm.username}
               onChange={(e) =>
                 setSwaggerAuthForm((prev) => ({
@@ -357,6 +358,7 @@ export default function AdminSettingsPage() {
             <input
               id="swagger-auth-password"
               type="password"
+              aria-label="Swagger password"
               value={swaggerAuthForm.password}
               onChange={(e) =>
                 setSwaggerAuthForm((prev) => ({

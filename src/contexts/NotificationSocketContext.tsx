@@ -5,6 +5,7 @@ import {
   useCallback,
   use,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
 } from "react";
@@ -152,18 +153,29 @@ export function NotificationSocketProvider({
     return true;
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      socket,
+      isConnected,
+      unreadCount,
+      latestNotification,
+      markAsRead,
+      markAllAsRead,
+      setUnreadCount,
+    }),
+    [
+      socket,
+      isConnected,
+      unreadCount,
+      latestNotification,
+      markAsRead,
+      markAllAsRead,
+      setUnreadCount,
+    ]
+  );
+
   return (
-    <NotificationSocketContext.Provider
-      value={{
-        socket,
-        isConnected,
-        unreadCount,
-        latestNotification,
-        markAsRead,
-        markAllAsRead,
-        setUnreadCount,
-      }}
-    >
+    <NotificationSocketContext.Provider value={contextValue}>
       {children}
     </NotificationSocketContext.Provider>
   );

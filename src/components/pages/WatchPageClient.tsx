@@ -131,6 +131,7 @@ const WatchPageClientContent = ({
                     title={`Watch ${movieData.title}`}
                     className="size-full"
                     allow="autoplay; fullscreen; picture-in-picture"
+                    sandbox="allow-scripts allow-forms allow-popups allow-presentation"
                     allowFullScreen
                     referrerPolicy="origin"
                     onLoad={handleStreamLoadSuccess}

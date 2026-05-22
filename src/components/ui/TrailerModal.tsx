@@ -99,10 +99,9 @@ export default function TrailerModal({
       role="presentation"
       tabIndex={-1}
     >
-      <div
+      <dialog
+        open
         className="bg-gray-900 rounded-lg max-w-7xl w-full max-h-[80vh] overflow-hidden flex flex-col"
-        role="dialog"
-        aria-modal="true"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700 flex-shrink-0">
@@ -131,6 +130,7 @@ export default function TrailerModal({
                   className="w-full h-full"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  sandbox="allow-scripts allow-presentation allow-popups"
                   allowFullScreen
                 />
               </div>
@@ -184,7 +184,7 @@ export default function TrailerModal({
             <p className="text-gray-400">{labels.noTrailersAvailable}</p>
           </div>
         )}
-      </div>
+      </dialog>
     </div>
   );
 }

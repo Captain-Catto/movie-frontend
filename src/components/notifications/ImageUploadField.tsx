@@ -163,9 +163,9 @@ export default function ImageUploadField({ value, onChange }: Props) {
       ) : (
         <>
           {/* Drop zone */}
-          <div
-            role="button"
-            tabIndex={0}
+          <button
+            type="button"
+            aria-label="Select notification image"
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
@@ -190,7 +190,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
               {isDragging ? "Drop image here" : "Drag & drop or click to select"}
             </p>
             <p className="text-xs text-gray-600">JPEG · PNG · GIF · WebP (max 5 MB)</p>
-          </div>
+          </button>
 
           {/* URL input (inline, below drop zone) */}
           {showUrlInput && (
@@ -198,6 +198,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
               <input
                 id={urlInputId}
                 type="text"
+                aria-label="Notification image URL"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleUrlApply(); } }}
@@ -223,6 +224,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
         id={fileInputId}
         ref={inputRef}
         type="file"
+        aria-label="Upload notification image"
         accept={ACCEPT.join(",")}
         className="hidden"
         onChange={handleFileInput}

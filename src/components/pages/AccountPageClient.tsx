@@ -278,6 +278,7 @@ export default function AccountPage() {
                   <input
                     id="account-display-name"
                     type="text"
+                    aria-label={labels.displayName}
                     value={form.name}
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, name: e.target.value }))
@@ -292,6 +293,7 @@ export default function AccountPage() {
                   <input
                     id="account-email"
                     type="text"
+                    aria-label={labels.email}
                     value={user?.email || ""}
                     readOnly
                     disabled
@@ -306,6 +308,7 @@ export default function AccountPage() {
                   <input
                     id="account-new-password"
                     type="password"
+                    aria-label={labels.newPassword}
                     value={form.password}
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, password: e.target.value }))
@@ -322,6 +325,7 @@ export default function AccountPage() {
                   <input
                     id="account-confirm-password"
                     type="password"
+                    aria-label={labels.confirmPassword}
                     value={form.confirmPassword}
                     onChange={(e) =>
                       setForm((prev) => ({

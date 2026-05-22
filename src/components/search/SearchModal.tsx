@@ -19,7 +19,7 @@ interface SearchModalProps {
 }
 
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
@@ -105,13 +105,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       role="presentation"
       tabIndex={-1}
     >
-      <div
+      <dialog
+        open
         ref={modalRef}
         className="bg-gray-900 rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border border-gray-700"
-        onClick={(e) => e.stopPropagation()}
-        onKeyDown={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
@@ -173,7 +170,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             />
           )}
         </div>
-      </div>
+      </dialog>
     </div>
   );
 };

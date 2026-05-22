@@ -131,20 +131,14 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
               </div>
             ) : (
               notifications.map((notification) => (
-                <div
+                <button
+                  type="button"
                   key={notification.id}
                   className={cn(
-                    "p-4 border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50 transition-colors cursor-pointer",
+                    "w-full text-left p-4 border-b border-gray-700 last:border-b-0 hover:bg-gray-700/50 transition-colors cursor-pointer",
                     !notification.isRead && "bg-blue-900/20"
                   )}
                   onClick={() => handleNotificationClick(notification)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      handleNotificationClick(notification);
-                    }
-                  }}
                 >
                   <div className="flex items-start gap-x-3">
                     <div className="flex-shrink-0 mt-1">
@@ -195,7 +189,7 @@ export function NotificationDropdown({ className }: NotificationDropdownProps) {
                       </Button>
                     </div>
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>

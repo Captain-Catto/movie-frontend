@@ -69,6 +69,7 @@ function Toggle({
       <input
         id={inputId}
         type="checkbox"
+        aria-label="Toggle visual effect"
         className="sr-only peer"
         checked={checked}
         onChange={onChange}
@@ -114,6 +115,7 @@ function Slider({
       </div>
       <input
         type="range"
+        aria-label={label}
         min={min}
         max={max}
         step={step}

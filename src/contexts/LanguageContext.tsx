@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useMemo,
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -69,14 +70,17 @@ export function LanguageProvider({ children, initialLanguage }: LanguageProvider
     [refresh]
   );
 
+  const contextValue = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      isVietnamese: language.startsWith("vi"),
+    }),
+    [language, setLanguage]
+  );
+
   return (
-    <LanguageContext.Provider
-      value={{
-        language,
-        setLanguage,
-        isVietnamese: language.startsWith("vi"),
-      }}
-    >
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );
