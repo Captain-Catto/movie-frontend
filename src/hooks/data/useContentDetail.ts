@@ -211,7 +211,6 @@ export function useContentDetail(
   // Use generic async query hook
   const { data, loading, error, refetch, isFetched } = useAsyncQuery({
     queryFn: fetchDetail,
-    dependencies: [id, type, language, fetchCredits, fetchRecommendations, fetchVideos],
     enabled,
   });
 

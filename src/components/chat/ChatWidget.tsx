@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useReducer, useRef } from "react";
 import {
   ArrowUp,
   Bot,
@@ -71,12 +71,12 @@ export default function ChatWidget() {
   const { language } = useLanguage();
   const locale = language.toLowerCase().startsWith("vi") ? "vi" : "en";
   const text = labels[locale];
-  const [open, setOpen] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
-  const [input, setInput] = useState("");
-  const [sending, setSending] = useState(false);
-  const [confirmTarget, setConfirmTarget] = useState<ChatSession | null>(null);
-  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+  type UIState = { open: boolean; showHistory: boolean; input: string; sending: boolean; confirmTarget: ChatSession | null; pos: { x: number; y: number } | null };
+  const [ui, dispatchUI] = useReducer(
+    (s: UIState, a: Partial<UIState>): UIState => ({ ...s, ...a }),
+    { open: false, showHistory: false, input: "", sending: false, confirmTarget: null, pos: null }
+  );
+  const { open, showHistory, input, sending, confirmTarget, pos } = ui;
 
   type ChatState = { session: ChatSession | null; sessions: ChatSession[]; messages: ChatMessage[]; initializing: boolean; error: string };
   const [chatState, dispatchChat] = useReducer(
@@ -143,7 +143,7 @@ export default function ChatWidget() {
     const content = input.trim();
     if (!content || !session || sending) return;
 
-    setInput("");
+    dispatchUI({ input: "" });
     dispatchChat({ error: "" });
     const optimistic: ChatMessage = {
       id: Date.now(),
@@ -155,7 +155,7 @@ export default function ChatWidget() {
       createdAt: new Date().toISOString(),
     };
     dispatchChat({ messages: [...messages, optimistic] });
-    setSending(true);
+    dispatchUI({ sending: true });
 
     try {
       const result = await chatApi.sendMessage(session.id, content, language);
@@ -165,12 +165,12 @@ export default function ChatWidget() {
     } catch {
       dispatchChat({ error: text.error, messages: messages.filter((m) => m.id !== optimistic.id) });
     } finally {
-      setSending(false);
+      dispatchUI({ sending: false });
     }
   };
 
   const loadSession = async (target: ChatSession) => {
-    setShowHistory(false);
+    dispatchUI({ showHistory: false });
     dispatchChat({ session: target, error: "", initializing: true });
     try {
       const existingMessages = await chatApi.getMessages(target.id);
@@ -181,7 +181,7 @@ export default function ChatWidget() {
   };
 
   const startNewChat = async () => {
-    setShowHistory(false);
+    dispatchUI({ showHistory: false });
     dispatchChat({ messages: [], error: "", initializing: true });
     try {
       const created = await chatApi.createOrGetSession(true);
@@ -233,7 +233,7 @@ export default function ChatWidget() {
     // Keep button inside viewport; 68px top margin keeps it below the fixed header (h-16 = 64px)
     const newX = Math.max(0, Math.min(window.innerWidth - 48, dragStartRef.current.px + dx));
     const newY = Math.max(68, Math.min(window.innerHeight - 104, dragStartRef.current.py + dy));
-    setPos({ x: newX, y: newY });
+    dispatchUI({ pos: { x: newX, y: newY } });
   };
 
   const handlePointerUp = () => {
@@ -245,7 +245,7 @@ export default function ChatWidget() {
       hasDraggedRef.current = false;
       return;
     }
-    setOpen((v) => !v);
+    dispatchUI({ open: !open });
   };
 
   const handleScrollToTop = () => {
@@ -277,7 +277,7 @@ export default function ChatWidget() {
             <>
               <button
                 type="button"
-                onClick={() => setShowHistory((value) => !value)}
+                onClick={() => dispatchUI({ showHistory: !showHistory })}
                 className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
                 aria-label="Chat history"
                 title={text.history}
@@ -297,7 +297,7 @@ export default function ChatWidget() {
           )}
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={() => dispatchUI({ open: false })}
             className="rounded-md p-2 text-gray-400 hover:bg-gray-800 hover:text-white"
             aria-label="Close chat"
           >
@@ -348,7 +348,7 @@ export default function ChatWidget() {
                         type="button"
                         onClick={(event) => {
                           event.stopPropagation();
-                          setConfirmTarget(item);
+                          dispatchUI({ confirmTarget: item });
                         }}
                         className={`rounded p-1 transition ${
                           session?.id === item.id
@@ -419,7 +419,7 @@ export default function ChatWidget() {
             <input
               aria-label="Message movie assistant"
               value={input}
-              onChange={(event) => setInput(event.target.value)}
+              onChange={(event) => dispatchUI({ input: event.target.value })}
               maxLength={2000}
               placeholder={text.placeholder}
               disabled={initializing && !session}
@@ -445,7 +445,7 @@ export default function ChatWidget() {
         <dialog
           open
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onCancel={() => setConfirmTarget(null)}
+          onCancel={() => dispatchUI({ confirmTarget: null })}
         >
           <div
             className="mx-4 w-full max-w-sm rounded-lg border border-gray-700 bg-gray-900 p-5 shadow-2xl"
@@ -456,7 +456,7 @@ export default function ChatWidget() {
             <div className="mt-4 flex justify-end gap-2">
               <button
                 type="button"
-                onClick={() => setConfirmTarget(null)}
+                onClick={() => dispatchUI({ confirmTarget: null })}
                 className="rounded-md px-4 py-2 text-sm text-gray-300 hover:bg-gray-800"
               >
                 {text.cancel}
@@ -465,7 +465,7 @@ export default function ChatWidget() {
                 type="button"
                 onClick={() => {
                   deleteSession(confirmTarget);
-                  setConfirmTarget(null);
+                  dispatchUI({ confirmTarget: null });
                 }}
                 className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
               >

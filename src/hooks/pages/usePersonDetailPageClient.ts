@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useRef } from "react";
+import { useMemo, useReducer, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getLocaleFromLanguage,
@@ -135,8 +135,10 @@ export function usePersonDetailPageClient({
   );
   const { personData, castCredits, crewCredits, loading, error, activeTab, showFullBio, currentPage } = personState;
   const skipInitialFetchRef = useRef(Boolean(initialPersonData));
+  const prevPersonIdRef = useRef(personId);
 
-  useEffect(() => {
+  if (personId !== prevPersonIdRef.current) {
+    prevPersonIdRef.current = personId;
     dispatch({
       personData: initialPersonData,
       castCredits: initialCastCredits,
@@ -148,13 +150,7 @@ export function usePersonDetailPageClient({
       currentPage: 1,
     });
     skipInitialFetchRef.current = Boolean(initialPersonData);
-  }, [
-    personId,
-    initialPersonData,
-    initialCastCredits,
-    initialCrewCredits,
-    initialError,
-  ]);
+  }
 
   useEffect(() => {
     if (skipInitialFetchRef.current) {
@@ -187,12 +183,13 @@ export function usePersonDetailPageClient({
   const currentRawItems = activeTab === "cast" ? castCredits : crewCredits;
 
   const totalPages = Math.max(1, Math.ceil(currentRawItems.length / ITEMS_PER_PAGE));
-
-  useEffect(() => {
+  const prevTotalPagesRef = useRef(totalPages);
+  if (totalPages !== prevTotalPagesRef.current) {
+    prevTotalPagesRef.current = totalPages;
     if (currentPage > totalPages) {
       dispatch({ currentPage: 1 });
     }
-  }, [currentPage, totalPages]);
+  }
 
   const currentItems = useMemo<MovieCardData[]>(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

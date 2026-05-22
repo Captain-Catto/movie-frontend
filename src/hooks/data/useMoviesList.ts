@@ -172,7 +172,6 @@ export function useMoviesList(
   // Use generic async query hook
   const { data, loading, error, refetch, isFetched } = useAsyncQuery({
     queryFn: fetchMovies,
-    dependencies: [category, page, limit, genre, year, sortBy, language],
     enabled,
   });
 

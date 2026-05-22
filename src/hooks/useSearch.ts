@@ -220,12 +220,12 @@ export const useSearch = (): UseSearchReturn => {
 
   // Cleanup timers on unmount
   useEffect(() => {
+    const loadTimer = loadingTimerRef.current;
+    const minTimer = minLoadingTimerRef.current;
+    const abortCtrl = abortControllerRef.current;
     return () => {
-      const loadTimer = loadingTimerRef.current;
       if (loadTimer) clearTimeout(loadTimer);
-      const minTimer = minLoadingTimerRef.current;
       if (minTimer) clearTimeout(minTimer);
-      const abortCtrl = abortControllerRef.current;
       if (abortCtrl) abortCtrl.abort();
     };
   }, []);

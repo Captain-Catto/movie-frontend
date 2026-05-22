@@ -9,7 +9,7 @@ import type { SyntheticEvent, ChangeEvent } from "react";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 import AccountSkeleton from "@/components/ui/AccountSkeleton";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
 import { authStorage } from "@/lib/auth-storage";
 import type { StoredUser } from "@/lib/auth-storage";
@@ -33,10 +33,6 @@ export default function AccountPage() {
   const [avatarError, setAvatarError] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    setAvatarUrl(user?.image || null);
-  }, [user?.image]);
 
   const avatarSrc = avatarUrl || user?.image || FALLBACK_PROFILE;
   const displayName = user?.name || labels.user;

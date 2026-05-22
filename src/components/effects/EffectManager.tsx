@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { usePathname } from 'next/navigation';
 import { RootState, AppDispatch } from '@/store';
@@ -19,7 +19,6 @@ const RedEnvelopeEffect = dynamic(() => import('./RedEnvelopeEffect'), {
 export default function EffectManager() {
   const dispatch = useDispatch<AppDispatch>();
   const pathname = usePathname();
-  const [isActivated, setIsActivated] = useState(false);
   const { enabled, activeEffects, intensity, redEnvelopeSettings, snowSettings, excludedPaths } = useSelector(
     (state: RootState) => state.effectSettings
   );
@@ -44,13 +43,13 @@ export default function EffectManager() {
     let idleId: number | undefined;
 
     const activate = () => {
-      timeoutId = window.setTimeout(() => setIsActivated(true), 1200);
+      timeoutId = window.setTimeout(() => dispatch(fetchEffectSettings()), 1200);
     };
 
     if (typeof win.requestIdleCallback === 'function') {
       idleId = win.requestIdleCallback(activate, { timeout: 2000 });
     } else {
-      timeoutId = window.setTimeout(() => setIsActivated(true), 2000);
+      timeoutId = window.setTimeout(() => dispatch(fetchEffectSettings()), 2000);
     }
 
     return () => {
@@ -61,12 +60,7 @@ export default function EffectManager() {
         win.cancelIdleCallback(idleId);
       }
     };
-  }, []);
-
-  useEffect(() => {
-    if (!isActivated) return;
-    dispatch(fetchEffectSettings());
-  }, [dispatch, isActivated]);
+  }, [dispatch]);
 
   // Don't show effects on admin pages (better UX for admin work)
   const isAdminPage = pathname?.startsWith('/admin');
@@ -80,7 +74,7 @@ export default function EffectManager() {
     return false;
   });
 
-  if (!isActivated || isAdminPage || isExcluded || !enabled || activeEffects.length === 0) {
+  if (isAdminPage || isExcluded || !enabled || activeEffects.length === 0) {
     return null;
   }
 

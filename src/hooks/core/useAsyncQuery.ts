@@ -4,10 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
  * Options for useAsyncQuery hook
  */
 export interface UseAsyncQueryOptions<T> {
-  /** The async function to execute */
+  /** The async function to execute — wrap in useCallback so identity changes trigger re-fetch */
   queryFn: () => Promise<T>;
-  /** Dependencies array for useEffect (when to re-run query) */
-  dependencies?: React.DependencyList;
   /** Whether the query is enabled (default: true) */
   enabled?: boolean;
   /** Callback when query succeeds */
@@ -59,7 +57,6 @@ export function useAsyncQuery<T>(
 ): UseAsyncQueryResult<T> {
   const {
     queryFn,
-    dependencies = [],
     enabled = true,
     onSuccess,
     onError,
@@ -91,13 +88,11 @@ export function useAsyncQuery<T>(
     }
   }, [queryFn, enabled, onSuccess, onError]);
 
-  // Auto-execute on mount or when dependencies change
   useEffect(() => {
     if (enabled) {
       execute();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled, ...dependencies]);
+  }, [enabled, execute]);
 
   return {
     data,

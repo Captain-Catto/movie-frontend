@@ -47,9 +47,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   );
   const hasScrolledRef = useRef(false);
   const isPlayingRef = useRef(isPlaying);
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
+  isPlayingRef.current = isPlaying;
 
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
@@ -94,13 +92,13 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
     };
   }, [hideOnPlay]);
 
-  // Reset scroll + visibility state when play starts (allows hiding again on next play)
-  useEffect(() => {
-    if (hideOnPlay && isPlaying) {
-      hasScrolledRef.current = false;
-      dispatchHeader({ isVisible: false });
-    }
-  }, [hideOnPlay, isPlaying]);
+  const prevIsPlayingRef = useRef(isPlaying);
+  const playJustStarted = hideOnPlay && isPlaying && !prevIsPlayingRef.current;
+  prevIsPlayingRef.current = isPlaying;
+  if (playJustStarted) {
+    hasScrolledRef.current = false;
+    dispatchHeader({ isVisible: false });
+  }
 
   const handleSearchClick = () => {
     setIsSearchModalOpen(true);

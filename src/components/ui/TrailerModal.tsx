@@ -3,6 +3,7 @@
 import {
   useState,
   useEffect,
+  useMemo,
   useRef,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
@@ -27,30 +28,18 @@ export default function TrailerModal({
 }: TrailerModalProps) {
   const { language } = useLanguage();
   const labels = getTrailerModalUiMessages(language);
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [userSelectedVideo, setUserSelectedVideo] = useState<Video | null>(null);
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
-  // Find the best trailer - prefer official trailers
-  useEffect(() => {
-    if (videos.length > 0 && !selectedVideo) {
-      // Priority: Official trailers > Trailers > Teasers > Other videos
-      const officialTrailer = videos.find(
-        (v) => v.official && v.type === "Trailer" && v.site === "YouTube"
-      );
-      const trailer = videos.find(
-        (v) => v.type === "Trailer" && v.site === "YouTube"
-      );
-      const teaser = videos.find(
-        (v) => v.type === "Teaser" && v.site === "YouTube"
-      );
-      const anyVideo = videos.find((v) => v.site === "YouTube");
-
-      setSelectedVideo(
-        officialTrailer || trailer || teaser || anyVideo || null
-      );
-    }
-  }, [videos, selectedVideo]);
+  const bestVideo = useMemo(() => {
+    const officialTrailer = videos.find((v) => v.official && v.type === "Trailer" && v.site === "YouTube");
+    const trailer = videos.find((v) => v.type === "Trailer" && v.site === "YouTube");
+    const teaser = videos.find((v) => v.type === "Teaser" && v.site === "YouTube");
+    const anyVideo = videos.find((v) => v.site === "YouTube");
+    return officialTrailer || trailer || teaser || anyVideo || null;
+  }, [videos]);
+  const selectedVideo = userSelectedVideo ?? bestVideo;
 
   // Close modal with Escape key
   useEffect(() => {
@@ -152,7 +141,7 @@ export default function TrailerModal({
                   <button
                     key={video.id}
                     type="button"
-                    onClick={() => setSelectedVideo(video)}
+                    onClick={() => setUserSelectedVideo(video)}
                     className={`w-full text-left p-3 rounded-lg border transition-all ${
                       selectedVideo?.id === video.id
                         ? "border-blue-500 bg-blue-500/20 text-white"

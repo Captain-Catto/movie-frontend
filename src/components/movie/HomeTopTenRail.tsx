@@ -90,13 +90,20 @@ export default function HomeTopTenRail({ title, movies }: HomeTopTenRailProps) {
   };
 
   useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
     updateScrollState();
 
-    const handleResize = () => updateScrollState();
-    window.addEventListener("resize", handleResize);
+    const ro = new ResizeObserver(updateScrollState);
+    ro.observe(scroller);
+    window.addEventListener("resize", updateScrollState);
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, [topMovies.length]);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, []);
 
   if (topMovies.length === 0) {
     return null;

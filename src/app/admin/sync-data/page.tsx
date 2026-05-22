@@ -68,6 +68,339 @@ const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string 
     },
   ];
 
+function SyncPageHeader() {
+  return (
+    <header>
+      <h1 className="text-3xl font-semibold text-white">Data Synchronization</h1>
+      <p className="text-gray-400 mt-2 max-w-2xl">
+        Manually trigger TMDB import jobs for movies and TV series. Use this when
+        you need fresh catalog data immediately, outside of scheduled jobs.
+      </p>
+    </header>
+  );
+}
+
+function SyncStatsSection({
+  stats,
+  formattedLastSync,
+}: {
+  stats: DashboardStats | null;
+  formattedLastSync: string;
+}) {
+  return (
+    <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <StatsCard
+        title="Total Movies"
+        value={stats?.totalMovies ?? 0}
+        color="bg-blue-600"
+        icon={
+          <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14z"
+            />
+          </svg>
+        }
+      />
+      <StatsCard
+        title="Total TV Series"
+        value={stats?.totalTVSeries ?? 0}
+        color="bg-purple-600"
+        icon={
+          <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
+          </svg>
+        }
+      />
+      <StatsCard
+        title="Last Sync"
+        value={formattedLastSync}
+        color="bg-amber-600"
+        icon={
+          <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        }
+      />
+      <StatsCard
+        title="Sync Status"
+        value={stats?.syncStatus ?? "unknown"}
+        color="bg-slate-600"
+        icon={
+          <svg className="size-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 8h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2h2M12 3l4 4m-4-4L8 7m4-4v13"
+            />
+          </svg>
+        }
+      />
+    </section>
+  );
+}
+
+function ManualSyncSection({
+  customDate,
+  syncing,
+  onCustomDateChange,
+  onSync,
+}: {
+  customDate: string;
+  syncing: SyncTarget | null;
+  onCustomDateChange: (value: string) => void;
+  onSync: (target: SyncTarget) => void;
+}) {
+  return (
+    <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Manual Sync Controls</h2>
+          <p className="text-gray-400 mt-1 max-w-xl">
+            Choose the dataset you want to refresh. You may optionally pick a
+            past TMDB export date (YYYY-MM-DD). Leave empty to use today&apos;s
+            date.
+          </p>
+        </div>
+        <label htmlFor="sync-custom-date" className="flex flex-col text-sm text-gray-300">
+          TMDB Export Date (optional)
+          <input
+            id="sync-custom-date"
+            type="date"
+            aria-label="TMDB export date"
+            value={customDate}
+            onChange={(event) => onCustomDateChange(event.target.value)}
+            max={new Date().toISOString().split("T")[0]}
+            suppressHydrationWarning
+            className="mt-1 rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+          />
+        </label>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {SYNC_OPTIONS.map((option) => {
+          const busy = syncing === option.key;
+          return (
+            <div
+              key={option.key}
+              className="flex items-start justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3"
+            >
+              <div>
+                <h3 className="text-lg font-medium text-white">{option.label}</h3>
+                <p className="text-sm text-gray-400 mt-1">{option.description}</p>
+              </div>
+              <button
+                type="button"
+                aria-label={`Run ${option.label}`}
+                onClick={() => onSync(option.key)}
+                disabled={busy}
+                className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                  busy
+                    ? "cursor-not-allowed bg-red-900 text-red-300"
+                    : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
+                }`}
+              >
+                {busy ? "Syncing…" : "Run"}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function CatalogSettingsSection({
+  settings,
+  settingsForm,
+  savingSettings,
+  onSettingsChange,
+  onSave,
+}: {
+  settings: SyncSettings | null;
+  settingsForm: {
+    movieCatalogLimit: number;
+    tvCatalogLimit: number;
+    trendingCatalogLimit: number;
+    peopleCacheLimit: number;
+    recommendationCacheLimit: number;
+  };
+  savingSettings: boolean;
+  onSettingsChange: (patch: Partial<typeof settingsForm>) => void;
+  onSave: () => void;
+}) {
+  return (
+    <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Catalog Size Settings</h2>
+          <p className="text-gray-400 mt-1 max-w-xl text-sm">
+            Configure maximum number of items to keep in the database for each content type.
+            Cleanup runs after &quot;Sync Popular Content&quot; to trim excess items based on popularity.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div>
+          <label htmlFor="sync-movie-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
+            Movie Catalog Limit
+          </label>
+          <input
+            id="sync-movie-catalog-limit"
+            type="number"
+            aria-label="Movie catalog limit"
+            min="0"
+            step="1000"
+            value={settingsForm.movieCatalogLimit}
+            onChange={(e) =>
+              onSettingsChange({ movieCatalogLimit: parseInt(e.target.value) || 0 })
+            }
+            className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Current: {(settings?.movieCatalogLimit ?? 500000).toLocaleString()}
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="sync-tv-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
+            TV Series Catalog Limit
+          </label>
+          <input
+            id="sync-tv-catalog-limit"
+            type="number"
+            aria-label="TV series catalog limit"
+            min="0"
+            step="1000"
+            value={settingsForm.tvCatalogLimit}
+            onChange={(e) =>
+              onSettingsChange({ tvCatalogLimit: parseInt(e.target.value) || 0 })
+            }
+            className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Current: {(settings?.tvCatalogLimit ?? 200000).toLocaleString()}
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="sync-trending-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
+            Trending Catalog Limit
+          </label>
+          <input
+            id="sync-trending-catalog-limit"
+            type="number"
+            aria-label="Trending catalog limit"
+            min="0"
+            step="10"
+            value={settingsForm.trendingCatalogLimit}
+            onChange={(e) =>
+              onSettingsChange({ trendingCatalogLimit: parseInt(e.target.value) || 0 })
+            }
+            className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Current: {(settings?.trendingCatalogLimit ?? 100).toLocaleString()}
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="sync-people-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
+            People Cache Limit
+          </label>
+          <input
+            id="sync-people-cache-limit"
+            type="number"
+            aria-label="People cache limit"
+            min="0"
+            step="1000"
+            value={settingsForm.peopleCacheLimit}
+            onChange={(e) =>
+              onSettingsChange({ peopleCacheLimit: parseInt(e.target.value) || 0 })
+            }
+            className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Current: {(settings?.peopleCacheLimit ?? 10000).toLocaleString()}
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="sync-recommendation-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
+            Recommendation Cache Limit
+          </label>
+          <input
+            id="sync-recommendation-cache-limit"
+            type="number"
+            aria-label="Recommendation cache limit"
+            min="0"
+            step="1000"
+            value={settingsForm.recommendationCacheLimit}
+            onChange={(e) =>
+              onSettingsChange({ recommendationCacheLimit: parseInt(e.target.value) || 0 })
+            }
+            className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Current: {(settings?.recommendationCacheLimit ?? 10000).toLocaleString()}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={savingSettings}
+          className={`rounded-md px-6 py-2 text-sm font-medium transition-colors ${
+            savingSettings
+              ? "cursor-not-allowed bg-red-900 text-red-300"
+              : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
+          }`}
+        >
+          {savingSettings ? "Saving..." : "Save Settings"}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function SyncNotesSection() {
+  return (
+    <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
+      <h3 className="text-lg font-semibold text-white mb-3">Notes & Recommendations</h3>
+      <ul className="space-y-2 text-sm text-gray-300">
+        <li>
+          • Keep sync frequency aligned with TMDB rate limits. Manual sync should be
+          used sparingly in production.
+        </li>
+        <li>
+          • The dashboard above reflects the most recent sync record stored in the
+          `sync_status` table.
+        </li>
+        <li>
+          • When scheduling regular syncs, prefer background jobs via cron or queue
+          workers instead of manual triggering.
+        </li>
+      </ul>
+    </section>
+  );
+}
+
 export default function AdminSyncDataPage() {
   const adminApi = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
@@ -183,330 +516,24 @@ export default function AdminSyncDataPage() {
 
   return (
     <div className="space-y-6">
-        <header>
-          <h1 className="text-3xl font-semibold text-white">Data Synchronization</h1>
-          <p className="text-gray-400 mt-2 max-w-2xl">
-            Manually trigger TMDB import jobs for movies and TV series. Use this
-            when you need fresh catalog data immediately, outside of scheduled
-            jobs.
-          </p>
-        </header>
-
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatsCard
-            title="Total Movies"
-            value={stats?.totalMovies ?? 0}
-            color="bg-blue-600"
-            icon={
-              <svg
-                className="size-7"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14z"
-                />
-              </svg>
-            }
-          />
-          <StatsCard
-            title="Total TV Series"
-            value={stats?.totalTVSeries ?? 0}
-            color="bg-purple-600"
-            icon={
-              <svg
-                className="size-7"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                />
-              </svg>
-            }
-          />
-          <StatsCard
-            title="Last Sync"
-            value={formattedLastSync}
-            color="bg-amber-600"
-            icon={
-              <svg
-                className="size-7"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            }
-          />
-          <StatsCard
-            title="Sync Status"
-            value={stats?.syncStatus ?? "unknown"}
-            color="bg-slate-600"
-            icon={
-              <svg
-                className="size-7"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2h2M12 3l4 4m-4-4L8 7m4-4v13"
-                />
-              </svg>
-            }
-          />
-        </section>
-
-        <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-white">
-                Manual Sync Controls
-              </h2>
-              <p className="text-gray-400 mt-1 max-w-xl">
-                Choose the dataset you want to refresh. You may optionally pick a
-                past TMDB export date (YYYY-MM-DD). Leave empty to use today&apos;s
-                date.
-              </p>
-            </div>
-            <label htmlFor="sync-custom-date" className="flex flex-col text-sm text-gray-300">
-              TMDB Export Date (optional)
-              <input
-                id="sync-custom-date"
-                type="date"
-                aria-label="TMDB export date"
-                value={customDate}
-                onChange={(event) => setCustomDate(event.target.value)}
-                max={new Date().toISOString().split("T")[0]}
-                suppressHydrationWarning
-                className="mt-1 rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-            </label>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {SYNC_OPTIONS.map((option) => {
-              const busy = syncing === option.key;
-              return (
-                <div
-                  key={option.key}
-                  className="flex items-start justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3"
-                >
-                  <div>
-                    <h3 className="text-lg font-medium text-white">
-                      {option.label}
-                    </h3>
-                    <p className="text-sm text-gray-400 mt-1">
-                      {option.description}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={`Run ${option.label}`}
-                    onClick={() => handleSync(option.key)}
-                    disabled={busy}
-                    className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                      busy
-                        ? "cursor-not-allowed bg-red-900 text-red-300"
-                        : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
-                    }`}
-                  >
-                    {busy ? "Syncing…" : "Run"}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xl font-semibold text-white">
-                Catalog Size Settings
-              </h2>
-              <p className="text-gray-400 mt-1 max-w-xl text-sm">
-                Configure maximum number of items to keep in the database for each content type.
-                Cleanup runs after &quot;Sync Popular Content&quot; to trim excess items based on popularity.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-              <label htmlFor="sync-movie-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
-                Movie Catalog Limit
-              </label>
-              <input
-                id="sync-movie-catalog-limit"
-                type="number"
-                aria-label="Movie catalog limit"
-                min="0"
-                step="1000"
-                value={settingsForm.movieCatalogLimit}
-                onChange={(e) =>
-                  setSettingsForm((prev) => ({
-                    ...prev,
-                    movieCatalogLimit: parseInt(e.target.value) || 0,
-                  }))
-                }
-                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Current: {(settings?.movieCatalogLimit ?? 500000).toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="sync-tv-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
-                TV Series Catalog Limit
-              </label>
-              <input
-                id="sync-tv-catalog-limit"
-                type="number"
-                aria-label="TV series catalog limit"
-                min="0"
-                step="1000"
-                value={settingsForm.tvCatalogLimit}
-                onChange={(e) =>
-                  setSettingsForm((prev) => ({
-                    ...prev,
-                    tvCatalogLimit: parseInt(e.target.value) || 0,
-                  }))
-                }
-                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Current: {(settings?.tvCatalogLimit ?? 200000).toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="sync-trending-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
-                Trending Catalog Limit
-              </label>
-              <input
-                id="sync-trending-catalog-limit"
-                type="number"
-                aria-label="Trending catalog limit"
-                min="0"
-                step="10"
-                value={settingsForm.trendingCatalogLimit}
-                onChange={(e) =>
-                  setSettingsForm((prev) => ({
-                    ...prev,
-                    trendingCatalogLimit: parseInt(e.target.value) || 0,
-                  }))
-                }
-                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Current: {(settings?.trendingCatalogLimit ?? 100).toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="sync-people-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
-                People Cache Limit
-              </label>
-              <input
-                id="sync-people-cache-limit"
-                type="number"
-                aria-label="People cache limit"
-                min="0"
-                step="1000"
-                value={settingsForm.peopleCacheLimit}
-                onChange={(e) =>
-                  setSettingsForm((prev) => ({
-                    ...prev,
-                    peopleCacheLimit: parseInt(e.target.value) || 0,
-                  }))
-                }
-                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Current: {(settings?.peopleCacheLimit ?? 10000).toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <label htmlFor="sync-recommendation-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
-                Recommendation Cache Limit
-              </label>
-              <input
-                id="sync-recommendation-cache-limit"
-                type="number"
-                aria-label="Recommendation cache limit"
-                min="0"
-                step="1000"
-                value={settingsForm.recommendationCacheLimit}
-                onChange={(e) =>
-                  setSettingsForm((prev) => ({
-                    ...prev,
-                    recommendationCacheLimit: parseInt(e.target.value) || 0,
-                  }))
-                }
-                className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-              <p className="mt-1 text-xs text-gray-400">
-                Current: {(settings?.recommendationCacheLimit ?? 10000).toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 flex justify-end">
-            <button
-              type="button"
-              onClick={handleSaveSettings}
-              disabled={savingSettings}
-              className={`rounded-md px-6 py-2 text-sm font-medium transition-colors ${
-                savingSettings
-                  ? "cursor-not-allowed bg-red-900 text-red-300"
-                  : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
-              }`}
-            >
-              {savingSettings ? "Saving..." : "Save Settings"}
-            </button>
-          </div>
-        </section>
-
-        <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-3">
-            Notes & Recommendations
-          </h3>
-          <ul className="space-y-2 text-sm text-gray-300">
-            <li>
-              • Keep sync frequency aligned with TMDB rate limits. Manual sync should
-              be used sparingly in production.
-            </li>
-            <li>
-              • The dashboard above reflects the most recent sync record stored in
-              the `sync_status` table.
-            </li>
-            <li>
-              • When scheduling regular syncs, prefer background jobs via cron or queue
-              workers instead of manual triggering.
-            </li>
-          </ul>
-        </section>
-      </div>
+      <SyncPageHeader />
+      <SyncStatsSection stats={stats} formattedLastSync={formattedLastSync} />
+      <ManualSyncSection
+        customDate={customDate}
+        syncing={syncing}
+        onCustomDateChange={setCustomDate}
+        onSync={handleSync}
+      />
+      <CatalogSettingsSection
+        settings={settings}
+        settingsForm={settingsForm}
+        savingSettings={savingSettings}
+        onSettingsChange={(patch) =>
+          setSettingsForm((prev) => ({ ...prev, ...patch }))
+        }
+        onSave={handleSaveSettings}
+      />
+      <SyncNotesSection />
+    </div>
   );
 }

@@ -162,7 +162,6 @@ export function useTVSeriesList(
   // Use generic async query hook
   const { data, loading, error, refetch, isFetched } = useAsyncQuery({
     queryFn: fetchTVSeries,
-    dependencies: [category, page, limit, genre, year, sortBy, language],
     enabled,
   });
 

@@ -96,13 +96,6 @@ export function useCommentItem({
     }
   }, [currentComment.id, repliesLoaded]);
 
-  useEffect(() => {
-    if (currentComment.replyCount > 0 && !repliesLoaded && depth < maxDepth) {
-      void loadReplies();
-      setShowReplies(true);
-    }
-  }, [currentComment.replyCount, depth, maxDepth, repliesLoaded, loadReplies]);
-
   const handleToggleReplies = async () => {
     if (!showReplies && !repliesLoaded) {
       await loadReplies();

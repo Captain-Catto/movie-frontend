@@ -305,25 +305,23 @@ export default function NotificationsPage() {
                       {dayLabel}
                     </div>
                     {groupedByDate[dateKey].map((notif) => {
+                      const { title, message } = getLocalizedNotif(notif, language);
                       return (
                         <div
                           key={notif.id}
-                          className={`w-full text-left bg-gray-850/60 border rounded-xl p-5 shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl cursor-pointer ${
+                          className={`relative w-full bg-gray-850/60 border rounded-xl shadow-lg transition-all duration-200 hover:bg-gray-850 hover:shadow-xl ${
                             notif.isRead
                               ? "border-gray-750/50"
                               : "border-blue-700/40 bg-gray-850/80"
                           }`}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => handleNotificationClick(notif)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              handleNotificationClick(notif);
-                            }
-                          }}
                         >
-                        <div className="flex items-start gap-4">
+                          <button
+                            type="button"
+                            className="absolute inset-0 w-full h-full rounded-xl cursor-pointer"
+                            onClick={() => handleNotificationClick(notif)}
+                            aria-label={title}
+                          />
+                          <div className="relative p-5 flex items-start gap-4 pointer-events-none">
                           {/* Type Icon/Badge */}
                           <div
                             className={`px-3 py-1.5 text-xs rounded-lg font-semibold capitalize shadow-sm ${
@@ -335,41 +333,34 @@ export default function NotificationsPage() {
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            {(() => {
-                              const { title, message } = getLocalizedNotif(notif, language);
-                              return (
-                                <>
-                                  <div className="flex items-start justify-between gap-3 mb-2">
-                                    <h3 className="text-white font-semibold text-base leading-tight">
-                                      {title}
-                                    </h3>
-                                    <div className="flex items-center gap-2">
-                                      <div className="text-xs text-gray-500 whitespace-nowrap" suppressHydrationWarning>
-                                        {formatRelativeTimeByLanguage(
-                                          new Date(notif.createdAt),
-                                          language
-                                        )}
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          handleDeleteNotification(notif);
-                                        }}
-                                        className="inline-flex size-8 items-center justify-center rounded-md text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer"
-                                        title={labels.deleteNotification}
-                                        aria-label={labels.deleteNotification}
-                                      >
-                                        <Trash2 size={15} />
-                                      </button>
-                                    </div>
-                                  </div>
-                                  <p className="text-gray-300 text-sm leading-relaxed">
-                                    {message}
-                                  </p>
-                                </>
-                              );
-                            })()}
+                            <div className="flex items-start justify-between gap-3 mb-2">
+                              <h3 className="text-white font-semibold text-base leading-tight">
+                                {title}
+                              </h3>
+                              <div className="flex items-center gap-2">
+                                <div className="text-xs text-gray-500 whitespace-nowrap" suppressHydrationWarning>
+                                  {formatRelativeTimeByLanguage(
+                                    new Date(notif.createdAt),
+                                    language
+                                  )}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    handleDeleteNotification(notif);
+                                  }}
+                                  className="relative z-10 pointer-events-auto inline-flex size-8 items-center justify-center rounded-md text-red-300 hover:bg-red-950/40 hover:text-red-200 cursor-pointer"
+                                  title={labels.deleteNotification}
+                                  aria-label={labels.deleteNotification}
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </div>
+                            </div>
+                            <p className="text-gray-300 text-sm leading-relaxed">
+                              {message}
+                            </p>
 
                             {/* Unread indicator */}
                             {!notif.isRead && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   getLocalizedGenreMap,
@@ -32,20 +32,19 @@ const TableFilters = ({
     languages: [],
   });
   const [isExpanded, setIsExpanded] = useState(false);
+  const prevInitialFiltersRef = useRef(initialFilters);
 
-  // Sync with initialFilters from URL parameters
-  useEffect(() => {
-    if (initialFilters) {
-      setFilters((prev) => ({
-        ...prev,
-        ...initialFilters,
-        ratings: initialFilters.ratings ?? prev.ratings,
-        versions: initialFilters.versions ?? prev.versions,
-        qualities: initialFilters.qualities ?? prev.qualities,
-        languages: initialFilters.languages ?? prev.languages,
-      }));
-    }
-  }, [initialFilters]);
+  if (initialFilters && initialFilters !== prevInitialFiltersRef.current) {
+    prevInitialFiltersRef.current = initialFilters;
+    setFilters((prev) => ({
+      ...prev,
+      ...initialFilters,
+      ratings: initialFilters.ratings ?? prev.ratings,
+      versions: initialFilters.versions ?? prev.versions,
+      qualities: initialFilters.qualities ?? prev.qualities,
+      languages: initialFilters.languages ?? prev.languages,
+    }));
+  }
 
   const countries = useMemo(
     () => [

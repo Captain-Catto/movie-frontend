@@ -98,13 +98,20 @@ export default function HomeWideCoverRail({
   };
 
   useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
     updateScrollState();
 
-    const handleResize = () => updateScrollState();
-    window.addEventListener("resize", handleResize);
+    const ro = new ResizeObserver(updateScrollState);
+    ro.observe(scroller);
+    window.addEventListener("resize", updateScrollState);
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, [movies.length]);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, []);
 
   if (movies.length === 0) {
     return null;

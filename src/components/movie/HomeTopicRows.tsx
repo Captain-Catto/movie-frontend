@@ -78,13 +78,20 @@ function HomeTopicRowItem({ row, rowIndex }: { row: HomeTopicRow; rowIndex: numb
   };
 
   useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
     updateScrollState();
 
-    const handleResize = () => updateScrollState();
-    window.addEventListener("resize", handleResize);
+    const ro = new ResizeObserver(updateScrollState);
+    ro.observe(scroller);
+    window.addEventListener("resize", updateScrollState);
 
-    return () => window.removeEventListener("resize", handleResize);
-  }, [row.movies.length]);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, []);
 
   if (row.movies.length === 0) {
     return null;

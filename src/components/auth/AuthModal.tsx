@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -106,15 +106,17 @@ export default function AuthModal({
     setSuccess("");
   };
 
-  useEffect(() => {
-    if (isOpen) {
-      setError("");
-      setSuccess("");
-    }
-  }, [isOpen]);
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setError("");
+          setSuccess("");
+        }
+        onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-[450px] bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white text-center">

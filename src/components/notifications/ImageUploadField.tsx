@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import { ImageIcon, X, Loader2, Link2 } from "lucide-react";
 import { authStorage } from "@/lib/auth-storage";
 
@@ -23,14 +23,15 @@ export default function ImageUploadField({ value, onChange }: Props) {
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlInput, setUrlInput] = useState(value || "");
   const inputRef = useRef<HTMLInputElement>(null);
+  const prevValueRef = useRef(value);
 
-  // Sync external value → preview (e.g. on form reset)
-  useEffect(() => {
+  if (value !== prevValueRef.current) {
+    prevValueRef.current = value;
     if (!value) {
       setPreview("");
       setUrlInput("");
     }
-  }, [value]);
+  }
 
   const uploadFile = useCallback(
     async (file: File) => {

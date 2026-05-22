@@ -56,11 +56,11 @@ function TopLineLoaderImpl() {
   const isActiveRef = useRef(false);
   const [progress, setProgress] = useState(0);
 
-  const isFirstRenderRef = useRef(true);
   const currentPathRef = useRef(pathWithSearch);
   const hasPendingLoadRef = useRef(false);
   const hideTimerRef = useRef<number | null>(null);
   const stallTimerRef = useRef<number | null>(null);
+  const progressIntervalRef = useRef<number | null>(null);
 
   const clearTimers = useCallback(() => {
     if (hideTimerRef.current !== null) {
@@ -71,6 +71,10 @@ function TopLineLoaderImpl() {
       window.clearTimeout(stallTimerRef.current);
       stallTimerRef.current = null;
     }
+    if (progressIntervalRef.current !== null) {
+      window.clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
   }, []);
 
   const start = useCallback(() => {
@@ -80,9 +84,22 @@ function TopLineLoaderImpl() {
     setIsVisible(true);
     setProgress((prev) => (prev > 0 ? prev : MIN_START_PROGRESS));
 
+    progressIntervalRef.current = window.setInterval(() => {
+      if (!isActiveRef.current) return;
+      setProgress((prev) => {
+        if (prev >= MAX_AUTO_PROGRESS) return prev;
+        const next = prev + Math.max((MAX_AUTO_PROGRESS - prev) * 0.12, 0.8);
+        return Math.min(next, MAX_AUTO_PROGRESS);
+      });
+    }, 140);
+
     stallTimerRef.current = window.setTimeout(() => {
       hasPendingLoadRef.current = false;
       isActiveRef.current = false;
+      if (progressIntervalRef.current !== null) {
+        window.clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
       setProgress(100);
       hideTimerRef.current = window.setTimeout(() => {
         setIsVisible(false);
@@ -106,21 +123,6 @@ function TopLineLoaderImpl() {
   }, [clearTimers]);
 
   useEffect(() => {
-    if (!isVisible) return;
-
-    const interval = window.setInterval(() => {
-      if (!isActiveRef.current) return;
-      setProgress((prev) => {
-        if (prev >= MAX_AUTO_PROGRESS) return prev;
-        const next = prev + Math.max((MAX_AUTO_PROGRESS - prev) * 0.12, 0.8);
-        return Math.min(next, MAX_AUTO_PROGRESS);
-      });
-    }, 140);
-
-    return () => window.clearInterval(interval);
-  }, [isVisible]);
-
-  useEffect(() => {
     const onDocumentClick = (event: MouseEvent) => {
       if (isModifiedClick(event)) return;
       const target = event.target as HTMLElement | null;
@@ -134,13 +136,8 @@ function TopLineLoaderImpl() {
       }
     };
 
-    const onPopState = () => {
-      start();
-    };
-
-    const onExternalStart = () => {
-      start();
-    };
+    const onPopState = () => start();
+    const onExternalStart = () => start();
 
     document.addEventListener("click", onDocumentClick, true);
     window.addEventListener("popstate", onPopState);
@@ -154,12 +151,6 @@ function TopLineLoaderImpl() {
   }, [start]);
 
   useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      currentPathRef.current = pathWithSearch;
-      return;
-    }
-
     if (currentPathRef.current !== pathWithSearch) {
       currentPathRef.current = pathWithSearch;
       complete();
