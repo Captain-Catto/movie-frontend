@@ -382,13 +382,12 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     if (activeTab !== "watch" || !editModal.open || !editModal.user) return;
-    fetchWatchHistory(editModal.user.id, watchPage);
+    fetchWatchHistory(editModal.user.id, watchPageRef.current);
   }, [
     activeTab,
     editModal.open,
     editModal.user,
     fetchWatchHistory,
-    watchPage,
   ]);
 
   return (
@@ -969,7 +968,7 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           disabled={watchHistory.page <= 1 || watchLoading}
-                          onClick={() => setWatchPage((page) => Math.max(1, page - 1))}
+                          onClick={() => { watchPageRef.current = Math.max(1, watchPageRef.current - 1); if (editModal.user) fetchWatchHistory(editModal.user.id, watchPageRef.current); }}
                           className="px-3 py-1.5 rounded bg-gray-700 text-white disabled:opacity-50"
                         >
                           Previous
@@ -977,7 +976,7 @@ export default function AdminUsersPage() {
                         <button
                           type="button"
                           disabled={watchHistory.page >= watchHistory.totalPages || watchLoading}
-                          onClick={() => setWatchPage((page) => page + 1)}
+                          onClick={() => { watchPageRef.current = watchPageRef.current + 1; if (editModal.user) fetchWatchHistory(editModal.user.id, watchPageRef.current); }}
                           className="px-3 py-1.5 rounded bg-gray-700 text-white disabled:opacity-50"
                         >
                           Next

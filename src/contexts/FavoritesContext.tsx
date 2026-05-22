@@ -37,7 +37,7 @@ const FavoritesContext = createContext<FavoritesContextValue | undefined>(
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
-  const [isLoading, setIsLoading] = useState(false);
+  const [fetchingFavorites, setFetchingFavorites] = useState(false);
   const { isAuthenticated } = useAuth();
 
   /**
@@ -50,7 +50,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      setIsLoading(true);
+      setFetchingFavorites(true);
       const response = await favoritesService.getUserFavorites({
         page: 1,
         limit: 1000,
@@ -60,7 +60,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to fetch favorites:", error);
     } finally {
-      setIsLoading(false);
+      setFetchingFavorites(false);
     }
   }, [isAuthenticated]);
 
@@ -145,7 +145,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   const value: FavoritesContextValue = {
     favoriteIds,
-    isLoading,
+    isLoading: fetchingFavorites,
     isFavorite,
     toggleFavorite,
     refreshFavorites,

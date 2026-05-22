@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 import { useNotificationSocket } from "@/hooks/useNotificationSocket";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -58,7 +58,12 @@ export function ToastNotificationProvider({
 }) {
   const { latestNotification } = useNotificationSocket();
   const { language } = useLanguage();
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+
+  type ToastsAction = { type: "add"; toast: ToastNotification } | { type: "remove"; id: number };
+  const [toasts, dispatchToasts] = useReducer((state: ToastNotification[], action: ToastsAction) => {
+    if (action.type === "add") return [action.toast, ...state.slice(0, 4)];
+    return state.filter((t) => t.id !== action.id);
+  }, []);
 
   useEffect(() => {
     if (!latestNotification) return;
@@ -75,16 +80,16 @@ export function ToastNotificationProvider({
       createdAt: latestNotification.createdAt,
     };
 
-    setToasts((prev) => [newToast, ...prev.slice(0, 4)]);
+    dispatchToasts({ type: "add", toast: newToast });
 
     const timer = setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== newToast.id));
+      dispatchToasts({ type: "remove", id: newToast.id });
     }, 5000);
     return () => clearTimeout(timer);
   }, [latestNotification]);
 
   const removeToast = (id: number) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    dispatchToasts({ type: "remove", id });
   };
 
   return (

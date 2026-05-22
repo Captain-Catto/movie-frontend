@@ -23,7 +23,7 @@ export default function RegisterForm({
     password: "",
     confirmPassword: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
@@ -95,7 +95,7 @@ export default function RegisterForm({
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.name ? "border-red-500" : ""
           }`}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
       </div>
@@ -114,7 +114,7 @@ export default function RegisterForm({
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.email ? "border-red-500" : ""
           }`}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
       </div>
@@ -133,7 +133,7 @@ export default function RegisterForm({
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.password ? "border-red-500" : ""
           }`}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password}</p>
@@ -154,7 +154,7 @@ export default function RegisterForm({
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.confirmPassword ? "border-red-500" : ""
           }`}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors.confirmPassword && (
           <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
@@ -164,9 +164,9 @@ export default function RegisterForm({
       <Button
         type="submit"
         className="w-full bg-red-600 hover:bg-red-700 text-white"
-        disabled={isLoading}
+        disabled={isSubmitting}
       >
-        {isLoading ? labels.registering : labels.register}
+        {isSubmitting ? labels.registering : labels.register}
       </Button>
     </form>
   );

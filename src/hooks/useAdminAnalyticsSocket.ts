@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./useAuth";
 
@@ -22,14 +22,27 @@ interface UseAdminAnalyticsSocketReturn {
 
 const ADMIN_ROLES = new Set(["admin", "super_admin", "viewer"]);
 
+type AnalyticsState = {
+  socket: Socket | null;
+  isConnected: boolean;
+  snapshot: AdminAnalyticsSnapshot | null;
+  lastUpdateAt: Date | null;
+};
+
+function analyticsReducer(state: AnalyticsState, action: Partial<AnalyticsState>): AnalyticsState {
+  return { ...state, ...action };
+}
+
 export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
   const { token, isAuthenticated, user } = useAuth();
 
   const [isReady, setIsReady] = useState(false);
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [snapshot, setSnapshot] = useState<AdminAnalyticsSnapshot | null>(null);
-  const [lastUpdateAt, setLastUpdateAt] = useState<Date | null>(null);
+  const [state, dispatch] = useReducer(analyticsReducer, {
+    socket: null,
+    isConnected: false,
+    snapshot: null,
+    lastUpdateAt: null,
+  });
 
   const socketRef = useRef<Socket | null>(null);
   const lastSnapshotIdRef = useRef<string | null>(null);
@@ -48,8 +61,7 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
-      setSocket(null);
-      setIsConnected(false);
+      dispatch({ socket: null, isConnected: false });
       return () => {};
     }
 

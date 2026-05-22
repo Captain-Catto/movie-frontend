@@ -20,7 +20,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
     email: "",
     password: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState("");
 
@@ -48,7 +48,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       const result = await onSubmit(formData.email, formData.password);
@@ -61,7 +61,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       console.error("Login error:", error);
       setSubmitError(labels.genericError);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -95,7 +95,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.email ? "border-red-500" : ""
           }`}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors.email && (
           <p className="text-red-500 text-sm">{errors.email}</p>
@@ -116,7 +116,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
           className={`bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 ${
             errors.password ? "border-red-500" : ""
           }`}
-          disabled={isLoading}
+          disabled={isSubmitting}
         />
         {errors.password && (
           <p className="text-red-500 text-sm">{errors.password}</p>
@@ -135,9 +135,9 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       <Button
         type="submit"
         className="w-full bg-red-600 hover:bg-red-700 text-white"
-        disabled={isLoading}
+        disabled={isSubmitting}
       >
-        {isLoading ? labels.loggingIn : labels.login}
+        {isSubmitting ? labels.loggingIn : labels.login}
       </Button>
     </form>
   );
