@@ -505,6 +505,18 @@ export default function AdminSeoPage() {
     showSuccess("Export ready", `Downloaded SEO data as ${isExcel ? "Excel" : "CSV"}`);
   };
 
+  const handleSeoHealthComplete = useCallback((res: {
+    total: number;
+    missingTitle: number;
+    missingDescription: number;
+    duplicates: unknown[];
+  }) => {
+    setLastCheckedAt(new Date().toLocaleString());
+    setLastCheckSummary(
+      `Checked ${res.total} entries · Missing titles: ${res.missingTitle}, descriptions: ${res.missingDescription}, duplicates: ${res.duplicates.length}`
+    );
+  }, []);
+
   const statusChartData = useMemo(
     () =>
       stats
@@ -562,14 +574,7 @@ export default function AdminSeoPage() {
       )}
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 gap-y-3">
-        <CheckSeoHealth
-          onComplete={(res) => {
-            setLastCheckedAt(new Date().toLocaleString());
-            setLastCheckSummary(
-              `Checked ${res.total} entries · Missing titles: ${res.missingTitle}, descriptions: ${res.missingDescription}, duplicates: ${res.duplicates.length}`
-            );
-          }}
-        />
+        <CheckSeoHealth onComplete={handleSeoHealthComplete} />
         {lastCheckedAt && lastCheckSummary && (
           <p className="text-sm text-gray-500" suppressHydrationWarning>
             Last checker run: {lastCheckedAt}, {lastCheckSummary}
@@ -636,18 +641,21 @@ export default function AdminSeoPage() {
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 gap-y-4">
         <div className="flex flex-wrap gap-3 items-center">
           <button
+            type="button"
             onClick={() => openEditModal(null, true)}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
           >
             Add SEO Metadata
           </button>
           <button
+            type="button"
             onClick={setupDefaults}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
           >
             Setup Defaults
           </button>
           <button
+            type="button"
             onClick={handleRefresh}
             className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500 cursor-pointer"
           >
@@ -669,6 +677,7 @@ export default function AdminSeoPage() {
 
         <div className="flex flex-wrap gap-3 items-center">
           <select
+            aria-label="Filter by status"
             value={filter}
             onChange={(e) =>
               setFilter(e.target.value as "all" | "active" | "inactive")
@@ -683,18 +692,21 @@ export default function AdminSeoPage() {
           <input
             type="text"
             placeholder="Search pages..."
+            aria-label="Search SEO pages"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 min-w-[220px] max-w-xs"
           />
           <div className="flex gap-2 flex-wrap">
             <button
+              type="button"
               onClick={() => exportSeoData("csv")}
               className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600 cursor-pointer"
             >
               Export CSV
             </button>
             <button
+              type="button"
               onClick={() => exportSeoData("excel")}
               className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 cursor-pointer"
             >
@@ -710,11 +722,13 @@ export default function AdminSeoPage() {
           <input
             type="text"
             value={resolvePath}
+            aria-label="Resolve path"
             onChange={(e) => setResolvePath(e.target.value)}
             placeholder="/movies hoặc /movie/[id]"
             className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 min-w-[220px]"
           />
           <select
+            aria-label="Resolve locale"
             value={resolveLocale}
             onChange={(e) => setResolveLocale(e.target.value as "vi" | "en")}
             className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2"
@@ -726,6 +740,7 @@ export default function AdminSeoPage() {
             ))}
           </select>
           <button
+            type="button"
             onClick={handleResolvePreview}
             disabled={resolveLoading}
             className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
@@ -837,13 +852,16 @@ export default function AdminSeoPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex gap-x-2">
                         <button
+                          type="button"
                           onClick={() => openEditModal(seo, false)}
                           className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleToggleActive(seo.id)}
+                          aria-label={seo.isActive ? "Deactivate" : "Activate"}
                           className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1 cursor-pointer"
                         >
                           {seo.isActive ? (
@@ -857,6 +875,7 @@ export default function AdminSeoPage() {
                           )}
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(seo.id)}
                           className="text-red-600 hover:text-red-900 cursor-pointer"
                         >
@@ -1001,6 +1020,7 @@ export default function AdminSeoPage() {
                     <input
                       type="text"
                       placeholder="OG Title"
+                      aria-label="OG Title"
                       value={formData.ogTitle}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, ogTitle: e.target.value }))
@@ -1009,6 +1029,7 @@ export default function AdminSeoPage() {
                     />
                     <textarea
                       placeholder="OG Description"
+                      aria-label="OG Description"
                       value={formData.ogDescription}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -1022,6 +1043,7 @@ export default function AdminSeoPage() {
                     <input
                       type="text"
                       placeholder="OG Image URL"
+                      aria-label="OG Image URL"
                       value={formData.ogImage}
                       onChange={(e) =>
                         setFormData((prev) => ({ ...prev, ogImage: e.target.value }))
@@ -1040,6 +1062,7 @@ export default function AdminSeoPage() {
                     <input
                       type="text"
                       placeholder="Twitter Title"
+                      aria-label="Twitter Title"
                       value={formData.twitterTitle}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -1051,6 +1074,7 @@ export default function AdminSeoPage() {
                     />
                     <textarea
                       placeholder="Twitter Description"
+                      aria-label="Twitter Description"
                       value={formData.twitterDescription}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -1064,6 +1088,7 @@ export default function AdminSeoPage() {
                     <input
                       type="text"
                       placeholder="Twitter Image URL"
+                      aria-label="Twitter Image URL"
                       value={formData.twitterImage}
                       onChange={(e) =>
                         setFormData((prev) => ({
@@ -1097,6 +1122,7 @@ export default function AdminSeoPage() {
 
               <div className="mt-6 flex justify-end gap-x-3">
                 <button
+                  type="button"
                   onClick={() =>
                     setEditModal({ open: false, seo: null, isNew: false })
                   }
@@ -1105,6 +1131,7 @@ export default function AdminSeoPage() {
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleSubmit}
                   className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 cursor-pointer"
                 >

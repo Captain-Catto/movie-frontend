@@ -410,6 +410,7 @@ export default function AdminUsersPage() {
               {(["all", "active", "banned"] as const).map((status) => (
                 <button
                   key={status}
+                  type="button"
                   onClick={() => setFilter(status)}
                   className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
                     filter === status
@@ -574,6 +575,7 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() => push(`/admin/users/${user.id}`)}
                             className="cursor-pointer px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
                           >
@@ -581,6 +583,7 @@ export default function AdminUsersPage() {
                           </button>
                           {user.isActive ? (
                             <button
+                              type="button"
                               onClick={() => setBanModal({ open: true, user })}
                               className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
                             >
@@ -588,6 +591,7 @@ export default function AdminUsersPage() {
                             </button>
                           ) : (
                             <button
+                              type="button"
                               onClick={() => handleUnbanUser(user.id)}
                               className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                             >
@@ -616,6 +620,7 @@ export default function AdminUsersPage() {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={closeEditModal}
                   className="cursor-pointer text-gray-400 hover:text-white transition-colors"
                   aria-label="Close"
@@ -627,6 +632,7 @@ export default function AdminUsersPage() {
               {/* Tabs */}
               <div className="flex gap-x-1 mb-6 border-b border-gray-700">
                 <button
+                  type="button"
                   onClick={() => setActiveTab("info")}
                   className={`px-4 py-2 font-medium transition-colors cursor-pointer ${
                     activeTab === "info"
@@ -637,6 +643,7 @@ export default function AdminUsersPage() {
                   User Info
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setActiveTab("watch");
                     watchPageRef.current = 1;
@@ -650,6 +657,7 @@ export default function AdminUsersPage() {
                   Watch History
                 </button>
                 <button
+                  type="button"
                   onClick={() => {
                     setActiveTab("logs");
                     if (userLogs.length === 0 && !logsLoading && editModal.user) {
@@ -797,12 +805,14 @@ export default function AdminUsersPage() {
 
                   <div className="flex justify-end gap-x-3 mt-6">
                     <button
+                      type="button"
                       onClick={closeEditModal}
                       className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
                     <button
+                      type="button"
                       onClick={handleUpdateUser}
                       disabled={editSaving}
                       className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -845,6 +855,7 @@ export default function AdminUsersPage() {
 
                   <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-5">
                     <select
+                      aria-label="Filter by action type"
                       value={watchAction}
                       onChange={(e) => {
                         setWatchAction(e.target.value as WatchActionType);
@@ -858,6 +869,7 @@ export default function AdminUsersPage() {
                       <option value="complete">Complete</option>
                     </select>
                     <select
+                      aria-label="Filter by content type"
                       value={watchContentType}
                       onChange={(e) => {
                         setWatchContentType(e.target.value as WatchContentType);
@@ -871,6 +883,7 @@ export default function AdminUsersPage() {
                     </select>
                     <input
                       type="date"
+                      aria-label="Start date"
                       value={watchStartDate}
                       onChange={(e) => {
                         setWatchStartDate(e.target.value);
@@ -880,6 +893,7 @@ export default function AdminUsersPage() {
                     />
                     <input
                       type="date"
+                      aria-label="End date"
                       value={watchEndDate}
                       onChange={(e) => {
                         setWatchEndDate(e.target.value);
@@ -987,6 +1001,7 @@ export default function AdminUsersPage() {
 
                   <div className="flex justify-end mt-6">
                     <button
+                      type="button"
                       onClick={closeEditModal}
                       className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                     >
@@ -1005,6 +1020,7 @@ export default function AdminUsersPage() {
                       User activity history including logins, actions, and events
                     </p>
                     <select
+                      aria-label="Filter by action"
                       value={logFilter}
                       onChange={(e) => setLogFilter(e.target.value)}
                       className="px-3 py-1.5 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600"
@@ -1074,6 +1090,7 @@ export default function AdminUsersPage() {
 
                   <div className="flex justify-end mt-6">
                     <button
+                      type="button"
                       onClick={closeEditModal}
                       className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
                     >
@@ -1098,11 +1115,13 @@ export default function AdminUsersPage() {
               <textarea
                 value={banReason}
                 onChange={(e) => setBanReason(e.target.value)}
+                aria-label="Reason for banning"
                 placeholder="Enter reason for banning..."
                 className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 min-h-24"
               />
               <div className="flex justify-end gap-x-3 mt-4">
                 <button
+                  type="button"
                   onClick={() => {
                     setBanModal({ open: false, user: null });
                     setBanReason("");
@@ -1112,6 +1131,7 @@ export default function AdminUsersPage() {
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleBanUser}
                   disabled={!banReason}
                   className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

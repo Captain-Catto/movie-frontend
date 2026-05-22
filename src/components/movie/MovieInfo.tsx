@@ -39,7 +39,7 @@ const MovieInfo = ({ title, rating, year, duration, season, episode, genres }: M
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {genres.map((genre, index) => (
+        {genres.map((genre) => (
           <span
             key={genre}
             className="px-3 py-1 bg-gray-800/50 backdrop-blur-sm rounded-full text-sm hover:bg-gray-700/50 transition-colors cursor-pointer text-white"

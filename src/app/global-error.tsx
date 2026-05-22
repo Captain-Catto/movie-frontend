@@ -37,6 +37,7 @@ export default function GlobalError({
 
             <div className="space-y-4">
               <button
+                type="button"
                 onClick={reset}
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >

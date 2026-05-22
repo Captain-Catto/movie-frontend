@@ -41,6 +41,7 @@ function SearchInput({ query, onQueryChange, onSearch, isLoading, ref }: SearchI
           ref={ref}
           type="text"
           placeholder={labels.placeholder}
+          aria-label={labels.placeholder}
           value={query}
           onChange={handleInputChange}
           className="w-full pl-10 pr-10 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
@@ -54,6 +55,7 @@ function SearchInput({ query, onQueryChange, onSearch, isLoading, ref }: SearchI
               <button
                 type="button"
                 onClick={handleClear}
+                aria-label="Clear search"
                 className="text-gray-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="size-5" />

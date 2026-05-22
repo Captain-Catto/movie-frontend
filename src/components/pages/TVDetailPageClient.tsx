@@ -298,6 +298,7 @@ const TVDetailPageClient = ({
                       <>
                         {tvData.overview.substring(0, 300)}...
                         <button
+                          type="button"
                           onClick={() => setShowFullDescription(true)}
                           className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors cursor-pointer"
                         >
@@ -313,6 +314,7 @@ const TVDetailPageClient = ({
                   tvData.overview &&
                   tvData.overview.length > 300 && (
                     <button
+                      type="button"
                       onClick={() => setShowFullDescription(false)}
                       className="mt-2 text-red-400 hover:text-red-300 font-medium transition-colors cursor-pointer"
                     >

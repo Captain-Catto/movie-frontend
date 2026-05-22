@@ -8,7 +8,7 @@ import { X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { RelativeTime } from "@/utils/hydration-safe-date";
 
-export interface NotificationDetailItem {
+interface NotificationDetailItem {
   id: string | number;
   title: string;
   message: string;
@@ -133,6 +133,8 @@ export default function NotificationDetailModal({ notification, onClose }: Props
       >
         {/* Close button */}
         <button
+          type="button"
+          aria-label="Close"
           onClick={onClose}
           className="absolute top-3 right-3 z-10 size-8 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-gray-300 hover:text-white transition-colors cursor-pointer"
         >

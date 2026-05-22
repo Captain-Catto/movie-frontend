@@ -44,6 +44,7 @@ export default function EpisodePicker({
           {labels.episodes}
         </h3>
         <select
+          aria-label="Select season"
           value={selectedSeason}
           onChange={(e) => changeSeason(Number(e.target.value))}
           className="bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-gray-500 transition-colors"
@@ -79,6 +80,7 @@ export default function EpisodePicker({
             return (
               <button
                 key={episodeKey}
+                type="button"
                 onClick={() => selectEpisode(ep.episodeNumber)}
                 title={ep.name}
                 className={`h-10 rounded text-sm font-medium transition-colors ${

@@ -836,6 +836,7 @@ export default function AdminUserDetailPage() {
     <div className="space-y-6">
       {/* Back button */}
       <button
+        type="button"
         onClick={() => push("/admin/users")}
         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors cursor-pointer"
       >
@@ -927,6 +928,7 @@ export default function AdminUserDetailPage() {
             </p>
           </div>
           <button
+            type="button"
             onClick={handleSaveProfile}
             disabled={savingProfile}
             className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-sm font-medium text-white transition-colors cursor-pointer"
@@ -1074,6 +1076,7 @@ export default function AdminUserDetailPage() {
           {/* Filter dropdown */}
           <div className="relative">
             <button
+              type="button"
               onClick={() => setShowFilterMenu(!showFilterMenu)}
               className="flex items-center gap-2 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm text-gray-300 transition-colors cursor-pointer"
             >
@@ -1086,6 +1089,7 @@ export default function AdminUserDetailPage() {
                 {FILTER_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
+                    type="button"
                     onClick={() => handleFilterChange(opt.value)}
                     className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-600 first:rounded-t-lg last:rounded-b-lg transition-colors cursor-pointer ${
                       filter === opt.value
@@ -1172,6 +1176,7 @@ export default function AdminUserDetailPage() {
         {page < totalPages && (
           <div className="p-4 border-t border-gray-700 text-center">
             <button
+              type="button"
               onClick={handleLoadMore}
               disabled={timelineLoading}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-sm text-gray-300 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
@@ -1228,6 +1233,7 @@ export default function AdminUserDetailPage() {
               </div>
               <button
                 type="button"
+                aria-label="Close"
                 onClick={() =>
                   setHideCommentModal({
                     group: null,
@@ -1274,6 +1280,7 @@ export default function AdminUserDetailPage() {
                     }))
                   }
                   rows={3}
+                  aria-label="Lý do cụ thể"
                   placeholder="Nhập lý do cụ thể"
                   className="w-full rounded-lg bg-gray-950 border border-gray-700 text-white placeholder:text-gray-500 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
@@ -1329,6 +1336,8 @@ export default function AdminUserDetailPage() {
                 </p>
               </div>
               <button
+                type="button"
+                aria-label="Close"
                 onClick={() => setWatchTimeOpen(false)}
                 className="size-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
               >
@@ -1511,6 +1520,8 @@ function DetailModal({
             <p className="text-sm text-gray-400 mt-1">{totalLabelByType[type]}</p>
           </div>
           <button
+            type="button"
+            aria-label="Close"
             onClick={onClose}
             className="size-9 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white inline-flex items-center justify-center cursor-pointer"
           >

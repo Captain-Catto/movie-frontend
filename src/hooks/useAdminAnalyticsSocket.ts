@@ -79,40 +79,24 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
 
     socketRef.current = client;
 
-    const handleConnect = () => {
-      setIsConnected(true);
-      setSocket(client);
-    };
-
-    const handleDisconnect = () => {
-      setIsConnected(false);
-    };
-
+    const handleConnect = () => dispatch({ socket: client, isConnected: true });
+    const handleDisconnect = () => dispatch({ isConnected: false });
     const handleConnectError = (error: Error) => {
       console.error("[AdminAnalyticsSocket] connect_error", error);
-      setIsConnected(false);
+      dispatch({ isConnected: false });
     };
-
     const handleAuthError = (error: Error) => {
       console.error("[AdminAnalyticsSocket] auth:error", error);
-      setIsConnected(false);
+      dispatch({ isConnected: false });
     };
-
     const handleAnalyticsUpdate = (payload: AdminAnalyticsSnapshot) => {
       if (!payload) return;
-
-      if (
-        payload.snapshotId &&
-        lastSnapshotIdRef.current === payload.snapshotId
-      ) {
-        return;
-      }
-
+      if (payload.snapshotId && lastSnapshotIdRef.current === payload.snapshotId) return;
       lastSnapshotIdRef.current = payload.snapshotId ?? null;
-      setSnapshot(payload);
-      setLastUpdateAt(
-        payload.updatedAt ? new Date(payload.updatedAt) : new Date()
-      );
+      dispatch({
+        snapshot: payload,
+        lastUpdateAt: payload.updatedAt ? new Date(payload.updatedAt) : new Date(),
+      });
     };
 
     client.on("connect", handleConnect);
@@ -129,15 +113,14 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
       client.off("analytics:update", handleAnalyticsUpdate);
       client.disconnect();
       socketRef.current = null;
-      setSocket(null);
-      setIsConnected(false);
+      dispatch({ socket: null, isConnected: false });
     };
   }, [isReady, isAuthenticated, token, user?.role]);
 
   return {
-    snapshot,
-    isConnected,
-    lastUpdateAt,
-    socket,
+    snapshot: state.snapshot,
+    isConnected: state.isConnected,
+    lastUpdateAt: state.lastUpdateAt,
+    socket: state.socket,
   };
 }

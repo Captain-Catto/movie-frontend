@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useReducer, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
@@ -38,10 +38,14 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true); // Start visible
+  const [{ isScrolled, isVisible }, dispatchHeader] = useReducer(
+    (s: { isScrolled: boolean; isVisible: boolean }, a: Partial<{ isScrolled: boolean; isVisible: boolean }>) => {
+      const next = { ...s, ...a };
+      return next.isScrolled === s.isScrolled && next.isVisible === s.isVisible ? s : next;
+    },
+    { isScrolled: false, isVisible: true }
+  );
   const hasScrolledRef = useRef(false);
-  const scrollRafRef = useRef<number | null>(null);
   const isPlayingRef = useRef(isPlaying);
   useEffect(() => {
     isPlayingRef.current = isPlaying;
@@ -55,36 +59,37 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
   // Handle scroll to update play state visibility and header styling
   useEffect(() => {
+    let scrollRafId: number | null = null;
+
     const updateScrollState = () => {
       const scrollTop = window.scrollY;
-      setIsScrolled((prev) => {
-        const next = scrollTop > 0;
-        return prev === next ? prev : next;
-      });
+      const nextScrolled = scrollTop > 0;
 
       if (hideOnPlay && scrollTop > 50) {
         if (!hasScrolledRef.current) hasScrolledRef.current = true;
-        setIsVisible((prev) => (prev ? prev : true));
+        dispatchHeader({ isScrolled: nextScrolled, isVisible: true });
       } else if (hideOnPlay && isPlayingRef.current && scrollTop <= 50) {
         hasScrolledRef.current = false;
-        setIsVisible(false);
+        dispatchHeader({ isScrolled: nextScrolled, isVisible: false });
+      } else {
+        dispatchHeader({ isScrolled: nextScrolled });
       }
 
-      scrollRafRef.current = null;
+      scrollRafId = null;
     };
 
     const handleScroll = () => {
-      if (scrollRafRef.current !== null) return;
-      scrollRafRef.current = window.requestAnimationFrame(updateScrollState);
+      if (scrollRafId !== null) return;
+      scrollRafId = window.requestAnimationFrame(updateScrollState);
     };
 
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      if (scrollRafRef.current !== null) {
-        window.cancelAnimationFrame(scrollRafRef.current);
-        scrollRafRef.current = null;
+      if (scrollRafId !== null) {
+        window.cancelAnimationFrame(scrollRafId);
+        scrollRafId = null;
       }
     };
   }, [hideOnPlay]);
@@ -93,7 +98,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   useEffect(() => {
     if (hideOnPlay && isPlaying) {
       hasScrolledRef.current = false;
-      setIsVisible(false);
+      dispatchHeader({ isVisible: false });
     }
   }, [hideOnPlay, isPlaying]);
 
@@ -177,6 +182,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
                 {/* Search */}
                 <button
+                  type="button"
                   className="p-1 hover:text-red-500 transition-colors text-white flex-shrink-0 cursor-pointer"
                   onClick={handleSearchClick}
                   title={labels.search}
@@ -207,6 +213,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                     <UserMenu user={user} onLogout={logout} />
                   ) : isHydrated ? (
                     <button
+                      type="button"
                       onClick={handleAuthModalOpen}
                     className="text-white hover:text-red-500 transition-colors text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 rounded bg-red-600 hover:bg-red-700 whitespace-nowrap cursor-pointer"
                   >
@@ -220,6 +227,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
               {/* Hamburger Menu Button - Tablet & Mobile (only visible on mobile) */}
               <button
+                type="button"
                 className="lg:hidden p-2 hover:text-red-500 transition-colors text-white relative z-50 flex-shrink-0 cursor-pointer"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label={isMenuOpen ? labels.closeMenu : labels.openMenu}
@@ -256,6 +264,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
         <div className="lg:hidden fixed inset-0 z-[200] size-screen bg-gray-900 opacity-100 transition-all duration-300 ease-out">
           <div className="min-h-screen h-screen overflow-y-auto px-4 pt-16 pb-6 relative z-[210] pointer-events-auto flex flex-col gap-3">
             <button
+              type="button"
               onClick={() => setIsMenuOpen(false)}
               aria-label={labels.closeMenu}
               className="absolute top-4 right-4 p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors cursor-pointer"
@@ -330,6 +339,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
                     <HeartIcon size={16}></HeartIcon>
                   </Link>
                   <button
+                    type="button"
                     onClick={() => {
                       setIsMenuOpen(false);
                       handleSearchClick();
@@ -348,6 +358,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
 
               {!isAuthenticated && (
                 <button
+                  type="button"
                   onClick={() => {
                     setIsMenuOpen(false);
                     handleAuthModalOpen();

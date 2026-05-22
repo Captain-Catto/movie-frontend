@@ -445,6 +445,7 @@ export default function AdminContentPage() {
             {TAB_CONFIG.map((tab) => (
               <button
                 key={tab.key}
+                type="button"
                 onClick={() => handleTabChange(tab.key)}
                 className={`cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
                   activeTab === tab.key
@@ -467,6 +468,7 @@ export default function AdminContentPage() {
                   (status) => (
                     <button
                       key={status}
+                      type="button"
                       onClick={() => handleFilterChange(status)}
                       className={`cursor-pointer px-4 py-2 rounded-lg font-medium transition-colors ${
                         filter === status
@@ -484,6 +486,7 @@ export default function AdminContentPage() {
                 <input
                   type="text"
                   placeholder="Search content..."
+                  aria-label="Search content"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={(e) => {
@@ -494,6 +497,7 @@ export default function AdminContentPage() {
                   className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 md:w-80"
                 />
                 <button
+                  type="button"
                   onClick={handleSearch}
                   className="cursor-pointer px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
                 >
@@ -619,6 +623,7 @@ export default function AdminContentPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
+                            type="button"
                             onClick={() =>
                               setDetailModal({
                                 open: true,
@@ -631,11 +636,13 @@ export default function AdminContentPage() {
                             }
                             className="cursor-pointer px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white text-sm rounded transition-colors"
                             title="View details"
+                            aria-label="View details"
                           >
                             <Eye className="size-4" />
                           </button>
                           {content.isBlocked ? (
                             <button
+                              type="button"
                               onClick={() => handleUnblockContent(content)}
                               className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                             >
@@ -643,6 +650,7 @@ export default function AdminContentPage() {
                             </button>
                           ) : (
                             <button
+                              type="button"
                               onClick={() => {
                                 setBlockReason("");
                                 setBlockModal({ open: true, content });
@@ -709,6 +717,7 @@ export default function AdminContentPage() {
               <textarea
                 value={blockReason}
                 onChange={(e) => setBlockReason(e.target.value)}
+                aria-label={isTrendingTab ? "Reason for hiding" : "Reason for blocking"}
                 placeholder={
                   isTrendingTab
                     ? "Enter reason for hiding..."
@@ -718,6 +727,7 @@ export default function AdminContentPage() {
               />
               <div className="flex justify-end gap-x-3 mt-4">
                 <button
+                  type="button"
                   onClick={() => {
                     setBlockModal({ open: false, content: null });
                     setBlockReason("");
@@ -727,6 +737,7 @@ export default function AdminContentPage() {
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleBlockContent}
                   disabled={!blockReason}
                   className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

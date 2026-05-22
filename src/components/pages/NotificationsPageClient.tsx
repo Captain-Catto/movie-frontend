@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import axiosInstance from "@/lib/axios-instance";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -15,7 +15,20 @@ import {
   type NotificationUiType,
 } from "@/lib/ui-messages";
 import { formatRelativeTimeByLanguage } from "@/utils/dateFormatter";
-import NotificationDetailModal, { type NotificationDetailItem } from "@/components/notifications/NotificationDetailModal";
+import NotificationDetailModal from "@/components/notifications/NotificationDetailModal";
+
+interface NotificationDetailItem {
+  id: string | number;
+  title: string;
+  message: string;
+  titleVi?: string;
+  messageVi?: string;
+  titleEn?: string;
+  messageEn?: string;
+  type: string;
+  createdAt: Date | string;
+  metadata?: { imageUrl?: string; [key: string]: unknown };
+}
 
 interface NotificationItem {
   id: string | number;
@@ -52,10 +65,12 @@ export default function NotificationsPage() {
   const { language } = useLanguage();
   const labels = getNotificationsPageUiMessages(language);
   const locale = getLocaleFromLanguage(language);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isEmpty, setIsEmpty] = useState(false);
+  type ListState = { notifications: NotificationItem[]; loading: boolean; error: string | null; isEmpty: boolean };
+  const [listState, dispatchList] = useReducer(
+    (s: ListState, a: Partial<ListState>): ListState => ({ ...s, ...a }),
+    { notifications: [], loading: true, error: null, isEmpty: false }
+  );
+  const { notifications, loading, error, isEmpty } = listState;
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<NotificationDetailItem | null>(null);
 
@@ -86,18 +101,13 @@ export default function NotificationsPage() {
               metadata: n.metadata,
             })
           ) as NotificationItem[];
-          setNotifications(items);
-          setIsEmpty(items.length === 0);
+          dispatchList({ notifications: items, isEmpty: items.length === 0, loading: false });
         } else {
-          setError(labels.noNotificationsFound);
-          setIsEmpty(true);
+          dispatchList({ error: labels.noNotificationsFound, isEmpty: true, loading: false });
         }
       } catch (err) {
         console.error("Failed to load notifications:", err);
-        setError(labels.cannotLoadNotifications);
-        setIsEmpty(true);
-      } finally {
-        setLoading(false);
+        dispatchList({ error: labels.cannotLoadNotifications, isEmpty: true, loading: false });
       }
     };
 
@@ -146,21 +156,13 @@ export default function NotificationsPage() {
   const markNotificationAsRead = async (notif: NotificationItem) => {
     if (notif.isRead) return;
 
-    setNotifications((prev) =>
-      prev.map((item) =>
-        item.id === notif.id ? { ...item, isRead: true } : item
-      )
-    );
+    dispatchList({ notifications: notifications.map((item) => item.id === notif.id ? { ...item, isRead: true } : item) });
 
     try {
       await axiosInstance.put(`/notifications/${notif.id}/read`);
     } catch (error) {
       console.error("Failed to mark notification as read:", error);
-      setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === notif.id ? { ...item, isRead: false } : item
-        )
-      );
+      dispatchList({ notifications: notifications.map((item) => item.id === notif.id ? { ...item, isRead: false } : item) });
     }
   };
 
@@ -176,29 +178,26 @@ export default function NotificationsPage() {
 
   const handleDeleteNotification = async (notif: NotificationItem) => {
     const previousNotifications = notifications;
-    setNotifications((prev) => prev.filter((item) => item.id !== notif.id));
-    setIsEmpty(previousNotifications.length <= 1);
+    const filtered = previousNotifications.filter((item) => item.id !== notif.id);
+    dispatchList({ notifications: filtered, isEmpty: filtered.length === 0 });
 
     try {
       await axiosInstance.delete(`/notifications/${notif.id}`);
     } catch (error) {
       console.error("Failed to delete notification:", error);
-      setNotifications(previousNotifications);
-      setIsEmpty(previousNotifications.length === 0);
+      dispatchList({ notifications: previousNotifications, isEmpty: previousNotifications.length === 0 });
     }
   };
 
   const handleClearNotifications = async () => {
     const previousNotifications = notifications;
-    setNotifications([]);
-    setIsEmpty(true);
+    dispatchList({ notifications: [], isEmpty: true });
 
     try {
       await axiosInstance.delete("/notifications");
     } catch (error) {
       console.error("Failed to clear notifications:", error);
-      setNotifications(previousNotifications);
-      setIsEmpty(previousNotifications.length === 0);
+      dispatchList({ notifications: previousNotifications, isEmpty: previousNotifications.length === 0 });
     }
   };
 
@@ -229,6 +228,7 @@ export default function NotificationsPage() {
                 </span>
                 {notifications.length > 0 && (
                   <button
+                    type="button"
                     onClick={handleClearNotifications}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors border bg-red-950/40 border-red-800/60 text-red-200 hover:bg-red-900/50 cursor-pointer"
                     title={labels.clearNotifications}
@@ -238,6 +238,7 @@ export default function NotificationsPage() {
                   </button>
                 )}
                 <button
+                  type="button"
                   onClick={() => setShowUnreadOnly((v) => !v)}
                   className={`px-3 py-1.5 rounded-full text-sm font-semibold transition-colors border cursor-pointer ${
                     showUnreadOnly
@@ -350,6 +351,7 @@ export default function NotificationsPage() {
                                         )}
                                       </div>
                                       <button
+                                        type="button"
                                         onClick={(event) => {
                                           event.stopPropagation();
                                           handleDeleteNotification(notif);

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   ArrowUp,
   Bot,
@@ -72,16 +72,18 @@ export default function ChatWidget() {
   const locale = language.toLowerCase().startsWith("vi") ? "vi" : "en";
   const text = labels[locale];
   const [open, setOpen] = useState(false);
-  const [session, setSession] = useState<ChatSession | null>(null);
-  const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
-  const [initializing, setInitializing] = useState(false);
   const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
   const [confirmTarget, setConfirmTarget] = useState<ChatSession | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
+
+  type ChatState = { session: ChatSession | null; sessions: ChatSession[]; messages: ChatMessage[]; initializing: boolean; error: string };
+  const [chatState, dispatchChat] = useReducer(
+    (s: ChatState, a: Partial<ChatState>): ChatState => ({ ...s, ...a }),
+    { session: null, sessions: [], messages: [], initializing: false, error: "" }
+  );
+  const { session, sessions, messages, initializing, error } = chatState;
 
   const listRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -105,25 +107,23 @@ export default function ChatWidget() {
     if (!open || !isAuthenticated || session || isLoading) return;
 
     let cancelled = false;
-    setInitializing(true);
+    dispatchChat({ initializing: true });
     Promise.all([chatApi.createOrGetSession(), chatApi.getSessions().catch(() => [])])
       .then(async ([created, loadedSessions]) => {
         if (cancelled) return;
-        setSessions(loadedSessions);
-        setSession(created);
-        setInitializing(false);
+        dispatchChat({ sessions: loadedSessions, session: created, initializing: false });
         try {
           const existingMessages = await chatApi.getMessages(created.id);
-          if (!cancelled) setMessages(existingMessages);
+          if (!cancelled) dispatchChat({ messages: existingMessages });
         } catch {
-          if (!cancelled) setMessages([]);
+          if (!cancelled) dispatchChat({ messages: [] });
         }
       })
       .catch(() => {
-        if (!cancelled) setError(text.error);
+        if (!cancelled) dispatchChat({ error: text.error });
       })
       .finally(() => {
-        if (!cancelled) setInitializing(false);
+        if (!cancelled) dispatchChat({ initializing: false });
       });
 
     return () => {
@@ -144,7 +144,7 @@ export default function ChatWidget() {
     if (!content || !session || sending) return;
 
     setInput("");
-    setError("");
+    dispatchChat({ error: "" });
     const optimistic: ChatMessage = {
       id: Date.now(),
       sessionId: session.id,
@@ -154,80 +154,59 @@ export default function ChatWidget() {
       metadata: null,
       createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, optimistic]);
+    dispatchChat({ messages: [...messages, optimistic] });
     setSending(true);
 
     try {
       const result = await chatApi.sendMessage(session.id, content, language);
-      setMessages((prev) => [
-        ...prev.filter((message) => message.id !== optimistic.id),
-        result.userMessage,
-        result.message,
-      ]);
-      chatApi.getSessions().then(setSessions).catch(() => undefined);
-      if (result.flagged) {
-        setError(text.flagged);
-      }
+      dispatchChat({ messages: [...messages.filter((m) => m.id !== optimistic.id), result.userMessage, result.message] });
+      chatApi.getSessions().then((s) => dispatchChat({ sessions: s })).catch(() => undefined);
+      if (result.flagged) dispatchChat({ error: text.flagged });
     } catch {
-      setError(text.error);
-      setMessages((prev) => prev.filter((message) => message.id !== optimistic.id));
+      dispatchChat({ error: text.error, messages: messages.filter((m) => m.id !== optimistic.id) });
     } finally {
       setSending(false);
     }
   };
 
   const loadSession = async (target: ChatSession) => {
-    setSession(target);
     setShowHistory(false);
-    setError("");
-    setInitializing(true);
+    dispatchChat({ session: target, error: "", initializing: true });
     try {
       const existingMessages = await chatApi.getMessages(target.id);
-      setMessages(existingMessages);
+      dispatchChat({ messages: existingMessages, initializing: false });
     } catch {
-      setMessages([]);
-      setError(text.error);
-    } finally {
-      setInitializing(false);
+      dispatchChat({ messages: [], error: text.error, initializing: false });
     }
   };
 
   const startNewChat = async () => {
     setShowHistory(false);
-    setMessages([]);
-    setError("");
-    setInitializing(true);
+    dispatchChat({ messages: [], error: "", initializing: true });
     try {
       const created = await chatApi.createOrGetSession(true);
-      setSession(created);
       const loadedSessions = await chatApi.getSessions();
-      setSessions(loadedSessions);
+      dispatchChat({ session: created, sessions: loadedSessions, initializing: false });
     } catch {
-      setError(text.error);
-    } finally {
-      setInitializing(false);
+      dispatchChat({ error: text.error, initializing: false });
     }
   };
 
   const deleteSession = async (target: ChatSession) => {
-    setError("");
+    dispatchChat({ error: "" });
     try {
       await chatApi.deleteSession(target.id);
       const remainingSessions = await chatApi.getSessions();
-      setSessions(remainingSessions);
+      dispatchChat({ sessions: remainingSessions });
 
       if (session?.id !== target.id) return;
 
       const nextSession = remainingSessions[0] || (await chatApi.createOrGetSession());
-      setSession(nextSession);
       const existingMessages = await chatApi.getMessages(nextSession.id);
-      setMessages(existingMessages);
-      if (remainingSessions.length === 0) {
-        const loadedSessions = await chatApi.getSessions();
-        setSessions(loadedSessions);
-      }
+      const finalSessions = remainingSessions.length === 0 ? await chatApi.getSessions() : remainingSessions;
+      dispatchChat({ session: nextSession, messages: existingMessages, sessions: finalSessions });
     } catch {
-      setError(text.error);
+      dispatchChat({ error: text.error });
     }
   };
 

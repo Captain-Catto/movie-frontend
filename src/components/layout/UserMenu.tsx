@@ -84,6 +84,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
     <div className="relative" ref={menuRef}>
       {/* Avatar Button */}
       <button
+        type="button"
         onClick={(e) => {
           e.stopPropagation();
           setIsOpen(!isOpen);
@@ -109,6 +110,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
       {isOpen && (
         <div
           role="menu"
+          tabIndex={-1}
           className="absolute right-0 mt-2 w-64 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-[150] animate-in fade-in slide-in-from-top-2 duration-200"
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
@@ -154,6 +156,7 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
 
             {/* Logout Button */}
             <button
+              type="button"
               onClick={handleLogout}
               className="w-full flex items-center px-4 py-3 text-sm text-gray-200 hover:bg-gray-700/50 transition-colors border-t border-gray-700 mt-2 cursor-pointer"
             >

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook } from "@testing-library/react";
 import { useCountUp } from "../useCountUp";
 
 describe("useCountUp", () => {
@@ -22,7 +22,7 @@ describe("useCountUp", () => {
     
     const { result } = renderHook(() => useCountUp(100, { duration: 100 }));
     
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current).toBe(100);
     }, { timeout: 500 });
   });
@@ -34,7 +34,7 @@ describe("useCountUp", () => {
       useCountUp(99.99, { duration: 100, decimals: 2 })
     );
     
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current).toBe(99.99);
     }, { timeout: 500 });
   });
@@ -47,13 +47,13 @@ describe("useCountUp", () => {
       { initialProps: { value: 0 } }
     );
     
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current).toBe(0);
     }, { timeout: 500 });
     
     rerender({ value: 50 });
     
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current).toBe(50);
     }, { timeout: 500 });
   });
@@ -63,7 +63,7 @@ describe("useCountUp", () => {
     
     const { result } = renderHook(() => useCountUp(0, { duration: 100 }));
     
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current).toBe(0);
     }, { timeout: 500 });
   });
@@ -73,7 +73,7 @@ describe("useCountUp", () => {
     
     const { result } = renderHook(() => useCountUp(-50, { duration: 100 }));
     
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current).toBe(-50);
     }, { timeout: 500 });
   });

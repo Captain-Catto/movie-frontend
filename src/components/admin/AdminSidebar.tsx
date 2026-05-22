@@ -237,6 +237,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
       <div className="p-4 border-b border-gray-800 bg-gray-900 relative">
         <button
           ref={menuButtonRef}
+          type="button"
           onClick={() => setMenuOpen((prev) => !prev)}
           className="flex w-full items-center gap-3 text-left cursor-pointer"
         >
@@ -267,6 +268,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             className="absolute left-4 right-4 mt-3 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-10 divide-y divide-gray-700"
           >
             <button
+              type="button"
               onClick={() => {
                 setProfileOpen(true);
                 setMenuOpen(false);
@@ -277,6 +279,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               <span>Profile</span>
             </button>
             <button
+              type="button"
               onClick={() => {
                 logout();
                 setMenuOpen(false);
@@ -366,6 +369,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setProfileOpen(false)}
                 className="text-gray-400 hover:text-white transition-colors cursor-pointer"
                 aria-label="Close profile modal"
@@ -399,8 +403,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 </label>
                 <div
                   id="admin-profile-email"
-                  role="textbox"
-                  aria-readonly="true"
+                  aria-label="Email"
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-400"
                 >
                   {user?.email || "No email"}
@@ -433,6 +436,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
 
             <div className="flex justify-end gap-3 mt-6">
               <button
+                type="button"
                 onClick={() => {
                   setProfileOpen(false);
                   setProfileForm({ name: user?.name ?? "", password: "" });
@@ -443,6 +447,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={async () => {
                   if (!user?.id) {
                     setProfileError("User information not found");

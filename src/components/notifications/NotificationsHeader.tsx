@@ -60,7 +60,6 @@ export default function NotificationsHeader({
   onClearFilters,
   onOpenSendModal,
   setFormData,
-  formData,
   title = "Notification Management",
   description = "Send and manage notifications to users",
   showTitle = true,
@@ -136,6 +135,7 @@ export default function NotificationsHeader({
           </div>
           <div className="flex items-end">
             <button
+              type="button"
               onClick={onClearFilters}
               className="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-4 py-2.5 hover:bg-gray-600 transition-colors cursor-pointer"
             >
@@ -156,6 +156,7 @@ export default function NotificationsHeader({
             return (
               <button
                 key={button.type}
+                type="button"
                 onClick={() =>
                   button.type === "maintenance"
                     ? handleMaintenanceClick()

@@ -109,6 +109,7 @@ const FavoritesPage = () => {
           <div className="text-center">
             <p className="text-red-500 mb-4">{error}</p>
             <button
+              type="button"
               onClick={() => fetchFavorites(1)}
               className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded"
             >

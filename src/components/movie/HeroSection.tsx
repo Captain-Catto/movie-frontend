@@ -200,7 +200,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
           const hasRating = normalizedRating !== null;
           const displayRating = normalizedRating ?? 0;
-          const year = movie.year ?? new Date().getFullYear();
+          const year = movie.year;
           const contentType = movie.href.includes("/tv/") ? "tv" : "movie";
           const watchTargetId =
             movie.tmdbId || parseInt(movie.id, 10) || movie.id;

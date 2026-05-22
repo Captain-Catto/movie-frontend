@@ -77,6 +77,8 @@ export default function SnowEffect({
     }));
 
     // Animation loop
+    let animationFrameId: number | undefined;
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -103,15 +105,16 @@ export default function SnowEffect({
         }
       });
 
-      animationFrameRef.current = requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
+      animationFrameRef.current = animationFrameId;
     };
 
     animate();
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [intensity, settings.speed, settings.density, settings.size, settings.windStrength]);

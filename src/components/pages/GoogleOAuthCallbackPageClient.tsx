@@ -121,6 +121,7 @@ export default function GoogleOAuthCallbackPage() {
 
           {status === "error" && (
             <button
+              type="button"
               onClick={() => {
                 try {
                   window.close();

@@ -157,6 +157,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   if (authLoading) {
     return (
       <button
+        type="button"
         disabled
         className={`
           ${iconOnly ? "p-3" : size === "compact" ? "px-3 py-2" : "px-8 py-4"}
@@ -184,6 +185,7 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
 
   return (
     <button
+      type="button"
       onClick={handleToggleFavorite}
       aria-pressed={isFavorite}
       data-state={isFavorite ? "on" : "off"}

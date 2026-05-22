@@ -5,14 +5,14 @@ import {
   useCallback,
   use,
   useEffect,
+  useReducer,
   useRef,
-  useState,
 } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "@/hooks/useAuth";
 
-export interface NotificationData {
+interface NotificationData {
   id: number;
   title: string;
   message: string;
@@ -31,7 +31,7 @@ export interface NotificationData {
   };
 }
 
-export interface NotificationSocketContextValue {
+interface NotificationSocketContextValue {
   socket: Socket | null;
   isConnected: boolean;
   unreadCount: number;
@@ -44,17 +44,24 @@ export interface NotificationSocketContextValue {
 const NotificationSocketContext =
   createContext<NotificationSocketContextValue | null>(null);
 
+type NotifSocketState = {
+  socket: Socket | null;
+  isConnected: boolean;
+  unreadCount: number;
+  latestNotification: NotificationData | null;
+};
+
 export function NotificationSocketProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const { token, isAuthenticated } = useAuth();
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [latestNotification, setLatestNotification] =
-    useState<NotificationData | null>(null);
+  const [socketState, dispatchSocket] = useReducer(
+    (s: NotifSocketState, a: Partial<NotifSocketState>): NotifSocketState => ({ ...s, ...a }),
+    { socket: null, isConnected: false, unreadCount: 0, latestNotification: null }
+  );
+  const { socket, isConnected, unreadCount, latestNotification } = socketState;
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
@@ -62,10 +69,7 @@ export function NotificationSocketProvider({
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
-        setSocket(null);
-        setIsConnected(false);
-        setUnreadCount(0);
-        setLatestNotification(null);
+        dispatchSocket({ socket: null, isConnected: false, unreadCount: 0, latestNotification: null });
       }
       return;
     }
@@ -73,26 +77,26 @@ export function NotificationSocketProvider({
     let newSocket: Socket | null = null;
 
     const handleConnect = () => {
-      if (newSocket) { setIsConnected(true); setSocket(newSocket); }
+      if (newSocket) dispatchSocket({ isConnected: true, socket: newSocket });
     };
-    const handleDisconnect = () => { setIsConnected(false); };
+    const handleDisconnect = () => dispatchSocket({ isConnected: false });
     const handleConnectError = (error: Error) => {
       console.error("WebSocket connection error:", error);
-      setIsConnected(false);
+      dispatchSocket({ isConnected: false });
     };
     const handleAuthError = (error: Error) => {
       console.error("Socket authentication failed:", error);
-      setIsConnected(false);
+      dispatchSocket({ isConnected: false });
     };
     const handleNewNotification = (notification: NotificationData) => {
       const createdAt =
         notification?.createdAt instanceof Date
           ? notification.createdAt
           : new Date(notification?.createdAt || Date.now());
-      setLatestNotification({ ...notification, createdAt });
+      dispatchSocket({ latestNotification: { ...notification, createdAt } });
     };
     const handleUnreadCount = (data: { count: number }) => {
-      setUnreadCount(data.count);
+      dispatchSocket({ unreadCount: data.count });
     };
 
     const timer = setTimeout(() => {
@@ -127,11 +131,14 @@ export function NotificationSocketProvider({
         newSocket.off("notification:unread-count", handleUnreadCount);
         newSocket.disconnect();
         socketRef.current = null;
-        setSocket(null);
-        setIsConnected(false);
+        dispatchSocket({ socket: null, isConnected: false });
       }
     };
   }, [isAuthenticated, token]);
+
+  const setUnreadCount = useCallback<Dispatch<SetStateAction<number>>>((value) => {
+    dispatchSocket({ unreadCount: typeof value === "function" ? value(socketState.unreadCount) : value });
+  }, [socketState.unreadCount]);
 
   const markAsRead = useCallback((notificationId: number) => {
     if (!socketRef.current?.connected) return false;

@@ -45,6 +45,7 @@ export default function AnalyticsContentList({
         <h2 className="text-xl font-semibold text-white">{title}</h2>
         {data.length > 0 && (
           <button
+            type="button"
             onClick={() => exportToCSV(data, exportFilename)}
             className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
           >

@@ -318,6 +318,7 @@ export default function AdminSyncDataPage() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={() => handleSync(option.key)}
                     disabled={busy}
                     className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
@@ -466,6 +467,7 @@ export default function AdminSyncDataPage() {
 
           <div className="mt-4 flex justify-end">
             <button
+              type="button"
               onClick={handleSaveSettings}
               disabled={savingSettings}
               className={`rounded-md px-6 py-2 text-sm font-medium transition-colors ${

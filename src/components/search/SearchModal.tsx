@@ -122,6 +122,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             aria-label={labels.closeSearch}
             title={labels.closeSearch}

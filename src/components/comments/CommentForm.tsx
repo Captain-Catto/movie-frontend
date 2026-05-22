@@ -73,6 +73,7 @@ export function CommentForm(props: CommentFormProps) {
             rows={4}
             cols={3}
             maxLength={1000}
+            aria-label={props.placeholder || labels.writeComment}
             placeholder={
               props.placeholder || labels.writeComment
             }

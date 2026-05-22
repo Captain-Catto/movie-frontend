@@ -62,6 +62,7 @@ export default function AnalyticsHeader({
             <span>{isLiveConnected ? "Live" : "Live paused"}</span>
           </div>
           <button
+            type="button"
             onClick={onRefresh}
             aria-label="Refresh analytics data"
             className="size-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center cursor-pointer"
@@ -87,6 +88,7 @@ export default function AnalyticsHeader({
             <span className="sr-only">Refresh</span>
           </button>
           <button
+            type="button"
             onClick={() => exportToCSV(viewStats, "analytics-views")}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer"
           >
@@ -106,6 +108,7 @@ export default function AnalyticsHeader({
             Export Views
           </button>
           <button
+            type="button"
             onClick={() =>
               exportToCSV(mostViewedContent, "analytics-most-viewed")
             }
@@ -141,6 +144,7 @@ export default function AnalyticsHeader({
               {DATE_PRESETS.map((preset) => (
                 <button
                   key={preset.key}
+                  type="button"
                   onClick={() => onDatePresetChange(preset.key)}
                   className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                     datePreset === preset.key

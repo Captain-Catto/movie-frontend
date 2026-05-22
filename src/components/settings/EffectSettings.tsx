@@ -144,6 +144,7 @@ function SnowAdvanced({
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-400">Fine-tune snow parameters</span>
         <button
+          type="button"
           onClick={onReset}
           className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors cursor-pointer"
         >
@@ -183,6 +184,7 @@ function RedEnvelopeAdvanced({
       <div className="flex items-center justify-between">
         <span className="text-xs text-gray-400">Fine-tune red envelope parameters</span>
         <button
+          type="button"
           onClick={onReset}
           className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 rounded border border-gray-600 transition-colors cursor-pointer"
         >
@@ -324,6 +326,7 @@ export default function EffectSettings() {
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {canExpand && (
                     <button
+                      type="button"
                       onClick={() => setExpandedEffect(isExpanded ? null : effect.type)}
                       className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 transition-colors cursor-pointer px-2 py-1 rounded-md hover:bg-gray-700/50"
                     >
@@ -380,6 +383,7 @@ export default function EffectSettings() {
           <div className="flex gap-2">
             <input
               type="text"
+              aria-label="Excluded path"
               value={newExcludedPath}
               onChange={(e) => setNewExcludedPath(e.target.value)}
               placeholder="/path/to/hide"
@@ -389,6 +393,8 @@ export default function EffectSettings() {
               }}
             />
             <button
+              type="button"
+              aria-label="Add path"
               onClick={handleAddExcludedPath}
               disabled={!newExcludedPath.trim()}
               className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg border border-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -406,6 +412,8 @@ export default function EffectSettings() {
                 >
                   <span className="text-sm text-gray-300 font-mono">{path}</span>
                   <button
+                    type="button"
+                    aria-label="Remove path"
                     onClick={() => handleRemoveExcludedPath(path)}
                     className="text-gray-500 hover:text-red-400 transition-colors cursor-pointer ml-2"
                   >
@@ -426,6 +434,7 @@ export default function EffectSettings() {
           {isDirty ? '⚠ Unsaved changes' : '✓ All changes saved'}
         </span>
         <button
+          type="button"
           onClick={handleSaveSettings}
           disabled={!isDirty || isLoading}
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${

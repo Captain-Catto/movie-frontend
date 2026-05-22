@@ -141,6 +141,7 @@ export default function AdminDashboard() {
           {/* Sync Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
+              type="button"
               onClick={() => triggerSync("popular")}
               disabled={syncingTarget !== null}
               className={`p-4 rounded-lg border-2 transition-all ${
@@ -180,6 +181,7 @@ export default function AdminDashboard() {
             </button>
 
             <button
+              type="button"
               onClick={() => triggerSync("all")}
               disabled={syncingTarget !== null}
               className={`p-4 rounded-lg border-2 transition-all ${

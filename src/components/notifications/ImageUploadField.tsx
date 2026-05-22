@@ -153,6 +153,7 @@ export default function ImageUploadField({ value, onChange }: Props) {
             <button
               type="button"
               onClick={handleRemove}
+              aria-label="Remove image"
               className="absolute top-2 right-2 size-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer"
             >
               <X size={14} />

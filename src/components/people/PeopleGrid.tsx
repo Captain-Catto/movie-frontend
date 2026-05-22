@@ -73,6 +73,7 @@ const PeopleGrid = ({
       {!loading && hasMore && people.length > 0 && (
         <div className="flex justify-center">
           <button
+            type="button"
             onClick={onLoadMore}
             className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
           >

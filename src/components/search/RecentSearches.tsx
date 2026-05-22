@@ -74,6 +74,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
 
           {searches.length > 0 && (
             <button
+              type="button"
               onClick={onClearAll}
               className="text-xs text-gray-400 hover:text-red-400 transition-colors flex items-center gap-x-1 cursor-pointer"
             >
@@ -130,6 +131,8 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
               </div>
 
               <button
+                type="button"
+                aria-label="Remove search"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemoveSearch(search);

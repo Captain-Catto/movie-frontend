@@ -219,6 +219,7 @@ export default function AdminSettingsPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
           className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
@@ -267,6 +268,7 @@ export default function AdminSettingsPage() {
                           <input
                             type="number"
                             min={1}
+                            aria-label={`${item.label} minimum`}
                             value={settings[item.key].min}
                             onChange={(e) =>
                               updateValue(
@@ -285,6 +287,7 @@ export default function AdminSettingsPage() {
                           <input
                             type="number"
                             min={1}
+                            aria-label={`${item.label} maximum`}
                             value={settings[item.key].max}
                             onChange={(e) =>
                               updateValue(
@@ -370,6 +373,7 @@ export default function AdminSettingsPage() {
             />
           </div>
           <button
+            type="button"
             onClick={handleSaveSwaggerAuth}
             disabled={swaggerSaving}
             className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
@@ -399,6 +403,7 @@ export default function AdminSettingsPage() {
             value={streamDomainText}
             onChange={(e) => setStreamDomainText(e.target.value)}
             rows={8}
+            aria-label="Stream domains"
             placeholder="https://vidsrcme.ru&#10;https://vidsrc-embed.ru&#10;https://vsrc.su"
             className="w-full rounded-md border border-gray-600 bg-gray-900 text-white text-sm p-3 focus:outline-none focus:ring-2 focus:ring-red-600"
           />
@@ -407,6 +412,7 @@ export default function AdminSettingsPage() {
               Tip: You can paste domains separated by newline or comma.
             </p>
             <button
+              type="button"
               onClick={handleSaveStreamDomains}
               disabled={streamSaving}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"

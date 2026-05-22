@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { useWindowWidth } from "../useWindowWidth";
 
 describe("useWindowWidth", () => {
@@ -17,7 +17,7 @@ describe("useWindowWidth", () => {
   it("should return current window width", async () => {
     vi.stubGlobal("innerWidth", 1200);
     const { result } = renderHook(() => useWindowWidth());
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current.width).toBe(1200);
     });
   });
@@ -25,7 +25,7 @@ describe("useWindowWidth", () => {
   it("should return desktop breakpoint for width >= 1024", async () => {
     vi.stubGlobal("innerWidth", 1024);
     const { result } = renderHook(() => useWindowWidth());
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current.breakpoint).toBe("desktop");
     });
   });
@@ -33,7 +33,7 @@ describe("useWindowWidth", () => {
   it("should return tablet breakpoint for width >= 640 and < 1024", async () => {
     vi.stubGlobal("innerWidth", 800);
     const { result } = renderHook(() => useWindowWidth());
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current.breakpoint).toBe("tablet");
     });
   });
@@ -41,7 +41,7 @@ describe("useWindowWidth", () => {
   it("should return mobile breakpoint for width < 640", async () => {
     vi.stubGlobal("innerWidth", 500);
     const { result } = renderHook(() => useWindowWidth());
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current.breakpoint).toBe("mobile");
     });
   });
@@ -49,7 +49,7 @@ describe("useWindowWidth", () => {
   it("should update on window resize", async () => {
     vi.stubGlobal("innerWidth", 1200);
     const { result } = renderHook(() => useWindowWidth());
-    await waitFor(() => {
+    await vi.waitFor(() => {
       expect(result.current.breakpoint).toBe("desktop");
     });
 

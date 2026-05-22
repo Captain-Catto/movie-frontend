@@ -199,6 +199,7 @@ export default function AccountPage() {
                 className="group relative size-24 cursor-pointer overflow-hidden rounded-full border-4 border-gray-600"
                 onClick={handleAvatarClick}
                 title={labels.changeAvatar}
+                aria-label={labels.changeAvatar}
               >
                 <Image
                   src={avatarSrc}
@@ -224,6 +225,7 @@ export default function AccountPage() {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                aria-label="Upload avatar"
                 className="hidden"
                 onChange={handleAvatarChange}
               />
@@ -345,6 +347,7 @@ export default function AccountPage() {
 
             <div className="gap-y-4 mt-8">
               <button
+                type="button"
                 className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
                 onClick={() => push("/account/change-password")}
               >
@@ -360,6 +363,7 @@ export default function AccountPage() {
               </button>
 
               <button
+                type="button"
                 className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
                 onClick={() => push("/notifications")}
               >

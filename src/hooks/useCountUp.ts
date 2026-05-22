@@ -50,8 +50,9 @@ export function useCountUp(
     animationRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      const frame = animationRef.current;
+      if (frame) {
+        cancelAnimationFrame(frame);
       }
     };
     // value change triggers animation

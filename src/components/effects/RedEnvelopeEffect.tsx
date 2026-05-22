@@ -410,6 +410,8 @@ export default function RedEnvelopeEffect({
 
     // Animation loop with enhanced physics
     let time = 0;
+    let animationFrameId: number | undefined;
+
     const animate = () => {
       time += 0.05;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -524,7 +526,8 @@ export default function RedEnvelopeEffect({
         }
       });
 
-      animationFrameRef.current = requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
+      animationFrameRef.current = animationFrameId;
     };
 
     animate();
@@ -536,8 +539,8 @@ export default function RedEnvelopeEffect({
       window.removeEventListener('pointerup', handlePointerInactive);
       window.removeEventListener('pointercancel', handlePointerInactive);
       window.removeEventListener('blur', handlePointerInactive);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
   }, [intensity, settings.fallSpeed, settings.rotationSpeed, settings.windStrength, settings.sparkleFrequency, settings.quantity]);

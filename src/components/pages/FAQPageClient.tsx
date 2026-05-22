@@ -11,6 +11,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   return (
     <div className="border border-gray-700 rounded-lg overflow-hidden">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-800 transition-colors cursor-pointer"
       >
@@ -47,7 +48,7 @@ export default function FAQPage() {
         </div>
 
         <div className="space-y-4">
-          {labels.items.map((faq, index) => (
+          {labels.items.map((faq) => (
             <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
           ))}
         </div>

@@ -126,6 +126,7 @@ export default function NotificationsTable({
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
+                    type="button"
                     onClick={() => onDeleteNotification(notification.id)}
                     className="text-red-500 hover:text-red-400 cursor-pointer"
                   >
@@ -143,6 +144,7 @@ export default function NotificationsTable({
         <div className="px-6 py-4 bg-gray-800 border-t border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <select
+              aria-label="Items per page"
               value={pagination.limit}
               onChange={(e) =>
                 onPaginationChange({
@@ -162,6 +164,7 @@ export default function NotificationsTable({
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() =>
                 onPaginationChange({ ...pagination, page: pagination.page - 1 })
               }
@@ -189,6 +192,7 @@ export default function NotificationsTable({
                         <span className="px-2 text-gray-500">…</span>
                       )}
                       <button
+                        type="button"
                         onClick={() => onPaginationChange({ ...pagination, page })}
                         className={`px-4 py-2 rounded-lg transition-colors ${
                           pagination.page === page
@@ -208,6 +212,7 @@ export default function NotificationsTable({
             </div>
 
             <button
+              type="button"
               onClick={() =>
                 onPaginationChange({ ...pagination, page: pagination.page + 1 })
               }

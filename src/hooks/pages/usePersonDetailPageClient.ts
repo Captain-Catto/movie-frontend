@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getLocaleFromLanguage,

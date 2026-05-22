@@ -73,9 +73,8 @@ export function InitialPageLoader() {
   }
 
   return (
-    <div
+    <output
       className={`initial-loader ${!isVisible ? "initial-loader--hidden" : ""}`}
-      role="status"
       aria-live="polite"
     >
       <div className="initial-loader__content">
@@ -84,6 +83,6 @@ export function InitialPageLoader() {
           <span className="initial-loader__logo-accent">Stream</span>
         </div>
       </div>
-    </div>
+    </output>
   );
 }

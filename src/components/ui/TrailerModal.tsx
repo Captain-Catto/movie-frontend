@@ -110,6 +110,8 @@ export default function TrailerModal({
             <h2 className="text-xl font-semibold text-white">{movieTitle}</h2>
           </div>
           <button
+            type="button"
+            aria-label="Close"
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
@@ -149,6 +151,7 @@ export default function TrailerModal({
                 {youtubeVideos.map((video) => (
                   <button
                     key={video.id}
+                    type="button"
                     onClick={() => setSelectedVideo(video)}
                     className={`w-full text-left p-3 rounded-lg border transition-all ${
                       selectedVideo?.id === video.id

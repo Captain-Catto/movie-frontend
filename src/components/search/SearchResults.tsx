@@ -121,6 +121,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         {!isLoading && hasMore && (
           <div className="mt-4 text-center">
             <button
+              type="button"
               onClick={onLoadMore}
               className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer"
             >

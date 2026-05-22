@@ -9,8 +9,6 @@ import type { TableFilterOptions, TableFiltersProps } from "@/types/ui";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getTableFiltersUiMessages } from "@/lib/ui-messages";
 
-export type { TableFilterOptions };
-
 const TableFilters = ({
   onFilterChange,
   onClose,
@@ -362,6 +360,7 @@ const TableFilters = ({
                   type="text"
                   maxLength={4}
                   placeholder={labels.customYearPlaceholder}
+                  aria-label={labels.customYearPlaceholder}
                   value={filters.customYear}
                   onChange={handleCustomYearChange}
                   onKeyPress={handleCustomYearSubmit}
@@ -400,6 +399,7 @@ const TableFilters = ({
                   >
                     {selectedYear}
                     <button
+                      type="button"
                       onClick={() => handleYearClick(selectedYear)}
                       className="ml-1 hover:text-blue-300"
                     >
@@ -477,4 +477,3 @@ const TableFilters = ({
 
 export default TableFilters;
 export { TableFilters as MovieFilters };
-export type { TableFilterOptions as FilterOptions };

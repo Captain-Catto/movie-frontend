@@ -111,6 +111,7 @@ export default function AdminChatPage() {
                 {flags.map((flag) => (
                   <button
                     key={flag.id}
+                    type="button"
                     onClick={() => openSession(flag.sessionId)}
                     className="w-full rounded-lg border border-gray-800 bg-gray-800/70 p-3 text-left transition hover:border-red-500/60"
                   >
@@ -182,12 +183,14 @@ export default function AdminChatPage() {
                     ? [
                         <div key={flag.id} className="flex gap-2">
                           <button
+                            type="button"
                             onClick={() => resolveFlag(flag.id, "resolved")}
                             className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
                           >
                             Resolve flag #{flag.id}
                           </button>
                           <button
+                            type="button"
                             onClick={() => resolveFlag(flag.id, "ignored")}
                             className="rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700"
                           >

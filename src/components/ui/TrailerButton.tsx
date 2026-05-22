@@ -45,7 +45,7 @@ export default function TrailerButton({
   // Show loading state during initial check
   if (!initialCheckDone) {
     return (
-      <button disabled className={combinedClasses}>
+      <button type="button" disabled className={combinedClasses}>
         <Loader2 size={20} className="animate-spin" />
         <span>{labels.checkingTrailer}</span>
       </button>
@@ -55,6 +55,7 @@ export default function TrailerButton({
   return (
     <>
       <button
+        type="button"
         onClick={() => void openTrailer()}
         disabled={isDisabled}
         className={combinedClasses}

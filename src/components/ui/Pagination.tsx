@@ -129,6 +129,7 @@ export function Pagination({
       <div className="flex items-center gap-x-1">
         {/* Previous Page */}
         <button
+          type="button"
           onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           className={classNames(
@@ -151,6 +152,7 @@ export function Pagination({
               </span>
               <input
                 type="number"
+                aria-label={labels.page}
                 min="1"
                 max={totalPages}
                 value={inputValue}
@@ -166,6 +168,7 @@ export function Pagination({
             </form>
           ) : (
             <button
+              type="button"
               onClick={handleMobilePageClick}
               className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
             >
@@ -182,6 +185,7 @@ export function Pagination({
           {desktopPages[0] > 1 && (
             <>
               <button
+                type="button"
                 onClick={() => onPageChange?.(1)}
                 className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
               >
@@ -198,6 +202,7 @@ export function Pagination({
           {/* Page numbers */}
           {desktopPages.map((page) => (
             <button
+              type="button"
               key={page}
               onClick={() => onPageChange?.(page)}
               className={classNames(
@@ -227,6 +232,7 @@ export function Pagination({
                       </span>
                       <input
                         type="number"
+                        aria-label={labels.goTo}
                         min="1"
                         max={totalPages}
                         value={desktopInputValue}
@@ -240,6 +246,7 @@ export function Pagination({
                     </form>
                   ) : (
                     <button
+                      type="button"
                       onClick={() => {
                         setDesktopInputMode(true);
                         setDesktopInputValue("");
@@ -253,6 +260,7 @@ export function Pagination({
                 </>
               )}
               <button
+                type="button"
                 onClick={() => onPageChange?.(totalPages)}
                 className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors cursor-pointer"
               >
@@ -264,6 +272,7 @@ export function Pagination({
 
         {/* Next Page */}
         <button
+          type="button"
           onClick={() =>
             onPageChange?.(Math.min(totalPages, currentPage + 1))
           }

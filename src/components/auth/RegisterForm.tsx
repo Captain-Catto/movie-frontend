@@ -58,7 +58,7 @@ export default function RegisterForm({
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       await onSuccess(formData.name, formData.email, formData.password);
@@ -66,7 +66,7 @@ export default function RegisterForm({
       console.error("Registration error:", error);
       onError(labels.genericError);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 

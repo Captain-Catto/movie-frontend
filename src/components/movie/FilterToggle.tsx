@@ -1,6 +1,6 @@
 'use client';
 
-import { FilterOptions } from './MovieFilters';
+import type { TableFilterOptions as FilterOptions } from "@/types/ui";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getFilterToggleUiMessages } from "@/lib/ui-messages";
 

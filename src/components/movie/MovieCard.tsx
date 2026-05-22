@@ -163,6 +163,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
             <div className="lg:hidden absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="absolute bottom-0 left-0 right-0 p-4">
                 <button
+                  type="button"
                   onClick={handleWatchMovie}
                   className="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded font-semibold transition-colors flex items-center justify-center gap-x-2 cursor-pointer"
                 >

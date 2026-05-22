@@ -142,6 +142,7 @@ const PeopleDetailPageClient = ({
                       {biographyText}
                       {canToggleBiography && (
                         <button
+                          type="button"
                           onClick={toggleBiography}
                           className="ml-2 text-red-400 hover:text-red-300 font-medium transition-colors inline-block cursor-pointer"
                         >
@@ -168,6 +169,7 @@ const PeopleDetailPageClient = ({
 
             <div className="flex gap-x-4 mb-6">
               <button
+                type="button"
                 onClick={() => handleTabChange("cast")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                   activeTab === "cast"
@@ -178,6 +180,7 @@ const PeopleDetailPageClient = ({
                 {labels.acting} ({castTotalItems})
               </button>
               <button
+                type="button"
                 onClick={() => handleTabChange("crew")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
                   activeTab === "crew"
@@ -190,7 +193,7 @@ const PeopleDetailPageClient = ({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-              {currentItems.map((item, index) => (
+              {currentItems.map((item) => (
                 <MovieCard
                   key={`${activeTab}-${item.tmdbId}`}
                   movie={item}

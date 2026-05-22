@@ -50,6 +50,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
         return (
           <button
             key={tab.id}
+            type="button"
             onClick={() => onTypeChange(tab.id)}
             className={`flex items-center gap-x-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
               isActive

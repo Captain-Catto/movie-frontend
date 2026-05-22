@@ -293,6 +293,7 @@ export function ContentDetailModal({
                 View on Site
               </a>
               <button
+                type="button"
                 onClick={onClose}
                 className="cursor-pointer px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors"
               >

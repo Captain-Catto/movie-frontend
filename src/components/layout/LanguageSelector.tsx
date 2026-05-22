@@ -29,6 +29,7 @@ export default function LanguageSelector() {
   return (
     <div ref={dropdownRef} className="relative flex-shrink-0">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 text-white/80 hover:text-white transition-colors text-sm px-2 py-1.5 rounded hover:bg-white/10 cursor-pointer"
         aria-label="Select language"
@@ -53,6 +54,7 @@ export default function LanguageSelector() {
           {SUPPORTED_LANGUAGES.map((lang) => (
             <button
               key={lang.code}
+              type="button"
               onClick={() => {
                 if (language === lang.code) {
                   setIsOpen(false);

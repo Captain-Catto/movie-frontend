@@ -206,6 +206,7 @@ export function CommentItem(props: CommentItemProps) {
           <div className="group-react line-center flex items-center gap-2">
             <button
               type="button"
+              aria-label="Like"
               className={`item item-up line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
                 currentComment.userLike === true
                   ? "bg-blue-600 text-white"
@@ -224,6 +225,7 @@ export function CommentItem(props: CommentItemProps) {
             </button>
             <button
               type="button"
+              aria-label="Dislike"
               className={`item item-down line-center flex items-center gap-1.5 px-3 py-1.5 rounded cursor-pointer transition-colors ${
                 currentComment.userLike === false
                   ? "bg-red-600 text-white"

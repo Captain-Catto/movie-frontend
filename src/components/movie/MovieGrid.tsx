@@ -39,7 +39,7 @@ const MovieGrid = ({
           {title && <h2 className="text-2xl font-semibold text-white">{title}</h2>}
           {showFilters && (
             <div className="flex gap-x-4">
-              <button className="flex items-center gap-x-2 text-red-500 cursor-pointer">
+              <button type="button" className="flex items-center gap-x-2 text-red-500 cursor-pointer">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -57,7 +57,7 @@ const MovieGrid = ({
                 </svg>
                 <span>{labels.trending}</span>
               </button>
-              <button className="flex items-center gap-x-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
+              <button type="button" className="flex items-center gap-x-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"

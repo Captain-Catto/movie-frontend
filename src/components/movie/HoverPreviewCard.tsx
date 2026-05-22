@@ -216,7 +216,7 @@ export function HoverPreviewCard({
                 );
               })
             : genreNames &&
-              genreNames.slice(0, 3).map((name, idx) => (
+              genreNames.slice(0, 3).map((name) => (
                 <span
                   key={name}
                   className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium"
