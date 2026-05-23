@@ -13,8 +13,10 @@ import {
   type NotificationItem,
 } from "@/hooks/useNotifications";
 
+import type { NotificationsPageUiMessages } from "@/lib/ui-messages";
+
 interface NotificationsPageHeaderProps {
-  labels: Record<string, any>;
+  labels: NotificationsPageUiMessages;
   notificationsLength: number;
   showUnreadOnly: boolean;
   onClear: () => void;
@@ -74,7 +76,7 @@ function NotificationsPageHeader({
 interface NotificationItemViewProps {
   notif: NotificationItem;
   language: string;
-  labels: Record<string, any>;
+  labels: NotificationsPageUiMessages;
   onClick: (notif: NotificationItem) => void;
   onDelete: (notif: NotificationItem) => void;
 }

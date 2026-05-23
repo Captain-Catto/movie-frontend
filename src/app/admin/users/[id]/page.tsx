@@ -39,7 +39,6 @@ import {
   type DetailItem,
   type CommentGroupPageState,
   type UserCommentGroupItem,
-  type UserCommentEntry,
 } from "@/hooks/useAdminUserDetail";
 
 const ROLE_OPTIONS = [

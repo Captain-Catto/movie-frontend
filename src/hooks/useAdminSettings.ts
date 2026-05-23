@@ -129,7 +129,7 @@ export function useAdminSettings() {
     } finally {
       dispatch({ loading: false });
     }
-  }, [adminApi.get, adminApi.isAuthenticated, showError]);
+  }, [adminApi, showError]);
 
   useEffect(() => {
     fetchSettings();

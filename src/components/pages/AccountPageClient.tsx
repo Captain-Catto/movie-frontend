@@ -3,17 +3,16 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/ui/Container";
-import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 import type { SyntheticEvent, ChangeEvent } from "react";
 import { FALLBACK_PROFILE } from "@/constants/app.constants";
 import AccountSkeleton from "@/components/ui/AccountSkeleton";
-import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
 import { useAccount } from "@/hooks/useAccount";
+import type { AuthUser } from "@/types/auth.types";
+import type { AccountUiMessages } from "@/lib/ui-messages";
 
 interface AccountPleaseLoginViewProps {
-  labels: Record<string, any>;
+  labels: AccountUiMessages;
 }
 
 function AccountPleaseLoginView({ labels }: AccountPleaseLoginViewProps) {
@@ -36,9 +35,9 @@ function AccountPleaseLoginView({ labels }: AccountPleaseLoginViewProps) {
 }
 
 interface AccountProfileCardProps {
-  labels: Record<string, any>;
+  labels: AccountUiMessages;
   displayName: string;
-  user: any;
+  user: AuthUser | null;
   avatarSrc: string;
   uploadingAvatar: boolean;
   avatarError: string;
@@ -125,10 +124,10 @@ function AccountProfileCard({
 }
 
 interface AccountSettingsFormProps {
-  labels: Record<string, any>;
+  labels: AccountUiMessages;
   displayName: string;
-  user: any;
-  form: any;
+  user: AuthUser | null;
+  form: { name: string; password?: string; confirmPassword?: string };
   saving: boolean;
   formError: string;
   formSuccess: string;

@@ -14,7 +14,6 @@ import type { WatchContentData } from "@/utils/watchContentMapper";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
-  FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import type { CastMember } from "@/types";
 import {
@@ -140,7 +139,6 @@ function VideoPlayerSection({
 }
 
 interface MovieInformationSectionProps {
-  movieId: string;
   movieData: WatchContentData;
   formattedDuration: string | null;
   hasDuration: boolean;
@@ -160,7 +158,6 @@ interface MovieInformationSectionProps {
 }
 
 function MovieInformationSection({
-  movieId,
   movieData,
   formattedDuration,
   hasDuration,
@@ -673,7 +670,6 @@ const WatchPageClientContent = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <MovieInformationSection
-                movieId={movieId}
                 movieData={movieData}
                 formattedDuration={formattedDuration}
                 hasDuration={hasDuration}

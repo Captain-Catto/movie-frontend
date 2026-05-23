@@ -63,10 +63,12 @@ function DesktopNav({ navigationItems, isActive }: DesktopNavProps) {
   );
 }
 
+import type { AuthUser } from "@/types/auth.types";
+
 interface DesktopActionsProps {
   isHydrated: boolean;
   isAuthenticated: boolean;
-  user: any;
+  user: AuthUser | null;
   onLogout: () => void;
   onSearchClick: () => void;
   onAuthModalOpen: () => void;
