@@ -306,53 +306,51 @@ function HeroSlide({
   };
 
   return (
-    <SwiperSlide key={movie.id} className="relative">
-      <div className="slide-elements relative h-full">
-        <Link
-          href={movie.href}
-          className="slide-url absolute inset-0 z-10"
-          onClick={handleDetailClick}
-          aria-label={
-            language.startsWith("vi")
-              ? `Xem chi tiết ${movie.title}`
-              : `View details for ${movie.title}`
-          }
+    <div className="slide-elements relative h-full">
+      <Link
+        href={movie.href}
+        className="slide-url absolute inset-0 z-10"
+        onClick={handleDetailClick}
+        aria-label={
+          language.startsWith("vi")
+            ? `Xem chi tiết ${movie.title}`
+            : `View details for ${movie.title}`
+        }
+      />
+      <div
+        className="background-fade absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBackgroundImage})` }}
+      >
+        <Image
+          className="fade-in visible size-full object-cover"
+          title={movie.title}
+          src={heroBackgroundImage}
+          alt={movie.title}
+          fill
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1536px) 90vw, 1280px"
+          quality={55}
+          priority={index === 0}
         />
-        <div
-          className="background-fade absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroBackgroundImage})` }}
-        >
-          <Image
-            className="fade-in visible size-full object-cover"
-            title={movie.title}
-            src={heroBackgroundImage}
-            alt={movie.title}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1536px) 90vw, 1280px"
-            quality={55}
-            priority={index === 0}
+      </div>
+      <div className="cover-fade absolute inset-0" />
+      <div className="safe-area relative z-20 h-full flex items-center">
+        <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <HeroSlideContent
+            movie={movie}
+            isVisible={isVisible}
+            language={language}
+            labels={labels}
+            contentType={contentType}
+            posterImage={posterImage}
+            hasRating={hasRating}
+            displayRating={displayRating}
+            watchHref={watchHref}
+            onDetailClick={handleDetailClick}
+            onWatchClick={handleWatchClick}
           />
         </div>
-        <div className="cover-fade absolute inset-0" />
-        <div className="safe-area relative z-20 h-full flex items-center">
-          <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-            <HeroSlideContent
-              movie={movie}
-              isVisible={isVisible}
-              language={language}
-              labels={labels}
-              contentType={contentType}
-              posterImage={posterImage}
-              hasRating={hasRating}
-              displayRating={displayRating}
-              watchHref={watchHref}
-              onDetailClick={handleDetailClick}
-              onWatchClick={handleWatchClick}
-            />
-          </div>
-        </div>
       </div>
-    </SwiperSlide>
+    </div>
   );
 }
 
@@ -516,15 +514,16 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
         }
       >
         {movies.map((movie, index) => (
-          <HeroSlide
-            key={movie.id}
-            movie={movie}
-            index={index}
-            isMobile={isMobile}
-            isVisible={index === visibleContentIndex}
-            language={language}
-            labels={labels}
-          />
+          <SwiperSlide key={movie.id} className="relative">
+            <HeroSlide
+              movie={movie}
+              index={index}
+              isMobile={isMobile}
+              isVisible={index === visibleContentIndex}
+              language={language}
+              labels={labels}
+            />
+          </SwiperSlide>
         ))}
 
         <div className="swiper-pagination-custom absolute bottom-8 left-1/2 -translate-x-1/2 z-30"></div>
