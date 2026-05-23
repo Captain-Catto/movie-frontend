@@ -103,7 +103,7 @@ function buildHeroSlideData(movie: MovieCardData, isMobile: boolean) {
   const posterImage =
     movie.posterImage || movie.poster || backgroundImage || FALLBACK_POSTER;
   const normalizedRating = normalizeRating(movie);
-  const contentType = movie.href.includes("/tv/") ? "tv" : "movie";
+  const contentType = (movie.href.includes("/tv/") ? "tv" : "movie") as "movie" | "tv";
   const watchTargetId = movie.tmdbId || parseInt(movie.id, 10) || movie.id;
 
   return {
