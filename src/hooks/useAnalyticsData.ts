@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useReducer } from "react";
 import { useAdminApi } from "./useAdminApi";
 import {
   ViewStats,
@@ -26,34 +26,80 @@ interface UseAnalyticsDataReturn extends AnalyticsData {
   refetch: () => Promise<void>;
 }
 
+interface AnalyticsState {
+  viewStats: ViewStats[];
+  viewSummary: ViewSummary | null;
+  clickStats: ClickStats | null;
+  playStats: PlayStats | null;
+  playSourceBreakdown: Record<string, number>;
+  favoriteStats: FavoriteStats | null;
+  popularContent: PopularContent[];
+  mostViewedContent: MostViewedItem[];
+  deviceStats: DeviceStats[];
+  countryStats: CountryStats[];
+  loading: boolean;
+  isRefreshing: boolean;
+  lastRefreshed: Date | null;
+}
+
+type AnalyticsAction =
+  | { type: "FETCH_START" }
+  | { type: "FETCH_SUCCESS"; payload: Partial<AnalyticsState> }
+  | { type: "FETCH_FAILURE" };
+
+function analyticsReducer(state: AnalyticsState, action: AnalyticsAction): AnalyticsState {
+  switch (action.type) {
+    case "FETCH_START":
+      return {
+        ...state,
+        loading: true,
+        isRefreshing: true,
+        playSourceBreakdown: {},
+      };
+    case "FETCH_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        isRefreshing: false,
+        ...action.payload,
+      };
+    case "FETCH_FAILURE":
+      return {
+        ...state,
+        loading: false,
+        isRefreshing: false,
+      };
+    default:
+      return state;
+  }
+}
+
 export function useAnalyticsData({
   dateRange,
   contentType,
 }: UseAnalyticsDataProps): UseAnalyticsDataReturn {
-  const [viewStats, setViewStats] = useState<ViewStats[]>([]);
-  const [viewSummary, setViewSummary] = useState<ViewSummary | null>(null);
-  const [clickStats, setClickStats] = useState<ClickStats | null>(null);
-  const [playStats, setPlayStats] = useState<PlayStats | null>(null);
-  const [playSourceBreakdown, setPlaySourceBreakdown] = useState<
-    Record<string, number>
-  >({});
-  const [favoriteStats, setFavoriteStats] = useState<FavoriteStats | null>(null);
-  const [popularContent, setPopularContent] = useState<PopularContent[]>([]);
-  const [mostViewedContent, setMostViewedContent] = useState<MostViewedItem[]>([]);
-  const [deviceStats, setDeviceStats] = useState<DeviceStats[]>([]);
-  const [countryStats, setCountryStats] = useState<CountryStats[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [state, dispatch] = useReducer(analyticsReducer, {
+    viewStats: [],
+    viewSummary: null,
+    clickStats: null,
+    playStats: null,
+    playSourceBreakdown: {},
+    favoriteStats: null,
+    popularContent: [],
+    mostViewedContent: [],
+    deviceStats: [],
+    countryStats: [],
+    loading: true,
+    isRefreshing: false,
+    lastRefreshed: null,
+  });
 
   const adminApi = useAdminApi();
 
   const fetchAnalytics = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;
 
-    setLoading(true);
-    setIsRefreshing(true);
-    setPlaySourceBreakdown({});
+    dispatch({ type: "FETCH_START" });
 
     try {
       const viewParams = new URLSearchParams({
@@ -93,46 +139,47 @@ export function useAnalyticsData({
         adminApi.get<CountryStats[]>(`/admin/analytics/countries?${viewParams}`),
       ]);
 
+      const payload: Partial<AnalyticsState> = {};
+
       // Process view stats
       if (viewRes.success && viewRes.data) {
         const data = viewRes.data;
-        setViewSummary({
+        payload.viewSummary = {
           total: Number(data.total ?? 0),
           byType: data.byType,
-        });
+        };
         const trendArray = Array.isArray(data.trend) ? data.trend : [];
-        const normalizedViewStats: ViewStats[] = trendArray.map((item) => ({
+        payload.viewStats = trendArray.map((item) => ({
           date: (item.date as string) ?? "",
           views: Number(item.views ?? item.count ?? 0),
         }));
-        setViewStats(normalizedViewStats);
       }
 
       // Process click stats
       if (clickRes.success && clickRes.data) {
-        setClickStats({
+        payload.clickStats = {
           total: Number((clickRes.data as ClickStats).total ?? 0),
-        });
+        };
       }
 
       // Process play stats
       if (playRes.success && playRes.data) {
-        setPlayStats({
+        payload.playStats = {
           total: Number((playRes.data as PlayStats).total ?? 0),
           bySource: (playRes.data as PlayStats).bySource ?? {},
-        });
-        setPlaySourceBreakdown((playRes.data as PlayStats).bySource ?? {});
+        };
+        payload.playSourceBreakdown = (playRes.data as PlayStats).bySource ?? {};
       }
 
       // Process favorite stats
       if (favoriteRes.success && favoriteRes.data) {
         const favData = favoriteRes.data as FavoriteStats;
-        setFavoriteStats({
+        payload.favoriteStats = {
           total: Number(favData.total ?? 0),
           byType: favData.byType,
           mostFavorited: favData.mostFavorited ?? [],
           trend: favData.trend ?? [],
-        });
+        };
       }
 
       // Process most viewed
@@ -140,7 +187,7 @@ export function useAnalyticsData({
         const rawMostViewed = Array.isArray(mostViewedRes.data)
           ? mostViewedRes.data
           : [];
-        const normalized: MostViewedItem[] = rawMostViewed.map((item) => {
+        payload.mostViewedContent = rawMostViewed.map((item) => {
           const record = item as unknown as Record<string, unknown>;
           return {
             contentId: Number(record.contentId ?? record.id ?? 0),
@@ -154,7 +201,6 @@ export function useAnalyticsData({
               null,
           };
         });
-        setMostViewedContent(normalized);
       }
 
       // Process popular content
@@ -169,7 +215,7 @@ export function useAnalyticsData({
             ]
           : [];
 
-        const normalizedPopular: PopularContent[] = Array.isArray(popularArray)
+        payload.popularContent = Array.isArray(popularArray)
           ? popularArray.map((item) => {
               const record = item as Record<string, unknown>;
               const tmdbId = Number(record.tmdbId ?? record.id ?? 0);
@@ -192,8 +238,6 @@ export function useAnalyticsData({
               };
             })
           : [];
-
-        setPopularContent(normalizedPopular);
       }
 
       // Process device stats
@@ -206,7 +250,7 @@ export function useAnalyticsData({
           return sum + (Number.isFinite(count) ? count : 0);
         }, 0);
 
-        const normalizedDevices: DeviceStats[] = rawDevices.map((item) => {
+        payload.deviceStats = rawDevices.map((item) => {
           const record = item as Record<string, unknown>;
           const count = Number(record.count ?? 0);
           const safeCount = Number.isFinite(count) ? count : 0;
@@ -217,8 +261,6 @@ export function useAnalyticsData({
             percentage,
           };
         });
-
-        setDeviceStats(normalizedDevices);
       }
 
       // Process country stats
@@ -231,7 +273,7 @@ export function useAnalyticsData({
           return sum + (Number.isFinite(count) ? count : 0);
         }, 0);
 
-        const normalizedCountries: CountryStats[] = rawCountries.map((item) => {
+        payload.countryStats = rawCountries.map((item) => {
           const record = item as Record<string, unknown>;
           const count = Number(record.count ?? 0);
           const safeCount = Number.isFinite(count) ? count : 0;
@@ -242,16 +284,13 @@ export function useAnalyticsData({
             percentage,
           };
         });
-
-        setCountryStats(normalizedCountries);
       }
 
-      setLastRefreshed(new Date());
+      payload.lastRefreshed = new Date();
+      dispatch({ type: "FETCH_SUCCESS", payload });
     } catch (error) {
       console.error("[Analytics] Error fetching analytics:", error);
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
+      dispatch({ type: "FETCH_FAILURE" });
     }
   }, [adminApi, dateRange, contentType]);
 
@@ -260,19 +299,19 @@ export function useAnalyticsData({
   }, [fetchAnalytics]);
 
   return {
-    viewStats,
-    viewSummary,
-    clickStats,
-    playStats,
-    playSourceBreakdown,
-    favoriteStats,
-    popularContent,
-    mostViewedContent,
-    deviceStats,
-    countryStats,
-    loading,
-    isRefreshing,
-    lastRefreshed,
+    viewStats: state.viewStats,
+    viewSummary: state.viewSummary,
+    clickStats: state.clickStats,
+    playStats: state.playStats,
+    playSourceBreakdown: state.playSourceBreakdown,
+    favoriteStats: state.favoriteStats,
+    popularContent: state.popularContent,
+    mostViewedContent: state.mostViewedContent,
+    deviceStats: state.deviceStats,
+    countryStats: state.countryStats,
+    loading: state.loading,
+    isRefreshing: state.isRefreshing,
+    lastRefreshed: state.lastRefreshed,
     refetch: fetchAnalytics,
   };
 }

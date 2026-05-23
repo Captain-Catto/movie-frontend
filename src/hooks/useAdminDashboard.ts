@@ -23,6 +23,7 @@ export function useAdminDashboard() {
   const { showSuccess, showError } = useToastRedux();
 
   const fetchDashboardStats = useCallback(async () => {
+    if (!adminApi.isAuthenticated) return;
     try {
       const response = await adminApi.get<DashboardStats>(
         "/admin/dashboard/stats"
@@ -72,10 +73,8 @@ export function useAdminDashboard() {
   );
 
   useEffect(() => {
-    if (adminApi.isAuthenticated) {
-      fetchDashboardStats();
-    }
-  }, [adminApi.isAuthenticated, fetchDashboardStats]);
+    fetchDashboardStats();
+  }, [fetchDashboardStats]);
 
   return {
     stats,

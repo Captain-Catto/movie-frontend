@@ -152,15 +152,20 @@ export function usePersonDetailPageClient({
     lastFetchedPersonIdRef.current = initialPersonData ? personId : null;
   }
 
+  const parsedPersonId = Number(personId);
+  const isValidPersonId = !!personId && Number.isFinite(parsedPersonId) && parsedPersonId > 0;
+  const prevPersonIdForValidationRef = useRef(personId);
+  if (personId !== prevPersonIdForValidationRef.current) {
+    prevPersonIdForValidationRef.current = personId;
+    if (!isValidPersonId) {
+      dispatch({ personData: null, castCredits: [], crewCredits: [], error: labels.invalidPersonId, loading: false });
+    }
+  }
+
   useEffect(() => {
+    if (!isValidPersonId) return;
     if (lastFetchedPersonIdRef.current === personId) return;
     lastFetchedPersonIdRef.current = personId;
-
-    const parsedPersonId = Number(personId);
-    if (!Number.isFinite(parsedPersonId) || parsedPersonId <= 0) {
-      dispatch({ personData: null, castCredits: [], crewCredits: [], error: labels.invalidPersonId, loading: false });
-      return;
-    }
 
     dispatch({ loading: true });
     getPersonDetailPageDataById(parsedPersonId).then((result) => {
@@ -168,7 +173,7 @@ export function usePersonDetailPageClient({
     }).catch((err) => {
       dispatch({ personData: null, castCredits: [], crewCredits: [], error: err instanceof Error ? err.message : labels.unableToLoadActorInformation, loading: false });
     });
-  }, [personId, labels.invalidPersonId, labels.unableToLoadActorInformation]);
+  }, [personId, parsedPersonId, isValidPersonId, labels.unableToLoadActorInformation]);
 
   const castTotalItems = castCredits.length;
   const crewTotalItems = crewCredits.length;

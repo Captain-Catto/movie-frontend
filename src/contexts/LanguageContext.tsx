@@ -4,7 +4,6 @@ import {
   createContext,
   use,
   useState,
-  useEffect,
   useCallback,
   useMemo,
   ReactNode,
@@ -43,21 +42,20 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 
 export function LanguageProvider({ children, initialLanguage }: LanguageProviderProps) {
   const { refresh } = useRouter();
-  const [language, setLanguageState] = useState<SupportedLanguageCode>(() => initialLanguage);
-
-  // Fallback: only fires when the server had no cookie (initialLanguage === default).
-  // Recovers the stored preference from localStorage (e.g. after cookie was cleared).
-  useEffect(() => {
-    if (initialLanguage !== DEFAULT_LANGUAGE) return;
-
+  // Fallback: when the server had no cookie (initialLanguage === default),
+  // recover the stored preference from localStorage (e.g. after cookie was cleared).
+  const [language, setLanguageState] = useState<SupportedLanguageCode>(() => {
+    if (initialLanguage !== DEFAULT_LANGUAGE) return initialLanguage;
+    if (typeof window === "undefined") return initialLanguage;
     const stored = localStorage.getItem(STORAGE_KEY);
     const normalized = stored === "vi" ? "vi-VN" : stored;
     if (normalized && SUPPORTED_LANGUAGES.some((l) => l.code === normalized)) {
       if (stored === "vi") localStorage.setItem(STORAGE_KEY, "vi-VN");
-      setLanguageState(normalized as SupportedLanguageCode);
       setLanguageCookie(normalized as SupportedLanguageCode);
+      return normalized as SupportedLanguageCode;
     }
-  }, [initialLanguage]);
+    return initialLanguage;
+  });
 
   const setLanguage = useCallback(
     (lang: SupportedLanguageCode) => {

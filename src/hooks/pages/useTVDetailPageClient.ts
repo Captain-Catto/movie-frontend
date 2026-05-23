@@ -42,6 +42,15 @@ export function useTVDetailPageClient({
     (initialTVData || initialError) ? `${tvIdParam}|${initialLanguage}` : null
   );
 
+  const isValidTvId = !!tvIdParam && !Number.isNaN(numericTvId) && numericTvId > 0;
+  const prevTvIdParamRef = useRef(tvIdParam);
+  if (tvIdParam !== prevTvIdParamRef.current) {
+    prevTvIdParamRef.current = tvIdParam;
+    if (!isValidTvId) {
+      dispatch({ error: labels.invalidTvSeriesId, tvData: null, loading: false, creditsLoading: false });
+    }
+  }
+
   usePageDuration({
     contentId: tvIdParam,
     contentType: "tv_series",
@@ -50,10 +59,7 @@ export function useTVDetailPageClient({
   });
 
   useEffect(() => {
-    if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
-      dispatch({ error: labels.invalidTvSeriesId, tvData: null, loading: false, creditsLoading: false });
-      return;
-    }
+    if (!tvIdParam || !isValidTvId) return;
     const fetchKey = `${tvIdParam}|${language}`;
     if (lastFetchKeyRef.current === fetchKey) return;
     lastFetchKeyRef.current = fetchKey;
@@ -67,7 +73,7 @@ export function useTVDetailPageClient({
     }).catch((err) => {
       dispatch({ error: err instanceof Error ? err.message : labels.unknownError, tvData: null, loading: false, creditsLoading: false });
     });
-  }, [numericTvId, tvIdParam, language, labels.invalidTvSeriesId, labels.unknownError]);
+  }, [numericTvId, tvIdParam, language, isValidTvId, labels.unknownError]);
 
   return {
     tvData,

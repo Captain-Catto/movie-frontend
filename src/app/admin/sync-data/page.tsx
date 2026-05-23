@@ -1,6 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useReducer } from "react";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
@@ -401,21 +401,73 @@ function SyncNotesSection() {
   );
 }
 
+interface SyncState {
+  stats: DashboardStats | null;
+  syncing: SyncTarget | null;
+  customDate: string;
+  settings: SyncSettings | null;
+  settingsForm: {
+    movieCatalogLimit: number;
+    tvCatalogLimit: number;
+    trendingCatalogLimit: number;
+    peopleCacheLimit: number;
+    recommendationCacheLimit: number;
+  };
+  savingSettings: boolean;
+}
+
+type SyncAction =
+  | { type: "SET_STATS"; payload: DashboardStats | null }
+  | { type: "SET_SYNCING"; payload: SyncTarget | null }
+  | { type: "SET_CUSTOM_DATE"; payload: string }
+  | { type: "SET_SETTINGS"; payload: SyncSettings | null }
+  | { type: "SET_SETTINGS_FORM"; payload: Partial<SyncState["settingsForm"]> | SyncState["settingsForm"] }
+  | { type: "SET_SAVING_SETTINGS"; payload: boolean };
+
+function syncReducer(state: SyncState, action: SyncAction): SyncState {
+  switch (action.type) {
+    case "SET_STATS":
+      return { ...state, stats: action.payload };
+    case "SET_SYNCING":
+      return { ...state, syncing: action.payload };
+    case "SET_CUSTOM_DATE":
+      return { ...state, customDate: action.payload };
+    case "SET_SETTINGS":
+      return { ...state, settings: action.payload };
+    case "SET_SETTINGS_FORM":
+      return {
+        ...state,
+        settingsForm: {
+          ...state.settingsForm,
+          ...action.payload,
+        },
+      };
+    case "SET_SAVING_SETTINGS":
+      return { ...state, savingSettings: action.payload };
+    default:
+      return state;
+  }
+}
+
 export default function AdminSyncDataPage() {
   const adminApi = useAdminApi();
   const { showSuccess, showError } = useToastRedux();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [syncing, setSyncing] = useState<SyncTarget | null>(null);
-  const [customDate, setCustomDate] = useState<string>("");
-  const [settings, setSettings] = useState<SyncSettings | null>(null);
-  const [settingsForm, setSettingsForm] = useState({
-    movieCatalogLimit: 500000,
-    tvCatalogLimit: 200000,
-    trendingCatalogLimit: 100,
-    peopleCacheLimit: 10000,
-    recommendationCacheLimit: 10000,
+  const [state, dispatch] = useReducer(syncReducer, {
+    stats: null,
+    syncing: null,
+    customDate: "",
+    settings: null,
+    settingsForm: {
+      movieCatalogLimit: 500000,
+      tvCatalogLimit: 200000,
+      trendingCatalogLimit: 100,
+      peopleCacheLimit: 10000,
+      recommendationCacheLimit: 10000,
+    },
+    savingSettings: false,
   });
-  const [savingSettings, setSavingSettings] = useState(false);
+
+  const { stats, syncing, customDate, settings, settingsForm, savingSettings } = state;
 
   const fetchStats = useCallback(async () => {
     if (!adminApi.isAuthenticated) {
@@ -425,7 +477,7 @@ export default function AdminSyncDataPage() {
       const response = await adminApi.get<DashboardStats>("/admin/dashboard/stats");
 
       if (response.success && response.data) {
-        setStats(response.data);
+        dispatch({ type: "SET_STATS", payload: response.data });
       } else {
         throw new Error(response.message || "Failed to load dashboard stats");
       }
@@ -440,14 +492,17 @@ export default function AdminSyncDataPage() {
     try {
       const response = await adminApi.get<SyncSettings>("/admin/sync/settings");
       if (response.success && response.data) {
-        setSettings(response.data);
-        setSettingsForm({
-          movieCatalogLimit: response.data.movieCatalogLimit ?? 500000,
-          tvCatalogLimit: response.data.tvCatalogLimit ?? 200000,
-          trendingCatalogLimit: response.data.trendingCatalogLimit ?? 100,
-          peopleCacheLimit: response.data.peopleCacheLimit ?? 10000,
-          recommendationCacheLimit:
-            response.data.recommendationCacheLimit ?? 10000,
+        dispatch({ type: "SET_SETTINGS", payload: response.data });
+        dispatch({
+          type: "SET_SETTINGS_FORM",
+          payload: {
+            movieCatalogLimit: response.data.movieCatalogLimit ?? 500000,
+            tvCatalogLimit: response.data.tvCatalogLimit ?? 200000,
+            trendingCatalogLimit: response.data.trendingCatalogLimit ?? 100,
+            peopleCacheLimit: response.data.peopleCacheLimit ?? 10000,
+            recommendationCacheLimit:
+              response.data.recommendationCacheLimit ?? 10000,
+          },
         });
       }
     } catch (error) {
@@ -463,7 +518,7 @@ export default function AdminSyncDataPage() {
   const handleSync = async (target: SyncTarget) => {
     if (syncing) return;
 
-    setSyncing(target);
+    dispatch({ type: "SET_SYNCING", payload: target });
 
     try {
       const payload = {
@@ -483,14 +538,14 @@ export default function AdminSyncDataPage() {
       console.error("Error triggering sync:", error);
       showError("Sync failed", error instanceof Error ? error.message : "Failed to trigger sync");
     } finally {
-      setSyncing(null);
+      dispatch({ type: "SET_SYNCING", payload: null });
     }
   };
 
   const handleSaveSettings = async () => {
     if (savingSettings) return;
 
-    setSavingSettings(true);
+    dispatch({ type: "SET_SAVING_SETTINGS", payload: true });
 
     try {
       const response = await adminApi.patch("/admin/sync/settings", settingsForm);
@@ -505,7 +560,7 @@ export default function AdminSyncDataPage() {
       console.error("Error saving settings:", error);
       showError("Save failed", error instanceof Error ? error.message : "Failed to save settings");
     } finally {
-      setSavingSettings(false);
+      dispatch({ type: "SET_SAVING_SETTINGS", payload: false });
     }
   };
 
@@ -521,7 +576,7 @@ export default function AdminSyncDataPage() {
       <ManualSyncSection
         customDate={customDate}
         syncing={syncing}
-        onCustomDateChange={setCustomDate}
+        onCustomDateChange={(val) => dispatch({ type: "SET_CUSTOM_DATE", payload: val })}
         onSync={handleSync}
       />
       <CatalogSettingsSection
@@ -529,7 +584,7 @@ export default function AdminSyncDataPage() {
         settingsForm={settingsForm}
         savingSettings={savingSettings}
         onSettingsChange={(patch) =>
-          setSettingsForm((prev) => ({ ...prev, ...patch }))
+          dispatch({ type: "SET_SETTINGS_FORM", payload: patch })
         }
         onSave={handleSaveSettings}
       />

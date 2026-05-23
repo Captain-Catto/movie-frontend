@@ -1,9 +1,6 @@
-// useComments Hook
-// Custom hook for managing comment state and operations
-
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, useReducer } from "react";
 import { commentService } from "@/services/comment.service";
 import {
   Comment,
@@ -16,6 +13,44 @@ import {
 import { useToast } from "@/hooks/useToast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getCommentsUiMessages } from "@/lib/ui-messages";
+
+interface CommentsState {
+  comments: Comment[];
+  loading: boolean;
+  error: string | null;
+  page: number;
+  hasMore: boolean;
+}
+
+type CommentsAction =
+  | { type: "FETCH_START" }
+  | { type: "FETCH_SUCCESS"; payload: { comments: Comment[]; hasNext: boolean; page: number; append: boolean } }
+  | { type: "FETCH_FAILURE"; payload: string }
+  | { type: "UPDATE_PAGE"; payload: number }
+  | { type: "SET_COMMENTS"; payload: Comment[] };
+
+function commentsReducer(state: CommentsState, action: CommentsAction): CommentsState {
+  switch (action.type) {
+    case "FETCH_START":
+      return { ...state, loading: true, error: null };
+    case "FETCH_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        comments: action.payload.append ? [...state.comments, ...action.payload.comments] : action.payload.comments,
+        hasMore: action.payload.hasNext,
+        page: action.payload.page,
+      };
+    case "FETCH_FAILURE":
+      return { ...state, loading: false, error: action.payload };
+    case "UPDATE_PAGE":
+      return { ...state, page: action.payload };
+    case "SET_COMMENTS":
+      return { ...state, comments: action.payload };
+    default:
+      return state;
+  }
+}
 
 export function useComments(
   options: UseCommentsOptions = {}
@@ -31,11 +66,13 @@ export function useComments(
     realtimeIntervalMs = 15000,
   } = options;
 
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [state, dispatch] = useReducer(commentsReducer, {
+    comments: [],
+    loading: false,
+    error: null,
+    page: 1,
+    hasMore: true,
+  });
 
   const { showSuccess, showError } = useToast();
   const { language } = useLanguage();
@@ -58,24 +95,25 @@ export function useComments(
   const loadComments = useCallback(
     async (pageNum: number = 1, append: boolean = false) => {
       try {
-        setLoading(true);
-        setError(null);
+        dispatch({ type: "FETCH_START" });
 
         const params = { ...queryParams, page: pageNum };
         const response = await commentService.getComments(params);
 
-        setComments((prev) =>
-          append ? [...prev, ...response.comments] : response.comments
-        );
-        setHasMore(response.hasNext);
-        setPage(pageNum);
+        dispatch({
+          type: "FETCH_SUCCESS",
+          payload: {
+            comments: response.comments,
+            hasNext: response.hasNext,
+            page: pageNum,
+            append,
+          },
+        });
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : labels.errorLoadingCommentsDefault;
-        setError(errorMessage);
+        dispatch({ type: "FETCH_FAILURE", payload: errorMessage });
         showError(labels.errorLoadingCommentsTitle, errorMessage);
-      } finally {
-        setLoading(false);
       }
     },
     [queryParams, showError, labels.errorLoadingCommentsDefault, labels.errorLoadingCommentsTitle]
@@ -83,16 +121,19 @@ export function useComments(
 
   // Load more comments (pagination)
   const loadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      loadComments(page + 1, true);
+    if (!state.loading && state.hasMore) {
+      loadComments(state.page + 1, true);
     }
-  }, [loading, hasMore, page, loadComments]);
+  }, [state.loading, state.hasMore, state.page, loadComments]);
 
   // Refresh comments
   const refresh = useCallback(() => {
-    setPage(1);
+    dispatch({ type: "UPDATE_PAGE", payload: 1 });
     loadComments(1, false);
   }, [loadComments]);
+
+  const commentsRef = useRef(state.comments);
+  commentsRef.current = state.comments;
 
   // Add new comment
   const addComment = useCallback(
@@ -104,7 +145,10 @@ export function useComments(
         // Use data.parentId instead of hook's parentId
         if (!data.parentId) {
           // Top-level comment - add to the current list
-          setComments((prev) => [newComment, ...prev]);
+          dispatch({
+            type: "SET_COMMENTS",
+            payload: [newComment, ...commentsRef.current],
+          });
         } else {
           // This is a reply - refresh to update reply counts and show in nested view
           // We need to refresh the whole list to show updated reply counts
@@ -141,9 +185,10 @@ export function useComments(
         const updatedComment = await commentService.updateComment(id, data);
 
         // Update local state
-        setComments((prev) =>
-          prev.map((comment) => (comment.id === id ? updatedComment : comment))
-        );
+        dispatch({
+          type: "SET_COMMENTS",
+          payload: commentsRef.current.map((comment) => (comment.id === id ? updatedComment : comment)),
+        });
 
         showSuccess(
           labels.commentUpdatedTitle,
@@ -176,7 +221,10 @@ export function useComments(
         // Remove from local state
         // For top-level comments: remove directly
         // For nested comments: CommentItem will handle via handleNestedDelete
-        setComments((prev) => prev.filter((comment) => comment.id !== id));
+        dispatch({
+          type: "SET_COMMENTS",
+          payload: commentsRef.current.filter((comment) => comment.id !== id),
+        });
 
         showSuccess(
           labels.commentDeletedTitle,
@@ -204,7 +252,8 @@ export function useComments(
     async (id: number): Promise<void> => {
       try {
         // Check if this comment exists in our top-level comments
-        const isTopLevel = comments.some(c => c.id === id);
+        const activeComments = commentsRef.current;
+        const isTopLevel = activeComments.some(c => c.id === id);
 
         // Only call API if it's a top-level comment
         // Nested comments are handled by CommentItem's handleNestedLike
@@ -213,8 +262,9 @@ export function useComments(
 
           // Update local state with backend response
           // Backend uses likeCount/dislikeCount, frontend uses likesCount/dislikesCount
-          setComments((prev) =>
-            prev.map((comment) => {
+          dispatch({
+            type: "SET_COMMENTS",
+            payload: activeComments.map((comment) => {
               if (comment.id === id) {
                 return {
                   ...comment,
@@ -230,8 +280,8 @@ export function useComments(
                 };
               }
               return comment;
-            })
-          );
+            }),
+          });
         }
         // If not top-level, it's a nested comment and will be handled by handleNestedLike
       } catch (err) {
@@ -240,7 +290,7 @@ export function useComments(
         showError(labels.errorTitle, errorMessage);
       }
     },
-    [showError, comments, labels.errorLikingCommentDefault, labels.errorTitle]
+    [showError, labels.errorLikingCommentDefault, labels.errorTitle]
   );
 
   // Dislike comment
@@ -248,7 +298,8 @@ export function useComments(
     async (id: number): Promise<void> => {
       try {
         // Check if this comment exists in our top-level comments
-        const isTopLevel = comments.some(c => c.id === id);
+        const activeComments = commentsRef.current;
+        const isTopLevel = activeComments.some(c => c.id === id);
 
         // Only call API if it's a top-level comment
         // Nested comments are handled by CommentItem's handleNestedDislike
@@ -257,8 +308,9 @@ export function useComments(
 
           // Update local state with backend response
           // Backend uses likeCount/dislikeCount, frontend uses likesCount/dislikesCount
-          setComments((prev) =>
-            prev.map((comment) => {
+          dispatch({
+            type: "SET_COMMENTS",
+            payload: activeComments.map((comment) => {
               if (comment.id === id) {
                 return {
                   ...comment,
@@ -274,8 +326,8 @@ export function useComments(
                 };
               }
               return comment;
-            })
-          );
+            }),
+          });
         }
         // If not top-level, it's a nested comment and will be handled by handleNestedDislike
       } catch (err) {
@@ -284,7 +336,7 @@ export function useComments(
         showError(labels.errorTitle, errorMessage);
       }
     },
-    [showError, comments, labels.errorDislikingCommentDefault, labels.errorTitle]
+    [showError, labels.errorDislikingCommentDefault, labels.errorTitle]
   );
 
   // Report comment
@@ -294,8 +346,10 @@ export function useComments(
         await commentService.reportComment(id, data);
 
         // Update local state
-        setComments((prev) =>
-          prev.map((comment) => {
+        const activeComments = commentsRef.current;
+        dispatch({
+          type: "SET_COMMENTS",
+          payload: activeComments.map((comment) => {
             if (comment.id === id) {
               return {
                 ...comment,
@@ -308,8 +362,8 @@ export function useComments(
               };
             }
             return comment;
-          })
-        );
+          }),
+        });
 
         showSuccess(
           labels.commentReportedTitle,
@@ -363,10 +417,10 @@ export function useComments(
   }, [enableRealtime, autoRefresh, movieId, tvSeriesId, refresh, realtimeIntervalMs]);
 
   return {
-    comments,
-    loading,
-    error,
-    hasMore,
+    comments: state.comments,
+    loading: state.loading,
+    error: state.error,
+    hasMore: state.hasMore,
     loadMore,
     refresh,
     addComment,
@@ -378,11 +432,40 @@ export function useComments(
   };
 }
 
+interface CommentState {
+  comment: Comment | null;
+  loading: boolean;
+  error: string | null;
+}
+
+type CommentAction =
+  | { type: "FETCH_START" }
+  | { type: "FETCH_SUCCESS"; payload: Comment }
+  | { type: "FETCH_FAILURE"; payload: string }
+  | { type: "SET_COMMENT"; payload: Comment | null };
+
+function commentReducer(state: CommentState, action: CommentAction): CommentState {
+  switch (action.type) {
+    case "FETCH_START":
+      return { ...state, loading: true, error: null };
+    case "FETCH_SUCCESS":
+      return { ...state, loading: false, comment: action.payload };
+    case "FETCH_FAILURE":
+      return { ...state, loading: false, error: action.payload };
+    case "SET_COMMENT":
+      return { ...state, comment: action.payload };
+    default:
+      return state;
+  }
+}
+
 // Hook for managing single comment operations
 export function useComment(commentId: number) {
-  const [comment, setComment] = useState<Comment | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(commentReducer, {
+    comment: null,
+    loading: false,
+    error: null,
+  });
 
   const { showError } = useToast();
   const { language } = useLanguage();
@@ -392,17 +475,14 @@ export function useComment(commentId: number) {
 
   const loadComment = useCallback(async () => {
     try {
-      setLoading(true);
-      setError(null);
+      dispatch({ type: "FETCH_START" });
       const commentData = await commentService.getCommentById(commentId);
-      setComment(commentData);
+      dispatch({ type: "FETCH_SUCCESS", payload: commentData });
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : labels.errorLoadingCommentDefault;
-      setError(errorMessage);
+      dispatch({ type: "FETCH_FAILURE", payload: errorMessage });
       showError(labels.errorLoadingCommentTitle, errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, [commentId, showError, labels.errorLoadingCommentDefault, labels.errorLoadingCommentTitle]);
 
@@ -414,9 +494,9 @@ export function useComment(commentId: number) {
   }, [commentId, loadComment]);
 
   return {
-    comment,
-    loading,
-    error,
+    comment: state.comment,
+    loading: state.loading,
+    error: state.error,
     refresh: loadComment,
   };
 }

@@ -54,8 +54,8 @@ export default function HomePosterRail({
   movies,
 }: HomePosterRailProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [canScrollBack, setCanScrollBack] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(true);
+  const [canScrollBack, setCanScrollBack] = useState<boolean | undefined>(undefined);
+  const [canScrollNext, setCanScrollNext] = useState<boolean | undefined>(undefined);
 
   const updateScrollState = () => {
     const scroller = scrollerRef.current;
@@ -80,8 +80,6 @@ export default function HomePosterRail({
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
-
-    updateScrollState();
 
     const ro = new ResizeObserver(updateScrollState);
     ro.observe(scroller);

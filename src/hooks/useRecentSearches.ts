@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useReducer } from "react";
 import { RecentSearch } from "@/types/search";
 import type { SearchFilterType } from "@/types/search";
 import axiosInstance from "@/lib/axios-instance";
@@ -25,7 +25,12 @@ const MAX_LOCAL_SEARCHES = 10;
 export const useRecentSearches = (
   user: User | null
 ): UseRecentSearchesReturn => {
-  const [searches, setSearches] = useState<RecentSearch[]>([]);
+  const [searches, setSearches] = useReducer(
+    (state: RecentSearch[], action: RecentSearch[] | ((prev: RecentSearch[]) => RecentSearch[])) => {
+      return typeof action === "function" ? action(state) : action;
+    },
+    []
+  );
 
   // Load searches from localStorage
   const loadLocalSearches = useCallback(() => {

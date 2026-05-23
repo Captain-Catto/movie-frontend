@@ -17,7 +17,7 @@ import type { CastMember } from "@/types";
 import { useMovieDetailPageClient } from "@/hooks/pages/useMovieDetailPageClient";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
-import { getMovieDetailUiMessages } from "@/lib/ui-messages";
+import { getMovieDetailUiMessages, type MovieDetailUiMessages } from "@/lib/ui-messages";
 import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
@@ -46,6 +46,353 @@ interface MovieDetailPageClientProps {
   initialMovieData: MovieDetail | null;
   initialContentType: "movie" | "tv" | null;
   initialError: string | null;
+}
+
+interface MovieDetailHeroProps {
+  movieData: MovieDetail;
+  movieId: string;
+  labels: MovieDetailUiMessages;
+  contentType: "movie" | "tv" | null;
+}
+
+function MovieDetailHero({ movieData, movieId, labels, contentType }: MovieDetailHeroProps) {
+  return (
+    <div className="relative min-h-[70vh]">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <Image
+          src={movieData.backgroundImage}
+          alt={`${movieData.title} backdrop`}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
+
+      <Container
+        withHeaderOffset
+        padding="tight"
+        className="relative z-10 flex items-center min-h-[70vh] pt-18 pb-12 lg:pt-14"
+      >
+        <div className="flex gap-8 w-full">
+          {/* Poster */}
+          <div className="hidden md:block flex-shrink-0">
+            <div className="relative w-64 h-96">
+              <Image
+                src={movieData.posterImage}
+                alt={movieData.title}
+                fill
+                className="object-cover rounded-lg shadow-2xl"
+                priority
+                sizes="256px"
+              />
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 max-w-2xl">
+            <h1 className="text-4xl md:text-5xl font-semibold text-white mb-2">
+              {movieData.title}
+            </h1>
+            {movieData.aliasTitle &&
+              movieData.aliasTitle !== movieData.title && (
+                <h2 className="text-xl text-yellow-400 mb-6">
+                  {movieData.aliasTitle}
+                </h2>
+              )}
+
+            {/** Precompute rating once to allow zero to show */}
+            {(() => {
+              const numericRating = Number(movieData.rating);
+              const hasRating =
+                Number.isFinite(numericRating) && numericRating >= 0;
+              return (
+                <div className="flex flex-wrap items-center gap-4 mb-6 text-white">
+                  {hasRating && (
+                    <>
+                      <div className="flex items-center">
+                        <svg
+                          className="size-5 text-yellow-500 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span>{numericRating.toFixed(1)}</span>
+                      </div>
+                      <span>&bull;</span>
+                    </>
+                  )}
+                  <span>{movieData.year}</span>
+                  <span>&bull;</span>
+                  <span>{movieData.runtime}</span>
+                  <span>&bull;</span>
+                  <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded">
+                    {movieData.quality}
+                  </span>
+                  {movieData.language && (
+                    <span className="px-2 py-1 bg-blue-500/20 text-blue-500 rounded">
+                      {movieData.language}
+                    </span>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Genres */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              {movieData.genres?.map((genre: string, index: number) => {
+                const genreId = movieData.genreIds?.[index];
+                if (typeof genreId !== "number") {
+                  return null;
+                }
+                return (
+                  <GenreBadge
+                    key={genreId}
+                    genre={genre}
+                    genreId={genreId}
+                    contentType={movieData.contentType || "movie"}
+                    variant="default"
+                  />
+                );
+              })}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href={`/watch/${
+                  movieData.contentType === "tv" ? "tv" : "movie"
+                }-${movieData.tmdbId || movieId}${
+                  movieData.contentType === "tv"
+                    ? "?season=1&episode=1"
+                    : ""
+                }`}
+                onClick={() =>
+                  analyticsService.trackClick(
+                    String(movieData.tmdbId || movieId),
+                    movieData.contentType === "tv" ? "tv_series" : "movie",
+                    movieData.title
+                  )
+                }
+                className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <svg
+                  className="size-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {labels.watchNow}
+              </Link>
+
+              <FavoriteButton
+                movie={{
+                  id: movieData.id,
+                  tmdbId: movieData.tmdbId,
+                  title: movieData.title || labels.unknownTitle,
+                  overview: movieData.description,
+                  poster_path: movieData.posterImage,
+                  backdrop_path: movieData.backgroundImage,
+                  vote_average: movieData.rating,
+                  genres: movieData.genres,
+                }}
+                className="px-8 py-4"
+              />
+
+              <TrailerButton
+                movieId={movieData.tmdbId || parseInt(movieId)}
+                movieTitle={movieData.title}
+                contentType={contentType || "movie"}
+                className="px-8 py-4 !rounded-lg font-semibold"
+              />
+            </div>
+          </div>
+        </div>
+      </Container>
+    </div>
+  );
+}
+
+interface MovieDetailCastSectionProps {
+  movieData: MovieDetail;
+  creditsLoading: boolean;
+  labels: MovieDetailUiMessages;
+}
+
+function MovieDetailCastSection({ movieData, creditsLoading, labels }: MovieDetailCastSectionProps) {
+  if (!(movieData.cast && movieData.cast.length > 0) && !creditsLoading) {
+    return null;
+  }
+
+  return (
+    <>
+      <h3 className="text-2xl font-semibold text-white mb-6">{labels.cast}</h3>
+      {creditsLoading ? (
+        <CastSkeleton />
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+          {movieData.cast.map(
+            (actor: CastMember) => (
+              <Link
+                key={actor.id}
+                href={`/people/${actor.id}`}
+                className="text-center group block"
+              >
+                <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-700 relative">
+                  <Image
+                    src={
+                      (actor.profile_path || actor.profilePath)
+                        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path || actor.profilePath}`
+                        : FALLBACK_POSTER
+                    }
+                    alt={actor.name}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 50vw, 25vw"
+                    onError={(
+                      e: SyntheticEvent<HTMLImageElement>
+                    ) => {
+                      e.currentTarget.src = "/images/no-avatar.svg";
+                    }}
+                  />
+                </div>
+                <h4 className="font-semibold text-white mb-1 group-hover:text-red-400 transition-colors">
+                  {actor.name}
+                </h4>
+                <p className="text-sm text-gray-400">
+                  {actor.character}
+                </p>
+              </Link>
+            )
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
+interface MovieDetailSidebarProps {
+  movieData: MovieDetail;
+  creditsLoading: boolean;
+  labels: MovieDetailUiMessages;
+  getLocalizedCountryName: (code: string) => string;
+  getLocalizedLanguageName: (code: string | undefined) => string;
+  getLocalizedStatus: (status: string | undefined) => string;
+}
+
+function MovieDetailSidebar({
+  movieData,
+  creditsLoading,
+  labels,
+  getLocalizedCountryName,
+  getLocalizedLanguageName,
+  getLocalizedStatus,
+}: MovieDetailSidebarProps) {
+  return (
+    <div className="lg:col-span-1">
+      <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
+        <h3 className="text-xl font-semibold text-white mb-4">{labels.contentInfo}</h3>
+        <div className="space-y-3 text-gray-300">
+          <div>
+            <span className="text-gray-500">{labels.director}</span>
+            <span className="ml-2">
+              {creditsLoading ? (
+                <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
+              ) : movieData.director ? (
+                <Link
+                  href={`/people/${movieData.director.id}`}
+                  className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded transition-colors cursor-pointer"
+                >
+                  {movieData.director.name}
+                </Link>
+              ) : (
+                labels.unknown
+              )}
+            </span>
+          </div>
+          {(movieData.cast && movieData.cast.length > 0) ||
+          creditsLoading ? (
+            <div>
+              <span className="text-gray-500">{labels.cast}:</span>
+              <div className="mt-1">
+                {creditsLoading ? (
+                  <div className="flex flex-wrap gap-2">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-block h-6 w-16 bg-gray-600 animate-pulse rounded"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  movieData.cast
+                    .slice(0, 6)
+                    .map((actor: CastMember) => (
+                      <Link
+                        key={actor.id}
+                        href={`/people/${actor.id}`}
+                        className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded mr-2 mb-2 transition-colors cursor-pointer"
+                      >
+                        {actor.name}
+                      </Link>
+                    ))
+                )}
+              </div>
+            </div>
+          ) : null}
+          <div>
+            <span className="text-gray-500">{labels.country}</span>
+            <span className="ml-2">
+              {creditsLoading ? (
+                <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
+              ) : (
+                getLocalizedCountryName(movieData.country || labels.unknown)
+              )}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">{labels.releaseYear}</span>
+            <span className="ml-2">{movieData.year}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">
+              {movieData.contentType === "tv"
+                ? labels.runtimeEpisode
+                : labels.runtime}
+            </span>
+            <span className="ml-2">{movieData.runtime}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">{labels.quality}</span>
+            <span className="ml-2">{movieData.quality}</span>
+          </div>
+          {movieData.language && (
+            <div>
+              <span className="text-gray-500">{labels.language}</span>
+              <span className="ml-2">
+                {getLocalizedLanguageName(movieData.language)}
+              </span>
+            </div>
+          )}
+          <div>
+            <span className="text-gray-500">{labels.status}</span>
+            <span className="ml-2 text-green-500">
+              {getLocalizedStatus(movieData.status)}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const MovieDetailPageClient = ({
@@ -130,16 +477,7 @@ const MovieDetailPageClient = ({
     }
   };
 
-  // console.log("🎨 [MovieDetailPage] Render - State:", {
-  //   loading,
-  //   hasMovieData: !!movieData,
-  //   movieDataTitle: movieData?.title,
-  //   error,
-  //   contentType,
-  // });
-
   if (loading) {
-    // console.log("⏳ [MovieDetailPage] Rendering loading skeleton");
     return (
       <Layout>
         <DetailPageSkeleton />
@@ -159,12 +497,6 @@ const MovieDetailPageClient = ({
     );
   }
 
-  // console.log("✨ [MovieDetailPage] Rendering movie detail page with data:", {
-  //   id: movieData.id,
-  //   title: movieData.title,
-  //   contentType: movieData.contentType,
-  // });
-
   return (
     <>
     <Layout>
@@ -175,168 +507,12 @@ const MovieDetailPageClient = ({
           </div>
         )}
 
-        {/* Hero Section */}
-        <div className="relative min-h-[70vh]">
-          {/* Background Image */}
-          <div className="absolute inset-0">
-            <Image
-              src={movieData.backgroundImage}
-              alt={`${movieData.title} backdrop`}
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-            />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
-
-          <Container
-            withHeaderOffset
-            padding="tight"
-            className="relative z-10 flex items-center min-h-[70vh] pt-18 pb-12 lg:pt-14"
-          >
-            <div className="flex gap-8 w-full">
-              {/* Poster */}
-              <div className="hidden md:block flex-shrink-0">
-                <div className="relative w-64 h-96">
-                  <Image
-                    src={movieData.posterImage}
-                    alt={movieData.title}
-                    fill
-                    className="object-cover rounded-lg shadow-2xl"
-                    priority
-                    sizes="256px"
-                  />
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 max-w-2xl">
-                <h1 className="text-4xl md:text-5xl font-semibold text-white mb-2">
-                  {movieData.title}
-                </h1>
-                {movieData.aliasTitle &&
-                  movieData.aliasTitle !== movieData.title && (
-                    <h2 className="text-xl text-yellow-400 mb-6">
-                      {movieData.aliasTitle}
-                    </h2>
-                  )}
-
-                {/** Precompute rating once to allow zero to show */}
-                {(() => {
-                  const numericRating = Number(movieData.rating);
-                  const hasRating =
-                    Number.isFinite(numericRating) && numericRating >= 0;
-                  return (
-                    <div className="flex flex-wrap items-center gap-4 mb-6 text-white">
-                      {hasRating && (
-                        <>
-                          <div className="flex items-center">
-                            <svg
-                              className="size-5 text-yellow-500 mr-1"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span>{numericRating.toFixed(1)}</span>
-                          </div>
-                          <span>&bull;</span>
-                        </>
-                      )}
-                      <span>{movieData.year}</span>
-                      <span>&bull;</span>
-                      <span>{movieData.runtime}</span>
-                      <span>&bull;</span>
-                      <span className="px-2 py-1 bg-red-500/20 text-red-500 rounded">
-                        {movieData.quality}
-                      </span>
-                      {movieData.language && (
-                        <span className="px-2 py-1 bg-blue-500/20 text-blue-500 rounded">
-                          {movieData.language}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
-
-                {/* Genres */}
-                <div className="flex flex-wrap gap-2 mb-8">
-                  {movieData.genres?.map((genre: string, index: number) => {
-                    const genreId = movieData.genreIds?.[index];
-                    if (typeof genreId !== "number") {
-                      return null;
-                    }
-                    return (
-                      <GenreBadge
-                        key={genreId}
-                        genre={genre}
-                        genreId={genreId}
-                        contentType={movieData.contentType || "movie"}
-                        variant="default"
-                      />
-                    );
-                  })}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-4">
-                  <Link
-                    href={`/watch/${
-                      movieData.contentType === "tv" ? "tv" : "movie"
-                    }-${movieData.tmdbId || movieId}${
-                      movieData.contentType === "tv"
-                        ? "?season=1&episode=1"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      analyticsService.trackClick(
-                        String(movieData.tmdbId || movieId),
-                        movieData.contentType === "tv" ? "tv_series" : "movie",
-                        movieData.title
-                      )
-                    }
-                    className="px-8 py-4 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg flex items-center gap-2 transition-colors"
-                  >
-                    <svg
-                      className="size-5"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    {labels.watchNow}
-                  </Link>
-
-                  <FavoriteButton
-                    movie={{
-                      id: movieData.id,
-                      tmdbId: movieData.tmdbId,
-                      title: movieData.title || labels.unknownTitle,
-                      overview: movieData.description,
-                      poster_path: movieData.posterImage,
-                      backdrop_path: movieData.backgroundImage,
-                      vote_average: movieData.rating,
-                      genres: movieData.genres,
-                    }}
-                    className="px-8 py-4"
-                  />
-
-                  <TrailerButton
-                    movieId={movieData.tmdbId || parseInt(movieId)}
-                    movieTitle={movieData.title}
-                    contentType={contentType || "movie"}
-                    className="px-8 py-4 !rounded-lg font-semibold"
-                  />
-                </div>
-              </div>
-            </div>
-          </Container>
-        </div>
+        <MovieDetailHero
+          movieData={movieData}
+          movieId={movieId}
+          labels={labels}
+          contentType={contentType}
+        />
 
         {/* Movie Details Section */}
         <Container padding="tight" className="py-12">
@@ -350,151 +526,21 @@ const MovieDetailPageClient = ({
                 </p>
               </div>
 
-              {/* Cast Section */}
-              {(movieData.cast && movieData.cast.length > 0) ||
-              creditsLoading ? (
-                <>
-                  <h3 className="text-2xl font-semibold text-white mb-6">{labels.cast}</h3>
-                  {creditsLoading ? (
-                    <CastSkeleton />
-                  ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-                      {movieData.cast.map(
-                        (actor: CastMember) => (
-                          <Link
-                            key={actor.id}
-                            href={`/people/${actor.id}`}
-                            className="text-center group block"
-                          >
-                            <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-700 relative">
-                              <Image
-                                src={
-                                  (actor.profile_path || actor.profilePath)
-                                    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path || actor.profilePath}`
-                                    : FALLBACK_POSTER
-                                }
-                                alt={actor.name}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
-                                loading="lazy"
-                                sizes="(max-width: 768px) 50vw, 25vw"
-                                onError={(
-                                  e: SyntheticEvent<HTMLImageElement>
-                                ) => {
-                                  e.currentTarget.src = "/images/no-avatar.svg";
-                                }}
-                              />
-                            </div>
-                            <h4 className="font-semibold text-white mb-1 group-hover:text-red-400 transition-colors">
-                              {actor.name}
-                            </h4>
-                            <p className="text-sm text-gray-400">
-                              {actor.character}
-                            </p>
-                          </Link>
-                        )
-                      )}
-                    </div>
-                  )}
-                </>
-              ) : null}
+              <MovieDetailCastSection
+                movieData={movieData}
+                creditsLoading={creditsLoading}
+                labels={labels}
+              />
             </div>
 
-            {/* Sidebar */}
-            <div className="lg:col-span-1">
-              <div className="bg-gray-800 rounded-lg p-6 sticky top-8">
-                <h3 className="text-xl font-semibold text-white mb-4">{labels.contentInfo}</h3>
-                <div className="space-y-3 text-gray-300">
-                  <div>
-                    <span className="text-gray-500">{labels.director}</span>
-                    <span className="ml-2">
-                      {creditsLoading ? (
-                        <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
-                      ) : movieData.director ? (
-                        <Link
-                          href={`/people/${movieData.director.id}`}
-                          className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded transition-colors cursor-pointer"
-                        >
-                          {movieData.director.name}
-                        </Link>
-                      ) : (
-                        labels.unknown
-                      )}
-                    </span>
-                  </div>
-                  {(movieData.cast && movieData.cast.length > 0) ||
-                  creditsLoading ? (
-                    <div>
-                      <span className="text-gray-500">{labels.cast}:</span>
-                      <div className="mt-1">
-                        {creditsLoading ? (
-                          <div className="flex flex-wrap gap-2">
-                            {Array.from({ length: 4 }).map((_, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-block h-6 w-16 bg-gray-600 animate-pulse rounded"
-                              />
-                            ))}
-                          </div>
-                        ) : (
-                          movieData.cast
-                            .slice(0, 6)
-                            .map((actor: CastMember) => (
-                              <Link
-                                key={actor.id}
-                                href={`/people/${actor.id}`}
-                                className="inline-block bg-gray-700 hover:bg-red-600 text-sm px-2 py-1 rounded mr-2 mb-2 transition-colors cursor-pointer"
-                              >
-                                {actor.name}
-                              </Link>
-                            ))
-                        )}
-                      </div>
-                    </div>
-                  ) : null}
-                  <div>
-                    <span className="text-gray-500">{labels.country}</span>
-                    <span className="ml-2">
-                      {creditsLoading ? (
-                        <span className="inline-block h-6 w-20 bg-gray-600 animate-pulse rounded" />
-                      ) : (
-                        getLocalizedCountryName(movieData.country || labels.unknown)
-                      )}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">{labels.releaseYear}</span>
-                    <span className="ml-2">{movieData.year}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">
-                      {movieData.contentType === "tv"
-                        ? labels.runtimeEpisode
-                        : labels.runtime}
-                    </span>
-                    <span className="ml-2">{movieData.runtime}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">{labels.quality}</span>
-                    <span className="ml-2">{movieData.quality}</span>
-                  </div>
-                  {movieData.language && (
-                    <div>
-                      <span className="text-gray-500">{labels.language}</span>
-                      <span className="ml-2">
-                        {getLocalizedLanguageName(movieData.language)}
-                      </span>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-gray-500">{labels.status}</span>
-                    <span className="ml-2 text-green-500">
-                      {getLocalizedStatus(movieData.status)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <MovieDetailSidebar
+              movieData={movieData}
+              creditsLoading={creditsLoading}
+              labels={labels}
+              getLocalizedCountryName={getLocalizedCountryName}
+              getLocalizedLanguageName={getLocalizedLanguageName}
+              getLocalizedStatus={getLocalizedStatus}
+            />
           </div>
         </Container>
 

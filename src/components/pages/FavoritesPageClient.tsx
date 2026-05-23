@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useReducer, useCallback, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { favoritesService } from "@/services/favorites.service";
 import type { ProcessedFavorite, FavoriteQueryParams } from "@/types/favorites.types";
@@ -15,29 +15,51 @@ import { Pagination } from "@/components/ui/Pagination";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getFavoritesPageUiMessages } from "@/lib/ui-messages";
 
+type FavoritesState = {
+  favorites: ProcessedFavorite[];
+  loading: boolean;
+  error: string | null;
+  page: number;
+  totalPages: number;
+  total: number;
+};
+
+type FavoritesAction =
+  | { type: "loading" }
+  | { type: "success"; favorites: ProcessedFavorite[]; page: number; totalPages: number; total: number }
+  | { type: "error"; error: string };
+
+function favoritesReducer(state: FavoritesState, action: FavoritesAction): FavoritesState {
+  switch (action.type) {
+    case "loading": return { ...state, loading: true, error: null };
+    case "success": return { ...state, loading: false, favorites: action.favorites, page: action.page, totalPages: action.totalPages, total: action.total };
+    case "error": return { ...state, loading: false, error: action.error };
+  }
+}
+
+const initialState: FavoritesState = {
+  favorites: [],
+  loading: true,
+  error: null,
+  page: 1,
+  totalPages: 1,
+  total: 0,
+};
+
 const FavoritesPage = () => {
-  const [favorites, setFavorites] = useState<ProcessedFavorite[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [, setHasMore] = useState(true);
+  const [state, dispatch] = useReducer(favoritesReducer, initialState);
+  const { favorites, loading, error, page, totalPages, total } = state;
   const { isAuthenticated } = useAuth();
   const { language } = useLanguage();
   const labels = getFavoritesPageUiMessages(language);
 
-  // Fetch favorites
   const fetchFavorites = useCallback(
     async (pageNum: number = 1) => {
       if (!isAuthenticated) return;
 
-
-
       if (pageNum === 1) {
-        setLoading(true);
+        dispatch({ type: "loading" });
       }
-      setError(null);
 
       try {
         const queryParams: FavoriteQueryParams = {
@@ -46,32 +68,24 @@ const FavoritesPage = () => {
         };
 
         const favData = await favoritesService.getUserFavorites(queryParams);
-        setFavorites(favData.favorites);
-
-        setHasMore(favData.hasMore);
-        setPage(pageNum);
-        setTotalPages(favData.totalPages);
-        setTotal(favData.total);
+        dispatch({
+          type: "success",
+          favorites: favData.favorites,
+          page: pageNum,
+          totalPages: favData.totalPages,
+          total: favData.total,
+        });
       } catch (err) {
         console.error("Error fetching favorites:", err);
-        setError(labels.loadFailed);
-      } finally {
-        setLoading(false);
+        dispatch({ type: "error", error: labels.loadFailed });
       }
     },
     [isAuthenticated, labels.loadFailed]
   );
 
-  // Initial load
   useEffect(() => {
-    if (isAuthenticated) {
-      // Only fetch local favorites data
-
-      fetchFavorites(1);
-    } else {
-
-    }
-  }, [isAuthenticated, fetchFavorites]);
+    fetchFavorites(1);
+  }, [fetchFavorites]);
 
   if (!isAuthenticated) {
     return (
@@ -147,7 +161,6 @@ const FavoritesPage = () => {
             </div>
           ) : (
             <>
-              {/* Grid layout */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 {favorites.map((favorite) => {
                   const movieCardData = favoriteToMovieCardData(favorite);
@@ -160,7 +173,6 @@ const FavoritesPage = () => {
                 })}
               </div>
 
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="mt-10 flex justify-center">
                   <Pagination

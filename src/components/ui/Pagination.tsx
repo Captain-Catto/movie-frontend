@@ -40,6 +40,8 @@ export function Pagination({
   const [desktopInputMode, setDesktopInputMode] = useState(false);
   const [desktopInputValue, setDesktopInputValue] = useState(() => currentPage.toString());
 
+  const focusOnMount = (el: HTMLInputElement | null) => { el?.focus(); };
+
   const getDesktopPages = () => {
     const pages = [];
     const half = Math.floor(showPages / 2);
@@ -148,7 +150,7 @@ export function Pagination({
                 onChange={(e) => setInputValue(e.target.value)}
                 onBlur={handleInputBlur}
                 onKeyDown={handleInputKeyDown}
-                autoFocus
+                ref={focusOnMount}
                 className="w-12 px-2 py-1 text-sm text-center text-white bg-gray-700 border border-red-500 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
               />
               <span className="text-sm font-medium text-gray-300 ml-2">
@@ -228,7 +230,7 @@ export function Pagination({
                         onChange={(e) => setDesktopInputValue(e.target.value)}
                         onBlur={handleDesktopInputBlur}
                         onKeyDown={handleDesktopInputKeyDown}
-                        autoFocus
+                        ref={focusOnMount}
                         className="w-16 px-2 py-1 text-sm text-center text-white bg-gray-700 border border-red-500 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder={`1-${totalPages}`}
                       />

@@ -1,104 +1,76 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useReducer, useRef } from 'react';
 
-/**
- * Options for useAsyncQuery hook
- */
 export interface UseAsyncQueryOptions<T> {
-  /** The async function to execute — wrap in useCallback so identity changes trigger re-fetch */
   queryFn: () => Promise<T>;
-  /** Whether the query is enabled (default: true) */
   enabled?: boolean;
-  /** Callback when query succeeds */
   onSuccess?: (data: T) => void;
-  /** Callback when query fails */
   onError?: (error: Error) => void;
-  /** Initial data before query completes */
   initialData?: T;
 }
 
-/**
- * Result returned by useAsyncQuery hook
- */
 export interface UseAsyncQueryResult<T> {
-  /** Query result data */
   data: T | null;
-  /** Loading state */
   loading: boolean;
-  /** Error state */
   error: Error | null;
-  /** Function to manually refetch data */
   refetch: () => Promise<void>;
-  /** Whether query has been executed at least once */
   isFetched: boolean;
 }
 
-/**
- * Generic hook for handling async operations with loading/error states
- * 
- * @example
- * ```tsx
- * const { data, loading, error, refetch } = useAsyncQuery({
- *   queryFn: async () => {
- *     const response = await apiService.getMovies();
- *     return response.data;
- *   },
- *   dependencies: [page, genre],
- *   onSuccess: (data) => {},
- *   onError: (error) => console.error('Failed to load:', error)
- * });
- * 
- * if (loading) return <Spinner />;
- * if (error) return <Error message={error.message} />;
- * return <MovieList movies={data} onRefresh={refetch} />;
- * ```
- */
-export function useAsyncQuery<T>(
-  options: UseAsyncQueryOptions<T>
-): UseAsyncQueryResult<T> {
-  const {
-    queryFn,
-    enabled = true,
-    onSuccess,
-    onError,
-    initialData,
-  } = options;
+type QueryState<T> = {
+  data: T | null;
+  error: Error | null;
+  status: "idle" | "loading" | "success" | "error";
+};
 
-  const [data, setData] = useState<T | null>(initialData ?? null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [isFetched, setIsFetched] = useState(false);
+type QueryAction<T> =
+  | { type: "loading" }
+  | { type: "success"; data: T }
+  | { type: "error"; error: Error };
+
+export function useAsyncQuery<T>(options: UseAsyncQueryOptions<T>): UseAsyncQueryResult<T> {
+  const { queryFn, enabled = true, onSuccess, onError, initialData } = options;
+
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
+
+  const [state, dispatch] = useReducer(
+    (s: QueryState<T>, a: QueryAction<T>): QueryState<T> => {
+      switch (a.type) {
+        case "loading": return { ...s, status: "loading", error: null };
+        case "success": return { data: a.data, error: null, status: "success" };
+        case "error": return { ...s, error: a.error, status: "error" };
+      }
+    },
+    { data: initialData ?? null, error: null, status: "idle" }
+  );
+
+  const { data, error, status } = state;
+  const loading = status === "loading";
+  const isFetched = status === "success";
 
   const execute = useCallback(async () => {
     if (!enabled) return;
-
-    setLoading(true);
-    setError(null);
-
+    dispatch({ type: "loading" });
     try {
       const result = await queryFn();
-      setData(result);
-      setIsFetched(true);
-      onSuccess?.(result);
+      dispatch({ type: "success", data: result });
+      onSuccessRef.current?.(result);
     } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err));
-      setError(error);
-      onError?.(error);
-    } finally {
-      setLoading(false);
+      const errorObj = err instanceof Error ? err : new Error(String(err));
+      dispatch({ type: "error", error: errorObj });
+      onErrorRef.current?.(errorObj);
     }
-  }, [queryFn, enabled, onSuccess, onError]);
+  }, [queryFn, enabled]);
 
   useEffect(() => {
-    if (enabled) {
-      execute();
-    }
-  }, [enabled, execute]);
+    execute();
+  }, [execute]);
 
-  return {
-    data,
-    loading,
-    error,
-    refetch: execute,
-    isFetched,
-  };
+  return { data, loading, error, refetch: execute, isFetched };
 }
+

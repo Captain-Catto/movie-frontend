@@ -54,8 +54,8 @@ function HomeTopicCard({ movie, priority }: { movie: MovieCardData; priority: bo
 
 function HomeTopicRowItem({ row, rowIndex }: { row: HomeTopicRow; rowIndex: number }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
-  const [canScrollBack, setCanScrollBack] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(true);
+  const [canScrollBack, setCanScrollBack] = useState<boolean | undefined>(undefined);
+  const [canScrollNext, setCanScrollNext] = useState<boolean | undefined>(undefined);
 
   const updateScrollState = () => {
     const scroller = scrollerRef.current;
@@ -80,8 +80,6 @@ function HomeTopicRowItem({ row, rowIndex }: { row: HomeTopicRow; rowIndex: numb
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
-
-    updateScrollState();
 
     const ro = new ResizeObserver(updateScrollState);
     ro.observe(scroller);

@@ -24,7 +24,7 @@ const LOADING_DELAY = 200; // Only show loading if search takes > 200ms
 const MIN_LOADING_TIME = 300; // Keep loading visible for at least 300ms to prevent flash
 
 export const useSearch = (): UseSearchReturn => {
-  const [query, setQuery] = useState("");
+  const [query, setQueryState] = useState("");
   const [selectedType, setSelectedType] = useState<SearchFilterType>("all");
   type SearchState = { results: SearchResult[]; isLoading: boolean; hasMore: boolean; page: number };
   type SearchAction = Partial<SearchState> | ((s: SearchState) => Partial<SearchState>);
@@ -39,6 +39,19 @@ export const useSearch = (): UseSearchReturn => {
   const searchStartTimeRef = useRef<number>(0);
   const activeRequestIdRef = useRef(0);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  const setQuery = useCallback((q: string) => {
+    setQueryState(q);
+    if (q.trim().length < 2) {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      if (loadingTimerRef.current) clearTimeout(loadingTimerRef.current);
+      if (minLoadingTimerRef.current) clearTimeout(minLoadingTimerRef.current);
+      dispatch({ results: [], hasMore: false, page: 1, isLoading: false });
+    }
+  }, []);
 
   // Use debounce hook instead of manual implementation
   const debouncedQuery = useDebounce(query, 600);
@@ -196,25 +209,7 @@ export const useSearch = (): UseSearchReturn => {
 
   // Search when debounced query or type changes
   useEffect(() => {
-    // Clear results immediately if query is too short
-    if (debouncedQuery.trim().length < 2) {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-      dispatch({ results: [], hasMore: false, page: 1, isLoading: false });
-      // Clear any pending timers
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current);
-      }
-      if (minLoadingTimerRef.current) {
-        clearTimeout(minLoadingTimerRef.current);
-      }
-      return;
-    }
-
-    // Trigger search after debounce
-    // Don't clear results here - keep previous results visible while loading
+    if (debouncedQuery.trim().length < 2) return;
     searchAPI(debouncedQuery, selectedType, 1);
   }, [debouncedQuery, selectedType, searchAPI]);
 

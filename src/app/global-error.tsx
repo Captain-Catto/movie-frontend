@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getGlobalErrorUiMessages } from "@/lib/ui-messages";
 
 export default function GlobalError({
@@ -9,16 +9,14 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [language, setLanguage] = useState<"vi" | "en">("en");
-  const labels = getGlobalErrorUiMessages(language);
-
-  useEffect(() => {
+  const [language] = useState<"vi" | "en">(() => {
+    if (typeof window === "undefined") return "en";
     const cookie = document.cookie;
-    const hasVietnamesePreference =
-      cookie.includes("preferred-language=vi-VN") ||
-      cookie.includes("preferred-language=vi");
-    setLanguage(hasVietnamesePreference ? "vi" : "en");
-  }, []);
+    return cookie.includes("preferred-language=vi-VN") || cookie.includes("preferred-language=vi")
+      ? "vi"
+      : "en";
+  });
+  const labels = getGlobalErrorUiMessages(language);
 
   return (
     <html lang={language === "vi" ? "vi" : "en"}>

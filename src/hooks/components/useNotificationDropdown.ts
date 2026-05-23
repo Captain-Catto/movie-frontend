@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import axiosInstance from "@/lib/axios-instance";
 import { useAuth } from "@/hooks/useAuth";
@@ -76,6 +76,18 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
     setUnreadCount,
   } = useNotificationSocket();
 
+  const prevLatestNotificationRef = useRef(latestNotification);
+  if (latestNotification !== prevLatestNotificationRef.current) {
+    prevLatestNotificationRef.current = latestNotification;
+    if (latestNotification) {
+      const newNotification: NotificationItem = { ...latestNotification, isRead: false };
+      setNotifications((prev) => [
+        newNotification,
+        ...prev.filter((item) => item.id !== newNotification.id).slice(0, 9),
+      ]);
+    }
+  }
+
   useEffect(() => {
     const fetchNotifications = async () => {
       if (!isAuthenticated) return;
@@ -112,18 +124,6 @@ export function useNotificationDropdown(): UseNotificationDropdownResult {
     fetchNotifications();
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (latestNotification) {
-      const newNotification: NotificationItem = {
-        ...latestNotification,
-        isRead: false,
-      };
-      setNotifications((prev) => [
-        newNotification,
-        ...prev.filter((item) => item.id !== newNotification.id).slice(0, 9),
-      ]);
-    }
-  }, [latestNotification]);
 
   const handleMarkAsRead = useCallback(
     async (notificationId: number) => {

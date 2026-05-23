@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useReducer } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const START_EVENT = "app-route-loading-start";
@@ -46,16 +46,32 @@ const shouldHandleAnchor = (
   return true;
 };
 
+interface LoaderState {
+  isVisible: boolean;
+  progress: number;
+}
+
+function loaderReducer(
+  state: LoaderState,
+  action: Partial<LoaderState> | ((prev: LoaderState) => Partial<LoaderState>)
+): LoaderState {
+  const patch = typeof action === "function" ? action(state) : action;
+  return { ...state, ...patch };
+}
+
 function TopLineLoaderImpl() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchKey = searchParams.toString();
   const pathWithSearch = `${pathname}${searchKey ? `?${searchKey}` : ""}`;
 
-  const [isVisible, setIsVisible] = useState(false);
-  const isActiveRef = useRef(false);
-  const [progress, setProgress] = useState(0);
+  const [state, dispatch] = useReducer(loaderReducer, {
+    isVisible: false,
+    progress: 0,
+  });
+  const { isVisible, progress } = state;
 
+  const isActiveRef = useRef(false);
   const currentPathRef = useRef(pathWithSearch);
   const hasPendingLoadRef = useRef(false);
   const hideTimerRef = useRef<number | null>(null);
@@ -81,15 +97,19 @@ function TopLineLoaderImpl() {
     hasPendingLoadRef.current = true;
     clearTimers();
     isActiveRef.current = true;
-    setIsVisible(true);
-    setProgress((prev) => (prev > 0 ? prev : MIN_START_PROGRESS));
+
+    dispatch((s) => ({
+      isVisible: true,
+      progress: s.progress > 0 ? s.progress : MIN_START_PROGRESS,
+    }));
 
     progressIntervalRef.current = window.setInterval(() => {
       if (!isActiveRef.current) return;
-      setProgress((prev) => {
-        if (prev >= MAX_AUTO_PROGRESS) return prev;
+      dispatch((s) => {
+        const prev = s.progress;
+        if (prev >= MAX_AUTO_PROGRESS) return {};
         const next = prev + Math.max((MAX_AUTO_PROGRESS - prev) * 0.12, 0.8);
-        return Math.min(next, MAX_AUTO_PROGRESS);
+        return { progress: Math.min(next, MAX_AUTO_PROGRESS) };
       });
     }, 140);
 
@@ -100,10 +120,9 @@ function TopLineLoaderImpl() {
         window.clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      setProgress(100);
+      dispatch({ progress: 100 });
       hideTimerRef.current = window.setTimeout(() => {
-        setIsVisible(false);
-        setProgress(0);
+        dispatch({ isVisible: false, progress: 0 });
       }, HIDE_DELAY_MS);
     }, STALL_TIMEOUT_MS);
   }, [clearTimers]);
@@ -115,10 +134,9 @@ function TopLineLoaderImpl() {
     hasPendingLoadRef.current = false;
     clearTimers();
     isActiveRef.current = false;
-    setProgress(100);
+    dispatch({ progress: 100 });
     hideTimerRef.current = window.setTimeout(() => {
-      setIsVisible(false);
-      setProgress(0);
+      dispatch({ isVisible: false, progress: 0 });
     }, HIDE_DELAY_MS);
   }, [clearTimers]);
 

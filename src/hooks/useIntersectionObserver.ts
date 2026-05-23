@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useReducer } from 'react';
 
 interface UseIntersectionObserverOptions {
   threshold?: number;
@@ -18,28 +18,30 @@ export function useIntersectionObserver(
   } = options;
 
   const elementRef = useRef<HTMLDivElement | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, dispatchVisible] = useReducer((s: boolean, a: boolean) => a, false);
+  const isFrozenRef = useRef(false);
 
   useEffect(() => {
     const element = elementRef.current;
     if (!element) return;
 
     // If already visible and freezeOnceVisible is true, don't observe
-    if (freezeOnceVisible && isVisible) return;
+    if (freezeOnceVisible && isFrozenRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         const shouldUpdate = entry.isIntersecting;
 
         if (shouldUpdate) {
-          setIsVisible(true);
+          dispatchVisible(true);
 
           // If freezeOnceVisible, disconnect after first intersection
           if (freezeOnceVisible) {
+            isFrozenRef.current = true;
             observer.disconnect();
           }
         } else if (!freezeOnceVisible) {
-          setIsVisible(false);
+          dispatchVisible(false);
         }
       },
       { threshold, root, rootMargin }
@@ -50,7 +52,8 @@ export function useIntersectionObserver(
     return () => {
       observer.disconnect();
     };
-  }, [threshold, root, rootMargin, freezeOnceVisible, isVisible]);
+  }, [threshold, root, rootMargin, freezeOnceVisible]);
 
   return [elementRef, isVisible];
 }
+

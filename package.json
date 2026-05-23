@@ -26,7 +26,6 @@
     "next": "15.5.7",
     "react": "19.1.2",
     "react-dom": "19.1.2",
-    "react-is": "^16.13.1",
     "react-loading-skeleton": "^3.5.0",
     "react-redux": "^9.2.0",
     "recharts": "^3.6.0",

@@ -72,9 +72,7 @@ export function useCommentForm({
   };
 
   useEffect(() => {
-    if (textareaRef.current && parentId) {
-      textareaRef.current.focus();
-    }
+    textareaRef.current?.focus();
   }, [parentId]);
 
   const searchMentions = async (query: string) => {

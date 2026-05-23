@@ -34,104 +34,98 @@ export function useEpisodePicker({
   const router = useRouter();
   const { language } = useLanguage();
   const dsLang = getDsLanguageFromLanguage(language);
+
   type EpisodeState = { episodes: Episode[]; loading: boolean };
   const [episodeState, dispatch] = useReducer(
     (s: EpisodeState, p: Partial<EpisodeState>): EpisodeState => ({ ...s, ...p }),
     { episodes: [], loading: false }
   );
   const { episodes, loading } = episodeState;
-  const [pendingSelection, setPendingSelection] = useState<{
-    key: string;
-    season: number;
-  } | null>(null);
+
+  const [prevSeason, setPrevSeason] = useState(currentSeason);
+  const [selectedSeason, setSelectedSeason] = useState(currentSeason);
+
+  if (currentSeason !== prevSeason) {
+    setPrevSeason(currentSeason);
+    setSelectedSeason(currentSeason);
+  }
+
   const seasonEpisodesCacheRef = useRef<Record<number, Episode[]>>({});
-  const selectionKey = `${tmdbId}:${contentId}:${currentSeason}`;
-  const selectedSeason =
-    pendingSelection?.key === selectionKey ? pendingSelection.season : currentSeason;
+  const lastFetchKeyRef = useRef<string | null>(null);
+  const currentSeasonRef = useRef(currentSeason);
+  currentSeasonRef.current = currentSeason;
+  const currentEpisodeRef = useRef(currentEpisode);
+  currentEpisodeRef.current = currentEpisode;
+  const dsLangRef = useRef(dsLang);
+  dsLangRef.current = dsLang;
 
   useEffect(() => {
     seasonEpisodesCacheRef.current = {};
+    lastFetchKeyRef.current = null;
+  }, [tmdbId, language]);
+
+  const fetchEpisodes = useCallback(async (season: number) => {
+    const cachedEpisodes = seasonEpisodesCacheRef.current[season];
+    dispatch({ episodes: cachedEpisodes ?? [], loading: !cachedEpisodes });
+    if (cachedEpisodes) return;
+
+    try {
+      const response = await apiService.getTVSeasonEpisodes(tmdbId, season, language);
+      if (response.success && response.data?.episodes) {
+        const normalizedEpisodes = response.data.episodes.map((episode, index) => ({
+          ...episode,
+          episodeNumber:
+            Number.isInteger(episode.episodeNumber) && episode.episodeNumber > 0
+              ? episode.episodeNumber
+              : index + 1,
+          name: episode.name || `Episode ${episode.episodeNumber || index + 1}`,
+        }));
+
+        dispatch({ episodes: normalizedEpisodes, loading: false });
+        seasonEpisodesCacheRef.current[season] = normalizedEpisodes;
+
+        if (season === currentSeasonRef.current) {
+          const nextEpisode = currentEpisodeRef.current + 1;
+          const hasNextEpisode = normalizedEpisodes.some((ep) => ep.episodeNumber === nextEpisode);
+          if (hasNextEpisode) {
+            apiService
+              .getStreamUrlByTmdbId(tmdbId, "tv", {
+                season,
+                episode: nextEpisode,
+                dsLang: dsLangRef.current,
+                autoplay: true,
+                autoNext: true,
+              })
+              .catch(() => undefined);
+          }
+        }
+      } else {
+        dispatch({ episodes: [], loading: false });
+      }
+    } catch {
+      dispatch({ episodes: [], loading: false });
+    }
   }, [tmdbId, language]);
 
   useEffect(() => {
-    const fetchEpisodes = async () => {
-      const cachedEpisodes = seasonEpisodesCacheRef.current[selectedSeason];
-      if (cachedEpisodes) {
-        dispatch({ episodes: cachedEpisodes });
-        return;
-      }
-
-      dispatch({ loading: true });
-      try {
-        const response = await apiService.getTVSeasonEpisodes(
-          tmdbId,
-          selectedSeason,
-          language
-        );
-        if (response.success && response.data?.episodes) {
-          const normalizedEpisodes = response.data.episodes.map(
-            (episode, index) => ({
-              ...episode,
-              episodeNumber:
-                Number.isInteger(episode.episodeNumber) &&
-                episode.episodeNumber > 0
-                  ? episode.episodeNumber
-                  : index + 1,
-              name:
-                episode.name ||
-                `Episode ${episode.episodeNumber || index + 1}`,
-            })
-          );
-
-          dispatch({ episodes: normalizedEpisodes, loading: false });
-          seasonEpisodesCacheRef.current[selectedSeason] = normalizedEpisodes;
-        } else {
-          dispatch({ episodes: [], loading: false });
-        }
-      } catch {
-        dispatch({ episodes: [], loading: false });
-      }
-    };
-
-    fetchEpisodes();
-  }, [tmdbId, selectedSeason, language]);
-
-  useEffect(() => {
-    if (selectedSeason !== currentSeason || episodes.length === 0) return;
-
-    const nextEpisode = currentEpisode + 1;
-    const hasNextEpisode = episodes.some(
-      (ep) => ep.episodeNumber === nextEpisode
-    );
-    if (!hasNextEpisode) return;
-
-    apiService
-      .getStreamUrlByTmdbId(tmdbId, "tv", {
-        season: selectedSeason,
-        episode: nextEpisode,
-        dsLang,
-        autoplay: true,
-        autoNext: true,
-      })
-      .catch(() => undefined);
-  }, [tmdbId, selectedSeason, currentSeason, currentEpisode, episodes, dsLang]);
+    const key = `${tmdbId}:${selectedSeason}:${language}`;
+    if (lastFetchKeyRef.current === key) return;
+    lastFetchKeyRef.current = key;
+    fetchEpisodes(selectedSeason);
+  }, [tmdbId, selectedSeason, language, fetchEpisodes]);
 
   const changeSeason = useCallback(
     (newSeason: number) => {
       if (newSeason === currentSeason && currentEpisode === 1) return;
-      setPendingSelection({ key: selectionKey, season: newSeason });
-      router.replace(`/watch/${contentId}?season=${newSeason}&episode=1`, {
-        scroll: false,
-      });
+      setSelectedSeason(newSeason);
+      router.replace(`/watch/${contentId}?season=${newSeason}&episode=1`, { scroll: false });
     },
-    [contentId, currentSeason, currentEpisode, router, selectionKey]
+    [contentId, currentSeason, currentEpisode, router]
   );
 
   const selectEpisode = useCallback(
     (episodeNumber: number) => {
-      if (selectedSeason === currentSeason && episodeNumber === currentEpisode) {
-        return;
-      }
+      if (selectedSeason === currentSeason && episodeNumber === currentEpisode) return;
       router.replace(
         `/watch/${contentId}?season=${selectedSeason}&episode=${episodeNumber}`,
         { scroll: false }
@@ -145,12 +139,5 @@ export function useEpisodePicker({
     [numberOfSeasons]
   );
 
-  return {
-    episodes,
-    loading,
-    selectedSeason,
-    seasonOptions,
-    changeSeason,
-    selectEpisode,
-  };
+  return { episodes, loading, selectedSeason, seasonOptions, changeSeason, selectEpisode };
 }
