@@ -59,8 +59,8 @@ export default function AnalyticsFavoritesChart({
                 borderRadius: "0.5rem",
                 color: "#F3F4F6",
               }}
-              labelFormatter={(value: string | number) =>
-                new Date(value).toLocaleDateString(locale)
+              labelFormatter={(value: React.ReactNode) =>
+                new Date(value as string | number).toLocaleDateString(locale)
               }
             />
             <Legend />
