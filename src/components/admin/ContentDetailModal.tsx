@@ -4,6 +4,7 @@ import Image from "next/image";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -14,6 +15,16 @@ import {
   TMDB_BACKDROP_SIZE,
 } from "@/constants/app.constants";
 import { ExternalLink, Star, Clock, Globe, Film } from "lucide-react";
+
+const toTmdbImageUrl = (
+  value: string | null | undefined,
+  size: string
+): string | null => {
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("/")) return `${TMDB_IMAGE_BASE_URL}/${size}${value}`;
+  return value;
+};
 
 interface ContentDetailModalProps {
   open: boolean;
@@ -39,12 +50,8 @@ export function ContentDetailModal({
   const content = data?.content;
   const credits = data?.credits;
 
-  const posterUrl = content?.posterPath
-    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${content.posterPath}`
-    : null;
-  const backdropUrl = content?.backdropPath
-    ? `${TMDB_IMAGE_BASE_URL}/${TMDB_BACKDROP_SIZE}${content.backdropPath}`
-    : null;
+  const posterUrl = toTmdbImageUrl(content?.posterPath, TMDB_POSTER_SIZE);
+  const backdropUrl = toTmdbImageUrl(content?.backdropPath, TMDB_BACKDROP_SIZE);
 
   const title =
     content && "title" in content
@@ -67,8 +74,9 @@ export function ContentDetailModal({
 
   const voteAverage =
     content && "voteAverage" in content
-      ? (content as { voteAverage: number }).voteAverage
+      ? Number((content as { voteAverage: number | string }).voteAverage)
       : 0;
+  const hasRating = Number.isFinite(voteAverage) && voteAverage > 0;
 
   const runtime =
     content && "runtime" in content
@@ -112,6 +120,9 @@ export function ContentDetailModal({
           <DialogTitle className="text-xl font-bold text-white">
             {loading ? "Loading..." : title}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Content details, metadata, cast, and actions for {loading ? "the selected title" : title}.
+          </DialogDescription>
         </DialogHeader>
 
         {loading ? (
@@ -162,7 +173,7 @@ export function ContentDetailModal({
               <div className="flex-1 space-y-3">
                 {/* Metadata badges */}
                 <div className="flex flex-wrap gap-2">
-                  {voteAverage > 0 && (
+                  {hasRating && (
                     <span className="flex items-center gap-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-xs font-semibold">
                       <Star className="size-3" />
                       {voteAverage.toFixed(1)}

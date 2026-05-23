@@ -55,6 +55,13 @@ const CONTENT_TYPE_PARAM: Record<Exclude<TabKey, "trending">, "movie" | "tv_seri
 
 const PAGE_SIZE = 20;
 
+const toTmdbPosterUrl = (value: string | null | undefined): string | undefined => {
+  if (!value) return undefined;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("/")) return `https://image.tmdb.org/t/p/w342${value}`;
+  return value;
+};
+
 export function useAdminContent() {
   type PageState = {
     activeTab: TabKey;
@@ -124,7 +131,7 @@ export function useAdminContent() {
       isBlocked: Boolean(item.isBlocked ?? item.isHidden ?? false),
       blockReason: item.blockReason ?? item.hiddenReason ?? undefined,
       posterPath: item.posterPath ?? undefined,
-      posterUrl: item.posterUrl ?? item.posterPath ?? undefined,
+      posterUrl: toTmdbPosterUrl(item.posterUrl) ?? toTmdbPosterUrl(item.posterPath),
       voteAverage:
         item.voteAverage !== undefined && item.voteAverage !== null
           ? Number(item.voteAverage)
@@ -305,8 +312,18 @@ export function useAdminContent() {
     if (isTrendingTab) {
       return;
     }
-    dispatch({ page: 1 });
     appliedSearchTermRef.current = searchTerm.trim();
+
+    if (page !== 1) {
+      dispatch({ page: 1 });
+      return;
+    }
+
+    if (activeTab === "movies") {
+      fetchMovies(1);
+    } else if (activeTab === "tv") {
+      fetchTVSeries(1);
+    }
   };
 
   const handleFilterChange = (status: ContentStatusFilter) => {

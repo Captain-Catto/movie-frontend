@@ -19,6 +19,13 @@ interface ContentHoverPreviewProps {
   children: React.ReactNode;
 }
 
+const toTmdbPosterUrl = (value: string | null | undefined): string | null => {
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
+  if (value.startsWith("/")) return `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${value}`;
+  return value;
+};
+
 export function ContentHoverPreview({
   title,
   posterUrl,
@@ -30,10 +37,10 @@ export function ContentHoverPreview({
 }: ContentHoverPreviewProps) {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const numericVoteAverage = Number(voteAverage);
+  const hasRating = Number.isFinite(numericVoteAverage) && numericVoteAverage > 0;
 
-  const imageUrl =
-    posterUrl ||
-    (posterPath ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${posterPath}` : null);
+  const imageUrl = toTmdbPosterUrl(posterUrl) ?? toTmdbPosterUrl(posterPath);
 
   const handleMouseEnter = useCallback(() => {
     timerRef.current = setTimeout(() => setVisible(true), 300);
@@ -82,10 +89,10 @@ export function ContentHoverPreview({
               </h4>
 
               <div className="flex items-center gap-2">
-                {voteAverage != null && voteAverage > 0 && (
+                {hasRating && (
                   <span className="flex items-center gap-0.5 text-yellow-400 text-xs font-semibold">
                     <Star className="size-3" />
-                    {voteAverage.toFixed(1)}
+                    {numericVoteAverage.toFixed(1)}
                   </span>
                 )}
                 {contentType && (
