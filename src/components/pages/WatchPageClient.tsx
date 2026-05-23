@@ -117,7 +117,6 @@ function VideoPlayerSection({
               fill
               sizes="100vw"
               className="object-cover"
-              priority
             />
             <div className="absolute inset-0 bg-gray-950 bg-opacity-40 flex items-center justify-center">
               <div className="size-24 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center transition-all transform hover:scale-110 group">
