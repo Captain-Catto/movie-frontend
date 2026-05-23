@@ -85,7 +85,6 @@ function VideoPlayerSection({
                 title={`Watch ${title}`}
                 className="size-full"
                 allow="autoplay; fullscreen; picture-in-picture"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
                 referrerPolicy="origin"
                 onLoad={handleStreamLoadSuccess}
                 onError={handleStreamLoadError}
