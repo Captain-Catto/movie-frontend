@@ -243,7 +243,7 @@ function AdminStreamDomainsSection({
           onChange={(e) => onTextChange(e.target.value)}
           rows={8}
           aria-label="Stream domains"
-          placeholder="https://vidsrcme.ru&#10;https://vidsrc-embed.ru&#10;https://vsrc.su"
+          placeholder="https://vsembed.ru&#10;https://vsembed.su"
           className="w-full rounded-md border border-gray-600 bg-gray-900 text-white text-sm p-3 focus:outline-none focus:ring-2 focus:ring-red-600"
         />
         <div className="flex items-center justify-between gap-3">

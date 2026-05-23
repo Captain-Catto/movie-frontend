@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BASE = "https://vidsrcme.ru";
+const BASE = "https://vsembed.ru";
 
 const HEADERS = {
   "User-Agent":
