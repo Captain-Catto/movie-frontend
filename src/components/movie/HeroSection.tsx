@@ -425,17 +425,27 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
+  const canLoop = movies.length > 1;
+
   const handleThumbnailClick = (index: number, event: React.MouseEvent) => {
     if (flipAnim || index === activeIndex || !swiperRef.current) return;
 
     if (isMobile) {
-      swiperRef.current.slideToLoop(index);
+      if (canLoop) {
+        swiperRef.current.slideToLoop(index);
+      } else {
+        swiperRef.current.slideTo(index);
+      }
       return;
     }
 
     const heroEl = heroRef.current;
     if (!heroEl) {
-      swiperRef.current.slideToLoop(index);
+      if (canLoop) {
+        swiperRef.current.slideToLoop(index);
+      } else {
+        swiperRef.current.slideTo(index);
+      }
       setActiveIndex(index);
       setVisibleContentIndex(index);
       return;
@@ -466,7 +476,11 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
     });
 
     setTimeout(() => {
-      swiperRef.current?.slideToLoop(index, 0);
+      if (canLoop) {
+        swiperRef.current?.slideToLoop(index, 0);
+      } else {
+        swiperRef.current?.slideTo(index, 0);
+      }
       setActiveIndex(index);
       setVisibleContentIndex(index);
     }, 420);
@@ -491,7 +505,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
         slidesPerView={1}
         pagination={{ clickable: true, el: ".swiper-pagination-custom" }}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
-        loop={true}
+        loop={canLoop}
         className="h-[100dvh]"
         onSwiper={(swiper) => (swiperRef.current = swiper)}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
