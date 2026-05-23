@@ -16,11 +16,11 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-          <div className="max-w-2xl gap-y-8">
+          <div className="max-w-2xl flex flex-col gap-y-8">
             {/* Title and Metadata Skeleton */}
-            <div>
-              <Skeleton className="h-12 w-96 mb-4" />
-              <div className="flex items-center gap-x-4 text-sm mb-4">
+            <div className="flex flex-col gap-y-4">
+              <Skeleton className="h-12 w-96" />
+              <div className="flex items-center gap-x-4 text-sm">
                 <Skeleton className="h-4 w-8" />
                 <Skeleton className="h-4 w-12" />
                 <Skeleton className="h-4 w-16" />
@@ -37,7 +37,7 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
             </div>
 
             {/* Description Skeleton */}
-            <div className="gap-y-2">
+            <div className="flex flex-col gap-y-2">
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-3/4" />
@@ -63,22 +63,22 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
       </div>
 
       {/* Content Section Skeleton */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 gap-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col gap-y-16">
         {/* Cast Section Skeleton */}
-        <div>
-          <Skeleton className="h-8 w-32 mb-8" />
+        <div className="flex flex-col gap-y-8">
+          <Skeleton className="h-8 w-32" />
           <CastSkeleton />
         </div>
 
         {/* Episodes/Related Content Section Skeleton */}
         {isTV ? (
-          <div>
-            <Skeleton className="h-8 w-48 mb-8" />
+          <div className="flex flex-col gap-y-8">
+            <Skeleton className="h-8 w-48" />
             <EpisodesSkeleton />
           </div>
         ) : (
-          <div>
-            <Skeleton className="h-8 w-48 mb-8" />
+          <div className="flex flex-col gap-y-8">
+            <Skeleton className="h-8 w-48" />
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {Array.from({ length: 6 }).map((_, index) => (
                 <div key={index} className="sw-item group relative">
@@ -87,9 +87,9 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
                       <Skeleton className="absolute inset-0" />
                     </div>
                   </div>
-                  <div className="info mt-3 gap-y-2">
+                  <div className="info mt-3 flex flex-col gap-y-2">
                     <Skeleton className="h-4 w-full" />
-                    <Skeleton className="size-3/4" />
+                    <Skeleton className="h-3 w-3/4" />
                   </div>
                 </div>
               ))}
@@ -99,9 +99,9 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
 
         {/* Additional Info Section Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
-            <Skeleton className="h-6 w-32 mb-4" />
-            <div className="gap-y-3">
+          <div className="flex flex-col gap-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="flex flex-col gap-y-3">
               {Array.from({ length: 5 }).map((_, index) => (
                 <div key={index} className="flex justify-between">
                   <Skeleton className="h-4 w-24" />
@@ -110,9 +110,9 @@ const DetailPageSkeleton = ({ isTV = false }: { isTV?: boolean }) => {
               ))}
             </div>
           </div>
-          <div>
-            <Skeleton className="h-6 w-32 mb-4" />
-            <div className="gap-y-3">
+          <div className="flex flex-col gap-y-4">
+            <Skeleton className="h-6 w-32" />
+            <div className="flex flex-col gap-y-3">
               {Array.from({ length: 4 }).map((_, index) => (
                 <div key={index} className="flex justify-between">
                   <Skeleton className="h-4 w-28" />
