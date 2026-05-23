@@ -318,21 +318,22 @@ function HeroSlide({
               : `View details for ${movie.title}`
           }
         />
-        <div className="background-fade absolute inset-0" />
-        <div className="cover-fade absolute inset-0">
-          <div className="cover-image relative size-full">
-            <Image
-              className="fade-in visible size-full object-cover"
-              title={movie.title}
-              src={heroBackgroundImage}
-              alt={movie.title}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1536px) 90vw, 1280px"
-              quality={55}
-              priority={index === 0}
-            />
-          </div>
+        <div
+          className="background-fade absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${heroBackgroundImage})` }}
+        >
+          <Image
+            className="fade-in visible size-full object-cover"
+            title={movie.title}
+            src={heroBackgroundImage}
+            alt={movie.title}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, (max-width: 1536px) 90vw, 1280px"
+            quality={55}
+            priority={index === 0}
+          />
         </div>
+        <div className="cover-fade absolute inset-0" />
         <div className="safe-area relative z-20 h-full flex items-center">
           <div className="slide-content max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <HeroSlideContent
@@ -425,7 +426,7 @@ const HeroSection = ({ movies, isLoading = false }: HeroSectionProps) => {
 
   if (!movies || movies.length === 0 || isLoading) return <HeroSkeleton />;
 
-  const canLoop = movies.length > 1;
+  const canLoop = movies.length > 2;
 
   const handleThumbnailClick = (index: number, event: React.MouseEvent) => {
     if (flipAnim || index === activeIndex || !swiperRef.current) return;
