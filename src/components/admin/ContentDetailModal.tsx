@@ -13,6 +13,7 @@ import {
   TMDB_IMAGE_BASE_URL,
   TMDB_POSTER_SIZE,
   TMDB_BACKDROP_SIZE,
+  FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import { ExternalLink, Star, Clock, Globe, Film } from "lucide-react";
 
@@ -24,6 +25,15 @@ const toTmdbImageUrl = (
   if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith("/")) return `${TMDB_IMAGE_BASE_URL}/${size}${value}`;
   return value;
+};
+
+type ContentImageFields = {
+  posterPath?: string | null;
+  poster_path?: string | null;
+  posterUrl?: string | null;
+  backdropPath?: string | null;
+  backdrop_path?: string | null;
+  backdropUrl?: string | null;
 };
 
 interface ContentDetailModalProps {
@@ -49,9 +59,16 @@ export function ContentDetailModal({
 
   const content = data?.content;
   const credits = data?.credits;
+  const imageFields = content as ContentImageFields | null | undefined;
 
-  const posterUrl = toTmdbImageUrl(content?.posterPath, TMDB_POSTER_SIZE);
-  const backdropUrl = toTmdbImageUrl(content?.backdropPath, TMDB_BACKDROP_SIZE);
+  const posterUrl =
+    toTmdbImageUrl(imageFields?.posterUrl, TMDB_POSTER_SIZE) ||
+    toTmdbImageUrl(imageFields?.posterPath, TMDB_POSTER_SIZE) ||
+    toTmdbImageUrl(imageFields?.poster_path, TMDB_POSTER_SIZE);
+  const backdropUrl =
+    toTmdbImageUrl(imageFields?.backdropUrl, TMDB_BACKDROP_SIZE) ||
+    toTmdbImageUrl(imageFields?.backdropPath, TMDB_BACKDROP_SIZE) ||
+    toTmdbImageUrl(imageFields?.backdrop_path, TMDB_BACKDROP_SIZE);
 
   const title =
     content && "title" in content
@@ -157,17 +174,15 @@ export function ContentDetailModal({
             {/* Main info */}
             <div className="flex gap-4">
               {/* Poster */}
-              {posterUrl && (
-                <div className="relative w-32 h-48 rounded-lg overflow-hidden shrink-0">
-                  <Image
-                    src={posterUrl}
-                    alt={title}
-                    fill
-                    sizes="128px"
-                    className="object-cover"
-                  />
-                </div>
-              )}
+              <div className="relative w-32 h-48 rounded-lg overflow-hidden shrink-0 bg-gray-800">
+                <Image
+                  src={posterUrl || FALLBACK_POSTER}
+                  alt={title}
+                  fill
+                  sizes="128px"
+                  className="object-cover"
+                />
+              </div>
 
               {/* Details */}
               <div className="flex-1 space-y-3">

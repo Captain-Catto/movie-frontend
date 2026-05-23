@@ -24,6 +24,7 @@ import {
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
 );
+const TMDB_PROFILE_CARD_SIZE = "w185";
 const DISPLAY_NAMES_BY_LOCALE = {
   "en-US": {
     region: new Intl.DisplayNames(["en-US"], { type: "region" }),
@@ -73,6 +74,8 @@ function TVDetailHero({
           sizes="100vw"
           className="object-cover"
           priority
+          fetchPriority="high"
+          quality={45}
           placeholder="blur"
           blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyLDHPKw8HFBcZLEEEEEEEgUCFQKBQQVBA
 "
@@ -90,7 +93,8 @@ function TVDetailHero({
                 alt={tvData.title}
                 fill
                 className="object-cover rounded-lg shadow-2xl"
-                priority
+                loading="eager"
+                quality={55}
                 sizes="(max-width: 768px) 192px, (max-width: 1024px) 256px, 288px"
               />
             </div>
@@ -279,14 +283,15 @@ function TVDetailCastSection({
                 <Image
                   src={
                     (actor.profile_path || actor.profilePath)
-                      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path || actor.profilePath}`
+                      ? `${TMDB_IMAGE_BASE_URL}/${TMDB_PROFILE_CARD_SIZE}${actor.profile_path || actor.profilePath}`
                       : FALLBACK_POSTER
                   }
                   alt={actor.name}
                   fill
                   className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
                   loading="lazy"
-                  sizes="(max-width: 768px) 50vw, 25vw"
+                  sizes="(max-width: 768px) 45vw, (max-width: 1280px) 20vw, 178px"
+                  quality={45}
                 />
               </div>
               <h4 className="font-semibold text-white mb-1 group-hover:text-red-400 transition-colors">

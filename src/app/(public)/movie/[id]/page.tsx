@@ -27,7 +27,11 @@ export async function generateMetadata({
     });
   }
 
-  const { movieData } = await getMovieDetailPageDataByTmdbId(parsedTmdbId, language);
+  const { movieData } = await getMovieDetailPageDataByTmdbId(
+    parsedTmdbId,
+    language,
+    { includeCredits: false }
+  );
   const previewImage = movieData?.backgroundImage || movieData?.posterImage;
 
   return resolvePageMetadata({

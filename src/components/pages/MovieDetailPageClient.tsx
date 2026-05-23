@@ -20,9 +20,10 @@ import { getLocaleFromLanguage } from "@/constants/app.constants";
 import { getMovieDetailUiMessages, type MovieDetailUiMessages } from "@/lib/ui-messages";
 import {
   TMDB_IMAGE_BASE_URL,
-  TMDB_POSTER_SIZE,
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
+
+const TMDB_PROFILE_CARD_SIZE = "w185";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -66,6 +67,8 @@ function MovieDetailHero({ movieData, movieId, labels, contentType }: MovieDetai
           fill
           className="object-cover"
           priority
+          fetchPriority="high"
+          quality={45}
           sizes="100vw"
         />
       </div>
@@ -85,7 +88,8 @@ function MovieDetailHero({ movieData, movieId, labels, contentType }: MovieDetai
                 alt={movieData.title}
                 fill
                 className="object-cover rounded-lg shadow-2xl"
-                priority
+                loading="eager"
+                quality={55}
                 sizes="256px"
               />
             </div>
@@ -250,14 +254,15 @@ function MovieDetailCastSection({ movieData, creditsLoading, labels }: MovieDeta
                   <Image
                     src={
                       (actor.profile_path || actor.profilePath)
-                        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${actor.profile_path || actor.profilePath}`
+                        ? `${TMDB_IMAGE_BASE_URL}/${TMDB_PROFILE_CARD_SIZE}${actor.profile_path || actor.profilePath}`
                         : FALLBACK_POSTER
                     }
                     alt={actor.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform cursor-pointer"
                     loading="lazy"
-                    sizes="(max-width: 768px) 50vw, 25vw"
+                    sizes="(max-width: 768px) 45vw, (max-width: 1280px) 20vw, 178px"
+                    quality={45}
                     onError={(
                       e: SyntheticEvent<HTMLImageElement>
                     ) => {

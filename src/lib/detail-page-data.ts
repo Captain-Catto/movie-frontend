@@ -170,9 +170,11 @@ function mergeMovieCredits(detail: MovieDetail, credits: Credits): MovieDetail {
 
 export async function getMovieDetailPageDataByTmdbId(
   tmdbId: number,
-  language: string
+  language: string,
+  options: { includeCredits?: boolean } = {}
 ): Promise<MovieDetailPageDataResult> {
   try {
+    const includeCredits = options.includeCredits ?? true;
     const contentResult = await lookupContentByTmdbId(tmdbId, language);
 
     if (!contentResult.success || !contentResult.content) {
@@ -189,7 +191,7 @@ export async function getMovieDetailPageDataByTmdbId(
         ? mapMovieToDetail(contentResult.content as Movie, language)
         : mapTVToMovieDetail(contentResult.content as TVSeries, language);
 
-    if (contentType !== "movie") {
+    if (contentType !== "movie" || !includeCredits) {
       return {
         movieData: mappedData,
         contentType,
