@@ -159,7 +159,7 @@ export function ContentDetailModal({
           <div className="space-y-4">
             {/* Backdrop */}
             {backdropUrl && (
-              <div className="relative h-48 rounded-lg overflow-hidden">
+              <div className="relative h-52 rounded-lg overflow-hidden">
                 <Image
                   src={backdropUrl}
                   alt={title}
@@ -167,19 +167,21 @@ export function ContentDetailModal({
                   sizes="700px"
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/20 to-transparent" />
               </div>
             )}
 
-            {/* Main info */}
+            {/* Main info — poster overlaps the backdrop with negative margin */}
             <div className="flex gap-4">
               {/* Poster */}
-              <div className="relative w-32 h-48 rounded-lg overflow-hidden shrink-0 bg-gray-800">
+              <div
+                className={`relative w-28 shrink-0 rounded-lg overflow-hidden bg-gray-800 shadow-xl ring-2 ring-gray-700 z-10 ${backdropUrl ? "-mt-20 h-44" : "h-44"}`}
+              >
                 <Image
                   src={posterUrl || FALLBACK_POSTER}
                   alt={title}
                   fill
-                  sizes="128px"
+                  sizes="112px"
                   className="object-cover"
                 />
               </div>
