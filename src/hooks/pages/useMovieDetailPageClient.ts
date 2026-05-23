@@ -39,7 +39,9 @@ export function useMovieDetailPageClient({
     { movieData: initialMovieData, loading: !initialMovieData && !initialError, creditsLoading: false, error: initialError, contentType: initialContentType }
   );
   const { movieData, loading, creditsLoading, error, contentType } = pageState;
-  const skipInitialFetchRef = useRef(Boolean(initialMovieData || initialError));
+  const lastFetchKeyRef = useRef<string | null>(
+    (initialMovieData || initialError) ? `${movieId}|${initialLanguage}` : null
+  );
 
   usePageDuration({
     contentId: movieId,
@@ -49,39 +51,31 @@ export function useMovieDetailPageClient({
   });
 
   useEffect(() => {
-    if (skipInitialFetchRef.current && language === initialLanguage) {
-      skipInitialFetchRef.current = false;
+    if (!movieId) return;
+    const fetchKey = `${movieId}|${language}`;
+    if (lastFetchKeyRef.current === fetchKey) return;
+    lastFetchKeyRef.current = fetchKey;
+
+    const parsedTmdbId = Number(movieId);
+    if (!Number.isFinite(parsedTmdbId) || parsedTmdbId <= 0) {
+      dispatch({ movieData: null, contentType: null, error: labels.invalidContentId, loading: false, creditsLoading: false });
       return;
     }
 
-    const fetchMovieData = async () => {
-      dispatch({ loading: true, creditsLoading: true, error: null });
-      try {
-        const parsedTmdbId = Number(movieId);
-        if (!Number.isFinite(parsedTmdbId) || parsedTmdbId <= 0) {
-          dispatch({ movieData: null, contentType: null, error: labels.invalidContentId, loading: false, creditsLoading: false });
-          return;
-        }
-
-        const result = await getMovieDetailPageDataByTmdbId(parsedTmdbId, language);
-        dispatch({ movieData: result.movieData, contentType: result.contentType, error: result.error, loading: false, creditsLoading: false });
-
-        if (result.movieData) {
-          analyticsService.trackView(
-            String(result.movieData.tmdbId),
-            result.contentType === "tv" ? "tv_series" : "movie",
-            result.movieData.title
-          );
-        }
-      } catch (err) {
-        dispatch({ error: err instanceof Error ? err.message : labels.anErrorOccurred, movieData: null, contentType: null, loading: false, creditsLoading: false });
+    dispatch({ loading: true, creditsLoading: true, error: null });
+    getMovieDetailPageDataByTmdbId(parsedTmdbId, language).then((result) => {
+      dispatch({ movieData: result.movieData, contentType: result.contentType, error: result.error, loading: false, creditsLoading: false });
+      if (result.movieData) {
+        analyticsService.trackView(
+          String(result.movieData.tmdbId),
+          result.contentType === "tv" ? "tv_series" : "movie",
+          result.movieData.title
+        );
       }
-    };
-
-    if (movieId) {
-      fetchMovieData();
-    }
-  }, [movieId, language, initialLanguage, labels.anErrorOccurred, labels.invalidContentId]);
+    }).catch((err) => {
+      dispatch({ error: err instanceof Error ? err.message : labels.anErrorOccurred, movieData: null, contentType: null, loading: false, creditsLoading: false });
+    });
+  }, [movieId, language, labels.anErrorOccurred, labels.invalidContentId]);
 
   return {
     movieData,

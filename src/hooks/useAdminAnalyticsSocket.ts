@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./useAuth";
 
@@ -36,7 +36,6 @@ function analyticsReducer(state: AnalyticsState, action: Partial<AnalyticsState>
 export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
   const { token, isAuthenticated, user } = useAuth();
 
-  const [isReady, setIsReady] = useState(false);
   const [state, dispatch] = useReducer(analyticsReducer, {
     socket: null,
     isConnected: false,
@@ -47,38 +46,22 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
   const socketRef = useRef<Socket | null>(null);
   const lastSnapshotIdRef = useRef<string | null>(null);
 
-  // Hydration guard
-  useEffect(() => {
-    const timer = setTimeout(() => setIsReady(true), 80);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     const isAdmin = !!user?.role && ADMIN_ROLES.has(user.role);
 
-    if (!isReady || !isAuthenticated || !token || !isAdmin) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+    if (!isAuthenticated || !token || !isAdmin) {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
       dispatch({ socket: null, isConnected: false });
-      return () => {};
+      return;
     }
 
     const API_BASE_URL =
       process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
 
-    const client = io(`${API_BASE_URL}/admin-analytics`, {
-      auth: { token },
-      transports: ["polling", "websocket"],
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
-    });
+    let client: Socket | null = null;
 
-    socketRef.current = client;
-
+    // Define handlers in outer scope so cleanup can reference them
     const handleConnect = () => dispatch({ socket: client, isConnected: true });
     const handleDisconnect = () => dispatch({ isConnected: false });
     const handleConnectError = (error: Error) => {
@@ -99,23 +82,39 @@ export function useAdminAnalyticsSocket(): UseAdminAnalyticsSocketReturn {
       });
     };
 
-    client.on("connect", handleConnect);
-    client.on("disconnect", handleDisconnect);
-    client.on("connect_error", handleConnectError);
-    client.on("auth:error", handleAuthError);
-    client.on("analytics:update", handleAnalyticsUpdate);
+    // Defer connection by 80ms as a hydration guard
+    const hydrationTimer = window.setTimeout(() => {
+      client = io(`${API_BASE_URL}/admin-analytics`, {
+        auth: { token },
+        transports: ["polling", "websocket"],
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+      });
+
+      socketRef.current = client;
+      client.on("connect", handleConnect);
+      client.on("disconnect", handleDisconnect);
+      client.on("connect_error", handleConnectError);
+      client.on("auth:error", handleAuthError);
+      client.on("analytics:update", handleAnalyticsUpdate);
+    }, 80);
 
     return () => {
-      client.off("connect", handleConnect);
-      client.off("disconnect", handleDisconnect);
-      client.off("connect_error", handleConnectError);
-      client.off("auth:error", handleAuthError);
-      client.off("analytics:update", handleAnalyticsUpdate);
-      client.disconnect();
-      socketRef.current = null;
-      dispatch({ socket: null, isConnected: false });
+      window.clearTimeout(hydrationTimer);
+      if (client) {
+        client.off("connect", handleConnect);
+        client.off("disconnect", handleDisconnect);
+        client.off("connect_error", handleConnectError);
+        client.off("auth:error", handleAuthError);
+        client.off("analytics:update", handleAnalyticsUpdate);
+        client.disconnect();
+        socketRef.current = null;
+        dispatch({ socket: null, isConnected: false });
+      }
     };
-  }, [isReady, isAuthenticated, token, user?.role]);
+  }, [isAuthenticated, token, user?.role]);
 
   return {
     snapshot: state.snapshot,

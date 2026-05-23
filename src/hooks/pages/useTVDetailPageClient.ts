@@ -38,7 +38,9 @@ export function useTVDetailPageClient({
     { tvData: initialTVData, loading: !initialTVData && !initialError, creditsLoading: false, error: initialError }
   );
   const { tvData, loading, creditsLoading, error } = pageState;
-  const skipInitialFetchRef = useRef(Boolean(initialTVData || initialError));
+  const lastFetchKeyRef = useRef<string | null>(
+    (initialTVData || initialError) ? `${tvIdParam}|${initialLanguage}` : null
+  );
 
   usePageDuration({
     contentId: tvIdParam,
@@ -48,35 +50,24 @@ export function useTVDetailPageClient({
   });
 
   useEffect(() => {
-    if (skipInitialFetchRef.current && language === initialLanguage) {
-      skipInitialFetchRef.current = false;
+    if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
+      dispatch({ error: labels.invalidTvSeriesId, tvData: null, loading: false, creditsLoading: false });
       return;
     }
+    const fetchKey = `${tvIdParam}|${language}`;
+    if (lastFetchKeyRef.current === fetchKey) return;
+    lastFetchKeyRef.current = fetchKey;
 
-    const fetchTVData = async () => {
-      dispatch({ loading: true, creditsLoading: true, error: null });
-      try {
-        if (!tvIdParam || Number.isNaN(numericTvId) || numericTvId <= 0) {
-          throw new Error(labels.invalidTvSeriesId);
-        }
-
-        const result = await getTVDetailPageDataByTmdbId(numericTvId, language);
-        dispatch({ tvData: result.tvData, error: result.error, loading: false, creditsLoading: false });
-
-        if (result.tvData) {
-          analyticsService.trackView(
-            String(result.tvData.tmdbId),
-            "tv_series",
-            result.tvData.title
-          );
-        }
-      } catch (err) {
-        dispatch({ error: err instanceof Error ? err.message : labels.unknownError, tvData: null, loading: false, creditsLoading: false });
+    dispatch({ loading: true, creditsLoading: true, error: null });
+    getTVDetailPageDataByTmdbId(numericTvId, language).then((result) => {
+      dispatch({ tvData: result.tvData, error: result.error, loading: false, creditsLoading: false });
+      if (result.tvData) {
+        analyticsService.trackView(String(result.tvData.tmdbId), "tv_series", result.tvData.title);
       }
-    };
-
-    fetchTVData();
-  }, [numericTvId, tvIdParam, language, initialLanguage, labels.invalidTvSeriesId, labels.unknownError]);
+    }).catch((err) => {
+      dispatch({ error: err instanceof Error ? err.message : labels.unknownError, tvData: null, loading: false, creditsLoading: false });
+    });
+  }, [numericTvId, tvIdParam, language, labels.invalidTvSeriesId, labels.unknownError]);
 
   return {
     tvData,

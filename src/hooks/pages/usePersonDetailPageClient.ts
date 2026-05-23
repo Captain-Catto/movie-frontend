@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer, useRef } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   getLocaleFromLanguage,
@@ -134,7 +134,7 @@ export function usePersonDetailPageClient({
     }
   );
   const { personData, castCredits, crewCredits, loading, error, activeTab, showFullBio, currentPage } = personState;
-  const skipInitialFetchRef = useRef(Boolean(initialPersonData));
+  const lastFetchedPersonIdRef = useRef<string | null>(initialPersonData ? personId : null);
   const prevPersonIdRef = useRef(personId);
 
   if (personId !== prevPersonIdRef.current) {
@@ -149,14 +149,12 @@ export function usePersonDetailPageClient({
       showFullBio: false,
       currentPage: 1,
     });
-    skipInitialFetchRef.current = Boolean(initialPersonData);
+    lastFetchedPersonIdRef.current = initialPersonData ? personId : null;
   }
 
   useEffect(() => {
-    if (skipInitialFetchRef.current) {
-      skipInitialFetchRef.current = false;
-      return;
-    }
+    if (lastFetchedPersonIdRef.current === personId) return;
+    lastFetchedPersonIdRef.current = personId;
 
     const parsedPersonId = Number(personId);
     if (!Number.isFinite(parsedPersonId) || parsedPersonId <= 0) {
@@ -164,17 +162,12 @@ export function usePersonDetailPageClient({
       return;
     }
 
-    const fetchPersonData = async () => {
-      dispatch({ loading: true });
-      try {
-        const result = await getPersonDetailPageDataById(parsedPersonId);
-        dispatch({ personData: result.personData, castCredits: result.castCredits, crewCredits: result.crewCredits, error: result.error, loading: false });
-      } catch (err) {
-        dispatch({ personData: null, castCredits: [], crewCredits: [], error: err instanceof Error ? err.message : labels.unableToLoadActorInformation, loading: false });
-      }
-    };
-
-    fetchPersonData();
+    dispatch({ loading: true });
+    getPersonDetailPageDataById(parsedPersonId).then((result) => {
+      dispatch({ personData: result.personData, castCredits: result.castCredits, crewCredits: result.crewCredits, error: result.error, loading: false });
+    }).catch((err) => {
+      dispatch({ personData: null, castCredits: [], crewCredits: [], error: err instanceof Error ? err.message : labels.unableToLoadActorInformation, loading: false });
+    });
   }, [personId, labels.invalidPersonId, labels.unableToLoadActorInformation]);
 
   const castTotalItems = castCredits.length;

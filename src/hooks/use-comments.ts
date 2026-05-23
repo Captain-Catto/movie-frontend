@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { commentService } from "@/services/comment.service";
 import {
   Comment,
@@ -388,6 +388,8 @@ export function useComment(commentId: number) {
   const { language } = useLanguage();
   const labels = getCommentsUiMessages(language);
 
+  const lastFetchedCommentIdRef = useRef<number | null>(null);
+
   const loadComment = useCallback(async () => {
     try {
       setLoading(true);
@@ -405,9 +407,10 @@ export function useComment(commentId: number) {
   }, [commentId, showError, labels.errorLoadingCommentDefault, labels.errorLoadingCommentTitle]);
 
   useEffect(() => {
-    if (commentId) {
-      loadComment();
-    }
+    if (!commentId) return;
+    if (lastFetchedCommentIdRef.current === commentId) return;
+    lastFetchedCommentIdRef.current = commentId;
+    loadComment();
   }, [commentId, loadComment]);
 
   return {

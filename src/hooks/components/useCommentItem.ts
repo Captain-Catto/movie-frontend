@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { commentService } from "@/services/comment.service";
 import { useAppSelector } from "@/store/hooks";
 import type {
@@ -43,7 +43,6 @@ export interface UseCommentItemResult {
 export function useCommentItem({
   comment,
   depth = 0,
-  maxDepth = 3,
   onEdit,
   onDelete,
   onLike,

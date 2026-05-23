@@ -98,7 +98,6 @@ export function useWatchPage({
     activeStreamIndex: number;
     streamError: string | null;
     hasTrackedPlay: boolean;
-    hasTrackedView: boolean;
   };
   const [watchState, dispatch] = useReducer(
     (s: WatchState, p: Partial<WatchState>): WatchState => ({ ...s, ...p }),
@@ -114,13 +113,11 @@ export function useWatchPage({
       activeStreamIndex: 0,
       streamError: initialStreamError,
       hasTrackedPlay: false,
-      hasTrackedView: false,
     }
   );
-  const { movieData, loading, error, credits, recommendations, creditsLoading, recommendationsLoading, streamCandidates, activeStreamIndex, streamError, hasTrackedPlay, hasTrackedView } = watchState;
+  const { movieData, loading, error, credits, recommendations, creditsLoading, recommendationsLoading, streamCandidates, activeStreamIndex, streamError, hasTrackedPlay } = watchState;
   const streamLoadingRef = useRef(false);
   const streamTimeoutRef = useRef<number | null>(null);
-  const skipInitialFetchRef = useRef(Boolean(initialMovieData || initialError));
   const lastDataFetchKeyRef = useRef<string | null>(
     initialMovieData || initialError ? `${movieId}|${initialLanguage}` : null
   );
@@ -144,59 +141,46 @@ export function useWatchPage({
   const streamContentType = movieData?.contentType;
 
   useEffect(() => {
-    if (skipInitialFetchRef.current && language === initialLanguage) {
-      skipInitialFetchRef.current = false;
-      return;
-    }
+    if (!movieId) return;
+    const dataFetchKey = `${movieId}|${language}|${season}|${episode}`;
+    if (lastDataFetchKeyRef.current === dataFetchKey) return;
+    lastDataFetchKeyRef.current = dataFetchKey;
 
-    const dataFetchKey = `${movieId}|${language}`;
-    if (lastDataFetchKeyRef.current === dataFetchKey) {
-      return;
-    }
+    dispatch({ loading: true, creditsLoading: true, recommendationsLoading: true, streamCandidates: [], streamError: null, activeStreamIndex: 0, error: null, hasTrackedPlay: false });
 
-    const fetchMovieData = async () => {
-      lastDataFetchKeyRef.current = dataFetchKey;
-      dispatch({ loading: true, creditsLoading: true, recommendationsLoading: true, streamCandidates: [], streamError: null, activeStreamIndex: 0, error: null });
-
-      try {
-        const result = await getWatchPageDataByRouteId(
-          movieId,
-          language,
-          season,
-          episode
+    getWatchPageDataByRouteId(movieId, language, season, episode).then((result) => {
+      dispatch({
+        movieData: result.movieData,
+        credits: result.credits,
+        recommendations: result.recommendations,
+        streamCandidates: result.streamCandidates,
+        streamError: result.streamError,
+        error: result.error,
+        creditsLoading: false,
+        recommendationsLoading: false,
+        loading: false,
+      });
+      if (result.movieData) {
+        analyticsService.trackView(
+          String(result.movieData.tmdbId),
+          result.movieData.contentType === "tv" ? "tv_series" : "movie",
+          result.movieData.title
         );
-
-        dispatch({
-          movieData: result.movieData,
-          credits: result.credits,
-          recommendations: result.recommendations,
-          streamCandidates: result.streamCandidates,
-          streamError: result.streamError,
-          error: result.error,
-          creditsLoading: false,
-          recommendationsLoading: false,
-          loading: false,
-        });
-      } catch {
-        dispatch({
-          error: labels.loadContentFailed,
-          movieData: null,
-          credits: null,
-          recommendations: [],
-          streamCandidates: [],
-          streamError: labels.fetchStreamFailed,
-          creditsLoading: false,
-          recommendationsLoading: false,
-          loading: false,
-        });
       }
-    };
-
-    if (movieId) {
-      fetchMovieData();
-      dispatch({ hasTrackedPlay: false, hasTrackedView: false });
-    }
-  }, [movieId, language, initialLanguage, season, episode, labels.fetchStreamFailed, labels.loadContentFailed]);
+    }).catch(() => {
+      dispatch({
+        error: labels.loadContentFailed,
+        movieData: null,
+        credits: null,
+        recommendations: [],
+        streamCandidates: [],
+        streamError: labels.fetchStreamFailed,
+        creditsLoading: false,
+        recommendationsLoading: false,
+        loading: false,
+      });
+    });
+  }, [movieId, language, season, episode, labels.fetchStreamFailed, labels.loadContentFailed]);
 
   useEffect(() => {
     if (!streamTmdbId || !streamContentType) return;
@@ -262,17 +246,6 @@ export function useWatchPage({
     labels.fetchStreamFailed,
     labels.noStreamAvailable,
   ]);
-
-  useEffect(() => {
-    if (!movieData || hasTrackedView) return;
-
-    analyticsService.trackView(
-      String(movieData.tmdbId),
-      movieData.contentType === "tv" ? "tv_series" : "movie",
-      movieData.title
-    );
-    dispatch({ hasTrackedView: true });
-  }, [movieData, hasTrackedView]);
 
   const clearStreamTimeout = useCallback(() => {
     if (streamTimeoutRef.current !== null) {
