@@ -60,7 +60,7 @@ export default async function TVShowsPage({ searchParams }: TVShowsPageProps) {
             </h1>
             <TVSearchInput
               initialQuery={query}
-              placeholder={language === "vi" ? "Tìm kiếm TV series..." : "Search TV series..."}
+              placeholder={language === "vi-VN" ? "Tìm kiếm TV series..." : "Search TV series..."}
             />
           </div>
 
@@ -73,7 +73,7 @@ export default async function TVShowsPage({ searchParams }: TVShowsPageProps) {
 
           {query && (
             <p className="text-gray-400 text-sm mb-6">
-              {language === "vi"
+              {language === "vi-VN"
                 ? `Kết quả tìm kiếm cho "${query}" — ${tvShows.length} kết quả`
                 : `Search results for "${query}" — ${tvShows.length} results`}
             </p>
