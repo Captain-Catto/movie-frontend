@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { HoverPreviewCard } from "@/components/movie/HoverPreviewCard";
 import { FALLBACK_POSTER, TMDB_IMAGE_BASE_URL, TMDB_POSTER_SIZE } from "@/constants/app.constants";
+import { tmdbImageLoader } from "@/lib/tmdb-image-loader";
 
 async function fetchFallbackPoster(tmdbId: number, type: string): Promise<string | null> {
   try {
@@ -126,7 +127,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, (max-width: 1280px) 16.67vw, 12.5vw"
               priority={priority}
               loading={priority ? undefined : "lazy"}
-              quality={55}
+              loader={posterSafe.includes("image.tmdb.org") ? tmdbImageLoader : undefined}
               className="object-cover transition-transform duration-300"
             />
 
@@ -134,7 +135,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
             {movie.episodeNumber && (
               <>
                 <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                  {movie.isComplete ? <span>{labels.full}</span> : <span>{movie.episodeNumber}</span>}
+                  {movie.isComplete ? <span>{labels.full}</span> : <span>{labels.episodePrefix} {movie.episodeNumber}</span>}
                 </div>
                 {movie.totalEpisodes && (
                   <div className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded">

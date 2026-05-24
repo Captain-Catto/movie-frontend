@@ -185,17 +185,19 @@ function TopLineLoaderImpl() {
   if (!isVisible) return null;
 
   return (
-    <progress
+    <div
       className="route-top-loader"
-      value={Math.round(progress)}
-      max={100}
+      role="progressbar"
+      aria-valuenow={Math.round(progress)}
+      aria-valuemin={0}
+      aria-valuemax={100}
       aria-label="Page loading progress"
     >
       <div
         className="route-top-loader__bar"
         style={{ transform: `scaleX(${progress / 100})` }}
       />
-    </progress>
+    </div>
   );
 }
 

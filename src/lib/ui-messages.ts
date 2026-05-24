@@ -181,6 +181,7 @@ export interface MovieCardUiMessages {
   full: string;
   watch: string;
   watchNowAlt: (title: string) => string;
+  episodePrefix: string;
 }
 
 export const getMovieCardUiMessages = (
@@ -192,6 +193,7 @@ export const getMovieCardUiMessages = (
     watch: locale === "vi" ? "Xem" : "Watch",
     watchNowAlt: (title: string) =>
       locale === "vi" ? `Xem ngay ${title}` : `Watch Now ${title}`,
+    episodePrefix: locale === "vi" ? "Tập" : "Ep",
   };
 };
 
