@@ -1,5 +1,7 @@
 import { formatCompactNumber } from "@/utils/analyticsUtils";
 import { useCountUp } from "@/hooks/useCountUp";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 interface AnalyticsStatsCardsProps {
   totalViews: number;
@@ -20,6 +22,8 @@ export default function AnalyticsStatsCards({
   favRate,
   loading,
 }: AnalyticsStatsCardsProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
   const animViews = useCountUp(totalViews, { duration: 650 });
   const animClicks = useCountUp(totalClicks, { duration: 650 });
   const animPlays = useCountUp(totalPlays, { duration: 650 });
@@ -47,47 +51,47 @@ export default function AnalyticsStatsCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
-        <p className="text-xs text-gray-300">Total Views</p>
+        <p className="text-xs text-gray-300">{labels.totalViews}</p>
         <p className="text-2xl font-bold mt-2">
           {formatCompactNumber(animViews)}
         </p>
-        <p className="text-[11px] text-gray-400 mt-1">Events tracked (VIEW)</p>
+        <p className="text-[11px] text-gray-400 mt-1">{labels.analyticsEventsView}</p>
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
-        <p className="text-xs text-gray-300">Total Clicks</p>
+        <p className="text-xs text-gray-300">{labels.totalClicks}</p>
         <p className="text-2xl font-bold mt-2">
           {formatCompactNumber(animClicks)}
         </p>
-        <p className="text-[11px] text-gray-400 mt-1">Events tracked (CLICK)</p>
+        <p className="text-[11px] text-gray-400 mt-1">{labels.analyticsEventsClick}</p>
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
-        <p className="text-xs text-gray-300">Total Plays</p>
+        <p className="text-xs text-gray-300">{labels.totalPlays}</p>
         <p className="text-2xl font-bold mt-2">
           {formatCompactNumber(animPlays)}
         </p>
-        <p className="text-[11px] text-gray-400 mt-1">Events tracked (PLAY)</p>
+        <p className="text-[11px] text-gray-400 mt-1">{labels.analyticsEventsPlay}</p>
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
-        <p className="text-xs text-gray-300">CTR</p>
+        <p className="text-xs text-gray-300">{labels.ctr}</p>
         <p className="text-2xl font-bold mt-2">{animCtr.toFixed(1)}%</p>
-        <p className="text-[11px] text-gray-400 mt-1">Clicks / Views</p>
+        <p className="text-[11px] text-gray-400 mt-1">{labels.analyticsClicksOverViews}</p>
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
-        <p className="text-xs text-gray-300">Favorites</p>
+        <p className="text-xs text-gray-300">{labels.favorites}</p>
         <p className="text-2xl font-bold mt-2">
           {formatCompactNumber(animFavorites)}
         </p>
-        <p className="text-[11px] text-gray-400 mt-1">Saved items</p>
+        <p className="text-[11px] text-gray-400 mt-1">{labels.analyticsSavedItems}</p>
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 text-white shadow-lg">
-        <p className="text-xs text-gray-300">Favorite Rate</p>
+        <p className="text-xs text-gray-300">{labels.favoriteRate}</p>
         <p className="text-2xl font-bold mt-2">{animFavRate.toFixed(1)}%</p>
-        <p className="text-[11px] text-gray-400 mt-1">Favorites / Views</p>
+        <p className="text-[11px] text-gray-400 mt-1">{labels.analyticsFavoritesOverViews}</p>
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import {
 } from "@/constants/app.constants";
 import { formatNumber } from "@/utils/analyticsUtils";
 import { exportToCSV } from "@/utils/analyticsUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 interface ContentItem {
   id: number | string;
@@ -29,8 +31,12 @@ export default function AnalyticsContentList({
   title,
   data,
   exportFilename,
-  emptyMessage = "No data available",
+  emptyMessage,
 }: AnalyticsContentListProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+  const fallbackEmpty = emptyMessage || labels.analyticsNoDataPeriod;
+
   const getHref = (item: ContentItem) => {
     const type =
       item.contentType === "tv_series" || item.contentType === "tv"
@@ -49,7 +55,7 @@ export default function AnalyticsContentList({
             onClick={() => exportToCSV(data, exportFilename)}
             className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
           >
-            Export
+            {labels.analyticsExport}
           </button>
         )}
       </div>
@@ -84,13 +90,13 @@ export default function AnalyticsContentList({
                 <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-400">
                   <span className="capitalize">{item.contentType}</span>
                   {item.viewCount !== undefined && (
-                    <span>{formatNumber(item.viewCount)} views</span>
+                    <span>{formatNumber(item.viewCount)} {labels.analyticsViews}</span>
                   )}
                   {item.favoriteCount !== undefined && (
-                    <span>{formatNumber(item.favoriteCount)} favorites</span>
+                    <span>{formatNumber(item.favoriteCount)} {labels.analyticsFavoritesLabel}</span>
                   )}
                   {item.count !== undefined && (
-                    <span>{formatNumber(item.count)} events</span>
+                    <span>{formatNumber(item.count)} {labels.analyticsEvents}</span>
                   )}
                 </div>
               </div>
@@ -99,7 +105,7 @@ export default function AnalyticsContentList({
         </div>
       ) : (
         <div className="h-[400px] flex items-center justify-center text-gray-400">
-          {emptyMessage}
+          {fallbackEmpty}
         </div>
       )}
     </div>

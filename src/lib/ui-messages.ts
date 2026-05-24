@@ -2815,6 +2815,37 @@ export interface AdminUiMessages {
   analyticsNoPopularData: string;
   analyticsNoViewEventsData: string;
   analyticsNoFavoriteData: string;
+  // StatsCards
+  analyticsEventsView: string;
+  analyticsEventsClick: string;
+  analyticsEventsPlay: string;
+  analyticsClicksOverViews: string;
+  analyticsSavedItems: string;
+  analyticsFavoritesOverViews: string;
+  // PlaySourceBreakdown
+  analyticsPlayBreakdownTitle: string;
+  analyticsPlayBreakdownHint: string;
+  analyticsPlayBreakdownEmpty: string;
+  analyticsPlaySourceCardWatch: string;
+  analyticsPlaySourceHoverWatch: string;
+  analyticsPlaySourceHeroWatch: string;
+  analyticsPlaySourceWatchPagePlay: string;
+  analyticsPlaySourceUnknown: string;
+  // Charts
+  analyticsViewsOverTime: string;
+  analyticsFavoritesOverTime: string;
+  analyticsChartConstraint: string;
+  analyticsNoDataPeriod: string;
+  // Device & Country
+  analyticsDeviceDistribution: string;
+  analyticsNoDeviceData: string;
+  analyticsTopCountries: string;
+  analyticsNoCountryData: string;
+  // ContentList
+  analyticsExport: string;
+  analyticsViews: string;
+  analyticsFavoritesLabel: string;
+  analyticsEvents: string;
 
   // Chat extra
   chatModerationTitle: string;
@@ -3059,6 +3090,38 @@ const ADMIN_MESSAGES: Record<UiLocale, AdminUiMessages> = {
     analyticsNoPopularData: "Không có dữ liệu nội dung phổ biến",
     analyticsNoViewEventsData: "Không có dữ liệu sự kiện xem",
     analyticsNoFavoriteData: "Không có dữ liệu yêu thích",
+    // StatsCards
+    analyticsEventsView: "Sự kiện theo dõi (VIEW)",
+    analyticsEventsClick: "Sự kiện theo dõi (CLICK)",
+    analyticsEventsPlay: "Sự kiện theo dõi (PLAY)",
+    analyticsClicksOverViews: "Clicks / Lượt xem",
+    analyticsSavedItems: "Mục đã lưu",
+    analyticsFavoritesOverViews: "Yêu thích / Lượt xem",
+    // PlaySourceBreakdown
+    analyticsPlayBreakdownTitle: "Phân tích nút phát",
+    analyticsPlayBreakdownHint: "Dữ liệu nguồn từ sự kiện phát",
+    analyticsPlayBreakdownEmpty: "Chưa có dữ liệu nguồn phát.",
+    analyticsPlaySourceCardWatch: "Nút xem thẻ",
+    analyticsPlaySourceHoverWatch: "Xem khi di chuột",
+    analyticsPlaySourceHeroWatch: "Nút xem Hero",
+    analyticsPlaySourceWatchPagePlay: "Nút phát trang xem",
+    analyticsPlaySourceUnknown: "Không xác định",
+    // Charts
+    analyticsViewsOverTime: "Lượt xem theo thời gian",
+    analyticsFavoritesOverTime: "Yêu thích theo thời gian",
+    analyticsChartConstraint: "Xu hướng giới hạn 30 ngày gần nhất (ràng buộc backend)",
+    analyticsNoDataPeriod: "Không có dữ liệu cho khoảng thời gian đã chọn",
+    // Device & Country
+    analyticsDeviceDistribution: "Phân bố thiết bị",
+    analyticsNoDeviceData: "Không có dữ liệu thiết bị",
+    analyticsTopCountries: "Quốc gia hàng đầu",
+    analyticsNoCountryData: "Không có dữ liệu quốc gia",
+    // ContentList
+    analyticsExport: "Xuất",
+    analyticsViews: "lượt xem",
+    analyticsFavoritesLabel: "yêu thích",
+    analyticsEvents: "sự kiện",
+
 
     // Chat extra
     chatModerationTitle: "Kiểm duyệt AI Chat",
@@ -3300,6 +3363,37 @@ const ADMIN_MESSAGES: Record<UiLocale, AdminUiMessages> = {
     analyticsNoPopularData: "No popular content data available",
     analyticsNoViewEventsData: "No view events data available",
     analyticsNoFavoriteData: "No favorite data available",
+    // StatsCards
+    analyticsEventsView: "Events tracked (VIEW)",
+    analyticsEventsClick: "Events tracked (CLICK)",
+    analyticsEventsPlay: "Events tracked (PLAY)",
+    analyticsClicksOverViews: "Clicks / Views",
+    analyticsSavedItems: "Saved items",
+    analyticsFavoritesOverViews: "Favorites / Views",
+    // PlaySourceBreakdown
+    analyticsPlayBreakdownTitle: "Play Buttons Breakdown",
+    analyticsPlayBreakdownHint: "Source metadata from play events",
+    analyticsPlayBreakdownEmpty: "No play source data available yet.",
+    analyticsPlaySourceCardWatch: "Card Watch",
+    analyticsPlaySourceHoverWatch: "Hover Watch",
+    analyticsPlaySourceHeroWatch: "Hero Watch",
+    analyticsPlaySourceWatchPagePlay: "Watch Page Play",
+    analyticsPlaySourceUnknown: "Unknown",
+    // Charts
+    analyticsViewsOverTime: "Views Over Time",
+    analyticsFavoritesOverTime: "Favorites Over Time",
+    analyticsChartConstraint: "Trend is limited to the last 30 days (backend constraint)",
+    analyticsNoDataPeriod: "No data available for the selected period",
+    // Device & Country
+    analyticsDeviceDistribution: "Device Distribution",
+    analyticsNoDeviceData: "No device data available",
+    analyticsTopCountries: "Top Countries",
+    analyticsNoCountryData: "No country data available",
+    // ContentList
+    analyticsExport: "Export",
+    analyticsViews: "views",
+    analyticsFavoritesLabel: "favorites",
+    analyticsEvents: "events",
 
     // Chat extra
     chatModerationTitle: "AI Chat Moderation",

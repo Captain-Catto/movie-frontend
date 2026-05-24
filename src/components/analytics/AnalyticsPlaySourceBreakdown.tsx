@@ -1,33 +1,40 @@
 import { formatCompactNumber } from "@/utils/analyticsUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages, type AdminUiMessages } from "@/lib/ui-messages";
 
 interface AnalyticsPlaySourceBreakdownProps {
   playSourceBreakdown: Record<string, number>;
   loading: boolean;
 }
 
-const PLAY_SOURCE_LABELS: Record<string, string> = {
-  card_watch_button: "Card Watch",
-  card_hover: "Hover Watch",
-  hover_preview_watch: "Hover Watch",
-  hero_watch_button: "Hero Watch",
-  watch_page_play_button: "Watch Page Play",
-  unknown: "Unknown",
+const getPlaySourceLabel = (key: string, labels: AdminUiMessages): string => {
+  switch (key) {
+    case "card_watch_button": return labels.analyticsPlaySourceCardWatch;
+    case "card_hover":
+    case "hover_preview_watch": return labels.analyticsPlaySourceHoverWatch;
+    case "hero_watch_button": return labels.analyticsPlaySourceHeroWatch;
+    case "watch_page_play_button": return labels.analyticsPlaySourceWatchPagePlay;
+    case "unknown": return labels.analyticsPlaySourceUnknown;
+    default: return key;
+  }
 };
 
 export default function AnalyticsPlaySourceBreakdown({
   playSourceBreakdown,
   loading,
 }: AnalyticsPlaySourceBreakdownProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
   const hasData = Object.keys(playSourceBreakdown || {}).length > 0;
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold text-white">
-          Play Buttons Breakdown
+          {labels.analyticsPlayBreakdownTitle}
         </h3>
         <span className="text-xs text-gray-400">
-          Source metadata from play events
+          {labels.analyticsPlayBreakdownHint}
         </span>
       </div>
       {loading ? (
@@ -52,7 +59,7 @@ export default function AnalyticsPlaySourceBreakdown({
                 className="bg-gray-800 rounded-lg p-4 border border-gray-700"
               >
                 <p className="text-sm text-gray-300">
-                  {PLAY_SOURCE_LABELS[key] || key}
+                  {getPlaySourceLabel(key, labels)}
                 </p>
                 <p className="text-2xl font-bold text-white mt-1">
                   {formatCompactNumber(value)}
@@ -62,7 +69,7 @@ export default function AnalyticsPlaySourceBreakdown({
         </div>
       ) : (
         <div className="text-sm text-gray-400">
-          No play source data available yet.
+          {labels.analyticsPlayBreakdownEmpty}
         </div>
       )}
     </div>

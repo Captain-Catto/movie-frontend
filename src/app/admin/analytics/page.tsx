@@ -14,9 +14,11 @@ const AnalyticsDeviceStats = dynamic(() => import("@/components/analytics/Analyt
 import AnalyticsContentList from "@/components/analytics/AnalyticsContentList";
 import AnalyticsCountryStats from "@/components/analytics/AnalyticsCountryStats";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 export default function AdminAnalyticsPage() {
   const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
   const [contentType, setContentType] = useState<"all" | "movie" | "tv">("all");
 
   const {
@@ -128,26 +130,26 @@ export default function AdminAnalyticsPage() {
       {/* Content Lists Row 1 */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <AnalyticsContentList
-          title={language.startsWith("vi") ? "Nội dung nổi bật (Lượt xem)" : "Top Content (viewCount)"}
+          title={labels.analyticsTopContent}
           data={popularContentData.slice(0, 10)}
           exportFilename="popular-content"
-          emptyMessage={language.startsWith("vi") ? "Không có dữ liệu phim nổi bật" : "No popular content data available"}
+          emptyMessage={labels.analyticsNoPopularData}
         />
         <AnalyticsContentList
-          title={language.startsWith("vi") ? "Xem nhiều nhất (Sự kiện)" : "Most Viewed (events)"}
+          title={labels.analyticsMostViewedEvents}
           data={mostViewedData}
           exportFilename="most-viewed-events"
-          emptyMessage={language.startsWith("vi") ? "Không có dữ liệu sự kiện xem" : "No view events data available"}
+          emptyMessage={labels.analyticsNoViewEventsData}
         />
       </div>
 
       {/* Content Lists Row 2 */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <AnalyticsContentList
-          title={language.startsWith("vi") ? "Yêu thích nhiều nhất" : "Most Favorited"}
+          title={labels.analyticsMostFavorited}
           data={mostFavoritedData.slice(0, 15)}
           exportFilename="most-favorited"
-          emptyMessage={language.startsWith("vi") ? "Không có dữ liệu yêu thích" : "No favorite data available"}
+          emptyMessage={labels.analyticsNoFavoriteData}
         />
         <AnalyticsDeviceStats deviceStats={deviceStats} />
       </div>

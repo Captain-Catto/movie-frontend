@@ -2,6 +2,8 @@ import dynamic from "next/dynamic";
 import { DeviceStats } from "@/types/analytics.types";
 import { DEVICE_COLORS } from "@/types/analytics.types";
 import { formatNumber } from "@/utils/analyticsUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
 const PieChart = dynamic(() => import("recharts").then((mod) => mod.PieChart), { ssr: false });
@@ -15,9 +17,12 @@ interface AnalyticsDeviceStatsProps {
 export default function AnalyticsDeviceStats({
   deviceStats,
 }: AnalyticsDeviceStatsProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-semibold text-white mb-4">Device Distribution</h2>
+      <h2 className="text-xl font-semibold text-white mb-4">{labels.analyticsDeviceDistribution}</h2>
       {deviceStats.length > 0 ? (
         <div className="flex flex-col lg:flex-row items-center gap-6">
           <ResponsiveContainer width="50%" height={300}>
@@ -72,7 +77,7 @@ export default function AnalyticsDeviceStats({
         </div>
       ) : (
         <div className="h-[300px] flex items-center justify-center text-gray-400">
-          No device data available
+          {labels.analyticsNoDeviceData}
         </div>
       )}
     </div>

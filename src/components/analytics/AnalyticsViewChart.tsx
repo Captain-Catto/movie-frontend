@@ -5,6 +5,7 @@ import { ViewStats } from "@/types/analytics.types";
 import { CHART_COLORS } from "@/types/analytics.types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getLocaleFromLanguage } from "@/constants/app.constants";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
 const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
@@ -22,12 +23,13 @@ interface AnalyticsViewChartProps {
 export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProps) {
   const { language } = useLanguage();
   const locale = getLocaleFromLanguage(language);
+  const labels = getAdminUiMessages(language);
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-semibold text-white mb-2">Views Over Time</h2>
+      <h2 className="text-xl font-semibold text-white mb-2">{labels.analyticsViewsOverTime}</h2>
       <p className="text-sm text-gray-400 mb-4">
-        Trend is limited to the last 30 days (backend constraint)
+        {labels.analyticsChartConstraint}
       </p>
       {viewStats.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
@@ -68,7 +70,7 @@ export default function AnalyticsViewChart({ viewStats }: AnalyticsViewChartProp
         </ResponsiveContainer>
       ) : (
         <div className="h-[300px] flex items-center justify-center text-gray-400">
-          No data available for the selected period
+          {labels.analyticsNoDataPeriod}
         </div>
       )}
     </div>
