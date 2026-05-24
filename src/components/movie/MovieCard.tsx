@@ -135,11 +135,11 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
             {movie.episodeNumber && (
               <>
                 <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                  {movie.isComplete ? <span>{labels.full}</span> : <span>{labels.episodePrefix} {movie.episodeNumber}</span>}
+                  {movie.isComplete ? <span>{labels.full}</span> : <span>{movie.episodeNumber} {labels.episodePrefix}</span>}
                 </div>
                 {movie.totalEpisodes && (
                   <div className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded">
-                    {labels.episodePrefix} {movie.totalEpisodes}
+                    {movie.totalEpisodes} {labels.episodePrefix}
                   </div>
                 )}
               </>

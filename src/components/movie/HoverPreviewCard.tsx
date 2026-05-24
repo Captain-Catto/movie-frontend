@@ -129,8 +129,8 @@ export function HoverPreviewCard({
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
       </div>
 
-      <div className="p-5 gap-y-4">
-        <div className="text-center gap-y-1">
+      <div className="p-5 flex flex-col gap-y-4">
+        <div className="text-center flex flex-col gap-y-1">
           <h3 className="text-white font-semibold text-lg line-clamp-2">{title}</h3>
           {overview && (
             <span className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium line-clamp-3">
