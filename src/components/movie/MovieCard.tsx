@@ -139,7 +139,7 @@ const MovieCard = ({ movie, priority = false }: MovieCardProps) => {
                 </div>
                 {movie.totalEpisodes && (
                   <div className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded">
-                    {movie.totalEpisodes}
+                    {labels.episodePrefix} {movie.totalEpisodes}
                   </div>
                 )}
               </>
