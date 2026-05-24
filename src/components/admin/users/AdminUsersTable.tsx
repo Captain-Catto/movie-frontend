@@ -1,5 +1,7 @@
 import Image from "next/image";
 import type { SyntheticEvent } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 import type { User } from "./types";
 import UserSignupAccess from "./UserSignupAccess";
 import { countryCodeToFlag, countryCodeToName, countryFlagUrl } from "./utils";
@@ -21,6 +23,9 @@ export default function AdminUsersTable({
   onOpenBan,
   onUnban,
 }: AdminUsersTableProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
       <div className="overflow-x-auto">
@@ -28,25 +33,25 @@ export default function AdminUsersTable({
           <thead className="bg-gray-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                User
+                {labels.tableHeaderUser}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Role
+                {labels.tableHeaderRole}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Status
+                {labels.tableHeaderStatus}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Sign Up / Access
+                {labels.tableHeaderSignupAccess}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Country
+                {labels.tableHeaderCountry}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Device / IP
+                {labels.tableHeaderDeviceIp}
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Actions
+                {labels.tableHeaderActions}
               </th>
             </tr>
           </thead>
@@ -54,13 +59,13 @@ export default function AdminUsersTable({
             {loading ? (
               <tr>
                 <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
-                  Loading…
+                  {labels.loading}
                 </td>
               </tr>
             ) : users.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-6 py-8 text-center text-gray-400">
-                  No users found
+                  {labels.noUsersFound}
                 </td>
               </tr>
             ) : (
@@ -77,7 +82,7 @@ export default function AdminUsersTable({
                         type="button"
                         onClick={() => onEditUser(user)}
                         className="cursor-pointer ml-3 text-left"
-                        title="Edit user"
+                        title={labels.seoTableActionEdit}
                       >
                         <div className="flex items-center gap-x-2">
                           <div className="text-sm font-medium text-white hover:text-red-300 transition-colors">
@@ -101,12 +106,12 @@ export default function AdminUsersTable({
                   <td className="px-6 py-4">
                     {user.isActive ? (
                       <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-600 text-white">
-                        Active
+                        {labels.statusActive}
                       </span>
                     ) : (
                       <div className="flex flex-col">
                         <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-600 text-white mb-1 w-fit">
-                          Banned
+                          {labels.statusBanned}
                         </span>
                         {user.bannedReason && (
                           <span className="text-xs text-gray-400">
@@ -124,24 +129,24 @@ export default function AdminUsersTable({
                       <>
                         {countryFlagUrl(user.lastLoginCountry) ? (
                           <Image
-                            src={countryFlagUrl(user.lastLoginCountry) as string}
-                            alt={countryCodeToName(user.lastLoginCountry)}
-                            title={countryCodeToName(user.lastLoginCountry)}
-                            width={24}
-                            height={16}
-                            className="rounded border border-gray-600"
-                            unoptimized
-                            onError={(e: SyntheticEvent<HTMLImageElement>) => {
-                              (e.currentTarget as HTMLImageElement).style.display =
-                                "none";
-                            }}
+                             src={countryFlagUrl(user.lastLoginCountry) as string}
+                             alt={countryCodeToName(user.lastLoginCountry)}
+                             title={countryCodeToName(user.lastLoginCountry)}
+                             width={24}
+                             height={16}
+                             className="rounded border border-gray-600"
+                             unoptimized
+                             onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                               (e.currentTarget as HTMLImageElement).style.display =
+                                 "none";
+                             }}
                           />
                         ) : (
                           <span
-                            className="text-xl"
-                            title={countryCodeToName(user.lastLoginCountry)}
+                             className="text-xl"
+                             title={countryCodeToName(user.lastLoginCountry)}
                           >
-                            {countryCodeToFlag(user.lastLoginCountry)}
+                             {countryCodeToFlag(user.lastLoginCountry)}
                           </span>
                         )}
                       </>
@@ -168,7 +173,7 @@ export default function AdminUsersTable({
                         onClick={() => onViewDetails(user.id)}
                         className="cursor-pointer px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-colors"
                       >
-                        Chi tiết
+                        {labels.actionDetails}
                       </button>
                       {user.isActive ? (
                         <button
@@ -176,7 +181,7 @@ export default function AdminUsersTable({
                           onClick={() => onOpenBan(user)}
                           className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
                         >
-                          Ban
+                          {labels.actionBan}
                         </button>
                       ) : (
                         <button
@@ -184,7 +189,7 @@ export default function AdminUsersTable({
                           onClick={() => onUnban(user.id)}
                           className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                         >
-                          Unban
+                          {labels.actionUnban}
                         </button>
                       )}
                     </div>

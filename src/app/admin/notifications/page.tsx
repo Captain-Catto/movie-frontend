@@ -5,8 +5,13 @@ import NotificationsHeader from "@/components/notifications/NotificationsHeader"
 import NotificationsStatsCards from "@/components/notifications/NotificationsStatsCards";
 import NotificationsTable from "@/components/notifications/NotificationsTable";
 import NotificationModal from "@/components/notifications/NotificationModal";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 export default function AdminNotificationsPage() {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   const {
     notifications,
     stats,
@@ -32,9 +37,9 @@ export default function AdminNotificationsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-semibold text-white">Notification Management</h1>
+        <h1 className="text-3xl font-semibold text-white">{labels.notificationsHeaderTitle}</h1>
         <p className="text-gray-400">
-          Send, review, and manage notifications delivered to users.
+          {labels.notificationsHeaderDesc}
         </p>
       </div>
 
@@ -68,3 +73,4 @@ export default function AdminNotificationsPage() {
     </div>
   );
 }
+

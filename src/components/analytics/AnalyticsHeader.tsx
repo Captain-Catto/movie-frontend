@@ -1,6 +1,8 @@
 import { DATE_PRESETS, DatePreset } from "@/types/analytics.types";
 import { ViewStats, MostViewedItem } from "@/types/analytics.types";
 import { exportToCSV } from "@/utils/analyticsUtils";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 interface AnalyticsHeaderProps {
   isLiveConnected: boolean;
@@ -17,6 +19,19 @@ interface AnalyticsHeaderProps {
   onCustomDateRangeChange: (range: { startDate: string; endDate: string }) => void;
 }
 
+const getPresetLabel = (key: string, isVi: boolean) => {
+  switch (key) {
+    case "today": return isVi ? "Hôm nay" : "Today";
+    case "yesterday": return isVi ? "Hôm qua" : "Yesterday";
+    case "last7days": return isVi ? "7 ngày qua" : "Last 7 Days";
+    case "last30days": return isVi ? "30 ngày qua" : "Last 30 Days";
+    case "thisMonth": return isVi ? "Tháng này" : "This Month";
+    case "lastMonth": return isVi ? "Tháng trước" : "Last Month";
+    case "custom": return isVi ? "Tự chọn" : "Custom";
+    default: return key;
+  }
+};
+
 export default function AnalyticsHeader({
   isLiveConnected,
   isRefreshing,
@@ -31,14 +46,18 @@ export default function AnalyticsHeader({
   onContentTypeChange,
   onCustomDateRangeChange,
 }: AnalyticsHeaderProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+  const isVi = language.startsWith("vi");
+
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-semibold text-white">Analytics Dashboard</h1>
+          <h1 className="text-3xl font-semibold text-white">{labels.analyticsHeaderTitle}</h1>
           <p className="text-gray-400 mt-1">
-            Track views, clicks, favorites, and device/country distribution
+            {labels.analyticsHeaderDesc}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -50,8 +69,8 @@ export default function AnalyticsHeader({
             }`}
             title={
               isLiveConnected
-                ? "Realtime updates active"
-                : "Realtime updates offline"
+                ? (isVi ? "Kết nối trực tiếp đang hoạt động" : "Realtime updates active")
+                : (isVi ? "Kết nối trực tiếp tạm ngưng" : "Realtime updates offline")
             }
           >
             <span
@@ -59,7 +78,7 @@ export default function AnalyticsHeader({
                 isLiveConnected ? "bg-green-200 animate-pulse" : "bg-gray-500"
               }`}
             />
-            <span>{isLiveConnected ? "Live" : "Live paused"}</span>
+            <span>{isLiveConnected ? (isVi ? "Trực tiếp" : "Live") : (isVi ? "Tạm dừng" : "Live paused")}</span>
           </div>
           <button
             type="button"
@@ -68,8 +87,8 @@ export default function AnalyticsHeader({
             className="size-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors flex items-center justify-center cursor-pointer"
             title={
               lastRefreshed
-                ? `Last refreshed: ${lastRefreshed.toLocaleTimeString()}`
-                : "Refresh data"
+                ? `${isVi ? "Tải lại lúc" : "Last refreshed"}: ${lastRefreshed.toLocaleTimeString()}`
+                : (isVi ? "Tải lại dữ liệu" : "Refresh data")
             }
           >
             <svg
@@ -105,7 +124,7 @@ export default function AnalyticsHeader({
                 d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            Export Views
+            {isVi ? "Xuất Lượt Xem" : "Export Views"}
           </button>
           <button
             type="button"
@@ -127,7 +146,7 @@ export default function AnalyticsHeader({
                 d="M4 4h16v4H4zM4 12h16v8H4z"
               />
             </svg>
-            Export Top
+            {isVi ? "Xuất Top Phim" : "Export Top"}
           </button>
         </div>
       </div>
@@ -138,7 +157,7 @@ export default function AnalyticsHeader({
           {/* Date Presets */}
           <fieldset className="flex-1">
             <legend className="block text-sm font-medium text-gray-300 mb-2">
-              Time Period
+              {isVi ? "Khoảng thời gian" : "Time Period"}
             </legend>
             <div className="flex flex-wrap gap-2">
               {DATE_PRESETS.map((preset) => (
@@ -152,7 +171,7 @@ export default function AnalyticsHeader({
                       : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                   }`}
                 >
-                  {preset.label}
+                  {getPresetLabel(preset.key, isVi)}
                 </button>
               ))}
             </div>
@@ -161,7 +180,7 @@ export default function AnalyticsHeader({
           {/* Content Type Filter */}
           <div className="w-full lg:w-48">
             <label htmlFor="analytics-content-type" className="block text-sm font-medium text-gray-300 mb-2">
-              Content Type
+              {isVi ? "Loại nội dung" : "Content Type"}
             </label>
             <select
               id="analytics-content-type"
@@ -171,9 +190,9 @@ export default function AnalyticsHeader({
               }
               className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-red-500"
             >
-              <option value="all">All Content</option>
-              <option value="movie">Movies</option>
-              <option value="tv">TV Shows</option>
+              <option value="all">{isVi ? "Tất cả nội dung" : "All Content"}</option>
+              <option value="movie">{isVi ? "Phim lẻ" : "Movies"}</option>
+              <option value="tv">{isVi ? "Phim bộ" : "TV Shows"}</option>
             </select>
           </div>
         </div>
@@ -183,7 +202,7 @@ export default function AnalyticsHeader({
           <div className="flex gap-4 mt-4">
             <div className="flex-1">
               <label htmlFor="analytics-start-date" className="block text-sm font-medium text-gray-300 mb-2">
-                Start Date
+                {isVi ? "Ngày bắt đầu" : "Start Date"}
               </label>
               <input
                 id="analytics-start-date"
@@ -201,7 +220,7 @@ export default function AnalyticsHeader({
             </div>
             <div className="flex-1">
               <label htmlFor="analytics-end-date" className="block text-sm font-medium text-gray-300 mb-2">
-                End Date
+                {isVi ? "Ngày kết thúc" : "End Date"}
               </label>
               <input
                 id="analytics-end-date"
@@ -223,3 +242,4 @@ export default function AnalyticsHeader({
     </div>
   );
 }
+

@@ -2592,3 +2592,737 @@ const FAQ_MESSAGES: Record<UiLocale, FaqUiMessages> = {
 export const getFaqUiMessages = (
   language: string | undefined
 ): FaqUiMessages => FAQ_MESSAGES[resolveUiLocale(language)];
+
+export interface AdminUiMessages {
+  dashboard: string;
+  settings: string;
+  content: string;
+  users: string;
+  analytics: string;
+  notifications: string;
+  aiChat: string;
+  seo: string;
+  syncData: string;
+  profile: string;
+  logout: string;
+  backToSite: string;
+  editProfile: string;
+  updateInfo: string;
+  displayName: string;
+  email: string;
+  password: string;
+  cancel: string;
+  save: string;
+  saving: string;
+  
+  // Dashboard
+  adminDashboard: string;
+  overview: string;
+  totalMovies: string;
+  totalTVSeries: string;
+  totalUsers: string;
+  totalContent: string;
+  failedStats: string;
+  dataSync: string;
+  lastSync: string;
+  popularRefresh: string;
+  popularRefreshDesc: string;
+  fullDailySync: string;
+  fullDailySyncDesc: string;
+  quickActions: string;
+  manageContent: string;
+  manageContentDesc: string;
+  userManagement: string;
+  userManagementDesc: string;
+  viewAnalytics: string;
+  viewAnalyticsDesc: string;
+  
+  // Settings Page
+  siteSettings: string;
+  adjustConstraints: string;
+  saveChanges: string;
+  registrationItems: string;
+  condition: string;
+  item: string;
+  visualEffectsSettings: string;
+  controlVisualEffects: string;
+  swaggerAccess: string;
+  swaggerDesc: string;
+  username: string;
+  passwordPlaceholder: string;
+  atLeast8Chars: string;
+  saveAccess: string;
+  swaggerStatus: string;
+  configured: string;
+  notConfigured: string;
+  updatedAtLabel: string;
+  modifiedBy: string;
+  streamDomains: string;
+  streamDomainsDesc: string;
+  streamDomainsPlaceholder: string;
+  streamDomainsTip: string;
+  saveStreamDomains: string;
+  loadingLabel: string;
+
+  // Users Page
+  userHeaderTitle: string;
+  userHeaderDesc: string;
+  
+  // Sync Data
+  syncDataHeaderTitle: string;
+  syncDataHeaderDesc: string;
+  syncStatsMovies: string;
+  syncStatsTv: string;
+  syncStatsLastSync: string;
+  syncStatsStatus: string;
+  syncOptionAll: string;
+  syncOptionAllDesc: string;
+  syncOptionMovies: string;
+  syncOptionMoviesDesc: string;
+  syncOptionTv: string;
+  syncOptionTvDesc: string;
+  syncOptionPopular: string;
+  syncOptionPopularDesc: string;
+  syncOptionTrending: string;
+  syncOptionTrendingDesc: string;
+  syncOptionToday: string;
+  syncOptionTodayDesc: string;
+
+  // SEO Page
+  seoHeaderTitle: string;
+  seoHeaderDesc: string;
+  seoTotalPages: string;
+  seoActive: string;
+  seoInactive: string;
+  seoAvgTitleLength: string;
+  seoAvgDescLength: string;
+  seoIdealTitle: string;
+  seoIdealDesc: string;
+  seoAllTracked: string;
+  seoCurrentlyEnabled: string;
+  seoDisabledOrDraft: string;
+
+  // Notifications Page
+  notificationsHeaderTitle: string;
+  notificationsHeaderDesc: string;
+
+  // Analytics Page
+  analyticsHeaderTitle: string;
+  analyticsHeaderDesc: string;
+
+  // Chat Page
+  chatHeaderTitle: string;
+  chatHeaderDesc: string;
+
+  // Users Page Extra
+  userFilterLabel: string;
+  statusAll: string;
+  statusActive: string;
+  statusBanned: string;
+  tableHeaderUser: string;
+  tableHeaderRole: string;
+  tableHeaderStatus: string;
+  tableHeaderSignupAccess: string;
+  tableHeaderCountry: string;
+  tableHeaderDeviceIp: string;
+  tableHeaderActions: string;
+  actionDetails: string;
+  actionBan: string;
+  actionUnban: string;
+  noUsersFound: string;
+  loading: string;
+  signupAccessRegister: string;
+  signupAccessLogin: string;
+  banUserTitle: string;
+  banUserConfirm: string;
+  banReasonPlaceholder: string;
+  banConfirmButton: string;
+
+  // Sync Data Extra
+  syncControlsTitle: string;
+  syncControlsDesc: string;
+  syncExportDateLabel: string;
+  syncButtonRun: string;
+  syncButtonSyncing: string;
+  catalogSettingsTitle: string;
+  catalogSettingsDesc: string;
+  catalogMovieLimitLabel: string;
+  catalogTvLimitLabel: string;
+  catalogTrendingLimitLabel: string;
+  catalogPeopleLimitLabel: string;
+  catalogRecommendationLimitLabel: string;
+  catalogCurrentValueLabel: string;
+  catalogSaveButton: string;
+  catalogSavingButton: string;
+  syncNotesTitle: string;
+  syncNoteTMDBLimits: string;
+  syncNoteSyncStatus: string;
+  syncNoteBackgroundJobs: string;
+
+  // SEO Page Extra
+  seoCheckerLastRun: string;
+  seoStatsTotalPagesDesc: string;
+  seoStatsActivePagesDesc: string;
+  seoStatsInactivePagesDesc: string;
+  seoStatsIdealTitle: string;
+  seoStatsIdealDesc: string;
+  seoToolbarAddButton: string;
+  seoToolbarSetupDefaultsButton: string;
+  seoToolbarRefreshButton: string;
+  seoToolbarAutoRefreshLabel: string;
+  seoToolbarSearchPlaceholder: string;
+  seoToolbarExportCsvButton: string;
+  seoToolbarExportExcelButton: string;
+  seoResolveTitle: string;
+  seoResolvePlaceholder: string;
+  seoResolveButton: string;
+  seoResolveButtonLoading: string;
+  seoTableHeaderPage: string;
+  seoTableHeaderLocale: string;
+  seoTableHeaderTitle: string;
+  seoTableHeaderDescription: string;
+  seoTableHeaderStatus: string;
+  seoTableHeaderActions: string;
+  seoTableNoData: string;
+  seoTableLoading: string;
+  seoTableActionEdit: string;
+  seoTableActionDelete: string;
+  seoModalTitleAdd: string;
+  seoModalTitleEdit: string;
+  seoModalLabelPageType: string;
+  seoModalLabelPath: string;
+  seoModalLabelLocale: string;
+  seoModalLabelTitle: string;
+  seoModalLabelDescription: string;
+  seoModalLabelKeywords: string;
+  seoModalLabelOgTitle: string;
+  seoModalLabelOgDescription: string;
+  seoModalLabelOgImage: string;
+  seoModalLabelTwitterTitle: string;
+  seoModalLabelTwitterDescription: string;
+  seoModalLabelTwitterImage: string;
+  seoModalLabelActive: string;
+  seoModalButtonCancel: string;
+  seoModalButtonCreate: string;
+  seoModalButtonUpdate: string;
+  seoPageTypeSelectPlaceholder: string;
+  seoPageTypeMatchHint: string;
+
+  // Analytics Extra
+  analyticsTopContent: string;
+  analyticsMostViewedEvents: string;
+  analyticsMostFavorited: string;
+  analyticsNoPopularData: string;
+  analyticsNoViewEventsData: string;
+  analyticsNoFavoriteData: string;
+
+  // Chat extra
+  chatModerationTitle: string;
+  chatModerationDesc: string;
+  chatSectionOpenFlags: string;
+  chatSectionConversationContext: string;
+  chatNoOpenFlags: string;
+  chatSelectFlagPrompt: string;
+  chatSessionUserLabel: string;
+  chatButtonResolve: string;
+  chatButtonIgnore: string;
+  chatUnknownUser: string;
+
+  // Layout Metrics & read-only
+  totalViews: string;
+  totalClicks: string;
+  totalPlays: string;
+  ctr: string;
+  favorites: string;
+  favoriteRate: string;
+  readOnlyMode: string;
+}
+
+const ADMIN_MESSAGES: Record<UiLocale, AdminUiMessages> = {
+  vi: {
+    dashboard: "Bảng điều khiển",
+    settings: "Cài đặt hệ thống",
+    content: "Quản lý phim",
+    users: "Người dùng",
+    analytics: "Số liệu phân tích",
+    notifications: "Gửi thông báo",
+    aiChat: "AI Trợ lý",
+    seo: "Cấu hình SEO",
+    syncData: "Đồng bộ dữ liệu",
+    profile: "Hồ sơ cá nhân",
+    logout: "Đăng xuất",
+    backToSite: "Về trang chủ",
+    editProfile: "Chỉnh sửa hồ sơ",
+    updateInfo: "Cập nhật thông tin cá nhân của bạn",
+    displayName: "Tên hiển thị",
+    email: "Địa chỉ Email",
+    password: "Mật khẩu (để trống để giữ nguyên)",
+    cancel: "Hủy bỏ",
+    save: "Lưu lại",
+    saving: "Đang lưu...",
+    adminDashboard: "Bảng Điều Khiển Admin",
+    overview: "Tổng quan hoạt động hệ thống xem phim",
+    totalMovies: "Tổng số phim lẻ",
+    totalTVSeries: "Tổng số phim bộ",
+    totalUsers: "Tổng người dùng",
+    totalContent: "Tổng nội dung",
+    failedStats: "Không thể tải số liệu thống kê dashboard",
+    dataSync: "Đồng bộ dữ liệu",
+    lastSync: "Đồng bộ cuối",
+    popularRefresh: "Đồng bộ phim phổ biến",
+    popularRefreshDesc: "Đồng bộ nhanh các nội dung nổi bật và thịnh hành",
+    fullDailySync: "Đồng bộ TMDB đầy đủ",
+    fullDailySyncDesc: "Xuất và đồng bộ hoàn chỉnh toàn bộ dữ liệu từ TMDB",
+    quickActions: "Thao tác nhanh",
+    manageContent: "Quản lý phim",
+    manageContentDesc: "Xem và quản lý tất cả danh sách phim lẻ & phim bộ",
+    userManagement: "Quản lý thành viên",
+    userManagementDesc: "Xem, phân quyền và quản lý tài khoản người dùng",
+    viewAnalytics: "Thống kê chi tiết",
+    viewAnalyticsDesc: "Xem chi tiết lưu lượng, hành vi và báo cáo hệ thống",
+    
+    // Settings Page
+    siteSettings: "Cấu hình hệ thống",
+    adjustConstraints: "Điều chỉnh giới hạn đăng ký và các hiệu ứng giao diện",
+    saveChanges: "Lưu thay đổi",
+    registrationItems: "Các mục đăng ký tài khoản",
+    condition: "Điều kiện (Độ dài)",
+    item: "Mục đăng ký",
+    visualEffectsSettings: "Cài đặt hiệu ứng đặc biệt",
+    controlVisualEffects: "Bật/Tắt các hiệu ứng hiển thị tới người dùng",
+    swaggerAccess: "Quyền truy cập Swagger APIs",
+    swaggerDesc: "Tài khoản bảo mật để mở tài liệu API tại /api-docs. Mật khẩu được mã hóa.",
+    username: "Tài khoản",
+    passwordPlaceholder: "Bỏ trống nếu muốn giữ nguyên mật khẩu cũ",
+    atLeast8Chars: "Tối thiểu 8 ký tự",
+    saveAccess: "Lưu tài khoản API",
+    swaggerStatus: "Trạng thái",
+    configured: "Đã thiết lập",
+    notConfigured: "Chưa thiết lập",
+    updatedAtLabel: "Cập nhật lúc",
+    modifiedBy: "Chỉnh sửa bởi",
+    streamDomains: "Tên miền Stream (Fallback)",
+    streamDomainsDesc: "Mỗi tên miền trên một dòng. Dòng đầu tiên sẽ là nguồn phát chính, các dòng tiếp theo là dự phòng.",
+    streamDomainsPlaceholder: "Nhập các link domain stream, ví dụ: https://vsembed.ru",
+    streamDomainsTip: "Gợi ý: Bạn có thể nhập các tên miền cách nhau bằng dấu xuống dòng hoặc dấu phẩy.",
+    saveStreamDomains: "Lưu danh sách tên miền",
+    loadingLabel: "Đang tải dữ liệu...",
+
+    // Users Page
+    userHeaderTitle: "Quản lý thành viên",
+    userHeaderDesc: "Xem, phân quyền và quản lý tài khoản người dùng trên toàn hệ thống.",
+    
+    // Sync Data
+    syncDataHeaderTitle: "Đồng bộ dữ liệu TMDB",
+    syncDataHeaderDesc: "Kích hoạt thủ công các tiến trình đồng bộ phim và danh mục từ TMDB. Dùng khi bạn cần cập nhật thông tin phim ngay lập tức.",
+    syncStatsMovies: "Tổng số phim lẻ",
+    syncStatsTv: "Tổng số phim bộ",
+    syncStatsLastSync: "Đồng bộ gần nhất",
+    syncStatsStatus: "Trạng thái đồng bộ",
+    syncOptionAll: "Đồng bộ tất cả",
+    syncOptionAllDesc: "Nhập toàn bộ danh mục bao gồm phim lẻ, phim bộ và phim thịnh hành.",
+    syncOptionMovies: "Đồng bộ phim lẻ",
+    syncOptionMoviesDesc: "Chỉ cập nhật danh mục phim lẻ.",
+    syncOptionTv: "Đồng bộ phim bộ",
+    syncOptionTvDesc: "Chỉ cập nhật danh mục phim bộ.",
+    syncOptionPopular: "Đồng bộ phim phổ biến",
+    syncOptionPopularDesc: "Cập nhật nhanh các danh sách phim phổ biến và thịnh hành.",
+    syncOptionTrending: "Chỉ đồng bộ Trending",
+    syncOptionTrendingDesc: "Cập nhật cache trang chủ và trang xu hướng.",
+    syncOptionToday: "Danh sách mới trong ngày",
+    syncOptionTodayDesc: "Tải về các bản xuất mới nhất trong ngày từ TMDB.",
+
+    // SEO Page
+    seoHeaderTitle: "Cấu hình & Quản lý SEO",
+    seoHeaderDesc: "Theo dõi, chỉnh sửa thẻ tiêu đề và mô tả meta giúp các công cụ tìm kiếm index tốt hơn.",
+    seoTotalPages: "Tổng số trang",
+    seoActive: "Hoạt động",
+    seoInactive: "Không hoạt động",
+    seoAvgTitleLength: "Độ dài tiêu đề TB",
+    seoAvgDescLength: "Độ dài mô tả TB",
+    seoIdealTitle: "Khuyên dùng: 50–60 ký tự",
+    seoIdealDesc: "Khuyên dùng: 150–160 ký tự",
+    seoAllTracked: "Tổng số trang SEO được theo dõi",
+    seoCurrentlyEnabled: "Các mục SEO đang được áp dụng",
+    seoDisabledOrDraft: "Các mục SEO đã tắt hoặc nháp",
+
+    // Notifications Page
+    notificationsHeaderTitle: "Quản lý thông báo",
+    notificationsHeaderDesc: "Tạo mới, xem và quản lý các thông báo hệ thống gửi tới người dùng.",
+
+    // Analytics Page
+    analyticsHeaderTitle: "Báo cáo phân tích hệ thống",
+    analyticsHeaderDesc: "Phân tích lượt truy cập, lượt click phát phim, thiết bị và các quốc gia phổ biến.",
+
+    // Chat Page
+    chatHeaderTitle: "AI Trợ lý Quản trị",
+    chatHeaderDesc: "Trợ lý AI hỗ trợ bạn tra cứu phim, phân tích người dùng và đưa ra gợi ý vận hành.",
+
+    // Users Page Extra
+    userFilterLabel: "Lọc theo trạng thái để nhanh chóng xem xét các tài khoản hoạt động và bị cấm.",
+    statusAll: "Tất cả",
+    statusActive: "Hoạt động",
+    statusBanned: "Bị cấm",
+    tableHeaderUser: "Người dùng",
+    tableHeaderRole: "Vai trò",
+    tableHeaderStatus: "Trạng thái",
+    tableHeaderSignupAccess: "Đăng ký / Truy cập",
+    tableHeaderCountry: "Quốc gia",
+    tableHeaderDeviceIp: "Thiết bị / IP",
+    tableHeaderActions: "Thao tác",
+    actionDetails: "Chi tiết",
+    actionBan: "Cấm",
+    actionUnban: "Bỏ cấm",
+    noUsersFound: "Không tìm thấy người dùng",
+    loading: "Đang tải...",
+    signupAccessRegister: "Đăng ký",
+    signupAccessLogin: "Đăng nhập",
+    banUserTitle: "Cấm người dùng",
+    banUserConfirm: "Cấm người dùng \"{name}\" ({email})",
+    banReasonPlaceholder: "Nhập lý do cấm...",
+    banConfirmButton: "Cấm người dùng",
+
+    // Sync Data Extra
+    syncControlsTitle: "Điều khiển đồng bộ thủ công",
+    syncControlsDesc: "Chọn dữ liệu bạn muốn làm mới. Bạn có thể tùy chọn chọn một ngày xuất TMDB trước đây (YYYY-MM-DD). Để trống để sử dụng ngày hôm nay.",
+    syncExportDateLabel: "Ngày xuất TMDB (tùy chọn)",
+    syncButtonRun: "Chạy",
+    syncButtonSyncing: "Đang đồng bộ...",
+    catalogSettingsTitle: "Cài đặt giới hạn danh mục",
+    catalogSettingsDesc: "Cấu hình số lượng mục tối đa để giữ lại trong cơ sở dữ liệu cho từng loại nội dung. Tiến trình dọn dẹp sẽ chạy sau khi \"Đồng bộ phim phổ biến\" để cắt bớt các mục dư thừa dựa trên mức độ phổ biến.",
+    catalogMovieLimitLabel: "Giới hạn danh mục phim lẻ",
+    catalogTvLimitLabel: "Giới hạn danh mục phim bộ",
+    catalogTrendingLimitLabel: "Giới hạn danh mục thịnh hành",
+    catalogPeopleLimitLabel: "Giới hạn cache diễn viên/đạo diễn",
+    catalogRecommendationLimitLabel: "Giới hạn cache gợi ý",
+    catalogCurrentValueLabel: "Hiện tại: {value}",
+    catalogSaveButton: "Lưu cài đặt",
+    catalogSavingButton: "Đang lưu...",
+    syncNotesTitle: "Ghi chú & Khuyến nghị",
+    syncNoteTMDBLimits: "• Giữ tần suất đồng bộ phù hợp với giới hạn của TMDB. Đồng bộ thủ công nên được sử dụng hạn chế trên môi trường thực tế.",
+    syncNoteSyncStatus: "• Bảng điều khiển trên phản ánh bản ghi đồng bộ gần đây nhất được lưu trữ trong bảng `sync_status`.",
+    syncNoteBackgroundJobs: "• Khi lên lịch đồng bộ định kỳ, hãy ưu tiên các tiến trình nền qua cron hoặc queue worker thay vì kích hoạt thủ công.",
+
+    // SEO Page Extra
+    seoCheckerLastRun: "Lần kiểm tra cuối: {date}, {summary}",
+    seoStatsTotalPagesDesc: "Tổng số trang SEO được theo dõi",
+    seoStatsActivePagesDesc: "Các mục SEO đang được áp dụng",
+    seoStatsInactivePagesDesc: "Các mục SEO đã tắt hoặc nháp",
+    seoStatsIdealTitle: "Khuyên dùng: 50–60 ký tự",
+    seoStatsIdealDesc: "Khuyên dùng: 150–160 ký tự",
+    seoToolbarAddButton: "Thêm SEO Metadata",
+    seoToolbarSetupDefaultsButton: "Thiết lập mặc định",
+    seoToolbarRefreshButton: "Làm mới ngay",
+    seoToolbarAutoRefreshLabel: "Tự động làm mới (30s)",
+    seoToolbarSearchPlaceholder: "Tìm kiếm trang...",
+    seoToolbarExportCsvButton: "Xuất bản CSV",
+    seoToolbarExportExcelButton: "Xuất bản Excel",
+    seoResolveTitle: "Thử nghiệm Resolve SEO",
+    seoResolvePlaceholder: "/movies hoặc /movie/[id]",
+    seoResolveButton: "Resolve",
+    seoResolveButtonLoading: "Đang xử lý...",
+    seoTableHeaderPage: "Trang",
+    seoTableHeaderLocale: "Ngôn ngữ",
+    seoTableHeaderTitle: "Tiêu đề",
+    seoTableHeaderDescription: "Mô tả",
+    seoTableHeaderStatus: "Trạng thái",
+    seoTableHeaderActions: "Thao tác",
+    seoTableNoData: "Không tìm thấy dữ liệu SEO",
+    seoTableLoading: "Đang tải...",
+    seoTableActionEdit: "Sửa",
+    seoTableActionDelete: "Xóa",
+    seoModalTitleAdd: "Thêm mới SEO Metadata",
+    seoModalTitleEdit: "Chỉnh sửa SEO Metadata",
+    seoModalLabelPageType: "Loại trang",
+    seoModalLabelPath: "Đường dẫn",
+    seoModalLabelLocale: "Ngôn ngữ",
+    seoModalLabelTitle: "Tiêu đề",
+    seoModalLabelDescription: "Mô tả",
+    seoModalLabelKeywords: "Từ khóa (cách nhau bằng dấu phẩy)",
+    seoModalLabelOgTitle: "Tiêu đề OG",
+    seoModalLabelOgDescription: "Mô tả OG",
+    seoModalLabelOgImage: "Đường dẫn ảnh OG",
+    seoModalLabelTwitterTitle: "Tiêu đề Twitter",
+    seoModalLabelTwitterDescription: "Mô tả Twitter",
+    seoModalLabelTwitterImage: "Đường dẫn ảnh Twitter",
+    seoModalLabelActive: "Hoạt động",
+    seoModalButtonCancel: "Hủy bỏ",
+    seoModalButtonCreate: "Tạo mới",
+    seoModalButtonUpdate: "Cập nhật",
+    seoPageTypeSelectPlaceholder: "Chọn loại trang",
+    seoPageTypeMatchHint: "Phải khớp với enum backend: home, movies, tv_series, trending, browse, favorites, people, custom.",
+
+    // Analytics Extra
+    analyticsTopContent: "Nội dung hàng đầu (Lượt xem)",
+    analyticsMostViewedEvents: "Xem nhiều nhất (Sự kiện)",
+    analyticsMostFavorited: "Yêu thích nhiều nhất",
+    analyticsNoPopularData: "Không có dữ liệu nội dung phổ biến",
+    analyticsNoViewEventsData: "Không có dữ liệu sự kiện xem",
+    analyticsNoFavoriteData: "Không có dữ liệu yêu thích",
+
+    // Chat extra
+    chatModerationTitle: "Kiểm duyệt AI Chat",
+    chatModerationDesc: "Xem xét các cuộc hội thoại chatbot bị gắn cờ trước khi thực hiện các hành động tài khoản.",
+    chatSectionOpenFlags: "Cờ đang mở",
+    chatSectionConversationContext: "Bối cảnh cuộc hội thoại",
+    chatNoOpenFlags: "Không có cờ nào đang mở.",
+    chatSelectFlagPrompt: "Chọn một cờ để kiểm tra phiên trò chuyện liên quan.",
+    chatSessionUserLabel: "Phiên #{id} · {user}",
+    chatButtonResolve: "Giải quyết cờ #{id}",
+    chatButtonIgnore: "Bỏ qua",
+    chatUnknownUser: "người dùng không xác định",
+
+    totalViews: "Tổng lượt xem",
+    totalClicks: "Tổng lượt click",
+    totalPlays: "Tổng lượt phát",
+    ctr: "Tỷ lệ click (CTR)",
+    favorites: "Yêu thích",
+    favoriteRate: "Tỷ lệ yêu thích",
+    readOnlyMode: "Chế độ chỉ đọc - Các thay đổi sẽ không được lưu",
+  },
+  en: {
+    dashboard: "Dashboard",
+    settings: "Settings",
+    content: "Content",
+    users: "Users",
+    analytics: "Analytics",
+    notifications: "Notifications",
+    aiChat: "AI Chat",
+    seo: "SEO",
+    syncData: "Sync Data",
+    profile: "Profile",
+    logout: "Logout",
+    backToSite: "Back to Site",
+    editProfile: "Edit Profile",
+    updateInfo: "Update your information",
+    displayName: "Display name",
+    email: "Email",
+    password: "Password (leave blank to keep current)",
+    cancel: "Cancel",
+    save: "Save",
+    saving: "Saving...",
+    adminDashboard: "Admin Dashboard",
+    overview: "Overview of your movie streaming platform",
+    totalMovies: "Total Movies",
+    totalTVSeries: "Total TV Series",
+    totalUsers: "Total Users",
+    totalContent: "Total Content",
+    failedStats: "Failed to load dashboard statistics",
+    dataSync: "Data Synchronization",
+    lastSync: "Last Sync",
+    popularRefresh: "Popular Refresh",
+    popularRefreshDesc: "Quick sync of popular and trending content",
+    fullDailySync: "Full Daily Export",
+    fullDailySyncDesc: "Complete synchronization of all TMDB data",
+    quickActions: "Quick Actions",
+    manageContent: "Manage Content",
+    manageContentDesc: "View and manage all movies and TV series",
+    userManagement: "User Management",
+    userManagementDesc: "View and manage registered users",
+    viewAnalytics: "Analytics",
+    viewAnalyticsDesc: "View platform statistics and insights",
+
+    // Settings Page
+    siteSettings: "Site Settings",
+    adjustConstraints: "Adjust registration constraints and visual effects",
+    saveChanges: "Save Changes",
+    registrationItems: "Registration Items",
+    condition: "Condition",
+    item: "Item",
+    visualEffectsSettings: "Visual Effects Settings",
+    controlVisualEffects: "Control visual effects displayed to all users",
+    swaggerAccess: "Swagger Access",
+    swaggerDesc: "Credentials required to open API docs at /api-docs. Password is stored as a hash.",
+    username: "Username",
+    passwordPlaceholder: "Leave blank to keep current password",
+    atLeast8Chars: "At least 8 characters",
+    saveAccess: "Save Access",
+    swaggerStatus: "Status",
+    configured: "Configured",
+    notConfigured: "Not configured",
+    updatedAtLabel: "Updated",
+    modifiedBy: "Modified by",
+    streamDomains: "Stream Domains",
+    streamDomainsDesc: "One domain per line. The first domain is the primary source and the remaining domains are fallback sources.",
+    streamDomainsPlaceholder: "https://vsembed.ru\nhttps://vsembed.su",
+    streamDomainsTip: "Tip: You can paste domains separated by newline or comma.",
+    saveStreamDomains: "Save Stream Domains",
+    loadingLabel: "Loading...",
+
+    // Users Page
+    userHeaderTitle: "User Management",
+    userHeaderDesc: "View and manage registered user accounts and roles.",
+    
+    // Sync Data
+    syncDataHeaderTitle: "Data Synchronization",
+    syncDataHeaderDesc: "Manually trigger TMDB import jobs for movies and TV series. Use this when you need fresh catalog data immediately.",
+    syncStatsMovies: "Total Movies",
+    syncStatsTv: "Total TV Series",
+    syncStatsLastSync: "Last Sync",
+    syncStatsStatus: "Sync Status",
+    syncOptionAll: "Sync All",
+    syncOptionAllDesc: "Full import: movies, TV series, trending content.",
+    syncOptionMovies: "Sync Movies",
+    syncOptionMoviesDesc: "Update movie catalog only.",
+    syncOptionTv: "Sync TV Series",
+    syncOptionTvDesc: "Update TV series catalog only.",
+    syncOptionPopular: "Sync Popular Content",
+    syncOptionPopularDesc: "Refresh popular movies, TV series, and trending lists.",
+    syncOptionTrending: "Sync Trending Only",
+    syncOptionTrendingDesc: "Refresh the homepage hero and trending page cache.",
+    syncOptionToday: "Latest Exports",
+    syncOptionTodayDesc: "Pull the most recent TMDB daily exports.",
+
+    // SEO Page
+    seoHeaderTitle: "SEO Management",
+    seoHeaderDesc: "Monitor and tune metadata so search crawlers pick up the latest updates.",
+    seoTotalPages: "Total Pages",
+    seoActive: "Active",
+    seoInactive: "Inactive",
+    seoAvgTitleLength: "Avg Title Length",
+    seoAvgDescLength: "Avg Description Length",
+    seoIdealTitle: "Ideal: 50–60 chars",
+    seoIdealDesc: "Ideal: 150–160 chars",
+    seoAllTracked: "All tracked SEO entries",
+    seoCurrentlyEnabled: "Currently enabled entries",
+    seoDisabledOrDraft: "Disabled or draft entries",
+
+    // Notifications Page
+    notificationsHeaderTitle: "Notification Management",
+    notificationsHeaderDesc: "Send, review, and manage notifications delivered to users.",
+
+    // Analytics Page
+    analyticsHeaderTitle: "System Analytics Reports",
+    analyticsHeaderDesc: "Analyze traffic, stream clicks, device stats, and popular countries.",
+
+    // Chat Page
+    chatHeaderTitle: "AI Admin Assistant",
+    chatHeaderDesc: "AI helper to query movie database, analyze user growth, and give platform insights.",
+
+    // Users Page Extra
+    userFilterLabel: "Filter by status to quickly review active and banned accounts.",
+    statusAll: "All",
+    statusActive: "Active",
+    statusBanned: "Banned",
+    tableHeaderUser: "User",
+    tableHeaderRole: "Role",
+    tableHeaderStatus: "Status",
+    tableHeaderSignupAccess: "Sign Up / Access",
+    tableHeaderCountry: "Country",
+    tableHeaderDeviceIp: "Device / IP",
+    tableHeaderActions: "Actions",
+    actionDetails: "Details",
+    actionBan: "Ban",
+    actionUnban: "Unban",
+    noUsersFound: "No users found",
+    loading: "Loading...",
+    signupAccessRegister: "Register",
+    signupAccessLogin: "Login",
+    banUserTitle: "Ban User",
+    banUserConfirm: "Ban user \"{name}\" ({email})",
+    banReasonPlaceholder: "Enter reason for banning...",
+    banConfirmButton: "Ban User",
+
+    // Sync Data Extra
+    syncControlsTitle: "Manual Sync Controls",
+    syncControlsDesc: "Choose the dataset you want to refresh. You may optionally pick a past TMDB export date (YYYY-MM-DD). Leave empty to use today's date.",
+    syncExportDateLabel: "TMDB Export Date (optional)",
+    syncButtonRun: "Run",
+    syncButtonSyncing: "Syncing...",
+    catalogSettingsTitle: "Catalog Size Settings",
+    catalogSettingsDesc: "Configure maximum number of items to keep in the database for each content type. Cleanup runs after \"Sync Popular Content\" to trim excess items based on popularity.",
+    catalogMovieLimitLabel: "Movie Catalog Limit",
+    catalogTvLimitLabel: "TV Series Catalog Limit",
+    catalogTrendingLimitLabel: "Trending Catalog Limit",
+    catalogPeopleLimitLabel: "People Cache Limit",
+    catalogRecommendationLimitLabel: "Recommendation Cache Limit",
+    catalogCurrentValueLabel: "Current: {value}",
+    catalogSaveButton: "Save Settings",
+    catalogSavingButton: "Saving...",
+    syncNotesTitle: "Notes & Recommendations",
+    syncNoteTMDBLimits: "• Keep sync frequency aligned with TMDB rate limits. Manual sync should be used sparingly in production.",
+    syncNoteSyncStatus: "• The dashboard above reflects the most recent sync record stored in the `sync_status` table.",
+    syncNoteBackgroundJobs: "• When scheduling regular syncs, prefer background jobs via cron or queue workers instead of manual triggering.",
+
+    // SEO Page Extra
+    seoCheckerLastRun: "Last checker run: {date}, {summary}",
+    seoStatsTotalPagesDesc: "All tracked SEO entries",
+    seoStatsActivePagesDesc: "Currently enabled entries",
+    seoStatsInactivePagesDesc: "Disabled or draft entries",
+    seoStatsIdealTitle: "Ideal: 50–60 chars",
+    seoStatsIdealDesc: "Ideal: 150–160 chars",
+    seoToolbarAddButton: "Add SEO Metadata",
+    seoToolbarSetupDefaultsButton: "Setup Defaults",
+    seoToolbarRefreshButton: "Refresh now",
+    seoToolbarAutoRefreshLabel: "Auto refresh (30s)",
+    seoToolbarSearchPlaceholder: "Search pages...",
+    seoToolbarExportCsvButton: "Export CSV",
+    seoToolbarExportExcelButton: "Export Excel",
+    seoResolveTitle: "SEO Resolve Test",
+    seoResolvePlaceholder: "/movies or /movie/[id]",
+    seoResolveButton: "Resolve",
+    seoResolveButtonLoading: "Resolving...",
+    seoTableHeaderPage: "Page",
+    seoTableHeaderLocale: "Locale",
+    seoTableHeaderTitle: "Title",
+    seoTableHeaderDescription: "Description",
+    seoTableHeaderStatus: "Status",
+    seoTableHeaderActions: "Actions",
+    seoTableNoData: "No SEO data found",
+    seoTableLoading: "Loading...",
+    seoTableActionEdit: "Edit",
+    seoTableActionDelete: "Delete",
+    seoModalTitleAdd: "Add SEO Metadata",
+    seoModalTitleEdit: "Edit SEO Metadata",
+    seoModalLabelPageType: "Page Type",
+    seoModalLabelPath: "Path",
+    seoModalLabelLocale: "Locale",
+    seoModalLabelTitle: "Title",
+    seoModalLabelDescription: "Description",
+    seoModalLabelKeywords: "Keywords (comma-separated)",
+    seoModalLabelOgTitle: "OG Title",
+    seoModalLabelOgDescription: "OG Description",
+    seoModalLabelOgImage: "OG Image URL",
+    seoModalLabelTwitterTitle: "Twitter Title",
+    seoModalLabelTwitterDescription: "Twitter Description",
+    seoModalLabelTwitterImage: "Twitter Image URL",
+    seoModalLabelActive: "Active",
+    seoModalButtonCancel: "Cancel",
+    seoModalButtonCreate: "Create",
+    seoModalButtonUpdate: "Update",
+    seoPageTypeSelectPlaceholder: "Select page type",
+    seoPageTypeMatchHint: "Must match backend enum: home, movies, tv_series, trending, browse, favorites, people, custom.",
+
+    // Analytics Extra
+    analyticsTopContent: "Top Content (viewCount)",
+    analyticsMostViewedEvents: "Most Viewed (events)",
+    analyticsMostFavorited: "Most Favorited",
+    analyticsNoPopularData: "No popular content data available",
+    analyticsNoViewEventsData: "No view events data available",
+    analyticsNoFavoriteData: "No favorite data available",
+
+    // Chat extra
+    chatModerationTitle: "AI Chat Moderation",
+    chatModerationDesc: "Review flagged chatbot conversations before taking account actions.",
+    chatSectionOpenFlags: "Open Flags",
+    chatSectionConversationContext: "Conversation Context",
+    chatNoOpenFlags: "No open flags.",
+    chatSelectFlagPrompt: "Select a flag to inspect the related chat session.",
+    chatSessionUserLabel: "Session #{id} · {user}",
+    chatButtonResolve: "Resolve flag #{id}",
+    chatButtonIgnore: "Ignore",
+    chatUnknownUser: "unknown user",
+
+    totalViews: "Total Views",
+    totalClicks: "Total Clicks",
+    totalPlays: "Total Plays",
+    ctr: "CTR",
+    favorites: "Favorites",
+    favoriteRate: "Favorite Rate",
+    readOnlyMode: "Read-Only Mode - Changes will not be saved",
+  },
+};
+
+export const getAdminUiMessages = (
+  language: string | undefined
+): AdminUiMessages => ADMIN_MESSAGES[resolveUiLocale(language)];

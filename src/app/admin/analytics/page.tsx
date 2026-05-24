@@ -13,8 +13,10 @@ const AnalyticsFavoritesChart = dynamic(() => import("@/components/analytics/Ana
 const AnalyticsDeviceStats = dynamic(() => import("@/components/analytics/AnalyticsDeviceStats"), { ssr: false });
 import AnalyticsContentList from "@/components/analytics/AnalyticsContentList";
 import AnalyticsCountryStats from "@/components/analytics/AnalyticsCountryStats";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function AdminAnalyticsPage() {
+  const { language } = useLanguage();
   const [contentType, setContentType] = useState<"all" | "movie" | "tv">("all");
 
   const {
@@ -126,26 +128,26 @@ export default function AdminAnalyticsPage() {
       {/* Content Lists Row 1 */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <AnalyticsContentList
-          title="Top Content (viewCount)"
+          title={language.startsWith("vi") ? "Nội dung nổi bật (Lượt xem)" : "Top Content (viewCount)"}
           data={popularContentData.slice(0, 10)}
           exportFilename="popular-content"
-          emptyMessage="No popular content data available"
+          emptyMessage={language.startsWith("vi") ? "Không có dữ liệu phim nổi bật" : "No popular content data available"}
         />
         <AnalyticsContentList
-          title="Most Viewed (events)"
+          title={language.startsWith("vi") ? "Xem nhiều nhất (Sự kiện)" : "Most Viewed (events)"}
           data={mostViewedData}
           exportFilename="most-viewed-events"
-          emptyMessage="No view events data available"
+          emptyMessage={language.startsWith("vi") ? "Không có dữ liệu sự kiện xem" : "No view events data available"}
         />
       </div>
 
       {/* Content Lists Row 2 */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <AnalyticsContentList
-          title="Most Favorited"
+          title={language.startsWith("vi") ? "Yêu thích nhiều nhất" : "Most Favorited"}
           data={mostFavoritedData.slice(0, 15)}
           exportFilename="most-favorited"
-          emptyMessage="No favorite data available"
+          emptyMessage={language.startsWith("vi") ? "Không có dữ liệu yêu thích" : "No favorite data available"}
         />
         <AnalyticsDeviceStats deviceStats={deviceStats} />
       </div>
@@ -155,3 +157,4 @@ export default function AdminAnalyticsPage() {
     </div>
   );
 }
+

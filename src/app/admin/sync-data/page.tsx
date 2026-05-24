@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useReducer } from "react";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useToastRedux } from "@/hooks/useToastRedux";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages, type AdminUiMessages } from "@/lib/ui-messages";
 
 interface DashboardStats {
   totalMovies: number;
@@ -68,13 +70,32 @@ const SYNC_OPTIONS: Array<{ key: SyncTarget; label: string; description: string 
     },
   ];
 
+const getSyncOptionDetails = (key: SyncTarget, labels: AdminUiMessages) => {
+  switch (key) {
+    case "all":
+      return { label: labels.syncOptionAll, description: labels.syncOptionAllDesc };
+    case "movies":
+      return { label: labels.syncOptionMovies, description: labels.syncOptionMoviesDesc };
+    case "tv":
+      return { label: labels.syncOptionTv, description: labels.syncOptionTvDesc };
+    case "popular":
+      return { label: labels.syncOptionPopular, description: labels.syncOptionPopularDesc };
+    case "trending":
+      return { label: labels.syncOptionTrending, description: labels.syncOptionTrendingDesc };
+    case "today":
+      return { label: labels.syncOptionToday, description: labels.syncOptionTodayDesc };
+  }
+};
+
 function SyncPageHeader() {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <header>
-      <h1 className="text-3xl font-semibold text-white">Data Synchronization</h1>
+      <h1 className="text-3xl font-semibold text-white">{labels.syncDataHeaderTitle}</h1>
       <p className="text-gray-400 mt-2 max-w-2xl">
-        Manually trigger TMDB import jobs for movies and TV series. Use this when
-        you need fresh catalog data immediately, outside of scheduled jobs.
+        {labels.syncDataHeaderDesc}
       </p>
     </header>
   );
@@ -87,10 +108,13 @@ function SyncStatsSection({
   stats: DashboardStats | null;
   formattedLastSync: string;
 }) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard
-        title="Total Movies"
+        title={labels.syncStatsMovies}
         value={stats?.totalMovies ?? 0}
         color="bg-blue-600"
         icon={
@@ -105,7 +129,7 @@ function SyncStatsSection({
         }
       />
       <StatsCard
-        title="Total TV Series"
+        title={labels.syncStatsTv}
         value={stats?.totalTVSeries ?? 0}
         color="bg-purple-600"
         icon={
@@ -120,7 +144,7 @@ function SyncStatsSection({
         }
       />
       <StatsCard
-        title="Last Sync"
+        title={labels.syncStatsLastSync}
         value={formattedLastSync}
         color="bg-amber-600"
         icon={
@@ -135,7 +159,7 @@ function SyncStatsSection({
         }
       />
       <StatsCard
-        title="Sync Status"
+        title={labels.syncStatsStatus}
         value={stats?.syncStatus ?? "unknown"}
         color="bg-slate-600"
         icon={
@@ -164,19 +188,24 @@ function ManualSyncSection({
   onCustomDateChange: (value: string) => void;
   onSync: (target: SyncTarget) => void;
 }) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">Manual Sync Controls</h2>
+          <h2 className="text-xl font-semibold text-white">
+            {language.startsWith("vi") ? "Điều khiển đồng bộ thủ công" : "Manual Sync Controls"}
+          </h2>
           <p className="text-gray-400 mt-1 max-w-xl">
-            Choose the dataset you want to refresh. You may optionally pick a
-            past TMDB export date (YYYY-MM-DD). Leave empty to use today&apos;s
-            date.
+            {language.startsWith("vi")
+              ? "Chọn tệp dữ liệu bạn muốn làm mới. Bạn có thể chọn ngày xuất dữ liệu TMDB trước đó (YYYY-MM-DD). Để trống để sử dụng ngày hôm nay."
+              : "Choose the dataset you want to refresh. You may optionally pick a past TMDB export date (YYYY-MM-DD). Leave empty to use today's date."}
           </p>
         </div>
         <label htmlFor="sync-custom-date" className="flex flex-col text-sm text-gray-300">
-          TMDB Export Date (optional)
+          {language.startsWith("vi") ? "Ngày xuất TMDB (tùy chọn)" : "TMDB Export Date (optional)"}
           <input
             id="sync-custom-date"
             type="date"
@@ -193,18 +222,19 @@ function ManualSyncSection({
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
         {SYNC_OPTIONS.map((option) => {
           const busy = syncing === option.key;
+          const details = getSyncOptionDetails(option.key, labels);
           return (
             <div
               key={option.key}
               className="flex items-start justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3"
             >
               <div>
-                <h3 className="text-lg font-medium text-white">{option.label}</h3>
-                <p className="text-sm text-gray-400 mt-1">{option.description}</p>
+                <h3 className="text-lg font-medium text-white">{details.label}</h3>
+                <p className="text-sm text-gray-400 mt-1">{details.description}</p>
               </div>
               <button
                 type="button"
-                aria-label={`Run ${option.label}`}
+                aria-label={`Run ${details.label}`}
                 onClick={() => onSync(option.key)}
                 disabled={busy}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
@@ -213,7 +243,7 @@ function ManualSyncSection({
                     : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
                 }`}
               >
-                {busy ? "Syncing…" : "Run"}
+                {busy ? (language.startsWith("vi") ? "Đang đồng bộ..." : "Syncing…") : (language.startsWith("vi") ? "Chạy" : "Run")}
               </button>
             </div>
           );
@@ -242,14 +272,20 @@ function CatalogSettingsSection({
   onSettingsChange: (patch: Partial<typeof settingsForm>) => void;
   onSave: () => void;
 }) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-semibold text-white">Catalog Size Settings</h2>
+          <h2 className="text-xl font-semibold text-white">
+            {language.startsWith("vi") ? "Cài đặt kích thước danh mục" : "Catalog Size Settings"}
+          </h2>
           <p className="text-gray-400 mt-1 max-w-xl text-sm">
-            Configure maximum number of items to keep in the database for each content type.
-            Cleanup runs after &quot;Sync Popular Content&quot; to trim excess items based on popularity.
+            {language.startsWith("vi")
+              ? "Cấu hình số lượng mục tối đa được lưu trữ trong cơ sở dữ liệu cho mỗi loại nội dung. Hệ thống sẽ tự động dọn dẹp các mục dư thừa dựa trên độ phổ biến sau khi đồng bộ."
+              : "Configure maximum number of items to keep in the database for each content type. Cleanup runs after \"Sync Popular Content\" to trim excess items based on popularity."}
           </p>
         </div>
       </div>
@@ -257,7 +293,7 @@ function CatalogSettingsSection({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div>
           <label htmlFor="sync-movie-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
-            Movie Catalog Limit
+            {language.startsWith("vi") ? "Giới hạn danh mục phim lẻ" : "Movie Catalog Limit"}
           </label>
           <input
             id="sync-movie-catalog-limit"
@@ -272,13 +308,13 @@ function CatalogSettingsSection({
             className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
           />
           <p className="mt-1 text-xs text-gray-400">
-            Current: {(settings?.movieCatalogLimit ?? 500000).toLocaleString()}
+            {language.startsWith("vi") ? "Hiện tại: " : "Current: "} {(settings?.movieCatalogLimit ?? 500000).toLocaleString()}
           </p>
         </div>
 
         <div>
           <label htmlFor="sync-tv-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
-            TV Series Catalog Limit
+            {language.startsWith("vi") ? "Giới hạn danh mục phim bộ" : "TV Series Catalog Limit"}
           </label>
           <input
             id="sync-tv-catalog-limit"
@@ -293,13 +329,13 @@ function CatalogSettingsSection({
             className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
           />
           <p className="mt-1 text-xs text-gray-400">
-            Current: {(settings?.tvCatalogLimit ?? 200000).toLocaleString()}
+            {language.startsWith("vi") ? "Hiện tại: " : "Current: "} {(settings?.tvCatalogLimit ?? 200000).toLocaleString()}
           </p>
         </div>
 
         <div>
           <label htmlFor="sync-trending-catalog-limit" className="block text-sm font-medium text-gray-300 mb-2">
-            Trending Catalog Limit
+            {language.startsWith("vi") ? "Giới hạn danh mục Trending" : "Trending Catalog Limit"}
           </label>
           <input
             id="sync-trending-catalog-limit"
@@ -314,13 +350,13 @@ function CatalogSettingsSection({
             className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
           />
           <p className="mt-1 text-xs text-gray-400">
-            Current: {(settings?.trendingCatalogLimit ?? 100).toLocaleString()}
+            {language.startsWith("vi") ? "Hiện tại: " : "Current: "} {(settings?.trendingCatalogLimit ?? 100).toLocaleString()}
           </p>
         </div>
 
         <div>
           <label htmlFor="sync-people-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
-            People Cache Limit
+            {language.startsWith("vi") ? "Giới hạn bộ nhớ đệm Diễn viên/Đạo diễn" : "People Cache Limit"}
           </label>
           <input
             id="sync-people-cache-limit"
@@ -335,13 +371,13 @@ function CatalogSettingsSection({
             className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
           />
           <p className="mt-1 text-xs text-gray-400">
-            Current: {(settings?.peopleCacheLimit ?? 10000).toLocaleString()}
+            {language.startsWith("vi") ? "Hiện tại: " : "Current: "} {(settings?.peopleCacheLimit ?? 10000).toLocaleString()}
           </p>
         </div>
 
         <div>
           <label htmlFor="sync-recommendation-cache-limit" className="block text-sm font-medium text-gray-300 mb-2">
-            Recommendation Cache Limit
+            {language.startsWith("vi") ? "Giới hạn bộ nhớ đệm Gợi ý" : "Recommendation Cache Limit"}
           </label>
           <input
             id="sync-recommendation-cache-limit"
@@ -356,7 +392,7 @@ function CatalogSettingsSection({
             className="w-full rounded-md border border-gray-600 bg-gray-900 px-3 py-2 text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
           />
           <p className="mt-1 text-xs text-gray-400">
-            Current: {(settings?.recommendationCacheLimit ?? 10000).toLocaleString()}
+            {language.startsWith("vi") ? "Hiện tại: " : "Current: "} {(settings?.recommendationCacheLimit ?? 10000).toLocaleString()}
           </p>
         </div>
       </div>
@@ -372,7 +408,7 @@ function CatalogSettingsSection({
               : "cursor-pointer bg-red-600 text-white hover:bg-red-700"
           }`}
         >
-          {savingSettings ? "Saving..." : "Save Settings"}
+          {savingSettings ? labels.saving : (language.startsWith("vi") ? "Lưu cài đặt" : "Save Settings")}
         </button>
       </div>
     </section>
@@ -380,22 +416,42 @@ function CatalogSettingsSection({
 }
 
 function SyncNotesSection() {
+  const { language } = useLanguage();
+
   return (
     <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-white mb-3">Notes & Recommendations</h3>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        {language.startsWith("vi") ? "Ghi chú & Khuyến nghị" : "Notes & Recommendations"}
+      </h3>
       <ul className="space-y-2 text-sm text-gray-300">
-        <li>
-          • Keep sync frequency aligned with TMDB rate limits. Manual sync should be
-          used sparingly in production.
-        </li>
-        <li>
-          • The dashboard above reflects the most recent sync record stored in the
-          `sync_status` table.
-        </li>
-        <li>
-          • When scheduling regular syncs, prefer background jobs via cron or queue
-          workers instead of manual triggering.
-        </li>
+        {language.startsWith("vi") ? (
+          <>
+            <li>
+              • Giữ tần suất đồng bộ phù hợp với giới hạn tần suất (rate limits) của TMDB. Tránh lạm dụng đồng bộ thủ công trong môi trường production.
+            </li>
+            <li>
+              • Bảng điều khiển hiển thị bản ghi đồng bộ gần đây nhất được lưu trong bảng `sync_status`.
+            </li>
+            <li>
+              • Khi lên lịch đồng bộ định kỳ, hãy ưu tiên sử dụng các tiến trình chạy ngầm (background jobs) qua cron hoặc queue worker thay vì kích hoạt thủ công.
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              • Keep sync frequency aligned with TMDB rate limits. Manual sync should be
+              used sparingly in production.
+            </li>
+            <li>
+              • The dashboard above reflects the most recent sync record stored in the
+              `sync_status` table.
+            </li>
+            <li>
+              • When scheduling regular syncs, prefer background jobs via cron or queue
+              workers instead of manual triggering.
+            </li>
+          </>
+        )}
       </ul>
     </section>
   );

@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import CheckSeoHealth from "./checker";
 import { SeoMetadata } from "@/types/seo";
 import { Eye, EyeOff } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 import {
   useAdminSeo,
   PAGE_TYPE_OPTIONS,
@@ -14,11 +16,14 @@ import {
 const SeoChartsSection = dynamic(() => import("./SeoChartsSection"), { ssr: false });
 
 function AdminSeoHeader() {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   return (
     <div className="flex flex-col gap-2">
-      <h1 className="text-3xl font-semibold text-white">SEO Management</h1>
+      <h1 className="text-3xl font-semibold text-white">{labels.seoHeaderTitle}</h1>
       <p className="text-gray-400">
-        Monitor and tune metadata so search crawlers pick up the latest updates.
+        {labels.seoHeaderDesc}
       </p>
     </div>
   );
@@ -48,12 +53,14 @@ function AdminSeoHealthSection({
     duplicates: unknown[];
   }) => void;
 }) {
+  const { language } = useLanguage();
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 gap-y-3">
       <CheckSeoHealth onComplete={onComplete} />
       {lastCheckedAt && lastCheckSummary && (
         <p className="text-sm text-gray-500" suppressHydrationWarning>
-          Last checker run: {lastCheckedAt}, {lastCheckSummary}
+          {language.startsWith("vi") ? "Lần kiểm tra cuối: " : "Last checker run: "} {lastCheckedAt}, {lastCheckSummary}
         </p>
       )}
     </div>
@@ -69,35 +76,38 @@ function AdminSeoStatsSection({
   statusChartData: { name: string; value: number }[];
   lengthChartData: { name: string; value: number }[];
 }) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
+
   if (!stats) return null;
 
   return (
     <div className="gap-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-white">Total Pages</h3>
+          <h3 className="text-lg font-semibold text-white">{labels.seoTotalPages}</h3>
           <p className="text-3xl font-bold text-blue-400">{stats.totalPages}</p>
-          <p className="text-xs text-gray-400 mt-1">All tracked SEO entries</p>
+          <p className="text-xs text-gray-400 mt-1">{labels.seoAllTracked}</p>
         </div>
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-white">Active</h3>
+          <h3 className="text-lg font-semibold text-white">{labels.seoActive}</h3>
           <p className="text-3xl font-bold text-green-400">{stats.activePages}</p>
-          <p className="text-xs text-gray-400 mt-1">Currently enabled entries</p>
+          <p className="text-xs text-gray-400 mt-1">{labels.seoCurrentlyEnabled}</p>
         </div>
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-white">Inactive</h3>
+          <h3 className="text-lg font-semibold text-white">{labels.seoInactive}</h3>
           <p className="text-3xl font-bold text-red-400">{stats.inactivePages}</p>
-          <p className="text-xs text-gray-400 mt-1">Disabled or draft entries</p>
+          <p className="text-xs text-gray-400 mt-1">{labels.seoDisabledOrDraft}</p>
         </div>
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-white">Avg Title Length</h3>
+          <h3 className="text-lg font-semibold text-white">{labels.seoAvgTitleLength}</h3>
           <p className="text-3xl font-bold text-purple-400">{stats.avgTitleLength}</p>
-          <p className="text-xs text-gray-400 mt-1">Ideal: 50–60 chars</p>
+          <p className="text-xs text-gray-400 mt-1">{labels.seoIdealTitle}</p>
         </div>
         <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg shadow">
-          <h3 className="text-lg font-semibold text-white">Avg Description Length</h3>
+          <h3 className="text-lg font-semibold text-white">{labels.seoAvgDescLength}</h3>
           <p className="text-3xl font-bold text-amber-400">{stats.avgDescriptionLength}</p>
-          <p className="text-xs text-gray-400 mt-1">Ideal: 150–160 chars</p>
+          <p className="text-xs text-gray-400 mt-1">{labels.seoIdealDesc}</p>
         </div>
       </div>
 
@@ -132,6 +142,8 @@ function AdminSeoToolbar({
   onSearchTermChange: (value: string) => void;
   onExport: (format: "csv" | "excel") => void;
 }) {
+  const { language } = useLanguage();
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 gap-y-4">
       <div className="flex flex-wrap gap-3 items-center">
@@ -140,21 +152,21 @@ function AdminSeoToolbar({
           onClick={onAdd}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
-          Add SEO Metadata
+          {language.startsWith("vi") ? "Thêm SEO Metadata" : "Add SEO Metadata"}
         </button>
         <button
           type="button"
           onClick={onSetupDefaults}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
         >
-          Setup Defaults
+          {language.startsWith("vi") ? "Thiết lập mặc định" : "Setup Defaults"}
         </button>
         <button
           type="button"
           onClick={onRefresh}
           className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-500 cursor-pointer"
         >
-          Refresh now
+          {language.startsWith("vi") ? "Tải lại dữ liệu" : "Refresh now"}
         </button>
         <div className="flex items-center gap-2">
           <input
@@ -166,7 +178,7 @@ function AdminSeoToolbar({
             className="size-4 accent-red-500"
           />
           <label htmlFor="auto-refresh" className="text-sm text-gray-300">
-            Auto refresh (30s)
+            {language.startsWith("vi") ? "Tự động tải lại (30s)" : "Auto refresh (30s)"}
           </label>
         </div>
       </div>
@@ -178,14 +190,14 @@ function AdminSeoToolbar({
           onChange={(e) => onFilterChange(e.target.value as "all" | "active" | "inactive")}
           className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2"
         >
-          <option value="all">All</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="all">{language.startsWith("vi") ? "Tất cả" : "All"}</option>
+          <option value="active">{language.startsWith("vi") ? "Hoạt động" : "Active"}</option>
+          <option value="inactive">{language.startsWith("vi") ? "Không hoạt động" : "Inactive"}</option>
         </select>
 
         <input
           type="text"
-          placeholder="Search pages..."
+          placeholder={language.startsWith("vi") ? "Tìm kiếm các trang..." : "Search pages..."}
           aria-label="Search SEO pages"
           value={searchTerm}
           onChange={(e) => onSearchTermChange(e.target.value)}
@@ -197,14 +209,14 @@ function AdminSeoToolbar({
             onClick={() => onExport("csv")}
             className="bg-amber-500 text-white px-4 py-2 rounded hover:bg-amber-600 cursor-pointer"
           >
-            Export CSV
+            {language.startsWith("vi") ? "Xuất file CSV" : "Export CSV"}
           </button>
           <button
             type="button"
             onClick={() => onExport("excel")}
             className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 cursor-pointer"
           >
-            Export Excel
+            {language.startsWith("vi") ? "Xuất file Excel" : "Export Excel"}
           </button>
         </div>
       </div>
@@ -229,16 +241,20 @@ function AdminSeoResolveSection({
   onResolveLocaleChange: (value: "vi" | "en") => void;
   onResolve: () => void;
 }) {
+  const { language } = useLanguage();
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 gap-y-3">
-      <h3 className="text-base font-semibold text-white">SEO Resolve Test</h3>
+      <h3 className="text-base font-semibold text-white">
+        {language.startsWith("vi") ? "Kiểm tra hiển thị SEO (Test Resolve)" : "SEO Resolve Test"}
+      </h3>
       <div className="flex flex-wrap items-center gap-3">
         <input
           type="text"
           value={resolvePath}
           aria-label="Resolve path"
           onChange={(e) => onResolvePathChange(e.target.value)}
-          placeholder="/movies hoặc /movie/[id]"
+          placeholder={language.startsWith("vi") ? "Ví dụ: /movies hoặc /movie/[id]" : "e.g., /movies or /movie/[id]"}
           className="border border-gray-700 bg-gray-900 text-white rounded-md px-3 py-2 flex-1 min-w-[220px]"
         />
         <select
@@ -259,7 +275,7 @@ function AdminSeoResolveSection({
           disabled={resolveLoading}
           className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
         >
-          {resolveLoading ? "Resolving…" : "Resolve"}
+          {resolveLoading ? (language.startsWith("vi") ? "Đang truy vấn…" : "Resolving…") : (language.startsWith("vi") ? "Truy vấn" : "Resolve")}
         </button>
       </div>
       {resolveResult && (
@@ -295,28 +311,30 @@ function AdminSeoTable({
   onToggleActive: (id: number) => void;
   onDelete: (id: number) => void;
 }) {
+  const { language } = useLanguage();
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg shadow overflow-hidden">
       <table className="min-w-full">
         <thead className="bg-gray-900">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Page
+              {language.startsWith("vi") ? "Trang" : "Page"}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Locale
+              {language.startsWith("vi") ? "Ngôn ngữ" : "Locale"}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Title
+              {language.startsWith("vi") ? "Tiêu đề" : "Title"}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Description
+              {language.startsWith("vi") ? "Mô tả" : "Description"}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Status
+              {language.startsWith("vi") ? "Trạng thái" : "Status"}
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-              Actions
+              {language.startsWith("vi") ? "Thao tác" : "Actions"}
             </th>
           </tr>
         </thead>
@@ -324,13 +342,13 @@ function AdminSeoTable({
           {loading ? (
             <tr>
               <td colSpan={6} className="px-6 py-4 text-center">
-                Loading…
+                {language.startsWith("vi") ? "Đang tải dữ liệu…" : "Loading…"}
               </td>
             </tr>
           ) : filteredSeoData.length === 0 ? (
             <tr>
               <td colSpan={6} className="px-6 py-4 text-center">
-                No SEO data found
+                {language.startsWith("vi") ? "Không tìm thấy dữ liệu SEO nào" : "No SEO data found"}
               </td>
             </tr>
           ) : (
@@ -349,11 +367,11 @@ function AdminSeoTable({
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-white max-w-xs truncate">{seo.title}</div>
-                  <div className="text-xs text-gray-400">{seo.title.length} chars</div>
+                  <div className="text-xs text-gray-400">{seo.title.length} {language.startsWith("vi") ? "ký tự" : "chars"}</div>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-white max-w-xs truncate">{seo.description}</div>
-                  <div className="text-xs text-gray-400">{seo.description.length} chars</div>
+                  <div className="text-xs text-gray-400">{seo.description.length} {language.startsWith("vi") ? "ký tự" : "chars"}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
@@ -363,7 +381,9 @@ function AdminSeoTable({
                         : "bg-red-100 text-red-800"
                     }`}
                   >
-                    {seo.isActive ? "Active" : "Inactive"}
+                    {seo.isActive 
+                      ? (language.startsWith("vi") ? "Hoạt động" : "Active") 
+                      : (language.startsWith("vi") ? "Tắt" : "Inactive")}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -373,7 +393,7 @@ function AdminSeoTable({
                       onClick={() => onEdit(seo)}
                       className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
-                      Edit
+                      {language.startsWith("vi") ? "Sửa" : "Edit"}
                     </button>
                     <button
                       type="button"
@@ -388,7 +408,7 @@ function AdminSeoTable({
                       onClick={() => onDelete(seo.id)}
                       className="text-red-600 hover:text-red-900 cursor-pointer"
                     >
-                      Delete
+                      {language.startsWith("vi") ? "Xóa" : "Delete"}
                     </button>
                   </div>
                 </td>
@@ -444,18 +464,21 @@ function AdminSeoEditModal({
     isActive: boolean;
   }>) => void;
 }) {
+  const { language } = useLanguage();
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 bg-gray-950 bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
-        <h2 className="text-lg font-semibold mb-4">{isNew ? "Add" : "Edit"} SEO Metadata</h2>
+        <h2 className="text-lg font-semibold mb-4 text-white">
+          {isNew ? (language.startsWith("vi") ? "Thêm mới SEO" : "Add SEO Metadata") : (language.startsWith("vi") ? "Cập nhật SEO" : "Edit SEO Metadata")}
+        </h2>
 
         <div className="gap-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label htmlFor="seo-page-type" className="block text-sm font-medium text-white">
-                Page Type
+                {language.startsWith("vi") ? "Loại Trang" : "Page Type"}
               </label>
               <select
                 id="seo-page-type"
@@ -464,20 +487,17 @@ function AdminSeoEditModal({
                 onChange={(e) => onFormChange({ pageType: e.target.value })}
                 className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
               >
-                <option value="">Select page type</option>
+                <option value="">{language.startsWith("vi") ? "Chọn loại trang" : "Select page type"}</option>
                 {PAGE_TYPE_OPTIONS.map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-400 mt-1">
-                Must match backend enum: home, movies, tv_series, trending, browse, favorites, people, custom.
-              </p>
             </div>
             <div>
               <label htmlFor="seo-path" className="block text-sm font-medium text-white">
-                Path
+                {language.startsWith("vi") ? "Đường dẫn (Path)" : "Path"}
               </label>
               <input
                 id="seo-path"
@@ -491,7 +511,7 @@ function AdminSeoEditModal({
             </div>
             <div>
               <label htmlFor="seo-locale" className="block text-sm font-medium text-white">
-                Locale
+                {language.startsWith("vi") ? "Ngôn ngữ" : "Locale"}
               </label>
               <select
                 id="seo-locale"
@@ -511,7 +531,7 @@ function AdminSeoEditModal({
 
           <div>
             <label htmlFor="seo-title" className="block text-sm font-medium text-white">
-              Title
+              {language.startsWith("vi") ? "Tiêu đề (Title)" : "Title"}
             </label>
             <input
               id="seo-title"
@@ -521,12 +541,12 @@ function AdminSeoEditModal({
               onChange={(e) => onFormChange({ title: e.target.value })}
               className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
             />
-            <p className="text-xs text-gray-400 mt-1">{formData.title.length} characters</p>
+            <p className="text-xs text-gray-400 mt-1">{formData.title.length} {language.startsWith("vi") ? "ký tự" : "characters"}</p>
           </div>
 
           <div>
             <label htmlFor="seo-description" className="block text-sm font-medium text-white">
-              Description
+              {language.startsWith("vi") ? "Mô tả (Description)" : "Description"}
             </label>
             <textarea
               id="seo-description"
@@ -536,12 +556,12 @@ function AdminSeoEditModal({
               className="mt-1 block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
               rows={3}
             />
-            <p className="text-xs text-gray-400 mt-1">{formData.description.length} characters</p>
+            <p className="text-xs text-gray-400 mt-1">{formData.description.length} {language.startsWith("vi") ? "ký tự" : "characters"}</p>
           </div>
 
           <div>
             <label htmlFor="seo-keywords" className="block text-sm font-medium text-white">
-              Keywords (comma-separated)
+              {language.startsWith("vi") ? "Từ khóa (ngăn cách bằng dấu phẩy)" : "Keywords (comma-separated)"}
             </label>
             <input
               id="seo-keywords"
@@ -558,14 +578,14 @@ function AdminSeoEditModal({
             <div className="gap-y-3">
               <input
                 type="text"
-                placeholder="OG Title"
+                placeholder={language.startsWith("vi") ? "OG Title" : "OG Title"}
                 aria-label="OG Title"
                 value={formData.ogTitle}
                 onChange={(e) => onFormChange({ ogTitle: e.target.value })}
                 className="block w-full border border-gray-700 rounded-md px-3 py-2 bg-gray-900 text-white"
               />
               <textarea
-                placeholder="OG Description"
+                placeholder={language.startsWith("vi") ? "OG Description" : "OG Description"}
                 aria-label="OG Description"
                 value={formData.ogDescription}
                 onChange={(e) => onFormChange({ ogDescription: e.target.value })}
@@ -574,7 +594,7 @@ function AdminSeoEditModal({
               />
               <input
                 type="text"
-                placeholder="OG Image URL"
+                placeholder={language.startsWith("vi") ? "Link hình ảnh OG" : "OG Image URL"}
                 aria-label="OG Image URL"
                 value={formData.ogImage}
                 onChange={(e) => onFormChange({ ogImage: e.target.value })}
@@ -620,10 +640,10 @@ function AdminSeoEditModal({
               aria-label="SEO entry active"
               checked={formData.isActive}
               onChange={(e) => onFormChange({ isActive: e.target.checked })}
-              className="mr-2"
+              className="mr-2 cursor-pointer"
             />
-            <label htmlFor="isActive" className="text-sm font-medium text-white">
-              Active
+            <label htmlFor="isActive" className="text-sm font-medium text-white cursor-pointer select-none">
+              {language.startsWith("vi") ? "Hoạt động" : "Active"}
             </label>
           </div>
         </div>
@@ -634,14 +654,14 @@ function AdminSeoEditModal({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 cursor-pointer"
           >
-            Cancel
+            {language.startsWith("vi") ? "Hủy" : "Cancel"}
           </button>
           <button
             type="button"
             onClick={onSubmit}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 cursor-pointer"
           >
-            {isNew ? "Create" : "Update"}
+            {isNew ? (language.startsWith("vi") ? "Tạo" : "Create") : (language.startsWith("vi") ? "Cập nhật" : "Update")}
           </button>
         </div>
       </div>
@@ -687,7 +707,7 @@ export default function AdminSeoPage() {
   } = useAdminSeo();
 
   return (
-    <div className="gap-y-6">
+    <div className="space-y-6">
       <AdminSeoHeader />
       <AdminSeoErrorBanner message={errorMessage} />
       <AdminSeoHealthSection

@@ -3,8 +3,12 @@
 import Link from "next/link";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 
 export default function AdminDashboard() {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
   const {
     stats,
     loading,
@@ -17,10 +21,10 @@ export default function AdminDashboard() {
         {/* Header */}
         <div>
           <h1 className="text-3xl font-semibold text-white mb-2">
-            Admin Dashboard
+            {labels.adminDashboard}
           </h1>
           <p className="text-gray-400">
-            Overview of your movie streaming platform
+            {labels.overview}
           </p>
         </div>
 
@@ -39,7 +43,7 @@ export default function AdminDashboard() {
         ) : stats ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard
-              title="Total Movies"
+              title={labels.totalMovies}
               value={stats.totalMovies}
               icon={
                 <svg
@@ -54,7 +58,7 @@ export default function AdminDashboard() {
             />
 
             <StatsCard
-              title="Total TV Series"
+              title={labels.totalTVSeries}
               value={stats.totalTVSeries}
               icon={
                 <svg
@@ -69,7 +73,7 @@ export default function AdminDashboard() {
             />
 
             <StatsCard
-              title="Total Users"
+              title={labels.totalUsers}
               value={stats.totalUsers}
               icon={
                 <svg
@@ -85,7 +89,7 @@ export default function AdminDashboard() {
             />
 
             <StatsCard
-              title="Total Content"
+              title={labels.totalContent}
               value={stats.totalContent}
               icon={
                 <svg
@@ -102,7 +106,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <p className="text-gray-400 text-center">
-              Failed to load dashboard statistics
+              {labels.failedStats}
             </p>
           </div>
         )}
@@ -110,7 +114,7 @@ export default function AdminDashboard() {
         {/* Sync Status Section */}
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h2 className="text-xl font-semibold text-white mb-4">
-            Data Synchronization
+            {labels.dataSync}
           </h2>
 
           {/* Last Sync Info */}
@@ -118,7 +122,7 @@ export default function AdminDashboard() {
             <div className="mb-4 p-4 bg-gray-700 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm">Last Sync</p>
+                  <p className="text-gray-400 text-sm">{labels.lastSync}</p>
                   <p className="text-white font-semibold" suppressHydrationWarning>
                     {new Date(stats.lastSyncDate).toLocaleString()}
                   </p>
@@ -151,7 +155,7 @@ export default function AdminDashboard() {
               } ${syncingTarget !== null ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-white">Popular Refresh</h3>
+                <h3 className="font-semibold text-white">{labels.popularRefresh}</h3>
                 {syncingTarget === "popular" && (
                   <svg
                     className="animate-spin size-5 text-white"
@@ -176,7 +180,7 @@ export default function AdminDashboard() {
                 )}
               </div>
               <p className="text-gray-400 text-sm">
-                Quick sync of popular and trending content
+                {labels.popularRefreshDesc}
               </p>
             </button>
 
@@ -191,7 +195,7 @@ export default function AdminDashboard() {
               } ${syncingTarget !== null ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-white">Full Daily Export</h3>
+                <h3 className="font-semibold text-white">{labels.fullDailySync}</h3>
                 {syncingTarget === "all" && (
                   <svg
                     className="animate-spin size-5 text-white"
@@ -216,7 +220,7 @@ export default function AdminDashboard() {
                 )}
               </div>
               <p className="text-gray-400 text-sm">
-                Complete synchronization of all TMDB data
+                {labels.fullDailySyncDesc}
               </p>
             </button>
           </div>
@@ -238,10 +242,10 @@ export default function AdminDashboard() {
                   <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
                 </svg>
               </div>
-              <h3 className="text-white font-semibold">Manage Content</h3>
+              <h3 className="text-white font-semibold">{labels.manageContent}</h3>
             </div>
             <p className="text-gray-400 text-sm">
-              View and manage all movies and TV series
+              {labels.manageContentDesc}
             </p>
           </Link>
 
@@ -259,10 +263,10 @@ export default function AdminDashboard() {
                   <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                 </svg>
               </div>
-              <h3 className="text-white font-semibold">User Management</h3>
+              <h3 className="text-white font-semibold">{labels.userManagement}</h3>
             </div>
             <p className="text-gray-400 text-sm">
-              View and manage registered users
+              {labels.userManagementDesc}
             </p>
           </Link>
 
@@ -280,10 +284,10 @@ export default function AdminDashboard() {
                   <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                 </svg>
               </div>
-              <h3 className="text-white font-semibold">Analytics</h3>
+              <h3 className="text-white font-semibold">{labels.viewAnalytics}</h3>
             </div>
             <p className="text-gray-400 text-sm">
-              View platform statistics and insights
+              {labels.viewAnalyticsDesc}
             </p>
           </Link>
         </div>

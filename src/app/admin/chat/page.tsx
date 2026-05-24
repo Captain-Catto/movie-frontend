@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ChatFlag {
   id: number;
@@ -37,6 +38,8 @@ interface ChatSessionDetail {
 }
 
 export default function AdminChatPage() {
+  const { language } = useLanguage();
+  const isVi = language.startsWith("vi");
   const adminApi = useAdminApi();
   const [flags, setFlags] = useState<ChatFlag[]>([]);
   const [selectedSession, setSelectedSession] =
@@ -84,9 +87,13 @@ export default function AdminChatPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">AI Chat Moderation</h1>
+        <h1 className="text-2xl font-semibold text-white">
+          {isVi ? "Kiểm duyệt cuộc trò chuyện AI" : "AI Chat Moderation"}
+        </h1>
         <p className="text-sm text-gray-400">
-          Review flagged chatbot conversations before taking account actions.
+          {isVi
+            ? "Xem xét các cuộc hội thoại chatbot bị báo cáo vi phạm trước khi xử lý tài khoản."
+            : "Review flagged chatbot conversations before taking account actions."}
         </p>
       </div>
 
@@ -99,13 +106,17 @@ export default function AdminChatPage() {
       <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
         <section className="rounded-lg border border-gray-800 bg-gray-900">
           <div className="border-b border-gray-800 px-4 py-3">
-            <h2 className="font-semibold text-white">Open Flags</h2>
+            <h2 className="font-semibold text-white">
+              {isVi ? "Cảnh báo chưa giải quyết" : "Open Flags"}
+            </h2>
           </div>
           <div className="max-h-[720px] overflow-y-auto p-3">
             {loading ? (
-              <div className="p-4 text-sm text-gray-400">Loading…</div>
+              <div className="p-4 text-sm text-gray-400">{isVi ? "Đang tải…" : "Loading…"}</div>
             ) : flags.length === 0 ? (
-              <div className="p-4 text-sm text-gray-400">No open flags.</div>
+              <div className="p-4 text-sm text-gray-400">
+                {isVi ? "Không có cảnh báo vi phạm nào." : "No open flags."}
+              </div>
             ) : (
               <div className="space-y-3">
                 {flags.map((flag) => (
@@ -148,16 +159,20 @@ export default function AdminChatPage() {
 
         <section className="rounded-lg border border-gray-800 bg-gray-900">
           <div className="border-b border-gray-800 px-4 py-3">
-            <h2 className="font-semibold text-white">Conversation Context</h2>
+            <h2 className="font-semibold text-white">
+              {isVi ? "Bối cảnh cuộc trò chuyện" : "Conversation Context"}
+            </h2>
           </div>
           {!selectedSession ? (
             <div className="p-6 text-sm text-gray-400">
-              Select a flag to inspect the related chat session.
+              {isVi
+                ? "Chọn một báo cáo vi phạm để kiểm tra nội dung phiên chat tương ứng."
+                : "Select a flag to inspect the related chat session."}
             </div>
           ) : (
             <div className="p-4">
               <div className="mb-4 rounded-lg bg-gray-800 p-3 text-sm text-gray-300">
-                Session #{selectedSession.session.id} ·{" "}
+                {isVi ? "Phiên chat" : "Session"} #{selectedSession.session.id} ·{" "}
                 {selectedSession.session.user?.email || "unknown user"}
               </div>
               <div className="mb-4 max-h-[520px] space-y-3 overflow-y-auto">
@@ -185,16 +200,16 @@ export default function AdminChatPage() {
                           <button
                             type="button"
                             onClick={() => resolveFlag(flag.id, "resolved")}
-                            className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                            className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 cursor-pointer"
                           >
-                            Resolve flag #{flag.id}
+                            {isVi ? `Giải quyết báo cáo #${flag.id}` : `Resolve flag #${flag.id}`}
                           </button>
                           <button
                             type="button"
                             onClick={() => resolveFlag(flag.id, "ignored")}
-                            className="rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700"
+                            className="rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700 cursor-pointer"
                           >
-                            Ignore
+                            {isVi ? "Bỏ qua" : "Ignore"}
                           </button>
                         </div>,
                       ]
@@ -208,3 +223,4 @@ export default function AdminChatPage() {
     </div>
   );
 }
+

@@ -4,6 +4,8 @@ import { ReactNode, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { redirect } from "next/navigation";
 import { useAdminAnalyticsSocket } from "@/hooks/useAdminAnalyticsSocket";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages } from "@/lib/ui-messages";
 import AdminSidebar from "./AdminSidebar";
 import AdminMetricsBar from "./AdminMetricsBar";
 import { AdminAnalyticsProvider } from "@/context/AdminAnalyticsContext";
@@ -14,6 +16,8 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
   const analytics = useAdminAnalyticsSocket();
   const metrics = useMemo<Metric[]>(() => {
     const views = analytics.snapshot?.views ?? 0;
@@ -31,37 +35,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
     return [
       {
-        label: "Total Views",
+        label: labels.totalViews,
         value: formatCompactNumber(views),
         hint: "VIEW events",
       },
       {
-        label: "Total Clicks",
+        label: labels.totalClicks,
         value: formatCompactNumber(clicks),
         hint: "CLICK events",
       },
       {
-        label: "Total Plays",
+        label: labels.totalPlays,
         value: formatCompactNumber(plays),
         hint: "PLAY events",
       },
       {
-        label: "CTR",
+        label: labels.ctr,
         value: `${ctr.toFixed(1)}%`,
         hint: "Clicks / Views",
       },
       {
-        label: "Favorites",
+        label: labels.favorites,
         value: formatCompactNumber(favorites),
         hint: "Saved items",
       },
       {
-        label: "Favorite Rate",
+        label: labels.favoriteRate,
         value: `${favRate.toFixed(1)}%`,
         hint: "Favorites / Views",
       },
     ];
-  }, [analytics.snapshot]);
+  }, [analytics.snapshot, labels]);
 
   const sidebarOpen = true;
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -70,7 +74,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white">Loading…</div>
+        <div className="text-white">{language.startsWith("vi") ? "Đang tải..." : "Loading..."}</div>
       </div>
     );
   }
@@ -118,7 +122,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                       />
                     </svg>
                     <span className="text-yellow-200 text-sm font-medium">
-                      Read-Only Mode - Changes will not be saved
+                      {labels.readOnlyMode}
                     </span>
                   </div>
                 </div>

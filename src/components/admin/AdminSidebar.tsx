@@ -6,6 +6,9 @@ import { useEffect, useReducer, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { ChevronDown, LogOut, User } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { getAdminUiMessages, type AdminUiMessages } from "@/lib/ui-messages";
+import LanguageSelector from "@/components/layout/LanguageSelector";
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -186,11 +189,13 @@ function AdminSidebarProfileButton({
 function AdminSidebarAccountMenu({
   open,
   menuRef,
+  labels,
   onOpenProfile,
   onLogout,
 }: {
   open: boolean;
   menuRef: React.RefObject<HTMLDivElement | null>;
+  labels: AdminUiMessages;
   onOpenProfile: () => void;
   onLogout: () => void;
 }) {
@@ -207,7 +212,7 @@ function AdminSidebarAccountMenu({
         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-200 hover:bg-gray-700 transition-colors cursor-pointer"
       >
         <User className="size-4" />
-        <span>Profile</span>
+        <span>{labels.profile}</span>
       </button>
       <button
         type="button"
@@ -215,7 +220,7 @@ function AdminSidebarAccountMenu({
         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-200 hover:bg-red-600/20 transition-colors cursor-pointer"
       >
         <LogOut className="size-4" />
-        <span>Logout</span>
+        <span>{labels.logout}</span>
       </button>
     </div>
   );
@@ -223,9 +228,26 @@ function AdminSidebarAccountMenu({
 
 function AdminSidebarNav({
   pathname,
+  labels,
 }: {
   pathname: string;
+  labels: AdminUiMessages;
 }) {
+  const getLocalizedTitle = (title: string) => {
+    switch (title.toLowerCase()) {
+      case "dashboard": return labels.dashboard;
+      case "settings": return labels.settings;
+      case "content": return labels.content;
+      case "users": return labels.users;
+      case "analytics": return labels.analytics;
+      case "notifications": return labels.notifications;
+      case "ai chat": return labels.aiChat;
+      case "seo": return labels.seo;
+      case "sync data": return labels.syncData;
+      default: return title;
+    }
+  };
+
   return (
     <nav className="p-4 gap-y-1">
       {ADMIN_MENU_ITEMS.map((item) => {
@@ -242,7 +264,7 @@ function AdminSidebarNav({
             }`}
           >
             {item.icon}
-            <span className="font-medium">{item.title}</span>
+            <span className="font-medium">{getLocalizedTitle(item.title)}</span>
           </Link>
         );
       })}
@@ -250,7 +272,7 @@ function AdminSidebarNav({
   );
 }
 
-function AdminSidebarFooter() {
+function AdminSidebarFooter({ backToSiteLabel }: { backToSiteLabel: string }) {
   return (
     <div className="p-4 mt-auto border-t border-gray-800 bg-gray-900">
       <Link
@@ -265,7 +287,7 @@ function AdminSidebarFooter() {
             d="M10 19l-7-7m0 0l7-7m-7 7h18"
           />
         </svg>
-        <span className="font-medium">Back to Site</span>
+        <span className="font-medium">{backToSiteLabel}</span>
       </Link>
     </div>
   );
@@ -281,6 +303,7 @@ function AdminSidebarProfileDialog({
   onPasswordChange,
   onClose,
   onSave,
+  labels,
 }: {
   open: boolean;
   user?: AdminSidebarProps["user"];
@@ -294,6 +317,7 @@ function AdminSidebarProfileDialog({
   onPasswordChange: (value: string) => void;
   onClose: () => void;
   onSave: () => void;
+  labels: AdminUiMessages;
 }) {
   if (!open) return null;
 
@@ -312,9 +336,9 @@ function AdminSidebarProfileDialog({
         <div className="flex items-start justify-between mb-4">
           <div>
             <h3 id="admin-profile-title" className="text-xl font-semibold text-white">
-              Edit Profile
+              {labels.editProfile}
             </h3>
-            <p className="text-sm text-gray-400">Update your information</p>
+            <p className="text-sm text-gray-400">{labels.updateInfo}</p>
           </div>
           <button
             type="button"
@@ -329,7 +353,7 @@ function AdminSidebarProfileDialog({
         <div className="gap-y-4">
           <div>
             <label htmlFor="admin-profile-name" className="block text-sm text-gray-300 mb-1">
-              Display name
+              {labels.displayName}
             </label>
             <input
               id="admin-profile-name"
@@ -338,13 +362,13 @@ function AdminSidebarProfileDialog({
               value={profileForm.name}
               onChange={(e) => onNameChange(e.target.value)}
               className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-600"
-              placeholder="Your name"
+              placeholder={labels.displayName}
             />
           </div>
 
           <div>
             <label htmlFor="admin-profile-email" className="block text-sm text-gray-300 mb-1">
-              Email
+              {labels.email}
             </label>
             <div
               id="admin-profile-email"
@@ -357,7 +381,7 @@ function AdminSidebarProfileDialog({
 
           <div>
             <label htmlFor="admin-profile-password" className="block text-sm text-gray-300 mb-1">
-              Password (leave blank to keep current)
+              {labels.password}
             </label>
             <input
               id="admin-profile-password"
@@ -379,7 +403,7 @@ function AdminSidebarProfileDialog({
             onClick={onClose}
             className="px-4 py-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 transition-colors cursor-pointer"
           >
-            Cancel
+            {labels.cancel}
           </button>
           <button
             type="button"
@@ -387,7 +411,7 @@ function AdminSidebarProfileDialog({
             disabled={profileSaving}
             className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-60 cursor-pointer"
           >
-            {profileSaving ? "Saving..." : "Save"}
+            {profileSaving ? labels.saving : labels.save}
           </button>
         </div>
       </div>
@@ -399,6 +423,8 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
   const adminApi = useAdminApi();
+  const { language } = useLanguage();
+  const labels = getAdminUiMessages(language);
 
   type SidebarState = {
     menuOpen: boolean;
@@ -465,16 +491,20 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-900 border-r border-gray-800 overflow-y-auto">
-      <div className="p-4 border-b border-gray-800 bg-gray-900 relative">
-        <AdminSidebarProfileButton
-          user={user}
-          menuOpen={menuOpen}
-          menuButtonRef={menuButtonRef}
-          onToggle={() => dispatchSidebar({ menuOpen: !menuOpen })}
-        />
+      <div className="p-4 border-b border-gray-800 bg-gray-900 relative flex items-center justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <AdminSidebarProfileButton
+            user={user}
+            menuOpen={menuOpen}
+            menuButtonRef={menuButtonRef}
+            onToggle={() => dispatchSidebar({ menuOpen: !menuOpen })}
+          />
+        </div>
+        <LanguageSelector />
         <AdminSidebarAccountMenu
           open={menuOpen}
           menuRef={menuRef}
+          labels={labels}
           onOpenProfile={() =>
             dispatchSidebar({
               profileOpen: true,
@@ -490,8 +520,9 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
         />
       </div>
 
-      <AdminSidebarNav pathname={pathname} />
-      <AdminSidebarFooter />
+      <AdminSidebarNav pathname={pathname} labels={labels} />
+      <AdminSidebarFooter backToSiteLabel={labels.backToSite} />
+
       <AdminSidebarProfileDialog
         open={profileOpen}
         user={user}
@@ -550,6 +581,7 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
             dispatchSidebar({ profileSaving: false });
           }
         }}
+        labels={labels}
       />
     </aside>
   );
