@@ -63,8 +63,40 @@ export async function getMoviesPageData(
 
 export async function getTVPageData(
   currentPage: number,
-  language: string
+  language: string,
+  query?: string
 ): Promise<PageListDataResult<MovieCardData>> {
+  if (query && query.trim().length >= 2) {
+    try {
+      const response = await apiService.searchTV(query.trim(), currentPage, DEFAULT_TV_PAGE_SIZE);
+      const res = response as unknown as Record<string, unknown>;
+      const inner = (res.data as Record<string, unknown>) ?? {};
+      const rawItems = (Array.isArray(inner.data) ? inner.data : []) as Record<string, unknown>[];
+      const pagination = (inner.pagination as Record<string, unknown>) ?? {};
+      const items: MovieCardData[] = rawItems.map((item) => ({
+        tmdbId: Number(item.tmdbId ?? item.id ?? 0),
+        title: String(item.title ?? item.name ?? ""),
+        poster: item.posterPath
+          ? `https://image.tmdb.org/t/p/w342${item.posterPath}`
+          : null,
+        href: `/tv/${item.tmdbId ?? item.id}`,
+        rating: Number(item.voteAverage ?? item.vote_average ?? 0),
+        year: item.firstAirDate
+          ? new Date(item.firstAirDate as string).getFullYear()
+          : undefined,
+        description: String(item.overview ?? ""),
+        genreIds: Array.isArray(item.genreIds) ? (item.genreIds as number[]) : [],
+      }));
+      return {
+        items,
+        totalPages: Number(pagination.totalPages ?? 1),
+        error: null,
+      };
+    } catch {
+      return { items: [], totalPages: 1, error: "Search failed" };
+    }
+  }
+
   return getTVListData({
     currentPage,
     limit: DEFAULT_TV_PAGE_SIZE,

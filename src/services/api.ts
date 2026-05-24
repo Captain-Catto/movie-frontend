@@ -390,6 +390,16 @@ class ApiService {
     return response.data;
   }
 
+  async searchTV(
+    query: string,
+    page: number = 1,
+    limit: number = 24
+  ): Promise<ApiResponse<unknown>> {
+    const params = this.buildQueryParams({ q: query, page, limit, type: "tv" });
+    const url = `${API_BASE_URL}/search?${params}`;
+    return this.fetchWithErrorHandling<ApiResponse<unknown>>(url);
+  }
+
   async searchPeople(
     query: string,
     page: number = 1,
