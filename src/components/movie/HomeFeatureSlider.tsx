@@ -155,9 +155,11 @@ export default function HomeFeatureSlider({
           <h3 title={visible.title}>
             <Link href={visible.href}>{visible.title}</Link>
           </h3>
-          <p className="home-feature-slider__alias" title={visible.aliasTitle}>
-            {visible.aliasTitle}
-          </p>
+          {visible.aliasTitle && visible.aliasTitle !== visible.title && (
+            <p className="home-feature-slider__alias" title={visible.aliasTitle}>
+              {visible.aliasTitle}
+            </p>
+          )}
 
           <div className="home-feature-slider__tags">
             {score && <span className="home-feature-slider__tag-imdb">IMDb {score}</span>}

@@ -133,9 +133,9 @@ export function HoverPreviewCard({
         <div className="text-center flex flex-col gap-y-1">
           <h3 className="text-white font-semibold text-lg line-clamp-2">{title}</h3>
           {overview && (
-            <span className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium line-clamp-3">
+            <p className="bg-gray-800 text-gray-200 px-2 py-1.5 rounded text-[11px] font-medium line-clamp-3 block text-justify leading-relaxed">
               {overview}
-            </span>
+            </p>
           )}
         </div>
 
