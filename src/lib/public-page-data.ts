@@ -73,20 +73,25 @@ export async function getTVPageData(
       const inner = (res.data as Record<string, unknown>) ?? {};
       const rawItems = (Array.isArray(inner.data) ? inner.data : []) as Record<string, unknown>[];
       const pagination = (inner.pagination as Record<string, unknown>) ?? {};
-      const items: MovieCardData[] = rawItems.map((item) => ({
-        tmdbId: Number(item.tmdbId ?? item.id ?? 0),
-        title: String(item.title ?? item.name ?? ""),
-        poster: item.posterPath
-          ? `https://image.tmdb.org/t/p/w342${item.posterPath}`
-          : null,
-        href: `/tv/${item.tmdbId ?? item.id}`,
-        rating: Number(item.voteAverage ?? item.vote_average ?? 0),
-        year: item.firstAirDate
-          ? new Date(item.firstAirDate as string).getFullYear()
-          : undefined,
-        description: String(item.overview ?? ""),
-        genreIds: Array.isArray(item.genreIds) ? (item.genreIds as number[]) : [],
-      }));
+      const items: MovieCardData[] = rawItems.map((item) => {
+        const tmdbId = Number(item.tmdbId ?? item.id ?? 0);
+        return {
+          id: String(tmdbId),
+          tmdbId,
+          title: String(item.title ?? item.name ?? ""),
+          aliasTitle: String(item.originalTitle ?? item.original_name ?? ""),
+          poster: item.posterPath
+            ? `https://image.tmdb.org/t/p/w342${item.posterPath}`
+            : "",
+          href: `/tv/${tmdbId}`,
+          rating: Number(item.voteAverage ?? item.vote_average ?? 0),
+          year: item.firstAirDate
+            ? new Date(item.firstAirDate as string).getFullYear()
+            : undefined,
+          description: String(item.overview ?? ""),
+          genreIds: Array.isArray(item.genreIds) ? (item.genreIds as number[]) : [],
+        };
+      });
       return {
         items,
         totalPages: Number(pagination.totalPages ?? 1),
