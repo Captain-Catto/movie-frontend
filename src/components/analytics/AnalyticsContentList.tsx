@@ -22,14 +22,13 @@ interface ContentItem {
 interface AnalyticsContentListProps {
   title: string;
   data: ContentItem[];
-  exportFilename: string;
+  exportFilename?: string;
   emptyMessage?: string;
 }
 
 export default function AnalyticsContentList({
   title,
   data,
-  exportFilename,
   emptyMessage,
 }: AnalyticsContentListProps) {
   const { language } = useLanguage();

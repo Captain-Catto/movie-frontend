@@ -10,8 +10,8 @@ interface AnalyticsHeaderProps {
   datePreset: DatePreset;
   contentType: "all" | "movie" | "tv";
   customDateRange: { startDate: string; endDate: string };
-  viewStats: ViewStats[];
-  mostViewedContent: MostViewedItem[];
+  viewStats?: ViewStats[];
+  mostViewedContent?: MostViewedItem[];
   onRefresh: () => void;
   onDatePresetChange: (preset: DatePreset) => void;
   onContentTypeChange: (type: "all" | "movie" | "tv") => void;
@@ -37,8 +37,6 @@ export default function AnalyticsHeader({
   datePreset,
   contentType,
   customDateRange,
-  viewStats,
-  mostViewedContent,
   onRefresh,
   onDatePresetChange,
   onContentTypeChange,

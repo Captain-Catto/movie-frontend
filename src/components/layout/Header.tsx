@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import LanguageSelector from "@/components/layout/LanguageSelector";
-import { HeartIcon, Search } from "lucide-react";
+import { HeartIcon, Search, Bell, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getHeaderUiMessages } from "@/lib/ui-messages";
 import { authStorage } from "@/lib/auth-storage";
@@ -92,8 +92,12 @@ function DesktopActions({
 }: DesktopActionsProps) {
   return (
     <div className="hidden lg:flex items-center gap-2 sm:gap-3 lg:gap-4">
-      <div className="flex-shrink-0 w-10 flex justify-center">
-        {isHydrated && isAuthenticated && <NotificationDropdown />}
+      <div className="flex-shrink-0 w-10 flex justify-center items-center">
+        {isHydrated && !isLoading && isAuthenticated ? (
+          <NotificationDropdown />
+        ) : isHydrated && authStorage.isAuthenticated() ? (
+          <Bell className="size-5 text-gray-500 animate-pulse" />
+        ) : null}
       </div>
 
       <button
@@ -134,7 +138,9 @@ function DesktopActions({
             {labels.login}
           </button>
         ) : isHydrated && authStorage.isAuthenticated() ? (
-          <div className="size-10 rounded-full bg-gray-800 border-2 border-gray-700 animate-pulse" />
+          <div className="size-10 rounded-full bg-gray-800 border-2 border-gray-700 animate-pulse flex items-center justify-center text-gray-500">
+            <User className="size-5" />
+          </div>
         ) : (
           <div className="w-16 sm:w-20 h-8 sm:h-10 bg-gray-800/40 rounded animate-pulse" />
         )}
