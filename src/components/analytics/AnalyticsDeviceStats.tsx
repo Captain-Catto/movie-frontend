@@ -1,14 +1,9 @@
-import dynamic from "next/dynamic";
 import { DeviceStats } from "@/types/analytics.types";
 import { DEVICE_COLORS } from "@/types/analytics.types";
 import { formatNumber } from "@/utils/analyticsUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
-
-const ResponsiveContainer = dynamic(() => import("recharts").then((mod) => mod.ResponsiveContainer), { ssr: false });
-const PieChart = dynamic(() => import("recharts").then((mod) => mod.PieChart), { ssr: false });
-const Pie = dynamic(() => import("recharts").then((mod) => mod.Pie), { ssr: false });
-const Cell = dynamic(() => import("recharts").then((mod) => mod.Cell), { ssr: false });
+import { ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 interface AnalyticsDeviceStatsProps {
   deviceStats: DeviceStats[];
