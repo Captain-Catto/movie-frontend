@@ -109,9 +109,13 @@ export function useAnalyticsData({
       });
       const mostViewedParams = new URLSearchParams({
         limit: "10",
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
         ...(contentType !== "all" && { contentType }),
       });
       const favoriteParams = new URLSearchParams({
+        startDate: dateRange.startDate,
+        endDate: dateRange.endDate,
         ...(contentType !== "all" && { contentType }),
       });
 
