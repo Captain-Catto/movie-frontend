@@ -8,10 +8,11 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsHydrated } from "@/hooks/useIsHydrated";
 import LanguageSelector from "@/components/layout/LanguageSelector";
-import { HeartIcon, Search, Bell, User } from "lucide-react";
+import { HeartIcon, Search, Bell } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getHeaderUiMessages } from "@/lib/ui-messages";
 import { authStorage } from "@/lib/auth-storage";
+import { FALLBACK_PROFILE } from "@/constants/app.constants";
 
 const SearchModal = dynamic(() => import("@/components/search/SearchModal"), {
   ssr: false,
@@ -138,8 +139,15 @@ function DesktopActions({
             {labels.login}
           </button>
         ) : isHydrated && authStorage.isAuthenticated() ? (
-          <div className="size-10 rounded-full bg-gray-800 border-2 border-gray-700 animate-pulse flex items-center justify-center text-gray-500">
-            <User className="size-5" />
+          <div className="relative size-10 rounded-full overflow-hidden border-2 border-gray-600 animate-pulse">
+            <Image
+              src={authStorage.getUser()?.image || FALLBACK_PROFILE}
+              alt="Loading Profile"
+              width={40}
+              height={40}
+              className="object-cover"
+              unoptimized
+            />
           </div>
         ) : (
           <div className="w-16 sm:w-20 h-8 sm:h-10 bg-gray-800/40 rounded animate-pulse" />
