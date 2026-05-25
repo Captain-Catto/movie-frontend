@@ -172,19 +172,32 @@ export default function HomeFeatureSlider({
 
           <div
             className="home-feature-slider__genres"
-            aria-hidden={!visible.genre}
+            aria-hidden={!visible.genre && (!visible.genres || visible.genres.length === 0)}
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
             onPointerUp={(e) => e.stopPropagation()}
           >
-            {visible.genre && (
-              <GenreBadge
-                genreId={visible.genreIds?.[0] ?? (visible.genre ? getGenreIdByName(visible.genre) : undefined) ?? 0}
-                genre={visible.genre}
-                contentType={watchType}
-                className="hover:!bg-red-600 hover:!text-white transition-colors relative z-10"
-              />
-            )}
+            {visible.genres && visible.genres.length > 0
+              ? visible.genres.map((genre, idx) => {
+                  const genreId = visible.genreIds?.[idx] ?? (genre ? getGenreIdByName(genre) : undefined) ?? 0;
+                  return (
+                    <GenreBadge
+                      key={`${genreId}-${idx}`}
+                      genreId={genreId}
+                      genre={genre}
+                      contentType={watchType}
+                      className="hover:!bg-red-600 hover:!text-white transition-colors relative z-10"
+                    />
+                  );
+                })
+              : visible.genre && (
+                  <GenreBadge
+                    genreId={visible.genreIds?.[0] ?? (visible.genre ? getGenreIdByName(visible.genre) : undefined) ?? 0}
+                    genre={visible.genre}
+                    contentType={watchType}
+                    className="hover:!bg-red-600 hover:!text-white transition-colors relative z-10"
+                  />
+                )}
           </div>
 
           <p className="home-feature-slider__description">

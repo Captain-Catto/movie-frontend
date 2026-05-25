@@ -22,6 +22,7 @@ import {
 } from "@/lib/page-data.types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWatchPageUiMessages } from "@/lib/ui-messages";
+import { getGenreIdByName } from "@/utils/genreMapping";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -293,10 +294,7 @@ function MovieInformationSection({
             {movieData.genres.length > 0 && (
               <div className="hl-tags flex flex-wrap gap-2">
                 {movieData.genres.map((genre, index) => {
-                  const genreId = movieData.genreIds?.[index];
-                  if (typeof genreId !== "number") {
-                    return null;
-                  }
+                  const genreId = movieData.genreIds?.[index] ?? (genre ? getGenreIdByName(genre) : undefined) ?? 0;
                   return (
                     <GenreBadge
                       key={genreId}

@@ -22,6 +22,7 @@ import {
   TMDB_IMAGE_BASE_URL,
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
+import { getGenreIdByName } from "@/utils/genreMapping";
 
 const TMDB_PROFILE_CARD_SIZE = "w185";
 
@@ -145,13 +146,9 @@ function MovieDetailHero({ movieData, movieId, labels, contentType }: MovieDetai
               );
             })()}
 
-            {/* Genres */}
             <div className="flex flex-wrap gap-2 mb-8">
               {movieData.genres?.map((genre: string, index: number) => {
-                const genreId = movieData.genreIds?.[index];
-                if (typeof genreId !== "number") {
-                  return null;
-                }
+                const genreId = movieData.genreIds?.[index] ?? (genre ? getGenreIdByName(genre) : undefined) ?? 0;
                 return (
                   <GenreBadge
                     key={genreId}

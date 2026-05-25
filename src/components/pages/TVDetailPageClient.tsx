@@ -20,6 +20,7 @@ import {
   FALLBACK_POSTER,
   getLocaleFromLanguage,
 } from "@/constants/app.constants";
+import { getGenreIdByName } from "@/utils/genreMapping";
 
 const RecommendationsSection = lazy(
   () => import("@/components/movie/RecommendationsSection")
@@ -132,13 +133,9 @@ function TVDetailHero({
                 )}
             </div>
 
-            {/* Genres */}
             <div className="flex flex-wrap justify-start gap-2 mb-4 sm:mb-6 md:mb-8">
               {tvData.genres.map((genre: string, index: number) => {
-                const genreId = tvData.genreIds?.[index];
-                if (typeof genreId !== "number") {
-                  return null;
-                }
+                const genreId = tvData.genreIds?.[index] ?? (genre ? getGenreIdByName(genre) : undefined) ?? 0;
                 return (
                   <GenreBadge
                     key={genreId}
