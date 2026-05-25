@@ -67,6 +67,7 @@ import type { AuthUser } from "@/types/auth.types";
 
 interface DesktopActionsProps {
   isHydrated: boolean;
+  isLoading: boolean;
   isAuthenticated: boolean;
   user: AuthUser | null;
   onLogout: () => void;
@@ -80,6 +81,7 @@ interface DesktopActionsProps {
 
 function DesktopActions({
   isHydrated,
+  isLoading,
   isAuthenticated,
   user,
   onLogout,
@@ -120,9 +122,9 @@ function DesktopActions({
       <LanguageSelector />
 
       <div className="flex-shrink-0">
-        {isHydrated && isAuthenticated ? (
+        {isHydrated && !isLoading && isAuthenticated ? (
           <UserMenu user={user} onLogout={onLogout} />
-        ) : isHydrated ? (
+        ) : isHydrated && !isLoading ? (
           <button
             type="button"
             onClick={onAuthModalOpen}
@@ -318,7 +320,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
   isPlayingRef.current = isPlaying;
 
   const pathname = usePathname();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const { language } = useLanguage();
   const isHydrated = useIsHydrated();
   const labels = getHeaderUiMessages(language);
@@ -424,6 +426,7 @@ const Header = ({ hideOnPlay = false, isPlaying = false }: HeaderProps) => {
             <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 flex-shrink-0">
               <DesktopActions
                 isHydrated={isHydrated}
+                isLoading={isLoading}
                 isAuthenticated={isAuthenticated}
                 user={user}
                 onLogout={logout}
