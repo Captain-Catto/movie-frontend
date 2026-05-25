@@ -8,6 +8,7 @@ import FavoriteButton from "@/components/favorites/FavoriteButton";
 import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
+import GenreBadge from "@/components/ui/GenreBadge";
 
 interface HomeFeatureSliderProps {
   title: string;
@@ -169,7 +170,14 @@ export default function HomeFeatureSlider({
           </div>
 
           <div className="home-feature-slider__genres" aria-hidden={!visible.genre}>
-            {visible.genre && <span>{visible.genre}</span>}
+            {visible.genre && (
+              <GenreBadge
+                genreId={visible.genreIds?.[0] ?? 0}
+                genre={visible.genre}
+                contentType={watchType}
+                className="hover:!bg-red-600 hover:!text-white transition-colors"
+              />
+            )}
           </div>
 
           <p className="home-feature-slider__description">
