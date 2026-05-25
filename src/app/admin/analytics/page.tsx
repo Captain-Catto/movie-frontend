@@ -5,7 +5,6 @@ import { useAdminAnalyticsContext } from "@/context/AdminAnalyticsContext";
 import { useAnalyticsDateRange } from "@/hooks/useAnalyticsDateRange";
 import { useAnalyticsData } from "@/hooks/useAnalyticsData";
 import AnalyticsHeader from "@/components/analytics/AnalyticsHeader";
-import AnalyticsStatsCards from "@/components/analytics/AnalyticsStatsCards";
 import AnalyticsPlaySourceBreakdown from "@/components/analytics/AnalyticsPlaySourceBreakdown";
 import dynamic from "next/dynamic";
 const AnalyticsViewChart = dynamic(() => import("@/components/analytics/AnalyticsViewChart"), { ssr: false });
@@ -192,16 +191,6 @@ export default function AdminAnalyticsPage() {
         onExportAll={handleExportAll}
       />
 
-      {/* Stats Cards */}
-      <AnalyticsStatsCards
-        totalViews={totalViews}
-        totalClicks={totalClicks}
-        totalPlays={totalPlays}
-        totalFavorites={totalFavorites}
-        ctr={ctr}
-        favRate={favRate}
-        loading={loading}
-      />
 
       {/* Play Source Breakdown */}
       <AnalyticsPlaySourceBreakdown
