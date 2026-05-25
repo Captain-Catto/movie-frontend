@@ -25,7 +25,10 @@ const NotificationDropdown = dynamic(
     import("@/components/notifications/NotificationDropdown").then(
       (module) => module.NotificationDropdown
     ),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <Bell className="size-5 text-gray-500" />,
+  }
 );
 const UserMenu = dynamic(() => import("@/components/layout/UserMenu"), {
   ssr: false,
