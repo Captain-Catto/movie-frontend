@@ -9,6 +9,7 @@ import { FALLBACK_POSTER } from "@/constants/app.constants";
 import type { MovieCardData } from "@/types/content.types";
 import { normalizeTmdbImageUrl } from "@/utils/tmdbImage";
 import GenreBadge from "@/components/ui/GenreBadge";
+import { getGenreIdByName } from "@/utils/genreMapping";
 
 interface HomeFeatureSliderProps {
   title: string;
@@ -169,13 +170,19 @@ export default function HomeFeatureSlider({
             {duration && <span>{duration}</span>}
           </div>
 
-          <div className="home-feature-slider__genres" aria-hidden={!visible.genre}>
+          <div
+            className="home-feature-slider__genres"
+            aria-hidden={!visible.genre}
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            onPointerUp={(e) => e.stopPropagation()}
+          >
             {visible.genre && (
               <GenreBadge
-                genreId={visible.genreIds?.[0] ?? 0}
+                genreId={visible.genreIds?.[0] ?? (visible.genre ? getGenreIdByName(visible.genre) : undefined) ?? 0}
                 genre={visible.genre}
                 contentType={watchType}
-                className="hover:!bg-red-600 hover:!text-white transition-colors"
+                className="hover:!bg-red-600 hover:!text-white transition-colors relative z-10"
               />
             )}
           </div>

@@ -377,18 +377,18 @@ const TableFilters = ({
   const { push } = useRouter();
   const { language } = useLanguage();
   const labels = getTableFiltersUiMessages(language);
-  const [filters, setFilters] = useState<TableFilterOptions>({
-    countries: [],
-    movieType: "",
-    genres: [],
-    years: [],
-    customYear: "",
-    sortBy: "popularity",
-    ratings: [],
-    versions: [],
-    qualities: [],
-    languages: [],
-  });
+  const [filters, setFilters] = useState<TableFilterOptions>(() => ({
+    countries: initialFilters?.countries ?? [],
+    movieType: initialFilters?.movieType ?? "",
+    genres: initialFilters?.genres ?? [],
+    years: initialFilters?.years ?? [],
+    customYear: initialFilters?.customYear ?? "",
+    sortBy: initialFilters?.sortBy ?? "popularity",
+    ratings: initialFilters?.ratings ?? [],
+    versions: initialFilters?.versions ?? [],
+    qualities: initialFilters?.qualities ?? [],
+    languages: initialFilters?.languages ?? [],
+  }));
   const [isExpanded, setIsExpanded] = useState(false);
   const prevInitialFiltersRef = useRef(initialFilters);
 

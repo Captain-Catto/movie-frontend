@@ -1053,6 +1053,13 @@ body {
   color: #e5e7eb;
 }
 
+.home-feature-slider__genres a {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto !important;
+  cursor: pointer;
+}
+
 .home-feature-slider__description {
   margin-top: 1.65rem;
   max-width: 36rem;
