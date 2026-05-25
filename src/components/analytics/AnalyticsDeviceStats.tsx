@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import { DeviceStats } from "@/types/analytics.types";
 import { DEVICE_COLORS } from "@/types/analytics.types";
 import { formatNumber } from "@/utils/analyticsUtils";
+import { exportToCSV } from "@/utils/analyticsUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
 
@@ -22,7 +23,18 @@ export default function AnalyticsDeviceStats({
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 className="text-xl font-semibold text-white mb-4">{labels.analyticsDeviceDistribution}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-white">{labels.analyticsDeviceDistribution}</h2>
+        {deviceStats.length > 0 && (
+          <button
+            type="button"
+            onClick={() => exportToCSV(deviceStats, "device-distribution")}
+            className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
+          >
+            {labels.analyticsExport}
+          </button>
+        )}
+      </div>
       {deviceStats.length > 0 ? (
         <div className="flex flex-col lg:flex-row items-center gap-6">
           <ResponsiveContainer width="50%" height={300}>
