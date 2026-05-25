@@ -84,6 +84,93 @@ export default function AdminAnalyticsPage() {
       count: item.count,
     })) ?? [];
 
+  const handleExportAll = () => {
+    let csvContent = "";
+
+    // Helper to format section header
+    const addSectionHeader = (title: string) => {
+      csvContent += `\n"=== ${title.toUpperCase()} ==="\n`;
+    };
+
+    // Overview section
+    addSectionHeader(language.startsWith("vi") ? "Báo Cáo Tổng Quan" : "Overview Report");
+    csvContent += `"Chỉ số (Metric)","Giá trị (Value)"\n`;
+    csvContent += `"Tổng lượt xem (Total Views)",${totalViews}\n`;
+    csvContent += `"Tổng lượt click (Total Clicks)",${totalClicks}\n`;
+    csvContent += `"Tổng lượt phát (Total Plays)",${totalPlays}\n`;
+    csvContent += `"Tổng lượt yêu thích (Total Favorites)",${totalFavorites}\n`;
+    csvContent += `"Tỷ lệ CTR (Click-Through Rate)","${ctr.toFixed(2)}%"\n`;
+    csvContent += `"Tỷ lệ yêu thích (Favorite Rate)","${favRate.toFixed(2)}%"\n`;
+
+    // Device section
+    if (deviceStats && deviceStats.length > 0) {
+      addSectionHeader(language.startsWith("vi") ? "Phân Phối Thiết Bị" : "Device Distribution");
+      csvContent += `"Thiết bị (Device)","Số lượng (Count)","Tỷ lệ (Percentage)"\n`;
+      deviceStats.forEach(d => {
+        csvContent += `"${d.device}",${d.count},"${d.percentage.toFixed(2)}%"\n`;
+      });
+    }
+
+    // Country section
+    if (countryStats && countryStats.length > 0) {
+      addSectionHeader(language.startsWith("vi") ? "Quốc Gia Hàng Đầu" : "Top Countries");
+      csvContent += `"Quốc gia (Country)","Số lượng (Count)","Tỷ lệ (Percentage)"\n`;
+      countryStats.forEach(c => {
+        csvContent += `"${c.country}",${c.count},"${c.percentage.toFixed(2)}%"\n`;
+      });
+    }
+
+    // Top Content Section
+    if (popularContent && popularContent.length > 0) {
+      addSectionHeader(language.startsWith("vi") ? "Nội Dung Nổi Bật (Top Content)" : "Top Content");
+      csvContent += `"TMDB ID","Tiêu đề (Title)","Loại (Type)","Lượt xem (Views)","Lượt clicks","Yêu thích (Favorites)"\n`;
+      popularContent.forEach(item => {
+        csvContent += `${item.tmdbId},${JSON.stringify(item.title)},"${item.contentType}",${item.viewCount},${item.clickCount},${item.favoriteCount}\n`;
+      });
+    }
+
+    // Most Viewed Events
+    if (mostViewedContent && mostViewedContent.length > 0) {
+      addSectionHeader(language.startsWith("vi") ? "Sự Kiện Xem Nhiều Nhất (Most Viewed)" : "Most Viewed Events");
+      csvContent += `"Content ID","Tiêu đề (Title)","Loại (Type)","Lượt xem (Views)"\n`;
+      mostViewedContent.forEach(item => {
+        csvContent += `"${item.contentId}",${JSON.stringify(item.title)},"${item.contentType}",${item.viewCount}\n`;
+      });
+    }
+
+    // Most Favorited
+    if (favoriteStats?.mostFavorited && favoriteStats.mostFavorited.length > 0) {
+      addSectionHeader(language.startsWith("vi") ? "Yêu Thích Nhiều Nhất (Most Favorited)" : "Most Favorited");
+      csvContent += `"Content ID","Tiêu đề (Title)","Loại (Type)","Số lượt thích (Count)"\n`;
+      favoriteStats.mostFavorited.forEach(item => {
+        csvContent += `"${item.contentId}",${JSON.stringify(item.title)},"${item.contentType}",${item.count}\n`;
+      });
+    }
+
+    // Play Source Breakdown
+    if (playSourceBreakdown && Object.keys(playSourceBreakdown).length > 0) {
+      addSectionHeader(language.startsWith("vi") ? "Nguồn Phát Video" : "Play Source Breakdown");
+      csvContent += `"Nguồn (Source)","Số lượng (Plays)"\n`;
+      Object.entries(playSourceBreakdown).forEach(([source, count]) => {
+        csvContent += `"${source}",${count}\n`;
+      });
+    }
+
+    // Download CSV blob with UTF-8 BOM to resolve Vietnamese characters in MS Excel
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `analytics-report-full_${dateRange.startDate}_to_${dateRange.endDate}.csv`
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const headerLastRefreshed = lastUpdateAt || lastRefreshed;
 
   return (
@@ -102,6 +189,7 @@ export default function AdminAnalyticsPage() {
         onDatePresetChange={setDatePreset}
         onContentTypeChange={setContentType}
         onCustomDateRangeChange={setCustomDateRange}
+        onExportAll={handleExportAll}
       />
 
       {/* Stats Cards */}
