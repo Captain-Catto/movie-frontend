@@ -143,14 +143,14 @@ function DesktopActions({
             <Image
               src={authStorage.getUser()?.image || FALLBACK_PROFILE}
               alt="Loading Profile"
-              width={40}
-              height={40}
+              fill
+              sizes="40px"
               className="object-cover"
               unoptimized
             />
           </div>
         ) : (
-          <div className="w-16 sm:w-20 h-8 sm:h-10 bg-gray-800/40 rounded animate-pulse" />
+          <div className="size-10 rounded-full bg-gray-800/40 animate-pulse" />
         )}
       </div>
     </div>
@@ -229,9 +229,9 @@ function MobileMenuOverlay({
                   <Image
                     src={user.image}
                     alt={user.name || labels.profileAlt}
-                    width={48}
-                    height={48}
-                    className="size-full object-cover"
+                    fill
+                    sizes="48px"
+                    className="object-cover"
                     unoptimized
                   />
                 ) : (

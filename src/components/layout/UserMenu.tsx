@@ -95,8 +95,8 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
           <Image
             src={avatarSrc}
             alt={displayName}
-            width={40}
-            height={40}
+            fill
+            sizes="40px"
             className="object-cover"
             unoptimized
             onError={(e: SyntheticEvent<HTMLImageElement>) => {
@@ -122,8 +122,8 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
                 <Image
                   src={avatarSrc}
                   alt={displayName}
-                  width={48}
-                  height={48}
+                  fill
+                  sizes="48px"
                   className="object-cover"
                   unoptimized
                   onError={(e: SyntheticEvent<HTMLImageElement>) => {
