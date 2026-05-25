@@ -237,22 +237,6 @@ function AccountSettingsForm({
         <button
           type="button"
           className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
-          onClick={() => onNavigate("/account/change-password")}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium mb-1">{labels.changePassword}</p>
-              <p className="text-sm text-gray-400">
-                {labels.updatePassword}
-              </p>
-            </div>
-            <span className="text-gray-400">→</span>
-          </div>
-        </button>
-
-        <button
-          type="button"
-          className="w-full text-left px-6 py-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors text-white cursor-pointer"
           onClick={() => onNavigate("/notifications")}
         >
           <div className="flex items-center justify-between">
