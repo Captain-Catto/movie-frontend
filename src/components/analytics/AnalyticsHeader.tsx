@@ -21,12 +21,10 @@ interface AnalyticsHeaderProps {
 
 const getPresetLabel = (key: string, isVi: boolean) => {
   switch (key) {
-    case "today": return isVi ? "Hôm nay" : "Today";
-    case "yesterday": return isVi ? "Hôm qua" : "Yesterday";
-    case "last7days": return isVi ? "7 ngày qua" : "Last 7 Days";
-    case "last30days": return isVi ? "30 ngày qua" : "Last 30 Days";
-    case "thisMonth": return isVi ? "Tháng này" : "This Month";
-    case "lastMonth": return isVi ? "Tháng trước" : "Last Month";
+    case "7d": return isVi ? "7 ngày qua" : "Last 7 Days";
+    case "30d": return isVi ? "30 ngày qua" : "Last 30 Days";
+    case "90d": return isVi ? "90 ngày qua" : "Last 90 Days";
+    case "1y": return isVi ? "1 năm qua" : "Last Year";
     case "custom": return isVi ? "Tự chọn" : "Custom";
     default: return key;
   }
