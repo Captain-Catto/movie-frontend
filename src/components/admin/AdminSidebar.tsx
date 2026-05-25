@@ -9,6 +9,7 @@ import { ChevronDown, LogOut, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages, type AdminUiMessages } from "@/lib/ui-messages";
 import LanguageSelector from "@/components/layout/LanguageSelector";
+import { authStorage } from "@/lib/auth-storage";
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -421,7 +422,7 @@ function AdminSidebarProfileDialog({
 
 export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, checkAuth } = useAuth();
   const adminApi = useAdminApi();
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
@@ -567,6 +568,18 @@ export default function AdminSidebar({ isOpen, user }: AdminSidebarProps) {
               dispatchSidebar({ profileError: res.error || "Update failed" });
               return;
             }
+
+            // Sync updated profile to global auth state and localStorage
+            const currentUser = authStorage.getUser();
+            if (currentUser) {
+              const updatedUser = {
+                ...currentUser,
+                name: payload.name ?? currentUser.name,
+              };
+              authStorage.setUser(updatedUser);
+              checkAuth();
+            }
+
             dispatchSidebar({
               profileOpen: false,
               profileForm: {
