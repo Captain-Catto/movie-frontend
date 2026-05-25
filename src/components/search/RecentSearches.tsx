@@ -84,7 +84,7 @@ const RecentSearches: React.FC<RecentSearchesProps> = ({
           )}
         </div>
 
-        <div className="gap-y-2">
+        <div className="flex flex-col gap-y-2">
           {searches.map((search, index) => (
             <button
               type="button"

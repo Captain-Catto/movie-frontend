@@ -300,7 +300,7 @@ export default function ChatWidget() {
         <button
           type="button"
           onClick={handleScrollToTop}
-          className="absolute right-0 top-14 flex size-11 items-center justify-center rounded-full border border-white/10 bg-red-600 text-white shadow-xl transition hover:bg-red-700"
+          className="absolute right-0 top-14 flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-red-600 text-white shadow-xl transition hover:bg-red-700"
           aria-label="Back to top"
           title="Back to top"
         >

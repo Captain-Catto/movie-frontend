@@ -17,11 +17,11 @@ interface SearchResultsProps {
 }
 
 const LoadingSkeleton = () => (
-  <div className="gap-y-3">
+  <div className="flex flex-col gap-y-3">
     {["sk-1", "sk-2", "sk-3"].map((id) => (
       <div key={id} className="flex items-center gap-x-3 p-3 animate-pulse">
         <div className="w-16 h-20 bg-gray-700 rounded"></div>
-        <div className="flex-1 gap-y-2">
+        <div className="flex-1 flex flex-col gap-y-2">
           <div className="h-4 bg-gray-700 rounded w-3/4"></div>
           <div className="h-3 bg-gray-700 rounded w-1/2"></div>
           <div className="h-3 bg-gray-700 rounded w-1/4"></div>
@@ -99,7 +99,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({
         )}
 
         {/* Results list */}
-        <div className="gap-y-2">
+        <div className="flex flex-col gap-y-2">
           {safeResults.map((result) => (
             <SearchResultItem
               key={`${result.mediaType}-${result.tmdbId}-${result.id}`}
