@@ -109,11 +109,15 @@ function DesktopActions({
   return (
     <div className="hidden lg:flex items-center gap-2 sm:gap-3 lg:gap-4">
       <div className="flex-shrink-0 w-10 flex justify-center items-center">
-        {isHydrated && !isLoading && isAuthenticated ? (
+        {isHydrated && isAuthenticated ? (
           <NotificationDropdown />
-        ) : isHydrated && authStorage.isAuthenticated() ? (
-          <Bell className="size-5 text-gray-500 animate-pulse" />
-        ) : null}
+        ) : (
+          <Bell
+            className={`size-5 text-gray-500 ${
+              isHydrated && authStorage.isAuthenticated() ? "animate-pulse" : "invisible"
+            }`}
+          />
+        )}
       </div>
 
       <button
@@ -143,8 +147,8 @@ function DesktopActions({
       <LanguageSelector />
 
       <div className="flex-shrink-0">
-        {isHydrated && !isLoading && isAuthenticated ? (
-          <UserMenu user={user} onLogout={onLogout} />
+        {isHydrated && (isAuthenticated || authStorage.isAuthenticated()) ? (
+          <UserMenu user={user || authStorage.getUser()} onLogout={onLogout} />
         ) : isHydrated && !isLoading ? (
           <button
             type="button"
@@ -153,17 +157,6 @@ function DesktopActions({
           >
             {labels.login}
           </button>
-        ) : isHydrated && authStorage.isAuthenticated() ? (
-          <div className="relative size-10 rounded-full overflow-hidden border-2 border-gray-600 animate-pulse">
-            <Image
-              src={authStorage.getUser()?.image || FALLBACK_PROFILE}
-              alt="Loading Profile"
-              fill
-              sizes="40px"
-              className="object-cover"
-              unoptimized
-            />
-          </div>
         ) : (
           <div className="size-10 rounded-full bg-gray-800/40 animate-pulse" />
         )}
