@@ -29,6 +29,18 @@ const NotificationDropdown = dynamic(
 );
 const UserMenu = dynamic(() => import("@/components/layout/UserMenu"), {
   ssr: false,
+  loading: () => (
+    <div className="relative size-10 rounded-full overflow-hidden border-2 border-gray-600">
+      <Image
+        src={authStorage.getUser()?.image || FALLBACK_PROFILE}
+        alt=""
+        fill
+        sizes="40px"
+        className="object-cover"
+        unoptimized
+      />
+    </div>
+  ),
 });
 
 interface HeaderProps {
