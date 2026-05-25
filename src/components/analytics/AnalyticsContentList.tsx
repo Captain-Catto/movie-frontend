@@ -6,7 +6,6 @@ import {
   FALLBACK_POSTER,
 } from "@/constants/app.constants";
 import { formatNumber } from "@/utils/analyticsUtils";
-import { exportToCSV } from "@/utils/analyticsUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
 
@@ -49,15 +48,6 @@ export default function AnalyticsContentList({
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-white">{title}</h2>
-        {data.length > 0 && (
-          <button
-            type="button"
-            onClick={() => exportToCSV(data, exportFilename)}
-            className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
-          >
-            {labels.analyticsExport}
-          </button>
-        )}
       </div>
       {data.length > 0 ? (
         <div className="space-y-3 max-h-[400px] overflow-y-auto">

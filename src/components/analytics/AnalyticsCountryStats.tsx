@@ -1,6 +1,5 @@
 import { CountryStats } from "@/types/analytics.types";
 import { formatNumber } from "@/utils/analyticsUtils";
-import { exportToCSV } from "@/utils/analyticsUtils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
 
@@ -18,15 +17,6 @@ export default function AnalyticsCountryStats({
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-white">{labels.analyticsTopCountries}</h2>
-        {countryStats.length > 0 && (
-          <button
-            type="button"
-            onClick={() => exportToCSV(countryStats, "top-countries")}
-            className="text-sm text-gray-400 hover:text-white transition-colors cursor-pointer"
-          >
-            {labels.analyticsExport}
-          </button>
-        )}
       </div>
       {countryStats.length > 0 ? (
         <div className="space-y-2">
