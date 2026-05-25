@@ -11,6 +11,7 @@ import LanguageSelector from "@/components/layout/LanguageSelector";
 import { HeartIcon, Search } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getHeaderUiMessages } from "@/lib/ui-messages";
+import { authStorage } from "@/lib/auth-storage";
 
 const SearchModal = dynamic(() => import("@/components/search/SearchModal"), {
   ssr: false,
@@ -132,8 +133,10 @@ function DesktopActions({
           >
             {labels.login}
           </button>
+        ) : isHydrated && authStorage.isAuthenticated() ? (
+          <div className="size-10 rounded-full bg-gray-800 border-2 border-gray-700 animate-pulse" />
         ) : (
-          <div className="w-16 sm:w-20 h-8 sm:h-10" />
+          <div className="w-16 sm:w-20 h-8 sm:h-10 bg-gray-800/40 rounded animate-pulse" />
         )}
       </div>
     </div>
