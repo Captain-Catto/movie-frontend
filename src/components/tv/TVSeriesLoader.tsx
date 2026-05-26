@@ -7,6 +7,7 @@ import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
 import TVSeriesSections from "@/components/tv/TVSeriesSections";
 import Skeleton from "@/components/ui/Skeleton";
 import { ChevronRight } from "lucide-react";
+import { getHomePageUiMessages } from "@/lib/ui-messages";
 
 interface TVSeriesLoaderProps {
   language: string;
@@ -26,7 +27,7 @@ function WideCoverSkeletonList({ title }: { title: string }) {
       </div>
       <div className="home-wide-cover-rail__content">
         <div className="home-wide-cover-rail__scroller overflow-x-hidden">
-          {Array.from({ length: 4 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={`wide-skeleton-${i}`} className="home-wide-cover-card select-none">
               <div className="home-wide-cover-card__cover relative aspect-[2.2/1] min-h-[12.4rem] rounded-lg overflow-hidden bg-gray-800/60">
                 <Skeleton className="absolute inset-0" />
@@ -62,14 +63,53 @@ function FeatureSliderSkeleton({ title }: { title: string }) {
       </div>
       <div className="home-feature-slider__stage relative overflow-hidden bg-gray-800/60 select-none">
         <Skeleton className="absolute inset-0" />
-        <div className="absolute bottom-[7.5rem] left-[1.25rem] md:bottom-24 md:left-24 space-y-3 z-10 w-2/3">
-          <Skeleton className="h-8 w-1/2" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/4" />
-          <div className="flex gap-4">
-            <Skeleton className="w-[3.7rem] h-[3.7rem] rounded-full" />
-            <Skeleton className="w-[3.4rem] h-[3rem] rounded-full" />
+        
+        {/* Matches padding, alignment, and grid system of .home-feature-slider__content */}
+        <div className="home-feature-slider__content relative z-3 w-full h-full flex flex-col justify-start">
+          <div className="space-y-4 max-w-[500px]">
+            {/* Title Skeleton */}
+            <Skeleton className="h-9 w-2/3" />
+            
+            {/* Alias Title Skeleton */}
+            <Skeleton className="h-4 w-1/2" />
+            
+            {/* Meta Tags Skeleton */}
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16" />
+              <Skeleton className="h-5 w-12" />
+              <Skeleton className="h-5 w-16" />
+            </div>
+            
+            {/* Genres Skeleton */}
+            <div className="flex gap-2">
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+            </div>
+            
+            {/* Description Skeleton */}
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+            
+            {/* Action Buttons Skeleton */}
+            <div className="flex items-center gap-4 pt-2">
+              <Skeleton className="w-[3.7rem] h-[3.7rem] rounded-full" />
+              <div className="flex rounded-full overflow-hidden border border-white/5 bg-white/5">
+                <Skeleton className="w-[3.4rem] h-[3rem]" />
+                <Skeleton className="w-[3.4rem] h-[3rem]" />
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Matches .home-feature-slider__thumbs absolute positioned rail at the bottom */}
+        <div className="home-feature-slider__thumbs select-none pointer-events-none">
+          {Array.from({ length: 8 }).map((_, idx) => (
+            <div key={`thumb-skeleton-${idx}`} className="relative w-[4.15rem] aspect-[2/3] rounded-lg overflow-hidden bg-gray-800/80 flex-shrink-0">
+              <Skeleton className="absolute inset-0" />
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -83,7 +123,7 @@ function TopTenTVSkeleton({ title }: { title: string }) {
       <h2>{title}</h2>
       <div className="home-top-ten__content">
         <div className="home-top-ten__scroller overflow-x-hidden">
-          {Array.from({ length: 5 }).map((_, i) => (
+          {Array.from({ length: 6 }).map((_, i) => (
             <div key={`top-ten-tv-skeleton-${i}`} className="home-top-ten-card select-none">
               <div className="home-top-ten-card__thumb relative aspect-[2/3] min-h-[26.75rem] rounded-lg overflow-hidden bg-gray-800/60">
                 <Skeleton className="absolute inset-0" />
@@ -104,23 +144,18 @@ function TopTenTVSkeleton({ title }: { title: string }) {
 }
 
 export function TVSeriesSectionsSkeleton({ language }: { language: string }) {
-  const isEn = language === "en";
-  const titles = {
-    onTheAir: isEn ? "On The Air" : "Đang Phát Sóng",
-    popular: isEn ? "Popular TV Series" : "Phim Bộ Phổ Biến",
-    topRated: isEn ? "Top 10 Top Rated TV Series" : "Top 10 Phim Bộ Điểm Cao",
-  };
+  const labels = getHomePageUiMessages(language);
 
   return (
     <div className="space-y-8">
       <div className="py-8">
-        <WideCoverSkeletonList title={titles.onTheAir} />
+        <WideCoverSkeletonList title={labels.onTheAir} />
       </div>
       <div className="py-8">
-        <FeatureSliderSkeleton title={titles.popular} />
+        <FeatureSliderSkeleton title={labels.popularTVSeries} />
       </div>
       <div className="py-8">
-        <TopTenTVSkeleton title={titles.topRated} />
+        <TopTenTVSkeleton title={`Top 10 ${labels.topRatedTVSeries}`} />
       </div>
     </div>
   );
