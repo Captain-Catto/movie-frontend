@@ -5,7 +5,7 @@ import { apiService } from "@/services/api";
 import type { MovieCardData } from "@/types/content.types";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import HomePosterRail from "@/components/movie/HomePosterRail";
-import MovieCardSkeleton from "@/components/ui/MovieCardSkeleton";
+import Skeleton from "@/components/ui/Skeleton";
 import { ChevronRight } from "lucide-react";
 
 interface UpcomingMoviesLoaderProps {
@@ -28,7 +28,15 @@ export function UpcomingSkeleton({ title }: { title: string }) {
       <div className="home-poster-rail__content">
         <div className="home-poster-rail__scroller overflow-x-hidden">
           {Array.from({ length: 8 }).map((_, i) => (
-            <MovieCardSkeleton key={`upcoming-skeleton-${i}`} />
+            <div key={`upcoming-skeleton-${i}`} className="home-poster-rail-card select-none">
+              <div className="home-poster-rail-card__thumb relative aspect-[2/3] min-h-[15rem] overflow-hidden rounded-lg bg-gray-800/60">
+                <Skeleton className="absolute inset-0" />
+              </div>
+              <div className="home-poster-rail-card__info space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-3 w-2/3 mx-auto" />
+              </div>
+            </div>
           ))}
         </div>
       </div>

@@ -12,7 +12,7 @@ interface TVSeriesLoaderProps {
   language: string;
 }
 
-// 1. Wide Cover Rail Skeleton
+// 1. Wide Cover Rail Skeleton (On The Air TV Series)
 function WideCoverSkeletonList({ title }: { title: string }) {
   return (
     <section className="home-wide-cover-rail">
@@ -28,14 +28,14 @@ function WideCoverSkeletonList({ title }: { title: string }) {
         <div className="home-wide-cover-rail__scroller overflow-x-hidden">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={`wide-skeleton-${i}`} className="home-wide-cover-card select-none">
-              <div className="home-wide-cover-card__cover relative aspect-[16/9] rounded-lg overflow-hidden bg-gray-800/60">
+              <div className="home-wide-cover-card__cover relative aspect-[2.2/1] min-h-[12.4rem] rounded-lg overflow-hidden bg-gray-800/60">
                 <Skeleton className="absolute inset-0" />
               </div>
-              <div className="home-wide-cover-card__body mt-3 flex gap-3">
-                <div className="relative size-12 sm:size-16 rounded overflow-hidden flex-shrink-0 bg-gray-800/80">
+              <div className="home-wide-cover-card__body grid grid-cols-[5rem_minmax(0,1fr)] gap-[1.25rem] min-h-[6.2rem] -mt-[1.55rem] px-[1.2rem] relative z-2">
+                <div className="home-wide-cover-card__poster relative w-20 aspect-[2/3] overflow-hidden rounded bg-gray-900 shadow-[0_0.75rem_1.5rem_rgba(0,0,0,0.35)]">
                   <Skeleton className="absolute inset-0" />
                 </div>
-                <div className="home-wide-cover-card__info space-y-2 flex-grow">
+                <div className="home-wide-cover-card__info pb-[0.55rem] space-y-2 self-end">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-3 w-2/3" />
                 </div>
@@ -48,7 +48,7 @@ function WideCoverSkeletonList({ title }: { title: string }) {
   );
 }
 
-// 2. Feature Slider Skeleton
+// 2. Feature Slider Skeleton (Popular TV Series)
 function FeatureSliderSkeleton({ title }: { title: string }) {
   return (
     <section className="home-feature-slider">
@@ -60,15 +60,15 @@ function FeatureSliderSkeleton({ title }: { title: string }) {
           </span>
         </div>
       </div>
-      <div className="relative aspect-[21/9] w-full rounded-lg overflow-hidden bg-gray-800/60 select-none">
+      <div className="home-feature-slider__stage relative overflow-hidden bg-gray-800/60 select-none">
         <Skeleton className="absolute inset-0" />
-        <div className="absolute bottom-6 left-6 space-y-3 z-10 w-2/3">
+        <div className="absolute bottom-[7.5rem] left-[1.25rem] md:bottom-24 md:left-24 space-y-3 z-10 w-2/3">
           <Skeleton className="h-8 w-1/2" />
           <Skeleton className="h-4 w-3/4" />
           <Skeleton className="h-4 w-1/4" />
           <div className="flex gap-4">
-            <Skeleton className="size-12 rounded-full" />
-            <Skeleton className="size-12 rounded-full" />
+            <Skeleton className="w-[3.7rem] h-[3.7rem] rounded-full" />
+            <Skeleton className="w-[3.4rem] h-[3rem] rounded-full" />
           </div>
         </div>
       </div>
@@ -85,11 +85,11 @@ function TopTenTVSkeleton({ title }: { title: string }) {
         <div className="home-top-ten__scroller overflow-x-hidden">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={`top-ten-tv-skeleton-${i}`} className="home-top-ten-card select-none">
-              <div className="home-top-ten-card__thumb relative aspect-[2/3] rounded-lg overflow-hidden bg-gray-800/60">
+              <div className="home-top-ten-card__thumb relative aspect-[2/3] min-h-[26.75rem] rounded-lg overflow-hidden bg-gray-800/60">
                 <Skeleton className="absolute inset-0" />
               </div>
-              <div className="home-top-ten-card__info mt-3 flex items-center gap-3">
-                <Skeleton className="h-10 w-8 rounded" />
+              <div className="home-top-ten-card__info grid grid-cols-[3.4rem_minmax(0,1fr)] gap-[0.85rem] p-[1rem_0.2rem_0] items-center">
+                <Skeleton className="h-10 w-full rounded bg-gray-700/80" />
                 <div className="home-top-ten-card__text space-y-2 flex-grow">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-3 w-2/3" />
