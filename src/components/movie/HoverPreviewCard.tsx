@@ -211,7 +211,7 @@ export function HoverPreviewCard({
                   <Link
                     key={id}
                     href={`/browse?genres=${id}&type=${contentType}`}
-                    className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-gray-700 transition-colors"
+                    className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-red-600 hover:text-white transition-colors"
                   >
                     {label}
                   </Link>
@@ -221,7 +221,7 @@ export function HoverPreviewCard({
               genreNames.slice(0, 3).map((name) => (
                 <span
                   key={name}
-                  className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium"
+                  className="bg-gray-800 text-gray-200 px-2 py-1 rounded text-[11px] font-medium hover:bg-red-600 hover:text-white transition-colors"
                 >
                   {name}
                 </span>
