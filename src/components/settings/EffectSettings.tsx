@@ -15,7 +15,8 @@ import {
   setExcludedPaths,
   EffectType,
 } from '@/store/effectSettingsSlice';
-import { useToastRedux } from '@/hooks/useToastRedux';
+import { useToast } from '@/hooks/useToast';
+import { useAuth } from '@/hooks/useAuth';
 import { Snowflake, Gift, ChevronDown, RotateCcw, Plus, Trash2, Loader2 } from 'lucide-react';
 
 type EffectConfig = {
@@ -214,6 +215,7 @@ function RedEnvelopeAdvanced({
 }
 
 export default function EffectSettings() {
+  const { isViewer } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const {
     enabled,
@@ -224,7 +226,7 @@ export default function EffectSettings() {
     isLoading,
     error,
   } = useSelector((state: RootState) => state.effectSettings);
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError, showWarning } = useToast();
 
   const [expandedEffect, setExpandedEffect] = useState<EffectType | null>(null);
   const [newExcludedPath, setNewExcludedPath] = useState('');
@@ -437,7 +439,7 @@ export default function EffectSettings() {
         </span>
         <button
           type="button"
-          onClick={handleSaveSettings}
+          onClick={() => { if (isViewer) { showWarning('Không có quyền', 'Tài khoản Viewer chỉ có quyền xem'); return; } void handleSaveSettings(); }}
           disabled={!isDirty || isLoading}
           className={`px-5 py-2 rounded-lg text-sm font-medium transition-colors ${
             isDirty && !isLoading

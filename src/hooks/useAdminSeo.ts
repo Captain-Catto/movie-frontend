@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useToastRedux } from "@/hooks/useToastRedux";
+import { useToast } from "@/hooks/useToast";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { SeoMetadata } from "@/types/seo";
 
@@ -77,7 +77,7 @@ export function useAdminSeo() {
   const [lastCheckedAt, setLastCheckedAt] = useState<string | null>(null);
   const [lastCheckSummary, setLastCheckSummary] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
   const adminApi = useAdminApi();
 
   const [editModal, setEditModal] = useState<{

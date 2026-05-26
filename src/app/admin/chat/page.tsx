@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 interface ChatFlag {
   id: number;
@@ -40,6 +42,8 @@ interface ChatSessionDetail {
 export default function AdminChatPage() {
   const { language } = useLanguage();
   const isVi = language.startsWith("vi");
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
   const adminApi = useAdminApi();
   const [flags, setFlags] = useState<ChatFlag[]>([]);
   const [selectedSession, setSelectedSession] =
@@ -199,14 +203,14 @@ export default function AdminChatPage() {
                         <div key={flag.id} className="flex gap-2">
                           <button
                             type="button"
-                            onClick={() => resolveFlag(flag.id, "resolved")}
+                            onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } void resolveFlag(flag.id, "resolved"); }}
                             className="rounded bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700 cursor-pointer"
                           >
                             {isVi ? `Giải quyết báo cáo #${flag.id}` : `Resolve flag #${flag.id}`}
                           </button>
                           <button
                             type="button"
-                            onClick={() => resolveFlag(flag.id, "ignored")}
+                            onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } void resolveFlag(flag.id, "ignored"); }}
                             className="rounded bg-gray-800 px-3 py-2 text-sm font-semibold text-gray-200 hover:bg-gray-700 cursor-pointer"
                           >
                             {isVi ? "Bỏ qua" : "Ignore"}

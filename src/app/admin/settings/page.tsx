@@ -4,6 +4,8 @@ import { useAdminSettings, type RegistrationSettings, type SwaggerAuthSettings }
 import EffectSettings from "@/components/settings/EffectSettings";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
   { key: "nickname", label: "Nickname" },
@@ -12,13 +14,16 @@ const ITEMS: Array<{ key: keyof RegistrationSettings; label: string }> = [
 
 function AdminSettingsHeader({
   saving,
+  isViewer,
   onSave,
 }: {
   saving: boolean;
+  isViewer: boolean;
   onSave: () => void;
 }) {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { showWarning } = useToast();
 
   return (
     <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
@@ -30,7 +35,7 @@ function AdminSettingsHeader({
       </div>
       <button
         type="button"
-        onClick={onSave}
+        onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSave(); }}
         disabled={saving}
         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
       >
@@ -161,17 +166,20 @@ function AdminSwaggerAccessSection({
   swaggerAuth,
   swaggerAuthForm,
   swaggerSaving,
+  isViewer,
   onFormChange,
   onSave,
 }: {
   swaggerAuth: SwaggerAuthSettings;
   swaggerAuthForm: { username: string; password?: string };
   swaggerSaving: boolean;
+  isViewer: boolean;
   onFormChange: (patch: Partial<{ username: string; password?: string }>) => void;
   onSave: () => void;
 }) {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { showWarning } = useToast();
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700">
@@ -216,7 +224,7 @@ function AdminSwaggerAccessSection({
         </div>
         <button
           type="button"
-          onClick={onSave}
+          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSave(); }}
           disabled={swaggerSaving}
           className="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
         >
@@ -237,16 +245,19 @@ function AdminSwaggerAccessSection({
 function AdminStreamDomainsSection({
   streamDomainText,
   streamSaving,
+  isViewer,
   onTextChange,
   onSave,
 }: {
   streamDomainText: string;
   streamSaving: boolean;
+  isViewer: boolean;
   onTextChange: (text: string) => void;
   onSave: () => void;
 }) {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { showWarning } = useToast();
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700">
@@ -271,7 +282,7 @@ function AdminStreamDomainsSection({
           </p>
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSave(); }}
             disabled={streamSaving}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
           >
@@ -284,6 +295,7 @@ function AdminStreamDomainsSection({
 }
 
 export default function AdminSettingsPage() {
+  const { isViewer } = useAuth();
   const {
     settings,
     loading,
@@ -303,7 +315,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <AdminSettingsHeader saving={saving} onSave={handleSave} />
+      <AdminSettingsHeader saving={saving} isViewer={isViewer} onSave={handleSave} />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <AdminRegistrationSettingsSection
@@ -318,6 +330,7 @@ export default function AdminSettingsPage() {
         swaggerAuth={swaggerAuth}
         swaggerAuthForm={swaggerAuthForm}
         swaggerSaving={swaggerSaving}
+        isViewer={isViewer}
         onFormChange={(patch) => setSwaggerAuthForm((prev) => ({ ...prev, ...patch }))}
         onSave={handleSaveSwaggerAuth}
       />
@@ -325,6 +338,7 @@ export default function AdminSettingsPage() {
       <AdminStreamDomainsSection
         streamDomainText={streamDomainText}
         streamSaving={streamSaving}
+        isViewer={isViewer}
         onTextChange={setStreamDomainText}
         onSave={handleSaveStreamDomains}
       />

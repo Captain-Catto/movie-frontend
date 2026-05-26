@@ -40,6 +40,8 @@ import {
   type CommentGroupPageState,
   type UserCommentGroupItem,
 } from "@/hooks/useAdminUserDetail";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 const ROLE_OPTIONS = [
   { value: "user", label: "User" },
@@ -183,6 +185,7 @@ function AdminUserProfileCard({
   profileForm,
   isEditingSelf,
   savingProfile,
+  isViewer,
   onProfileFormChange,
   onSave,
 }: {
@@ -190,9 +193,12 @@ function AdminUserProfileCard({
   profileForm: UserProfileForm;
   isEditingSelf: boolean;
   savingProfile: boolean;
+  isViewer: boolean;
   onProfileFormChange: (patch: Partial<UserProfileForm>) => void;
   onSave: () => void;
 }) {
+  const { showWarning } = useToast();
+
   return (
     <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
       <div className="flex items-center justify-between gap-4 mb-5">
@@ -210,7 +216,7 @@ function AdminUserProfileCard({
         </div>
         <button
           type="button"
-          onClick={onSave}
+          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSave(); }}
           disabled={savingProfile}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed rounded-lg text-sm font-medium text-white transition-colors cursor-pointer"
         >
@@ -699,6 +705,7 @@ function AdminWatchTimeModal({
 
 export default function AdminUserDetailPage() {
   const { push } = useRouter();
+  const { isViewer } = useAuth();
   const {
     user,
     profileForm,
@@ -766,6 +773,7 @@ export default function AdminUserDetailPage() {
         profileForm={profileForm}
         isEditingSelf={isEditingSelf}
         savingProfile={savingProfile}
+        isViewer={isViewer}
         onProfileFormChange={(patch) =>
           dispatch((s) => ({ profileForm: { ...s.profileForm, ...patch } }))
         }
@@ -803,6 +811,7 @@ export default function AdminUserDetailPage() {
           loading={detailLoading}
           page={detailPage}
           totalPages={detailTotalPages}
+          isViewer={isViewer}
           onToggleCommentGroup={handleToggleCommentGroup}
           onCommentGroupPageChange={handleCommentGroupPageChange}
           onOpenHideCommentModal={handleOpenHideCommentModal}
@@ -884,6 +893,7 @@ function DetailModal({
   loading,
   page,
   totalPages,
+  isViewer,
   onToggleCommentGroup,
   onCommentGroupPageChange,
   onOpenHideCommentModal,
@@ -899,6 +909,7 @@ function DetailModal({
   loading: boolean;
   page: number;
   totalPages: number;
+  isViewer: boolean;
   onToggleCommentGroup: (group: UserCommentGroupItem) => void;
   onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
   onOpenHideCommentModal: (group: UserCommentGroupItem, commentId: number) => void;
@@ -961,6 +972,7 @@ function DetailModal({
                 item={item}
                 expandedCommentGroups={expandedCommentGroups}
                 commentGroupPages={commentGroupPages}
+                isViewer={isViewer}
                 onToggleCommentGroup={onToggleCommentGroup}
                 onCommentGroupPageChange={onCommentGroupPageChange}
                 onOpenHideCommentModal={onOpenHideCommentModal}
@@ -990,6 +1002,7 @@ function DetailModalItem({
   item,
   expandedCommentGroups,
   commentGroupPages,
+  isViewer,
   onToggleCommentGroup,
   onCommentGroupPageChange,
   onOpenHideCommentModal,
@@ -999,11 +1012,14 @@ function DetailModalItem({
   item: DetailItem;
   expandedCommentGroups: Set<string>;
   commentGroupPages: Record<string, CommentGroupPageState>;
+  isViewer: boolean;
   onToggleCommentGroup: (group: UserCommentGroupItem) => void;
   onCommentGroupPageChange: (group: UserCommentGroupItem, page: number) => void;
   onOpenHideCommentModal: (group: UserCommentGroupItem, commentId: number) => void;
   onUnhideComment: (group: UserCommentGroupItem, commentId: number) => void;
 }) {
+  const { showWarning: showWarningToast } = useToast();
+
   if (type === "views" && "actionType" in item) {
     return (
       <ContentDetailRow
@@ -1170,7 +1186,7 @@ function DetailModalItem({
                   (comment.isHidden ? (
                     <button
                       type="button"
-                      onClick={() => onUnhideComment(item, comment.id)}
+                      onClick={() => { if (isViewer) { showWarningToast("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onUnhideComment(item, comment.id); }}
                       className="text-xs text-emerald-400 hover:text-emerald-300 whitespace-nowrap cursor-pointer"
                     >
                       Mở lại
@@ -1178,7 +1194,7 @@ function DetailModalItem({
                   ) : (
                     <button
                       type="button"
-                      onClick={() => onOpenHideCommentModal(item, comment.id)}
+                      onClick={() => { if (isViewer) { showWarningToast("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onOpenHideCommentModal(item, comment.id); }}
                       className="text-xs text-red-400 hover:text-red-300 whitespace-nowrap cursor-pointer"
                     >
                       Ẩn bình luận

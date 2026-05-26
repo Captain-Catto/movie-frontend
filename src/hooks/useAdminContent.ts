@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
-import { useToastRedux } from "@/hooks/useToastRedux";
+import { useToast } from "@/hooks/useToast";
 
 export type TabKey = "movies" | "tv" | "trending";
 export type ContentStatusFilter = "all" | "active" | "blocked";
@@ -110,7 +110,7 @@ export function useAdminContent() {
 
   const appliedSearchTermRef = useRef("");
   const adminApi = useAdminApi();
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
 
   const isTrendingTab = activeTab === "trending";
 

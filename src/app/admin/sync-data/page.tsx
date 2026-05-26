@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
 import StatsCard from "@/components/admin/StatsCard";
 import { useAdminApi } from "@/hooks/useAdminApi";
-import { useToastRedux } from "@/hooks/useToastRedux";
+import { useToast } from "@/hooks/useToast";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages, type AdminUiMessages } from "@/lib/ui-messages";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardStats {
   totalMovies: number;
@@ -180,16 +181,19 @@ function SyncStatsSection({
 function ManualSyncSection({
   customDate,
   syncing,
+  isViewer,
   onCustomDateChange,
   onSync,
 }: {
   customDate: string;
   syncing: SyncTarget | null;
+  isViewer: boolean;
   onCustomDateChange: (value: string) => void;
   onSync: (target: SyncTarget) => void;
 }) {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { showWarning } = useToast();
 
   return (
     <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
@@ -235,7 +239,7 @@ function ManualSyncSection({
               <button
                 type="button"
                 aria-label={`Run ${details.label}`}
-                onClick={() => onSync(option.key)}
+                onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSync(option.key); }}
                 disabled={busy}
                 className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                   busy
@@ -257,6 +261,7 @@ function CatalogSettingsSection({
   settings,
   settingsForm,
   savingSettings,
+  isViewer,
   onSettingsChange,
   onSave,
 }: {
@@ -269,11 +274,13 @@ function CatalogSettingsSection({
     recommendationCacheLimit: number;
   };
   savingSettings: boolean;
+  isViewer: boolean;
   onSettingsChange: (patch: Partial<typeof settingsForm>) => void;
   onSave: () => void;
 }) {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { showWarning } = useToast();
 
   return (
     <section className="bg-gray-800 border border-gray-700 rounded-lg p-6">
@@ -400,7 +407,7 @@ function CatalogSettingsSection({
       <div className="mt-4 flex justify-end">
         <button
           type="button"
-          onClick={onSave}
+          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSave(); }}
           disabled={savingSettings}
           className={`rounded-md px-6 py-2 text-sm font-medium transition-colors ${
             savingSettings
@@ -506,8 +513,9 @@ function syncReducer(state: SyncState, action: SyncAction): SyncState {
 }
 
 export default function AdminSyncDataPage() {
+  const { isViewer } = useAuth();
   const adminApi = useAdminApi();
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
   const [state, dispatch] = useReducer(syncReducer, {
     stats: null,
     syncing: null,
@@ -632,6 +640,7 @@ export default function AdminSyncDataPage() {
       <ManualSyncSection
         customDate={customDate}
         syncing={syncing}
+        isViewer={isViewer}
         onCustomDateChange={(val) => dispatch({ type: "SET_CUSTOM_DATE", payload: val })}
         onSync={handleSync}
       />
@@ -639,6 +648,7 @@ export default function AdminSyncDataPage() {
         settings={settings}
         settingsForm={settingsForm}
         savingSettings={savingSettings}
+        isViewer={isViewer}
         onSettingsChange={(patch) =>
           dispatch({ type: "SET_SETTINGS_FORM", payload: patch })
         }

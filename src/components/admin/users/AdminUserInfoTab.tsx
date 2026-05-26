@@ -1,5 +1,7 @@
 import type { User, EditFormState, UserRole } from "./types";
 import { formatDateTime } from "./utils";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 interface AdminUserInfoTabProps {
   user: User;
@@ -22,6 +24,9 @@ export default function AdminUserInfoTab({
   onClose,
   onUpdateUser,
 }: AdminUserInfoTabProps) {
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -137,7 +142,7 @@ export default function AdminUserInfoTab({
         </button>
         <button
           type="button"
-          onClick={onUpdateUser}
+          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onUpdateUser(); }}
           disabled={editSaving}
           className="cursor-pointer px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >

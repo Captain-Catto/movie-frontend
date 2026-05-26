@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { useAdminApi } from "@/hooks/useAdminApi";
-import { useToastRedux } from "@/hooks/useToastRedux";
+import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/hooks/useAuth";
 
 export interface UserDetails {
@@ -288,7 +288,7 @@ export function useAdminUserDetail() {
   const params = useParams();
   const userId = params.id as string;
   const api = useAdminApi();
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
   const { user: currentUser } = useAuth();
 
   type PageState = {

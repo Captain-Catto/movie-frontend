@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useAdminApi } from "./useAdminApi";
-import { useToastRedux } from "./useToastRedux";
+import { useToast } from "./useToast";
 
 export interface DashboardStats {
   totalMovies: number;
@@ -20,7 +20,7 @@ export function useAdminDashboard() {
     null
   );
   const adminApi = useAdminApi();
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
 
   const fetchDashboardStats = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;

@@ -6,6 +6,8 @@ import { SeoMetadata } from "@/types/seo";
 import { Eye, EyeOff } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import {
   useAdminSeo,
   PAGE_TYPE_OPTIONS,
@@ -123,6 +125,7 @@ function AdminSeoToolbar({
   autoRefresh,
   filter,
   searchTerm,
+  isViewer,
   onAdd,
   onSetupDefaults,
   onRefresh,
@@ -134,6 +137,7 @@ function AdminSeoToolbar({
   autoRefresh: boolean;
   filter: "all" | "active" | "inactive";
   searchTerm: string;
+  isViewer: boolean;
   onAdd: () => void;
   onSetupDefaults: () => void;
   onRefresh: () => void;
@@ -143,20 +147,21 @@ function AdminSeoToolbar({
   onExport: (format: "csv" | "excel") => void;
 }) {
   const { language } = useLanguage();
+  const { showWarning } = useToast();
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 gap-y-4">
       <div className="flex flex-wrap gap-3 items-center">
         <button
           type="button"
-          onClick={onAdd}
+          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onAdd(); }}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
           {language.startsWith("vi") ? "Thêm SEO Metadata" : "Add SEO Metadata"}
         </button>
         <button
           type="button"
-          onClick={onSetupDefaults}
+          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSetupDefaults(); }}
           className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
         >
           {language.startsWith("vi") ? "Thiết lập mặc định" : "Setup Defaults"}
@@ -301,17 +306,20 @@ function AdminSeoResolveSection({
 function AdminSeoTable({
   loading,
   filteredSeoData,
+  isViewer,
   onEdit,
   onToggleActive,
   onDelete,
 }: {
   loading: boolean;
   filteredSeoData: SeoMetadata[];
+  isViewer: boolean;
   onEdit: (seo: SeoMetadata) => void;
   onToggleActive: (id: number) => void;
   onDelete: (id: number) => void;
 }) {
   const { language } = useLanguage();
+  const { showWarning } = useToast();
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg shadow overflow-hidden">
@@ -390,14 +398,14 @@ function AdminSeoTable({
                   <div className="flex gap-x-2">
                     <button
                       type="button"
-                      onClick={() => onEdit(seo)}
+                      onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onEdit(seo); }}
                       className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                     >
                       {language.startsWith("vi") ? "Sửa" : "Edit"}
                     </button>
                     <button
                       type="button"
-                      onClick={() => onToggleActive(seo.id)}
+                      onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onToggleActive(seo.id); }}
                       aria-label={seo.isActive ? "Deactivate" : "Activate"}
                       className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-1 cursor-pointer"
                     >
@@ -405,7 +413,7 @@ function AdminSeoTable({
                     </button>
                     <button
                       type="button"
-                      onClick={() => onDelete(seo.id)}
+                      onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onDelete(seo.id); }}
                       className="text-red-600 hover:text-red-900 cursor-pointer"
                     >
                       {language.startsWith("vi") ? "Xóa" : "Delete"}
@@ -425,6 +433,7 @@ function AdminSeoEditModal({
   open,
   isNew,
   formData,
+  isViewer,
   onClose,
   onSubmit,
   onFormChange,
@@ -446,6 +455,7 @@ function AdminSeoEditModal({
     twitterImage: string;
     isActive: boolean;
   };
+  isViewer: boolean;
   onClose: () => void;
   onSubmit: () => void;
   onFormChange: (patch: Partial<{
@@ -465,6 +475,7 @@ function AdminSeoEditModal({
   }>) => void;
 }) {
   const { language } = useLanguage();
+  const { showWarning } = useToast();
   if (!open) return null;
 
   return (
@@ -658,7 +669,7 @@ function AdminSeoEditModal({
           </button>
           <button
             type="button"
-            onClick={onSubmit}
+            onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onSubmit(); }}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 cursor-pointer"
           >
             {isNew ? (language.startsWith("vi") ? "Tạo" : "Create") : (language.startsWith("vi") ? "Cập nhật" : "Update")}
@@ -705,6 +716,7 @@ export default function AdminSeoPage() {
     exportSeoData,
     handleSeoHealthComplete,
   } = useAdminSeo();
+  const { isViewer } = useAuth();
 
   return (
     <div className="space-y-6">
@@ -724,6 +736,7 @@ export default function AdminSeoPage() {
         autoRefresh={autoRefresh}
         filter={filter}
         searchTerm={searchTerm}
+        isViewer={isViewer}
         onAdd={() => openEditModal(null, true)}
         onSetupDefaults={setupDefaults}
         onRefresh={handleRefresh}
@@ -744,6 +757,7 @@ export default function AdminSeoPage() {
       <AdminSeoTable
         loading={loading}
         filteredSeoData={filteredSeoData}
+        isViewer={isViewer}
         onEdit={(seo) => openEditModal(seo, false)}
         onToggleActive={handleToggleActive}
         onDelete={handleDelete}
@@ -752,6 +766,7 @@ export default function AdminSeoPage() {
         open={editModal.open}
         isNew={editModal.isNew}
         formData={formData}
+        isViewer={isViewer}
         onClose={() => setEditModal({ open: false, seo: null, isNew: false })}
         onSubmit={handleSubmit}
         onFormChange={(patch) => setFormData((prev) => ({ ...prev, ...patch }))}

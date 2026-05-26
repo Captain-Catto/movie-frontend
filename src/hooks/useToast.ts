@@ -1,7 +1,71 @@
-/**
- * useToast Hook
- * Now uses Redux instead of Context for state management
- */
+import { useCallback } from "react";
+import { useAppDispatch } from "@/store/hooks";
+import { addToast, removeToast, type Toast } from "@/store/toastSlice";
 
-export { useToastRedux as useToast } from "./useToastRedux";
-export type { UseToastReturn } from "./useToastRedux";
+export interface UseToastReturn {
+  showToast: (toast: Omit<Toast, "id">) => void;
+  showSuccess: (title: string, message?: string) => void;
+  showError: (title: string, message?: string) => void;
+  showInfo: (title: string, message?: string) => void;
+  showWarning: (title: string, message?: string) => void;
+  removeToast: (id: string) => void;
+}
+
+/**
+ * Redux-based Toast Hook
+ * Core hook for displaying toast notifications across the application
+ */
+export function useToast(): UseToastReturn {
+  const dispatch = useAppDispatch();
+
+  const showToast = useCallback(
+    (toast: Omit<Toast, "id">) => {
+      dispatch(addToast(toast));
+    },
+    [dispatch]
+  );
+
+  const showSuccess = useCallback(
+    (title: string, message?: string) => {
+      dispatch(addToast({ title, message, type: "success" }));
+    },
+    [dispatch]
+  );
+
+  const showError = useCallback(
+    (title: string, message?: string) => {
+      dispatch(addToast({ title, message, type: "error" }));
+    },
+    [dispatch]
+  );
+
+  const showInfo = useCallback(
+    (title: string, message?: string) => {
+      dispatch(addToast({ title, message, type: "info" }));
+    },
+    [dispatch]
+  );
+
+  const showWarning = useCallback(
+    (title: string, message?: string) => {
+      dispatch(addToast({ title, message, type: "warning" }));
+    },
+    [dispatch]
+  );
+
+  const handleRemoveToast = useCallback(
+    (id: string) => {
+      dispatch(removeToast(id));
+    },
+    [dispatch]
+  );
+
+  return {
+    showToast,
+    showSuccess,
+    showError,
+    showInfo,
+    showWarning,
+    removeToast: handleRemoveToast,
+  };
+}

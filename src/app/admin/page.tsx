@@ -5,10 +5,14 @@ import StatsCard from "@/components/admin/StatsCard";
 import { useAdminDashboard } from "@/hooks/useAdminDashboard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 export default function AdminDashboard() {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
   const {
     stats,
     loading,
@@ -146,7 +150,7 @@ export default function AdminDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               type="button"
-              onClick={() => triggerSync("popular")}
+              onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } triggerSync("popular"); }}
               disabled={syncingTarget !== null}
               className={`p-4 rounded-lg border-2 transition-all ${
                 syncingTarget === "popular"
@@ -186,7 +190,7 @@ export default function AdminDashboard() {
 
             <button
               type="button"
-              onClick={() => triggerSync("all")}
+              onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } triggerSync("all"); }}
               disabled={syncingTarget !== null}
               className={`p-4 rounded-lg border-2 transition-all ${
                 syncingTarget === "all"

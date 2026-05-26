@@ -1,6 +1,8 @@
 import type { Notification, PaginationMeta } from "@/types/notifications.types";
 import { NOTIFICATION_TYPE_COLORS } from "@/types/notifications.types";
 import type { ReactElement } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 interface NotificationsTableProps {
   notifications: Notification[];
@@ -17,6 +19,9 @@ export default function NotificationsTable({
   onPaginationChange,
   onDeleteNotification,
 }: NotificationsTableProps) {
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
+
   return (
     <div className="bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-700">
       <table className="min-w-full">
@@ -127,7 +132,7 @@ export default function NotificationsTable({
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     type="button"
-                    onClick={() => onDeleteNotification(notification.id)}
+                    onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onDeleteNotification(notification.id); }}
                     className="text-red-500 hover:text-red-400 cursor-pointer"
                   >
                     Delete

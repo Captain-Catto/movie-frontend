@@ -2,6 +2,8 @@ import { Eye } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { ContentHoverPreview } from "@/components/admin/ContentHoverPreview";
 import { ContentItem, TabKey } from "@/hooks/useAdminContent";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 const TYPE_LABELS: Record<ContentItem["contentType"], string> = {
   movie: "Movie",
@@ -52,6 +54,9 @@ export default function AdminContentTable({
   onUnblock: (content: ContentItem) => void;
   onPageChange: (page: number) => void;
 }) {
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
+
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
       <div className="overflow-x-auto">
@@ -165,7 +170,7 @@ export default function AdminContentTable({
                       {content.isBlocked ? (
                         <button
                           type="button"
-                          onClick={() => onUnblock(content)}
+                          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onUnblock(content); }}
                           className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                         >
                           {activeTab === "trending" ? "Unhide" : "Unblock"}
@@ -173,7 +178,7 @@ export default function AdminContentTable({
                       ) : (
                         <button
                           type="button"
-                          onClick={() => onOpenBlock(content)}
+                          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onOpenBlock(content); }}
                           className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
                         >
                           {activeTab === "trending" ? "Hide" : "Block"}

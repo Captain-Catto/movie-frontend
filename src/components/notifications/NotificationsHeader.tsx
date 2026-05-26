@@ -4,6 +4,8 @@ import type {
   NotificationFormData,
 } from "@/types/notifications.types";
 import { SEND_MODAL_BUTTONS } from "@/types/notifications.types";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 
 interface NotificationsHeaderProps {
   filters: NotificationFilters;
@@ -64,6 +66,9 @@ export default function NotificationsHeader({
   description = "Send and manage notifications to users",
   showTitle = true,
 }: NotificationsHeaderProps) {
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
+
   const handleMaintenanceClick = () => {
     onOpenSendModal("maintenance");
     setFormData((prev) => ({
@@ -159,11 +164,14 @@ export default function NotificationsHeader({
               <button
                 key={button.type}
                 type="button"
-                onClick={() =>
-                  button.type === "maintenance"
-                    ? handleMaintenanceClick()
-                    : onOpenSendModal(button.type)
-                }
+                onClick={() => {
+                  if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; }
+                  if (button.type === "maintenance") {
+                    handleMaintenanceClick();
+                  } else {
+                    onOpenSendModal(button.type);
+                  }
+                }}
                 className={`${buttonColor} text-white p-4 rounded-lg font-semibold transition-colors text-left cursor-pointer`}
               >
                 <div className="flex items-start gap-3">

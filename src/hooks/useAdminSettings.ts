@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useReducer } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
-import { useToastRedux } from "@/hooks/useToastRedux";
+import { useToast } from "@/hooks/useToast";
 
 export type MinMax = { min: number; max: number };
 export type RegistrationSettings = {
@@ -43,7 +43,7 @@ function settingsReducer(
 
 export function useAdminSettings() {
   const adminApi = useAdminApi();
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
 
   const [state, dispatch] = useReducer(settingsReducer, {
     loading: false,

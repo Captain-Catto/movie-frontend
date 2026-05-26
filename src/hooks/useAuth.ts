@@ -16,6 +16,7 @@ export interface UseAuthReturn {
   refreshToken: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isViewer: boolean;
   error: string | null;
   login: (
     email: string,
@@ -115,6 +116,7 @@ export function useAuth(): UseAuthReturn {
     refreshToken,
     isLoading,
     isAuthenticated,
+    isViewer: user?.role === "viewer",
     error,
     login: handleLoginWithEmail, // Alias
     loginWithEmail: handleLoginWithEmail,

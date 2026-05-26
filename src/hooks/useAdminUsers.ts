@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useCallback, useRef } from "react";
 import { useAdminApi } from "@/hooks/useAdminApi";
-import { useToastRedux } from "@/hooks/useToastRedux";
+import { useToast } from "@/hooks/useToast";
 
 // Import types
 import type {
@@ -94,7 +94,7 @@ export function useAdminUsers() {
 
   const watchPageRef = useRef(1);
   const adminApi = useAdminApi();
-  const { showSuccess, showError } = useToastRedux();
+  const { showSuccess, showError } = useToast();
 
   const fetchUsers = useCallback(async () => {
     if (!adminApi.isAuthenticated) return;

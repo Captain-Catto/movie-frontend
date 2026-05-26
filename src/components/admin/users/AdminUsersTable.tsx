@@ -2,6 +2,8 @@ import Image from "next/image";
 import type { SyntheticEvent } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getAdminUiMessages } from "@/lib/ui-messages";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import type { User } from "./types";
 import UserSignupAccess from "./UserSignupAccess";
 import { countryCodeToFlag, countryCodeToName, countryFlagUrl } from "./utils";
@@ -25,6 +27,8 @@ export default function AdminUsersTable({
 }: AdminUsersTableProps) {
   const { language } = useLanguage();
   const labels = getAdminUiMessages(language);
+  const { isViewer } = useAuth();
+  const { showWarning } = useToast();
 
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
@@ -80,9 +84,8 @@ export default function AdminUsersTable({
                       </div>
                       <button
                         type="button"
-                        onClick={() => onEditUser(user)}
-                        className="cursor-pointer ml-3 text-left"
-                        title={labels.seoTableActionEdit}
+                        onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onEditUser(user); }}
+                        className="ml-3 text-left cursor-pointer"
                       >
                         <div className="flex items-center gap-x-2">
                           <div className="text-sm font-medium text-white hover:text-red-300 transition-colors">
@@ -178,7 +181,7 @@ export default function AdminUsersTable({
                       {user.isActive ? (
                         <button
                           type="button"
-                          onClick={() => onOpenBan(user)}
+                          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onOpenBan(user); }}
                           className="cursor-pointer px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded transition-colors"
                         >
                           {labels.actionBan}
@@ -186,7 +189,7 @@ export default function AdminUsersTable({
                       ) : (
                         <button
                           type="button"
-                          onClick={() => onUnban(user.id)}
+                          onClick={() => { if (isViewer) { showWarning("Không có quyền", "Tài khoản Viewer chỉ có quyền xem"); return; } onUnban(user.id); }}
                           className="cursor-pointer px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded transition-colors"
                         >
                           {labels.actionUnban}
