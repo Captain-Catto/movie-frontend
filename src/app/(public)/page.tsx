@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import HeroSection from "@/components/movie/HeroSection";
-import HomePosterRail from "@/components/movie/HomePosterRail";
 import HomeTopTenRail from "@/components/movie/HomeTopTenRail";
 import HomeTopicRows from "@/components/movie/HomeTopicRows";
-import TVSeriesSections from "@/components/tv/TVSeriesSections";
+import LazySection from "@/components/ui/LazySection";
+import UpcomingMoviesLoader, { UpcomingSkeleton } from "@/components/movie/UpcomingMoviesLoader";
+import TVSeriesLoader, { TVSeriesSectionsSkeleton } from "@/components/tv/TVSeriesLoader";
 import { getServerPreferredLanguage } from "@/lib/server-language";
-import { getHomePageData } from "@/lib/home-page-data";
+import { getInitialHomePageData } from "@/lib/home-page-data";
 import { getHomePageUiMessages } from "@/lib/ui-messages";
 import { getStaticPageSeo } from "@/lib/page-seo";
 import { resolvePageMetadata } from "@/lib/seo-resolver";
@@ -33,11 +34,7 @@ export default async function Home() {
     nowPlayingMovies,
     popularMovies,
     topRatedMovies,
-    upcomingMovies,
-    onTheAirTVSeries,
-    popularTVSeries,
-    topRatedTVSeries,
-  } = await getHomePageData(language);
+  } = await getInitialHomePageData(language);
 
   return (
     <Layout>
@@ -71,25 +68,24 @@ export default async function Home() {
         />
       </div>
 
-      {/* Upcoming Section */}
+      {/* Upcoming Section (Lazy Loaded) */}
       <div className="py-8 deferred-content">
-        <HomePosterRail
-          title={labels.upcoming}
-          href="/movies/upcoming"
-          viewMoreLabel={labels.viewMore}
-          movies={upcomingMovies}
-        />
+        <LazySection fallback={<UpcomingSkeleton title={labels.upcoming} />}>
+          <UpcomingMoviesLoader
+            title={labels.upcoming}
+            viewMoreLabel={labels.viewMore}
+            language={language}
+          />
+        </LazySection>
       </div>
 
-      {/* TV Series Sections */}
+      {/* TV Series Sections (Lazy Loaded) */}
       <div className="deferred-content">
-        <TVSeriesSections
-          onTheAirTVSeries={onTheAirTVSeries}
-          popularTVSeries={popularTVSeries}
-          topRatedTVSeries={topRatedTVSeries}
-          language={language}
-        />
+        <LazySection fallback={<TVSeriesSectionsSkeleton language={language} />}>
+          <TVSeriesLoader language={language} />
+        </LazySection>
       </div>
     </Layout>
   );
 }
+

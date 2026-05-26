@@ -3,7 +3,7 @@ import type { MovieCardData, TVSeries } from "@/types/content.types";
 import { mapMoviesToFrontend } from "@/utils/movieMapper";
 import { mapTrendingDataToFrontend } from "@/utils/trendingMapper";
 import { mapTVSeriesToFrontendList } from "@/utils/tvMapper";
-import type { HomePageData } from "@/lib/page-data.types";
+import type { HomePageData, InitialHomePageData } from "@/lib/page-data.types";
 
 const HOME_SECTION_LIMIT = 10;
 const HOME_HERO_LIMIT = 6;
@@ -99,3 +99,40 @@ export async function getHomePageData(
     topRatedTVSeries: toTVSeriesCards(topRatedTVRes.success ? topRatedTVRes.data : [], language),
   };
 }
+
+export async function getInitialHomePageData(
+  language: string
+): Promise<InitialHomePageData> {
+  const [
+    trendingRes,
+    nowPlayingRes,
+    popularRes,
+    topRatedRes,
+  ] = await Promise.all([
+    apiService.getTrending({ page: 1, limit: HOME_HERO_LIMIT, language }),
+    apiService.getNowPlayingMovies({
+      page: 1,
+      limit: HOME_SECTION_LIMIT,
+      language,
+    }),
+    apiService.getPopularMovies({ page: 1, limit: HOME_SECTION_LIMIT, language }),
+    apiService.getTopRatedMovies({
+      page: 1,
+      limit: HOME_SECTION_LIMIT,
+      language,
+    }),
+  ]);
+
+  const heroMovies =
+    trendingRes.success && Array.isArray(trendingRes.data)
+      ? (mapTrendingDataToFrontend(trendingRes.data) as MovieCardData[])
+      : [];
+
+  return {
+    heroMovies,
+    nowPlayingMovies: toMovieCards(nowPlayingRes.success ? nowPlayingRes.data : [], language),
+    popularMovies: toMovieCards(popularRes.success ? popularRes.data : [], language),
+    topRatedMovies: toMovieCards(topRatedRes.success ? topRatedRes.data : [], language),
+  };
+}
+

@@ -27,6 +27,13 @@ export interface HomePageData {
   topRatedTVSeries: MovieCardData[];
 }
 
+export interface InitialHomePageData {
+  heroMovies: MovieCardData[];
+  nowPlayingMovies: MovieCardData[];
+  popularMovies: MovieCardData[];
+  topRatedMovies: MovieCardData[];
+}
+
 export type BrowseFetchType = "movie" | "tv" | "trending";
 
 export interface BrowsePageParams {
