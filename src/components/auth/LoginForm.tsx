@@ -11,9 +11,10 @@ interface LoginFormProps {
     email: string,
     password: string
   ) => Promise<{ success: boolean; error?: string }>;
+  onForgotPasswordClick?: () => void;
 }
 
-export default function LoginForm({ onSubmit }: LoginFormProps) {
+export default function LoginForm({ onSubmit, onForgotPasswordClick }: LoginFormProps) {
   const { language } = useLanguage();
   const labels = getLoginFormUiMessages(language);
   const [formData, setFormData] = useState({
@@ -126,6 +127,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
       <div className="flex items-center justify-end">
         <button
           type="button"
+          onClick={onForgotPasswordClick}
           className="text-sm text-red-400 hover:text-red-300 transition-colors"
         >
           {labels.forgotPassword}

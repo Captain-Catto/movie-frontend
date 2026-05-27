@@ -1287,6 +1287,14 @@ export interface AuthModalUiMessages {
   termsOfService: string;
   and: string;
   privacyPolicy: string;
+  forgotPasswordTitle: string;
+  forgotPasswordDescription: string;
+  emailAddressLabel: string;
+  emailPlaceholder: string;
+  submitForgotPassword: string;
+  backToLogin: string;
+  forgotPasswordSuccess: string;
+  forgotPasswordFailed: string;
 }
 
 const AUTH_MODAL_MESSAGES: Record<UiLocale, AuthModalUiMessages> = {
@@ -1313,6 +1321,14 @@ const AUTH_MODAL_MESSAGES: Record<UiLocale, AuthModalUiMessages> = {
     termsOfService: "Điều khoản Dịch vụ",
     and: "và",
     privacyPolicy: "Chính sách Bảo mật",
+    forgotPasswordTitle: "Quên mật khẩu",
+    forgotPasswordDescription: "Nhập email đã đăng ký để nhận hướng dẫn khôi phục mật khẩu.",
+    emailAddressLabel: "Địa chỉ Email",
+    emailPlaceholder: "Nhập email của bạn...",
+    submitForgotPassword: "Gửi mã khôi phục",
+    backToLogin: "Quay lại đăng nhập",
+    forgotPasswordSuccess: "Một liên kết đặt lại mật khẩu đã được gửi về email của bạn (nếu tài khoản tồn tại).",
+    forgotPasswordFailed: "Gửi yêu cầu thất bại. Vui lòng kiểm tra lại email hoặc thử lại sau.",
   },
   en: {
     loginTitle: "Login",
@@ -1337,6 +1353,14 @@ const AUTH_MODAL_MESSAGES: Record<UiLocale, AuthModalUiMessages> = {
     termsOfService: "Terms of Service",
     and: "and",
     privacyPolicy: "Privacy Policy",
+    forgotPasswordTitle: "Forgot Password",
+    forgotPasswordDescription: "Enter your registered email to receive recovery instructions.",
+    emailAddressLabel: "Email Address",
+    emailPlaceholder: "Enter your email...",
+    submitForgotPassword: "Send Recovery Code",
+    backToLogin: "Back to Login",
+    forgotPasswordSuccess: "A password reset link has been sent to your email (if the account exists).",
+    forgotPasswordFailed: "Failed to send request. Please check your email or try again later.",
   },
 };
 
@@ -1393,6 +1417,65 @@ const LOGIN_FORM_MESSAGES: Record<UiLocale, LoginFormUiMessages> = {
 export const getLoginFormUiMessages = (
   language: string | undefined
 ): LoginFormUiMessages => LOGIN_FORM_MESSAGES[resolveUiLocale(language)];
+
+export interface ResetPasswordUiMessages {
+  title: string;
+  description: string;
+  newPasswordLabel: string;
+  newPasswordPlaceholder: string;
+  confirmPasswordLabel: string;
+  confirmPasswordPlaceholder: string;
+  passwordMismatch: string;
+  resetPasswordSuccess: string;
+  resetPasswordFailed: string;
+  resetPasswordSubmit: string;
+  passwordMinLength: string;
+  backToHome: string;
+  processing: string;
+  invalidToken: string;
+  genericError: string;
+}
+
+const RESET_PASSWORD_MESSAGES: Record<UiLocale, ResetPasswordUiMessages> = {
+  vi: {
+    title: "Đặt lại mật khẩu",
+    description: "Vui lòng nhập mật khẩu mới cho tài khoản của bạn.",
+    newPasswordLabel: "Mật khẩu mới",
+    newPasswordPlaceholder: "Nhập ít nhất 6 ký tự...",
+    confirmPasswordLabel: "Xác nhận mật khẩu mới",
+    confirmPasswordPlaceholder: "Nhập lại mật khẩu mới...",
+    passwordMismatch: "Mật khẩu xác nhận không trùng khớp!",
+    resetPasswordSuccess: "Mật khẩu của bạn đã được cập nhật thành công! Đang chuyển hướng...",
+    resetPasswordFailed: "Liên kết đã hết hạn hoặc không hợp lệ. Vui lòng yêu cầu mã khôi phục mới.",
+    resetPasswordSubmit: "Cập nhật mật khẩu",
+    passwordMinLength: "Mật khẩu phải chứa ít nhất 6 ký tự",
+    backToHome: "Quay lại Trang chủ",
+    processing: "Đang xử lý...",
+    invalidToken: "Mã khôi phục không tìm thấy hoặc không hợp lệ trong URL.",
+    genericError: "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  },
+  en: {
+    title: "Reset Password",
+    description: "Please enter a new password for your account.",
+    newPasswordLabel: "New Password",
+    newPasswordPlaceholder: "At least 6 characters...",
+    confirmPasswordLabel: "Confirm New Password",
+    confirmPasswordPlaceholder: "Re-enter new password...",
+    passwordMismatch: "Passwords do not match!",
+    resetPasswordSuccess: "Your password has been successfully updated! Redirecting...",
+    resetPasswordFailed: "Token is expired or invalid. Please request a new recovery link.",
+    resetPasswordSubmit: "Update Password",
+    passwordMinLength: "Password must be at least 6 characters long",
+    backToHome: "Back to Home",
+    processing: "Processing...",
+    invalidToken: "Recovery token is missing or invalid in the URL.",
+    genericError: "An error occurred. Please try again.",
+  },
+};
+
+export const getResetPasswordUiMessages = (
+  language: string | undefined
+): ResetPasswordUiMessages => RESET_PASSWORD_MESSAGES[resolveUiLocale(language)];
 
 export interface RegisterFormUiMessages {
   username: string;

@@ -57,6 +57,24 @@ class AuthApiService {
     }
   }
 
+  async forgotPassword(email: string): Promise<AuthResponse> {
+    try {
+      const response = await axiosInstance.post("/auth/forgot-password", { email });
+      return response.data;
+    } catch (error) {
+      return this.handleAxiosError(error);
+    }
+  }
+
+  async resetPassword(data: { token: string; newPassword: string }): Promise<AuthResponse> {
+    try {
+      const response = await axiosInstance.post("/auth/reset-password", data);
+      return response.data;
+    } catch (error) {
+      return this.handleAxiosError(error);
+    }
+  }
+
   private handleAxiosError(error: unknown): AuthResponse {
     if (axios.isAxiosError(error)) {
       const data = error.response?.data as {
