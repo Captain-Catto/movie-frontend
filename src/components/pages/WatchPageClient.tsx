@@ -23,6 +23,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getWatchPageUiMessages } from "@/lib/ui-messages";
 import { getGenreIdByName } from "@/utils/genreMapping";
+import Breadcrumb from "@/components/ui/Breadcrumb";
 
 const CommentSection = lazy(() =>
   import("@/components/comments/CommentSection").then((m) => ({
@@ -166,7 +167,7 @@ function MovieInformationSection({
   return (
     <div className="wm-info grid grid-cols-1 lg:grid-cols-4 gap-8">
       {/* Poster */}
-      <div className="v-thumb-l lg:col-span-1">
+      <div className="v-thumb-l hidden sm:block lg:col-span-1">
         <div className="v-thumbnail aspect-[2/3] relative rounded-xl overflow-hidden bg-gray-800 group">
           <Image
             src={movieData.posterImage}
@@ -393,9 +394,9 @@ function CastSidebarSection({
           ))}
         </div>
       ) : credits?.cast && credits.cast.length > 0 ? (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-3 sm:overflow-x-visible sm:pb-0">
           {credits.cast.slice(0, 9).map((actor: CastMember) => (
-            <div key={actor.id} className="text-center">
+            <div key={actor.id} className="text-center flex-shrink-0 w-20 sm:w-auto">
               <Link href={`/people/${actor.id}`} className="block mb-2">
                 <div className="size-16 rounded-full overflow-hidden bg-gray-700 mx-auto">
                   {(actor.profile_path || actor.profilePath) ? (
@@ -485,16 +486,16 @@ function RecommendationsSidebarSection({
           ))}
         </div>
       ) : recommendations.length > 0 ? (
-        <div className="gap-y-4">
+        <div className="flex gap-3 overflow-x-auto pb-2 sm:flex-col sm:gap-y-4 sm:overflow-x-visible sm:pb-0">
           {recommendations.map((item: WatchPageRecommendationItem) => (
             <Link
               key={item.id}
               href={`/${
                 contentType === "tv" ? "tv" : "movie"
               }/${item.id}`}
-              className="flex gap-x-3 hover:bg-gray-700 rounded-lg p-2 transition-colors group"
+              className="flex flex-col sm:flex-row gap-x-3 hover:bg-gray-700 rounded-lg p-2 transition-colors group flex-shrink-0 w-28 sm:w-auto"
             >
-              <div className="w-16 h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
+              <div className="w-full h-36 sm:w-16 sm:h-24 rounded overflow-hidden bg-gray-700 flex-shrink-0">
                 {item.poster_path ? (
                   <Image
                     src={`${TMDB_IMAGE_BASE_URL}/${TMDB_POSTER_SIZE}${item.poster_path}`}
@@ -648,6 +649,24 @@ const WatchPageClientContent = ({
           handleStreamLoadError={handleStreamLoadError}
           labels={{ fallbackSource: labels.fallbackSource }}
         />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+          <Breadcrumb
+            items={[
+              { label: labels.home, href: "/" },
+              ...(movieData.contentType === "tv"
+                ? [{ label: labels.tvSeries, href: "/tv" }]
+                : [{ label: labels.movie, href: "/movie" }]),
+              {
+                label: movieData.title,
+                href: `/${movieData.contentType === "tv" ? "tv" : "movie"}/${movieData.tmdbId}`,
+              },
+              ...(movieData.contentType === "tv"
+                ? [{ label: `${labels.episode} ${episode}` }]
+                : []),
+            ]}
+          />
+        </div>
 
         {movieData.contentType === "tv" && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">

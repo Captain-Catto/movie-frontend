@@ -567,6 +567,7 @@ export interface WatchPageUiMessages {
   noRecommendations: string;
   notAvailable: string;
   posterAltFallback: string;
+  home: string;
 }
 
 const WATCH_PAGE_MESSAGES: Record<UiLocale, WatchPageUiMessages> = {
@@ -588,6 +589,7 @@ const WATCH_PAGE_MESSAGES: Record<UiLocale, WatchPageUiMessages> = {
     noRecommendations: "Không có gợi ý liên quan",
     notAvailable: "Không có",
     posterAltFallback: "Poster phim",
+    home: "Trang chủ",
   },
   en: {
     unableToLoad: "Unable to load watch page data.",
@@ -607,6 +609,7 @@ const WATCH_PAGE_MESSAGES: Record<UiLocale, WatchPageUiMessages> = {
     noRecommendations: "No movie recommendations available",
     notAvailable: "N/A",
     posterAltFallback: "Movie poster",
+    home: "Home",
   },
 };
 
