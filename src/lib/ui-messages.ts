@@ -2867,6 +2867,21 @@ export interface AdminUiMessages {
   favorites: string;
   favoriteRate: string;
   readOnlyMode: string;
+
+  // Banned Words Page
+  bannedWords: string;
+  bannedWordsHeaderTitle: string;
+  bannedWordsHeaderDesc: string;
+  tableHeaderWord: string;
+  tableHeaderSeverity: string;
+  tableHeaderAction: string;
+  addWordButton: string;
+  severityLow: string;
+  severityMedium: string;
+  severityHigh: string;
+  actionFilter: string;
+  actionBlock: string;
+  actionFlag: string;
 }
 
 const ADMIN_MESSAGES: Record<UiLocale, AdminUiMessages> = {
@@ -3142,6 +3157,21 @@ const ADMIN_MESSAGES: Record<UiLocale, AdminUiMessages> = {
     favorites: "Yêu thích",
     favoriteRate: "Tỷ lệ yêu thích",
     readOnlyMode: "Chế độ chỉ đọc - Các thay đổi sẽ không được lưu",
+
+    // Banned Words Page
+    bannedWords: "Quản lý từ cấm",
+    bannedWordsHeaderTitle: "Danh sách từ cấm",
+    bannedWordsHeaderDesc: "Quản lý danh sách các từ bị cấm, tự động lọc hoặc gắn cờ bình luận vi phạm.",
+    tableHeaderWord: "Từ cấm",
+    tableHeaderSeverity: "Mức độ nghiêm trọng",
+    tableHeaderAction: "Hành động",
+    addWordButton: "Thêm từ cấm",
+    severityLow: "Thấp",
+    severityMedium: "Trung bình",
+    severityHigh: "Cao",
+    actionFilter: "Ẩn bằng ***",
+    actionBlock: "Chặn bình luận",
+    actionFlag: "Đánh dấu cờ",
   },
   en: {
     dashboard: "Dashboard",
@@ -3414,6 +3444,21 @@ const ADMIN_MESSAGES: Record<UiLocale, AdminUiMessages> = {
     favorites: "Favorites",
     favoriteRate: "Favorite Rate",
     readOnlyMode: "Read-Only Mode - Changes will not be saved",
+
+    // Banned Words Page
+    bannedWords: "Banned Words",
+    bannedWordsHeaderTitle: "Banned Words Management",
+    bannedWordsHeaderDesc: "Manage the list of banned words to automatically filter or flag abusive comments.",
+    tableHeaderWord: "Banned Word",
+    tableHeaderSeverity: "Severity",
+    tableHeaderAction: "Action",
+    addWordButton: "Add Word",
+    severityLow: "Low",
+    severityMedium: "Medium",
+    severityHigh: "High",
+    actionFilter: "Censor (***)",
+    actionBlock: "Block Comment",
+    actionFlag: "Flag for Review",
   },
 };
 
