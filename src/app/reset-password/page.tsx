@@ -60,7 +60,7 @@ function ResetPasswordForm() {
       } else {
         setError(response.message || labels.resetPasswordFailed);
       }
-    } catch (err: any) {
+    } catch {
       setError(labels.genericError);
     } finally {
       setIsSubmitting(false);
